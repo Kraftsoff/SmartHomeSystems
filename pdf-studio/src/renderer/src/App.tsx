@@ -1,0 +1,283 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocument } from './hooks/useDocument'
+import { usePdfDoc } from './hooks/usePdfDoc'
+import { Toolbar } from './components/Toolbar'
+import { Sidebar } from './components/Sidebar'
+import { PdfCanvas, type PageSize } from './components/PdfCanvas'
+import { AnnotationLayer } from './components/AnnotationLayer'
+import { Welcome } from './components/Welcome'
+import { StatusBar } from './components/StatusBar'
+import { FindBar } from './components/FindBar'
+import type { Tool } from './lib/annotations'
+import type { MenuCommand } from '../../shared/ipc'
+
+const MIN_SCALE = 0.25
+const MAX_SCALE = 4
+const ROTATE_STEP = 90
+
+export default function App(): JSX.Element {
+  const doc = useDocument()
+  const { doc: pdfDoc, numPages, loading, error } = usePdfDoc(doc.bytes)
+
+  const [currentPage, setCurrentPage] = useState(0)
+  const [scale, setScale] = useState(1)
+  const [tool, setTool] = useState<Tool>('select')
+  const [color, setColor] = useState('#ffd400')
+  const [pageSize, setPageSize] = useState<PageSize | null>(null)
+  const [showFind, setShowFind] = useState(false)
+
+  // Keep the current page within bounds as pages are added/removed.
+  useEffect(() => {
+    if (numPages === 0) {
+      setCurrentPage(0)
+    } else if (currentPage > numPages - 1) {
+      setCurrentPage(numPages - 1)
+    }
+  }, [numPages, currentPage])
+
+  // Report state to the main process so native menu items enable correctly.
+  useEffect(() => {
+    window.api.notifyDocumentState({
+      hasDocument: doc.hasDocument,
+      isDirty: doc.isDirty,
+      canUndo: doc.canUndo,
+      canRedo: doc.canRedo
+    })
+  }, [doc.hasDocument, doc.isDirty, doc.canUndo, doc.canRedo])
+
+  const onSized = useCallback((size: PageSize) => {
+    setPageSize((prev) =>
+      prev && prev.width === size.width && prev.height === size.height ? prev : size
+    )
+  }, [])
+
+  // ---- File operations -----------------------------------------------------
+
+  const openFile = useCallback(async () => {
+    const file = await window.api.openPdfDialog()
+    if (!file) return
+    doc.open(file.name, file.path, file.data)
+    setCurrentPage(0)
+    setScale(1)
+    setTool('select')
+  }, [doc])
+
+  const openFromDrop = useCallback(
+    async (file: File) => {
+      const buffer = await file.arrayBuffer()
+      // Electron exposes the absolute path on dropped File objects.
+      const path = (file as File & { path?: string }).path ?? null
+      doc.open(file.name, path, new Uint8Array(buffer))
+      setCurrentPage(0)
+      setScale(1)
+      setTool('select')
+    },
+    [doc]
+  )
+
+  const save = useCallback(
+    async (forceDialog: boolean) => {
+      if (!doc.hasDocument) return
+      const bytes = await doc.exportBytes()
+      if (!forceDialog && doc.path) {
+        const res = await window.api.savePdf(doc.path, bytes)
+        if (!res.canceled && res.path) doc.markSaved(res.path, doc.name, bytes)
+      } else {
+        const res = await window.api.savePdfAs(doc.name || 'document.pdf', bytes)
+        if (!res.canceled && res.path) {
+          const name = res.path.split(/[\\/]/).pop() || doc.name
+          doc.markSaved(res.path, name, bytes)
+        }
+      }
+    },
+    [doc]
+  )
+
+  // ---- View operations -----------------------------------------------------
+
+  const zoomIn = useCallback(() => setScale((s) => Math.min(MAX_SCALE, +(s + 0.2).toFixed(2))), [])
+  const zoomOut = useCallback(
+    () => setScale((s) => Math.max(MIN_SCALE, +(s - 0.2).toFixed(2))),
+    []
+  )
+  const zoomReset = useCallback(() => setScale(1), [])
+  const nextPage = useCallback(
+    () => setCurrentPage((p) => Math.min(numPages - 1, p + 1)),
+    [numPages]
+  )
+  const prevPage = useCallback(() => setCurrentPage((p) => Math.max(0, p - 1)), [])
+  const goToPage = useCallback(
+    (index: number) => {
+      if (numPages === 0) return
+      setCurrentPage(Math.min(numPages - 1, Math.max(0, index)))
+    },
+    [numPages]
+  )
+
+  // ---- Page operations -----------------------------------------------------
+
+  const rotate = useCallback(() => {
+    if (doc.hasDocument) void doc.rotateCurrentPage(currentPage, ROTATE_STEP)
+  }, [doc, currentPage])
+  const deletePage = useCallback(() => {
+    if (doc.hasDocument && numPages > 1) void doc.deleteCurrentPage(currentPage)
+  }, [doc, currentPage, numPages])
+  const reorder = useCallback(
+    (from: number, to: number) => {
+      void doc.reorderPage(from, to)
+      setCurrentPage(to)
+    },
+    [doc]
+  )
+
+  // ---- Native menu commands ------------------------------------------------
+
+  useEffect(() => {
+    const dispatch: Record<MenuCommand, () => void> = {
+      open: () => void openFile(),
+      save: () => void save(false),
+      'save-as': () => void save(true),
+      'close-document': () => doc.close(),
+      'zoom-in': zoomIn,
+      'zoom-out': zoomOut,
+      'zoom-reset': zoomReset,
+      'next-page': nextPage,
+      'prev-page': prevPage,
+      'rotate-page': rotate,
+      'delete-page': deletePage,
+      undo: doc.undo,
+      redo: doc.redo,
+      find: () => setShowFind(true)
+    }
+    return window.api.onMenuCommand((command) => dispatch[command]?.())
+  }, [openFile, save, doc, zoomIn, zoomOut, zoomReset, nextPage, prevPage, rotate, deletePage])
+
+  // ---- Drag & drop ---------------------------------------------------------
+
+  const dragDepth = useRef(0)
+  const [dragging, setDragging] = useState(false)
+
+  useEffect(() => {
+    const onDragOver = (e: DragEvent): void => e.preventDefault()
+    const onDragEnter = (e: DragEvent): void => {
+      e.preventDefault()
+      dragDepth.current += 1
+      setDragging(true)
+    }
+    const onDragLeave = (): void => {
+      dragDepth.current -= 1
+      if (dragDepth.current <= 0) setDragging(false)
+    }
+    const onDrop = (e: DragEvent): void => {
+      e.preventDefault()
+      dragDepth.current = 0
+      setDragging(false)
+      const file = e.dataTransfer?.files?.[0]
+      if (file && file.name.toLowerCase().endsWith('.pdf')) void openFromDrop(file)
+    }
+    window.addEventListener('dragover', onDragOver)
+    window.addEventListener('dragenter', onDragEnter)
+    window.addEventListener('dragleave', onDragLeave)
+    window.addEventListener('drop', onDrop)
+    return () => {
+      window.removeEventListener('dragover', onDragOver)
+      window.removeEventListener('dragenter', onDragEnter)
+      window.removeEventListener('dragleave', onDragLeave)
+      window.removeEventListener('drop', onDrop)
+    }
+  }, [openFromDrop])
+
+  // ---- Render --------------------------------------------------------------
+
+  const pageAnnotations = doc.annotations.filter((a) => a.pageIndex === currentPage)
+
+  return (
+    <div className={`app ${dragging ? 'dragging' : ''}`}>
+      <Toolbar
+        hasDocument={doc.hasDocument}
+        isDirty={doc.isDirty}
+        canUndo={doc.canUndo}
+        canRedo={doc.canRedo}
+        tool={tool}
+        color={color}
+        scale={scale}
+        currentPage={currentPage}
+        numPages={numPages}
+        onOpen={() => void openFile()}
+        onSave={() => void save(false)}
+        onSaveAs={() => void save(true)}
+        onUndo={doc.undo}
+        onRedo={doc.redo}
+        onToolChange={setTool}
+        onColorChange={setColor}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onZoomReset={zoomReset}
+        onPrevPage={prevPage}
+        onNextPage={nextPage}
+        onGoToPage={goToPage}
+        onRotate={rotate}
+        onDeletePage={deletePage}
+        onToggleFind={() => setShowFind((v) => !v)}
+      />
+
+      {showFind && pdfDoc && (
+        <FindBar doc={pdfDoc} onClose={() => setShowFind(false)} onGoToPage={goToPage} />
+      )}
+
+      <div className="workspace">
+        {doc.hasDocument && pdfDoc && (
+          <Sidebar
+            doc={pdfDoc}
+            numPages={numPages}
+            currentPage={currentPage}
+            onSelectPage={goToPage}
+            onReorder={reorder}
+          />
+        )}
+
+        <main className="viewer">
+          {!doc.hasDocument && <Welcome onOpen={() => void openFile()} />}
+
+          {doc.hasDocument && loading && <div className="viewer-message">Загрузка документа…</div>}
+          {doc.hasDocument && error && (
+            <div className="viewer-message error">Ошибка: {error}</div>
+          )}
+
+          {doc.hasDocument && pdfDoc && !loading && (
+            <div className="page-scroll">
+              <div className="page-stage">
+                <PdfCanvas doc={pdfDoc} pageIndex={currentPage} scale={scale} onSized={onSized} />
+                {pageSize && (
+                  <AnnotationLayer
+                    pageIndex={currentPage}
+                    size={pageSize}
+                    scale={scale}
+                    tool={tool}
+                    color={color}
+                    annotations={pageAnnotations}
+                    onCommit={doc.addAnnotation}
+                    onDelete={doc.deleteAnnotation}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {doc.hasDocument && (
+        <StatusBar
+          name={doc.name}
+          path={doc.path}
+          isDirty={doc.isDirty}
+          currentPage={currentPage}
+          numPages={numPages}
+          annotationCount={doc.annotations.length}
+        />
+      )}
+
+      {dragging && <div className="drop-overlay">Отпустите, чтобы открыть PDF</div>}
+    </div>
+  )
+}
