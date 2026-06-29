@@ -1,2 +1,4 @@
 # vendored AI-agent marketing skills (coreyhaines31/marketingskills via: npx skills add coreyhaines31/marketingskills)
-.agents/
+.agents/*
+# но наш собственный контекст-файл маркетинга — версионируем
+!.agents/product-marketing.md
