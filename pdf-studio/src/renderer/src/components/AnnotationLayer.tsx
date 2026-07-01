@@ -1,6 +1,7 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import {
   type Annotation,
+  type LineAnnotation,
   type Tool,
   nextAnnotationId
 } from '../lib/annotations'
@@ -18,7 +19,7 @@ interface AnnotationLayerProps {
   onDelete(id: string): void
 }
 
-interface DragRect {
+interface DragBox {
   x0: number
   y0: number
   x1: number
@@ -27,6 +28,11 @@ interface DragRect {
 
 const DEFAULT_LINE_WIDTH = 2 // PDF points
 const DEFAULT_FONT_SIZE = 18 // PDF points
+
+/** Tools that draw by dragging a rectangle over a region. */
+const RECT_TOOLS: Tool[] = ['highlight', 'rect', 'underline', 'strikethrough']
+/** Tools that draw a straight segment from a start to an end point. */
+const LINE_TOOLS: Tool[] = ['line', 'arrow']
 
 /**
  * Interactive overlay that both renders existing annotations and captures new
@@ -37,7 +43,7 @@ const DEFAULT_FONT_SIZE = 18 // PDF points
 export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
   const { pageIndex, size, scale, tool, color, annotations, onCommit, onDelete } = props
   const svgRef = useRef<SVGSVGElement>(null)
-  const [dragRect, setDragRect] = useState<DragRect | null>(null)
+  const [drag, setDrag] = useState<DragBox | null>(null)
   const [inkPoints, setInkPoints] = useState<Array<{ x: number; y: number }>>([])
   const [textDraft, setTextDraft] = useState<{ x: number; y: number; value: string } | null>(
     null
@@ -52,7 +58,9 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     }
   }
 
-  const isDrawing = tool === 'highlight' || tool === 'rect' || tool === 'ink'
+  const isRect = RECT_TOOLS.includes(tool)
+  const isLine = LINE_TOOLS.includes(tool)
+  const isDrawing = isRect || isLine || tool === 'ink'
 
   const handlePointerDown = (e: ReactPointerEvent): void => {
     if (textDraft) return
@@ -70,7 +78,7 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     if (tool === 'ink') {
       setInkPoints([p])
     } else {
-      setDragRect({ x0: p.x, y0: p.y, x1: p.x, y1: p.y })
+      setDrag({ x0: p.x, y0: p.y, x1: p.x, y1: p.y })
     }
   }
 
@@ -80,9 +88,13 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     if (tool === 'ink') {
       if (inkPoints.length === 0) return
       setInkPoints((pts) => [...pts, p])
-    } else if (dragRect) {
-      setDragRect({ ...dragRect, x1: p.x, y1: p.y })
+    } else if (drag) {
+      setDrag({ ...drag, x1: p.x, y1: p.y })
     }
+  }
+
+  const commitLine = (line: Omit<LineAnnotation, 'id' | 'type' | 'pageIndex' | 'color'>): void => {
+    onCommit({ id: nextAnnotationId(), type: 'line', pageIndex, color, ...line })
   }
 
   const handlePointerUp = (e: ReactPointerEvent): void => {
@@ -104,31 +116,53 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
       return
     }
 
-    if (dragRect) {
-      const x = Math.min(dragRect.x0, dragRect.x1)
-      const y = Math.min(dragRect.y0, dragRect.y1)
-      const w = Math.abs(dragRect.x1 - dragRect.x0)
-      const h = Math.abs(dragRect.y1 - dragRect.y0)
-      // Ignore accidental zero-area clicks.
-      if (w > 0.005 && h > 0.005) {
-        if (tool === 'highlight') {
-          onCommit({ id: nextAnnotationId(), type: 'highlight', pageIndex, color, x, y, w, h })
-        } else if (tool === 'rect') {
-          onCommit({
-            id: nextAnnotationId(),
-            type: 'rect',
-            pageIndex,
-            color,
-            x,
-            y,
-            w,
-            h,
-            lineWidth: DEFAULT_LINE_WIDTH
-          })
-        }
+    if (!drag) return
+    const x = Math.min(drag.x0, drag.x1)
+    const y = Math.min(drag.y0, drag.y1)
+    const w = Math.abs(drag.x1 - drag.x0)
+    const h = Math.abs(drag.y1 - drag.y0)
+
+    if (isLine) {
+      // Ignore accidental zero-length clicks.
+      const len = Math.hypot(drag.x1 - drag.x0, drag.y1 - drag.y0)
+      if (len > 0.01) {
+        commitLine({
+          x1: drag.x0,
+          y1: drag.y0,
+          x2: drag.x1,
+          y2: drag.y1,
+          lineWidth: DEFAULT_LINE_WIDTH,
+          arrow: tool === 'arrow'
+        })
       }
-      setDragRect(null)
+    } else if (w > 0.005 && h > 0.005) {
+      if (tool === 'highlight') {
+        onCommit({ id: nextAnnotationId(), type: 'highlight', pageIndex, color, x, y, w, h })
+      } else if (tool === 'rect') {
+        onCommit({
+          id: nextAnnotationId(),
+          type: 'rect',
+          pageIndex,
+          color,
+          x,
+          y,
+          w,
+          h,
+          lineWidth: DEFAULT_LINE_WIDTH
+        })
+      } else if (tool === 'underline' || tool === 'strikethrough') {
+        const ly = tool === 'underline' ? y + h : y + h / 2
+        commitLine({
+          x1: x,
+          y1: ly,
+          x2: x + w,
+          y2: ly,
+          lineWidth: DEFAULT_LINE_WIDTH,
+          arrow: false
+        })
+      }
     }
+    setDrag(null)
   }
 
   const commitText = (): void => {
@@ -147,8 +181,8 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     setTextDraft(null)
   }
 
-  const px = (normX: number): number => normX * size.width
-  const py = (normY: number): number => normY * size.height
+  const px = (n: number): number => n * size.width
+  const py = (n: number): number => n * size.height
 
   return (
     <div className="annotation-layer" style={{ width: size.width, height: size.height }}>
@@ -163,28 +197,49 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
       >
         {annotations.map((ann) => renderAnnotation(ann, size, scale, selectedId === ann.id))}
 
-        {/* in-progress drag rectangle */}
-        {dragRect &&
-          (tool === 'highlight' || tool === 'rect') &&
-          (() => {
-            const x = Math.min(dragRect.x0, dragRect.x1)
-            const y = Math.min(dragRect.y0, dragRect.y1)
-            const w = Math.abs(dragRect.x1 - dragRect.x0)
-            const h = Math.abs(dragRect.y1 - dragRect.y0)
-            return (
-              <rect
-                x={px(x)}
-                y={py(y)}
-                width={px(w)}
-                height={py(h)}
-                fill={tool === 'highlight' ? color : 'none'}
-                fillOpacity={tool === 'highlight' ? 0.35 : 0}
-                stroke={color}
-                strokeWidth={tool === 'rect' ? DEFAULT_LINE_WIDTH * scale : 0}
-                strokeDasharray="4 3"
-              />
-            )
-          })()}
+        {/* in-progress previews */}
+        {drag && isRect && tool !== 'underline' && tool !== 'strikethrough' && (
+          <rect
+            x={px(Math.min(drag.x0, drag.x1))}
+            y={py(Math.min(drag.y0, drag.y1))}
+            width={px(Math.abs(drag.x1 - drag.x0))}
+            height={py(Math.abs(drag.y1 - drag.y0))}
+            fill={tool === 'highlight' ? color : 'none'}
+            fillOpacity={tool === 'highlight' ? 0.35 : 0}
+            stroke={color}
+            strokeWidth={tool === 'rect' ? DEFAULT_LINE_WIDTH * scale : 0}
+            strokeDasharray="4 3"
+          />
+        )}
+        {drag && (tool === 'underline' || tool === 'strikethrough') && (
+          <line
+            x1={px(Math.min(drag.x0, drag.x1))}
+            x2={px(Math.max(drag.x0, drag.x1))}
+            y1={py(
+              tool === 'underline'
+                ? Math.max(drag.y0, drag.y1)
+                : (drag.y0 + drag.y1) / 2
+            )}
+            y2={py(
+              tool === 'underline'
+                ? Math.max(drag.y0, drag.y1)
+                : (drag.y0 + drag.y1) / 2
+            )}
+            stroke={color}
+            strokeWidth={DEFAULT_LINE_WIDTH * scale}
+          />
+        )}
+        {drag && isLine && (
+          <line
+            x1={px(drag.x0)}
+            y1={py(drag.y0)}
+            x2={px(drag.x1)}
+            y2={py(drag.y1)}
+            stroke={color}
+            strokeWidth={DEFAULT_LINE_WIDTH * scale}
+            strokeLinecap="round"
+          />
+        )}
 
         {/* in-progress freehand stroke */}
         {tool === 'ink' && inkPoints.length > 1 && (
@@ -255,6 +310,23 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
   )
 }
 
+/** Arrowhead endpoints for a line drawn in CSS-pixel space. */
+function arrowHead(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  lineWidth: number
+): Array<{ x: number; y: number }> {
+  const angle = Math.atan2(y2 - y1, x2 - x1)
+  const headLen = 10 + lineWidth * 2
+  const spread = Math.PI / 7
+  return [1, -1].map((sign) => {
+    const a = angle + Math.PI - sign * spread
+    return { x: x2 + headLen * Math.cos(a), y: y2 + headLen * Math.sin(a) }
+  })
+}
+
 function renderAnnotation(
   ann: Annotation,
   size: PageSize,
@@ -305,6 +377,32 @@ function renderAnnotation(
           strokeLinejoin="round"
         />
       )
+    case 'line': {
+      const x1 = px(ann.x1)
+      const y1 = py(ann.y1)
+      const x2 = px(ann.x2)
+      const y2 = py(ann.y2)
+      const stroke = selected ? '#2196f3' : ann.color
+      const sw = ann.lineWidth * scale
+      return (
+        <g key={ann.id}>
+          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+          {ann.arrow &&
+            arrowHead(x1, y1, x2, y2, ann.lineWidth).map((h, i) => (
+              <line
+                key={i}
+                x1={x2}
+                y1={y2}
+                x2={h.x}
+                y2={h.y}
+                stroke={stroke}
+                strokeWidth={sw}
+                strokeLinecap="round"
+              />
+            ))}
+        </g>
+      )
+    }
     case 'text':
       return (
         <text
@@ -326,7 +424,7 @@ function renderAnnotation(
 function selectionHitTarget(ann: Annotation, size: PageSize): JSX.Element {
   const px = (n: number): number => n * size.width
   const py = (n: number): number => n * size.height
-  const common = { fill: 'transparent', stroke: 'transparent', strokeWidth: 10 }
+  const common = { fill: 'transparent', stroke: 'transparent', strokeWidth: 12 }
   switch (ann.type) {
     case 'highlight':
     case 'rect':
@@ -336,6 +434,10 @@ function selectionHitTarget(ann: Annotation, size: PageSize): JSX.Element {
     case 'ink':
       return (
         <polyline points={ann.points.map((p) => `${px(p.x)},${py(p.y)}`).join(' ')} {...common} />
+      )
+    case 'line':
+      return (
+        <line x1={px(ann.x1)} y1={py(ann.y1)} x2={px(ann.x2)} y2={py(ann.y2)} {...common} />
       )
     case 'text':
       return (
@@ -359,6 +461,8 @@ function annotationAnchor(ann: Annotation, size: PageSize): { x: number; y: numb
     case 'rect':
     case 'text':
       return { x: px(ann.x), y: py(ann.y) }
+    case 'line':
+      return { x: px(ann.x1), y: py(ann.y1) }
     case 'ink': {
       const first = ann.points[0]
       return { x: px(first.x), y: py(first.y) }

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDocument } from './hooks/useDocument'
 import { usePdfDoc } from './hooks/usePdfDoc'
+import { useZoom } from './hooks/useZoom'
+import { useTheme } from './hooks/useTheme'
 import { Toolbar } from './components/Toolbar'
 import { Sidebar } from './components/Sidebar'
 import { PdfCanvas, type PageSize } from './components/PdfCanvas'
@@ -8,23 +10,29 @@ import { AnnotationLayer } from './components/AnnotationLayer'
 import { Welcome } from './components/Welcome'
 import { StatusBar } from './components/StatusBar'
 import { FindBar } from './components/FindBar'
+import { getPageBaseSize, renderPageToPng } from './lib/pdf'
 import type { Tool } from './lib/annotations'
-import type { MenuCommand } from '../../shared/ipc'
+import type { MenuCommand, RecentFile } from '../../shared/ipc'
 
-const MIN_SCALE = 0.25
-const MAX_SCALE = 4
 const ROTATE_STEP = 90
+const PNG_EXPORT_SCALE = 2
 
 export default function App(): JSX.Element {
   const doc = useDocument()
   const { doc: pdfDoc, numPages, loading, error } = usePdfDoc(doc.bytes)
+  const { theme, toggleTheme } = useTheme()
 
   const [currentPage, setCurrentPage] = useState(0)
-  const [scale, setScale] = useState(1)
   const [tool, setTool] = useState<Tool>('select')
   const [color, setColor] = useState('#ffd400')
   const [pageSize, setPageSize] = useState<PageSize | null>(null)
+  const [basePageSize, setBasePageSize] = useState<{ width: number; height: number } | null>(null)
   const [showFind, setShowFind] = useState(false)
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([])
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const zoom = useZoom(basePageSize, scrollRef)
+  const scale = zoom.scale
 
   // Keep the current page within bounds as pages are added/removed.
   useEffect(() => {
@@ -34,6 +42,28 @@ export default function App(): JSX.Element {
       setCurrentPage(numPages - 1)
     }
   }, [numPages, currentPage])
+
+  // Track the current page's unscaled size (drives fit-to-width / fit-to-page).
+  useEffect(() => {
+    if (!pdfDoc || numPages === 0) {
+      setBasePageSize(null)
+      return
+    }
+    let cancelled = false
+    getPageBaseSize(pdfDoc, Math.min(currentPage, numPages - 1)).then((size) => {
+      if (!cancelled) setBasePageSize(size)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [pdfDoc, currentPage, numPages])
+
+  // Refresh the recent-files list whenever we are on the welcome screen.
+  useEffect(() => {
+    if (!doc.hasDocument) {
+      window.api.getRecentFiles().then(setRecentFiles)
+    }
+  }, [doc.hasDocument])
 
   // Report state to the main process so native menu items enable correctly.
   useEffect(() => {
@@ -53,26 +83,48 @@ export default function App(): JSX.Element {
 
   // ---- File operations -----------------------------------------------------
 
+  const { setActual: zoomActual } = zoom
+  const resetViewState = useCallback(() => {
+    setCurrentPage(0)
+    setTool('select')
+    zoomActual()
+  }, [zoomActual])
+
   const openFile = useCallback(async () => {
     const file = await window.api.openPdfDialog()
     if (!file) return
     doc.open(file.name, file.path, file.data)
-    setCurrentPage(0)
-    setScale(1)
-    setTool('select')
-  }, [doc])
+    resetViewState()
+  }, [doc, resetViewState])
+
+  const openRecent = useCallback(
+    async (path: string) => {
+      const file = await window.api.readPdf(path)
+      if (!file) {
+        // File is gone — refresh the list so the stale entry disappears.
+        window.api.getRecentFiles().then(setRecentFiles)
+        return
+      }
+      doc.open(file.name, file.path, file.data)
+      resetViewState()
+    },
+    [doc, resetViewState]
+  )
 
   const openFromDrop = useCallback(
     async (file: File) => {
       const buffer = await file.arrayBuffer()
-      // Electron exposes the absolute path on dropped File objects.
       const path = (file as File & { path?: string }).path ?? null
       doc.open(file.name, path, new Uint8Array(buffer))
-      setCurrentPage(0)
-      setScale(1)
-      setTool('select')
+      if (path) window.api.addRecentFile(path)
+      resetViewState()
     },
-    [doc]
+    [doc, resetViewState]
+  )
+
+  const baseName = useCallback(
+    () => (doc.name || 'document').replace(/\.pdf$/i, ''),
+    [doc.name]
   )
 
   const save = useCallback(
@@ -87,20 +139,50 @@ export default function App(): JSX.Element {
         if (!res.canceled && res.path) {
           const name = res.path.split(/[\\/]/).pop() || doc.name
           doc.markSaved(res.path, name, bytes)
+          window.api.addRecentFile(res.path)
         }
       }
     },
     [doc]
   )
 
+  // ---- Page operations -----------------------------------------------------
+
+  const rotate = useCallback(() => {
+    if (doc.hasDocument) void doc.rotateCurrentPage(currentPage, ROTATE_STEP)
+  }, [doc, currentPage])
+  const deletePage = useCallback(() => {
+    if (doc.hasDocument && numPages > 1) void doc.deleteCurrentPage(currentPage)
+  }, [doc, currentPage, numPages])
+  const duplicatePage = useCallback(() => {
+    if (doc.hasDocument) void doc.duplicateCurrentPage(currentPage)
+  }, [doc, currentPage])
+  const reorder = useCallback(
+    (from: number, to: number) => {
+      void doc.reorderPage(from, to)
+      setCurrentPage(to)
+    },
+    [doc]
+  )
+  const insertPdf = useCallback(async () => {
+    if (!doc.hasDocument) return
+    const file = await window.api.openPdfDialog()
+    if (file) void doc.insertDocumentAfter(currentPage, file.data)
+  }, [doc, currentPage])
+  const extractPage = useCallback(async () => {
+    if (!doc.hasDocument) return
+    const bytes = await doc.extractPageBytes(currentPage)
+    await window.api.savePdfAs(`${baseName()}-стр${currentPage + 1}.pdf`, bytes)
+  }, [doc, currentPage, baseName])
+  const exportPng = useCallback(async () => {
+    if (!pdfDoc) return
+    const page = await pdfDoc.getPage(currentPage + 1)
+    const png = await renderPageToPng(page, PNG_EXPORT_SCALE)
+    await window.api.savePngAs(`${baseName()}-стр${currentPage + 1}.png`, png)
+  }, [pdfDoc, currentPage, baseName])
+
   // ---- View operations -----------------------------------------------------
 
-  const zoomIn = useCallback(() => setScale((s) => Math.min(MAX_SCALE, +(s + 0.2).toFixed(2))), [])
-  const zoomOut = useCallback(
-    () => setScale((s) => Math.max(MIN_SCALE, +(s - 0.2).toFixed(2))),
-    []
-  )
-  const zoomReset = useCallback(() => setScale(1), [])
   const nextPage = useCallback(
     () => setCurrentPage((p) => Math.min(numPages - 1, p + 1)),
     [numPages]
@@ -114,22 +196,6 @@ export default function App(): JSX.Element {
     [numPages]
   )
 
-  // ---- Page operations -----------------------------------------------------
-
-  const rotate = useCallback(() => {
-    if (doc.hasDocument) void doc.rotateCurrentPage(currentPage, ROTATE_STEP)
-  }, [doc, currentPage])
-  const deletePage = useCallback(() => {
-    if (doc.hasDocument && numPages > 1) void doc.deleteCurrentPage(currentPage)
-  }, [doc, currentPage, numPages])
-  const reorder = useCallback(
-    (from: number, to: number) => {
-      void doc.reorderPage(from, to)
-      setCurrentPage(to)
-    },
-    [doc]
-  )
-
   // ---- Native menu commands ------------------------------------------------
 
   useEffect(() => {
@@ -138,9 +204,9 @@ export default function App(): JSX.Element {
       save: () => void save(false),
       'save-as': () => void save(true),
       'close-document': () => doc.close(),
-      'zoom-in': zoomIn,
-      'zoom-out': zoomOut,
-      'zoom-reset': zoomReset,
+      'zoom-in': zoom.zoomIn,
+      'zoom-out': zoom.zoomOut,
+      'zoom-reset': zoom.setActual,
       'next-page': nextPage,
       'prev-page': prevPage,
       'rotate-page': rotate,
@@ -150,7 +216,7 @@ export default function App(): JSX.Element {
       find: () => setShowFind(true)
     }
     return window.api.onMenuCommand((command) => dispatch[command]?.())
-  }, [openFile, save, doc, zoomIn, zoomOut, zoomReset, nextPage, prevPage, rotate, deletePage])
+  }, [openFile, save, doc, zoom, nextPage, prevPage, rotate, deletePage])
 
   // ---- Drag & drop ---------------------------------------------------------
 
@@ -201,8 +267,10 @@ export default function App(): JSX.Element {
         tool={tool}
         color={color}
         scale={scale}
+        zoomMode={zoom.zoomMode}
         currentPage={currentPage}
         numPages={numPages}
+        theme={theme}
         onOpen={() => void openFile()}
         onSave={() => void save(false)}
         onSaveAs={() => void save(true)}
@@ -210,15 +278,22 @@ export default function App(): JSX.Element {
         onRedo={doc.redo}
         onToolChange={setTool}
         onColorChange={setColor}
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onZoomReset={zoomReset}
+        onZoomIn={zoom.zoomIn}
+        onZoomOut={zoom.zoomOut}
+        onZoomActual={zoom.setActual}
+        onFitWidth={zoom.fitWidth}
+        onFitPage={zoom.fitPage}
         onPrevPage={prevPage}
         onNextPage={nextPage}
         onGoToPage={goToPage}
         onRotate={rotate}
         onDeletePage={deletePage}
+        onDuplicatePage={duplicatePage}
+        onInsertPdf={() => void insertPdf()}
+        onExtractPage={() => void extractPage()}
+        onExportPng={() => void exportPng()}
         onToggleFind={() => setShowFind((v) => !v)}
+        onToggleTheme={toggleTheme}
       />
 
       {showFind && pdfDoc && (
@@ -237,7 +312,13 @@ export default function App(): JSX.Element {
         )}
 
         <main className="viewer">
-          {!doc.hasDocument && <Welcome onOpen={() => void openFile()} />}
+          {!doc.hasDocument && (
+            <Welcome
+              onOpen={() => void openFile()}
+              recentFiles={recentFiles}
+              onOpenRecent={(p) => void openRecent(p)}
+            />
+          )}
 
           {doc.hasDocument && loading && <div className="viewer-message">Загрузка документа…</div>}
           {doc.hasDocument && error && (
@@ -245,7 +326,7 @@ export default function App(): JSX.Element {
           )}
 
           {doc.hasDocument && pdfDoc && !loading && (
-            <div className="page-scroll">
+            <div className="page-scroll" ref={scrollRef}>
               <div className="page-stage">
                 <PdfCanvas doc={pdfDoc} pageIndex={currentPage} scale={scale} onSized={onSized} />
                 {pageSize && (

@@ -1,0 +1,66 @@
+name: PDF Studio CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'pdf-studio/**'
+      - '.github/workflows/pdf-studio-ci.yml'
+  pull_request:
+    paths:
+      - 'pdf-studio/**'
+      - '.github/workflows/pdf-studio-ci.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: pdf-studio
+
+jobs:
+  # Fast cross-platform gate: type-check and bundle the app. The Electron binary
+  # is not needed here, so we skip its download to keep the job quick.
+  build:
+    name: Type-check & build
+    runs-on: ubuntu-latest
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pdf-studio/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Type-check (main + renderer)
+        run: npm run typecheck
+      - name: Build (electron-vite)
+        run: npm run build
+
+  # Package the Windows installer + portable build and publish the artifacts.
+  package-windows:
+    name: Package Windows installer
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pdf-studio/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build & package (NSIS + portable)
+        run: npm run build:win
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-studio-windows
+          path: |
+            pdf-studio/dist/*.exe
+          if-no-files-found: warn
+          retention-days: 14

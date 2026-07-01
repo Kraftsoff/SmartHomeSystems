@@ -5,7 +5,16 @@
  * us render at any zoom and bake into the PDF at the page's true dimensions.
  */
 
-export type Tool = 'select' | 'highlight' | 'ink' | 'text' | 'rect'
+export type Tool =
+  | 'select'
+  | 'highlight'
+  | 'underline'
+  | 'strikethrough'
+  | 'ink'
+  | 'text'
+  | 'rect'
+  | 'line'
+  | 'arrow'
 
 export type AnnotationColor = string // hex, e.g. '#ffd400'
 
@@ -50,11 +59,28 @@ export interface TextAnnotation extends BaseAnnotation {
   fontSize: number
 }
 
+/**
+ * A straight line between two points. Used directly for the line/arrow tools
+ * and also to represent underline/strikethrough markups (a horizontal line at
+ * the bottom or middle of a dragged region). `arrow` adds an arrowhead at the
+ * end point.
+ */
+export interface LineAnnotation extends BaseAnnotation {
+  type: 'line'
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  lineWidth: number
+  arrow: boolean
+}
+
 export type Annotation =
   | HighlightAnnotation
   | RectAnnotation
   | InkAnnotation
   | TextAnnotation
+  | LineAnnotation
 
 let idCounter = 0
 /** Monotonic id generator (avoids Math.random / Date.now for determinism). */

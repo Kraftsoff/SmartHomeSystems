@@ -76,6 +76,42 @@ export async function appendPdf(
   return save(doc)
 }
 
+/** Insert all pages of `otherBytes` immediately after `afterIndex`. */
+export async function insertPdfAt(
+  bytes: Uint8Array,
+  otherBytes: Uint8Array,
+  afterIndex: number
+): Promise<Uint8Array> {
+  const doc = await load(bytes)
+  const other = await load(otherBytes)
+  const copied = await doc.copyPages(other, other.getPageIndices())
+  copied.forEach((p, i) => doc.insertPage(afterIndex + 1 + i, p))
+  return save(doc)
+}
+
+/** Duplicate the page at `pageIndex`, placing the copy right after it. */
+export async function duplicatePage(
+  bytes: Uint8Array,
+  pageIndex: number
+): Promise<Uint8Array> {
+  const doc = await load(bytes)
+  const [copy] = await doc.copyPages(doc, [pageIndex])
+  doc.insertPage(pageIndex + 1, copy)
+  return save(doc)
+}
+
+/** Extract a single page into a new one-page PDF and return its bytes. */
+export async function extractPage(
+  bytes: Uint8Array,
+  pageIndex: number
+): Promise<Uint8Array> {
+  const src = await load(bytes)
+  const out = await PDFDocument.create()
+  const [copied] = await out.copyPages(src, [pageIndex])
+  out.addPage(copied)
+  return save(out)
+}
+
 /**
  * Bake renderer annotations into the PDF content. Annotation coordinates are
  * normalized with a top-left origin; PDF uses a bottom-left origin, so the y
@@ -143,6 +179,27 @@ export async function bakeAnnotations(
           font,
           color
         })
+        break
+      }
+      case 'line': {
+        const start = { x: ann.x1 * pw, y: ph - ann.y1 * ph }
+        const end = { x: ann.x2 * pw, y: ph - ann.y2 * ph }
+        page.drawLine({ start, end, thickness: ann.lineWidth, color })
+        if (ann.arrow) {
+          // Draw a simple two-stroke arrowhead at the end point.
+          const angle = Math.atan2(end.y - start.y, end.x - start.x)
+          const headLen = 10 + ann.lineWidth * 2
+          const spread = Math.PI / 7
+          for (const sign of [1, -1]) {
+            const a = angle + Math.PI - sign * spread
+            page.drawLine({
+              start: end,
+              end: { x: end.x + headLen * Math.cos(a), y: end.y + headLen * Math.sin(a) },
+              thickness: ann.lineWidth,
+              color
+            })
+          }
+        }
         break
       }
     }

@@ -5,7 +5,8 @@ import {
   type OpenedFile,
   type SaveResult,
   type DocumentState,
-  type MenuCommand
+  type MenuCommand,
+  type RecentFile
 } from '../shared/ipc'
 
 /** Typed, minimal surface exposed to the renderer. */
@@ -17,6 +18,10 @@ const api = {
     ipcRenderer.invoke(IpcChannels.savePdf, path, data),
   savePdfAs: (suggestedName: string, data: Uint8Array): Promise<SaveResult> =>
     ipcRenderer.invoke(IpcChannels.savePdfAs, suggestedName, data),
+  savePngAs: (suggestedName: string, data: Uint8Array): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.savePngAs, suggestedName, data),
+  getRecentFiles: (): Promise<RecentFile[]> => ipcRenderer.invoke(IpcChannels.getRecentFiles),
+  addRecentFile: (path: string): void => ipcRenderer.send(IpcChannels.addRecentFile, path),
   notifyDocumentState: (state: DocumentState): void =>
     ipcRenderer.send(IpcChannels.documentStateChanged, state),
   onMenuCommand: (handler: (command: MenuCommand) => void): (() => void) => {

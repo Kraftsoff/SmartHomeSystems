@@ -1,5 +1,7 @@
 import type { Tool } from '../lib/annotations'
 import { DEFAULT_COLORS } from '../lib/annotations'
+import type { Theme } from '../hooks/useTheme'
+import type { ZoomMode } from '../hooks/useZoom'
 
 interface ToolbarProps {
   hasDocument: boolean
@@ -9,8 +11,10 @@ interface ToolbarProps {
   tool: Tool
   color: string
   scale: number
+  zoomMode: ZoomMode
   currentPage: number
   numPages: number
+  theme: Theme
 
   onOpen(): void
   onSave(): void
@@ -21,21 +25,32 @@ interface ToolbarProps {
   onColorChange(color: string): void
   onZoomIn(): void
   onZoomOut(): void
-  onZoomReset(): void
+  onZoomActual(): void
+  onFitWidth(): void
+  onFitPage(): void
   onPrevPage(): void
   onNextPage(): void
   onGoToPage(index: number): void
   onRotate(): void
   onDeletePage(): void
+  onDuplicatePage(): void
+  onInsertPdf(): void
+  onExtractPage(): void
+  onExportPng(): void
   onToggleFind(): void
+  onToggleTheme(): void
 }
 
 const TOOLS: Array<{ id: Tool; label: string; icon: string }> = [
-  { id: 'select', label: 'Выбор', icon: '⟲' },
+  { id: 'select', label: 'Выбор / удаление', icon: '🖱' },
   { id: 'highlight', label: 'Выделение', icon: '🖍' },
+  { id: 'underline', label: 'Подчёркивание', icon: 'U' },
+  { id: 'strikethrough', label: 'Зачёркивание', icon: 'S' },
   { id: 'ink', label: 'Карандаш', icon: '✏️' },
   { id: 'text', label: 'Текст', icon: 'T' },
-  { id: 'rect', label: 'Прямоугольник', icon: '▭' }
+  { id: 'rect', label: 'Прямоугольник', icon: '▭' },
+  { id: 'line', label: 'Линия', icon: '／' },
+  { id: 'arrow', label: 'Стрелка', icon: '↗' }
 ]
 
 export function Toolbar(props: ToolbarProps): JSX.Element {
@@ -47,8 +62,10 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
     tool,
     color,
     scale,
+    zoomMode,
     currentPage,
-    numPages
+    numPages,
+    theme
   } = props
 
   return (
@@ -71,7 +88,7 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
           disabled={!hasDocument}
           title="Сохранить как (Ctrl+Shift+S)"
         >
-          Сохранить как…
+          Как…
         </button>
       </div>
 
@@ -116,15 +133,31 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
           −
         </button>
         <button
-          className="tbtn"
-          onClick={props.onZoomReset}
+          className={`tbtn ${zoomMode === 'actual' ? 'active' : ''}`}
+          onClick={props.onZoomActual}
           disabled={!hasDocument}
-          title="Сбросить масштаб"
+          title="100%"
         >
           {Math.round(scale * 100)}%
         </button>
         <button className="tbtn icon" onClick={props.onZoomIn} disabled={!hasDocument} title="Увеличить">
           +
+        </button>
+        <button
+          className={`tbtn ${zoomMode === 'fit-width' ? 'active' : ''}`}
+          onClick={props.onFitWidth}
+          disabled={!hasDocument}
+          title="По ширине"
+        >
+          ↔
+        </button>
+        <button
+          className={`tbtn ${zoomMode === 'fit-page' ? 'active' : ''}`}
+          onClick={props.onFitPage}
+          disabled={!hasDocument}
+          title="По странице"
+        >
+          ⤢
         </button>
       </div>
 
@@ -161,8 +194,16 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
       </div>
 
       <div className="toolbar-group">
-        <button className="tbtn icon" onClick={props.onRotate} disabled={!hasDocument} title="Повернуть страницу">
+        <button className="tbtn icon" onClick={props.onRotate} disabled={!hasDocument} title="Повернуть страницу (Ctrl+R)">
           ⟳
+        </button>
+        <button
+          className="tbtn icon"
+          onClick={props.onDuplicatePage}
+          disabled={!hasDocument}
+          title="Дублировать страницу"
+        >
+          ⧉
         </button>
         <button
           className="tbtn icon"
@@ -172,8 +213,42 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
         >
           🗑
         </button>
+        <button
+          className="tbtn icon"
+          onClick={props.onInsertPdf}
+          disabled={!hasDocument}
+          title="Вставить другой PDF после текущей страницы"
+        >
+          📎
+        </button>
+        <button
+          className="tbtn icon"
+          onClick={props.onExtractPage}
+          disabled={!hasDocument}
+          title="Извлечь страницу в новый файл"
+        >
+          ⤓
+        </button>
+        <button
+          className="tbtn icon"
+          onClick={props.onExportPng}
+          disabled={!hasDocument}
+          title="Экспорт страницы в PNG"
+        >
+          🖼
+        </button>
+      </div>
+
+      <div className="toolbar-group">
         <button className="tbtn icon" onClick={props.onToggleFind} disabled={!hasDocument} title="Найти (Ctrl+F)">
           🔍
+        </button>
+        <button
+          className="tbtn icon"
+          onClick={props.onToggleTheme}
+          title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+        >
+          {theme === 'dark' ? '☀' : '🌙'}
         </button>
       </div>
     </div>

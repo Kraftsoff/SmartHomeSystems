@@ -52,6 +52,34 @@ export async function renderPageToCanvas(
   return { width: viewport.width, height: viewport.height }
 }
 
+/** Base (unscaled) size of a page in PDF points. */
+export async function getPageBaseSize(
+  doc: PdfDocumentProxy,
+  pageIndex: number
+): Promise<{ width: number; height: number }> {
+  const page = await doc.getPage(pageIndex + 1)
+  const vp = page.getViewport({ scale: 1 })
+  return { width: vp.width, height: vp.height }
+}
+
+/** Render a page to PNG bytes at the given scale (for image export). */
+export async function renderPageToPng(
+  page: PdfPageProxy,
+  scale: number
+): Promise<Uint8Array> {
+  const viewport = page.getViewport({ scale })
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.floor(viewport.width)
+  canvas.height = Math.floor(viewport.height)
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Не удалось получить 2D-контекст canvas')
+  await page.render({ canvasContext: ctx, viewport }).promise
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+  if (!blob) throw new Error('Не удалось создать PNG')
+  return new Uint8Array(await blob.arrayBuffer())
+}
+
 export interface TextMatch {
   pageIndex: number
 }

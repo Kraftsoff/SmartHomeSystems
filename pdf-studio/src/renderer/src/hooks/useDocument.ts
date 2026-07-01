@@ -5,7 +5,10 @@ import {
   rotatePage,
   deletePage,
   movePage,
-  appendPdf
+  appendPdf,
+  insertPdfAt,
+  duplicatePage,
+  extractPage
 } from '../lib/pdfEdit'
 
 /** An immutable snapshot of the editable document state. */
@@ -112,6 +115,10 @@ export interface DocumentController {
   deleteCurrentPage(pageIndex: number): Promise<void>
   reorderPage(from: number, to: number): Promise<void>
   appendDocument(otherBytes: Uint8Array): Promise<void>
+  insertDocumentAfter(pageIndex: number, otherBytes: Uint8Array): Promise<void>
+  duplicateCurrentPage(pageIndex: number): Promise<void>
+  /** Bake annotations and return a one-page PDF for the given page. */
+  extractPageBytes(pageIndex: number): Promise<Uint8Array>
 }
 
 export function useDocument(): DocumentController {
@@ -195,7 +202,16 @@ export function useDocument(): DocumentController {
         applyStructural((b) => deletePage(b, pageIndex)),
       reorderPage: (from, to) => applyStructural((b) => movePage(b, from, to)),
       appendDocument: (otherBytes) =>
-        applyStructural((b) => appendPdf(b, otherBytes))
+        applyStructural((b) => appendPdf(b, otherBytes)),
+      insertDocumentAfter: (pageIndex, otherBytes) =>
+        applyStructural((b) => insertPdfAt(b, otherBytes, pageIndex)),
+      duplicateCurrentPage: (pageIndex) =>
+        applyStructural((b) => duplicatePage(b, pageIndex)),
+      extractPageBytes: async (pageIndex) => {
+        if (!current) throw new Error('Документ не открыт')
+        const baked = await bakeAnnotations(current.bytes, current.annotations)
+        return extractPage(baked, pageIndex)
+      }
     }),
     [current, state, bytes, annotations, isDirty, pushSnapshot, applyStructural]
   )

@@ -1,4 +1,5 @@
-:root {
+:root,
+:root[data-theme='dark'] {
   --bg: #1f2430;
   --bg-elevated: #272d3a;
   --bg-panel: #232936;
@@ -8,8 +9,23 @@
   --accent: #4c8bf5;
   --accent-hover: #5d97f6;
   --danger: #ff5252;
+  --viewer-bg: #161a22;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   --radius: 8px;
+}
+
+:root[data-theme='light'] {
+  --bg: #f4f6fa;
+  --bg-elevated: #ffffff;
+  --bg-panel: #eef1f6;
+  --border: #d5dae2;
+  --text: #1f2430;
+  --text-dim: #667085;
+  --accent: #2f6fe0;
+  --accent-hover: #3f7ae0;
+  --danger: #e5484d;
+  --viewer-bg: #dde2ea;
+  --shadow: 0 2px 8px rgba(31, 36, 48, 0.12);
 }
 
 * {
@@ -249,7 +265,7 @@ button:disabled {
   min-width: 0;
   display: flex;
   position: relative;
-  background: #161a22;
+  background: var(--viewer-bg);
 }
 
 .page-scroll {
@@ -381,6 +397,54 @@ button:disabled {
 
 .welcome-open:hover {
   background: var(--accent-hover);
+}
+
+.welcome-recent {
+  margin-top: 26px;
+  text-align: left;
+}
+
+.welcome-recent-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.welcome-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 168px;
+  overflow-y: auto;
+}
+
+.welcome-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text);
+  text-align: left;
+}
+
+.welcome-recent-item:hover {
+  background: rgba(127, 127, 127, 0.1);
+  border-color: var(--border);
+}
+
+.welcome-recent-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .welcome-features {

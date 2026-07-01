@@ -13,6 +13,7 @@ asarUnpack:
   - resources/**
 win:
   executableName: pdf-studio
+  icon: build/icon.ico
   target:
     - target: nsis
       arch:

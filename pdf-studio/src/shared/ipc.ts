@@ -9,6 +9,9 @@ export const IpcChannels = {
   readPdf: 'pdf:read',
   savePdf: 'pdf:save',
   savePdfAs: 'pdf:save-as',
+  savePngAs: 'pdf:save-png-as',
+  getRecentFiles: 'recent:get',
+  addRecentFile: 'recent:add',
   // Renderer -> main notifications used to keep native menus in sync.
   documentStateChanged: 'pdf:document-state-changed',
   // Main -> renderer commands dispatched from the application menu.
@@ -27,6 +30,11 @@ export interface OpenedFile {
 export interface SaveResult {
   canceled: boolean
   path: string | null
+}
+
+export interface RecentFile {
+  path: string
+  name: string
 }
 
 /** Commands the native menu can ask the renderer to perform. */
