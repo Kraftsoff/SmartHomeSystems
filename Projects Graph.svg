@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+<rect width="1400" height="900" fill="#1e1e24"/>
+<defs><radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a2a33"/><stop offset="100%" stop-color="#1e1e24"/></radialGradient></defs>
+<rect width="1400" height="900" fill="url(#glow)"/>
+<line x1="700" y1="450" x2="483" y2="325" stroke="#4fc3f7" stroke-width="2.5" stroke-opacity="0.55"/>
+<line x1="700" y1="450" x2="917" y2="325" stroke="#81c784" stroke-width="2.5" stroke-opacity="0.55"/>
+<line x1="700" y1="450" x2="700" y2="700" stroke="#ba68c8" stroke-width="2.5" stroke-opacity="0.55"/>
+<line x1="483" y1="325" x2="273" y2="325" stroke="#4fc3f7" stroke-width="1.8" stroke-opacity="0.4"/>
+<line x1="483" y1="325" x2="378" y2="143" stroke="#4fc3f7" stroke-width="1.8" stroke-opacity="0.4"/>
+<line x1="917" y1="325" x2="1022" y2="143" stroke="#81c784" stroke-width="1.8" stroke-opacity="0.4"/>
+<line x1="917" y1="325" x2="1127" y2="325" stroke="#81c784" stroke-width="1.8" stroke-opacity="0.4"/>
+<line x1="700" y1="700" x2="882" y2="805" stroke="#ba68c8" stroke-width="1.8" stroke-opacity="0.4"/>
+<line x1="700" y1="700" x2="700" y2="910" stroke="#ba68c8" stroke-width="1.8" stroke-opacity="0.4"/>
+<circle cx="273" cy="325" r="34" fill="#4fc3f7" fill-opacity="0.18" stroke="#4fc3f7" stroke-width="2"/>
+<text x="273" y="375" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">Сайт Сова</text>
+<circle cx="378" cy="143" r="34" fill="#4fc3f7" fill-opacity="0.18" stroke="#4fc3f7" stroke-width="2"/>
+<text x="378" y="184" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">Airsoft</text>
+<text x="378" y="202" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">marketplace</text>
+<circle cx="1022" cy="143" r="34" fill="#81c784" fill-opacity="0.18" stroke="#81c784" stroke-width="2"/>
+<text x="1022" y="184" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">MiMiSmart</text>
+<text x="1022" y="202" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">Control Centre</text>
+<circle cx="1127" cy="325" r="34" fill="#81c784" fill-opacity="0.18" stroke="#81c784" stroke-width="2"/>
+<text x="1127" y="375" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">NotaOS</text>
+<circle cx="882" cy="805" r="34" fill="#ba68c8" fill-opacity="0.18" stroke="#ba68c8" stroke-width="2"/>
+<text x="882" y="846" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">Windows</text>
+<text x="882" y="864" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">PDF Editor</text>
+<circle cx="700" cy="910" r="34" fill="#ba68c8" fill-opacity="0.18" stroke="#ba68c8" stroke-width="2"/>
+<text x="700" y="951" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">Остров</text>
+<text x="700" y="969" font-size="15" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="500" text-anchor="middle" dominant-baseline="middle">Мираж</text>
+<circle cx="483" cy="325" r="46" fill="#4fc3f7" fill-opacity="0.28" stroke="#4fc3f7" stroke-width="3"/>
+<text x="483" y="316" font-size="14" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">🌐 Web &amp;</text>
+<text x="483" y="334" font-size="14" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">Marketplace</text>
+<circle cx="917" cy="325" r="46" fill="#81c784" fill-opacity="0.28" stroke="#81c784" stroke-width="3"/>
+<text x="917" y="316" font-size="14" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">⚙️ Системы</text>
+<text x="917" y="333" font-size="14" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">&amp; OS</text>
+<circle cx="700" cy="700" r="46" fill="#ba68c8" fill-opacity="0.28" stroke="#ba68c8" stroke-width="3"/>
+<text x="700" y="692" font-size="14" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">🕹️ Приложения</text>
+<text x="700" y="708" font-size="14" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">&amp; Игры</text>
+<circle cx="700" cy="450" r="60" fill="#e0a458" fill-opacity="0.30" stroke="#e0a458" stroke-width="4"/>
+<text x="700" y="444" font-size="20" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="800" text-anchor="middle" dominant-baseline="middle">🏠 Мои</text>
+<text x="700" y="468" font-size="20" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-weight="800" text-anchor="middle" dominant-baseline="middle">проекты</text>
+<text x="40" y="55" font-size="26" fill="#e8e8ee" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Obsidian · Карта проектов</text>
+<text x="40" y="84" font-size="15" fill="#8a8a99" font-family="Segoe UI, Arial, sans-serif">SmartHomeSystems — Graph View</text>
+</svg>
