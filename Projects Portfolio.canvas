@@ -1,0 +1,162 @@
+{
+	"nodes": [
+		{
+			"id": "hub",
+			"type": "text",
+			"text": "# 🏠 Мои проекты\n\n**Portfolio · SmartHomeSystems**\n\n_Обзор всех проектов по категориям_",
+			"x": -220,
+			"y": -360,
+			"width": 440,
+			"height": 160,
+			"color": "2"
+		},
+
+		{
+			"id": "group-web",
+			"type": "group",
+			"label": "🌐 Web & Marketplace",
+			"x": -1200,
+			"y": 0,
+			"width": 720,
+			"height": 500,
+			"color": "5"
+		},
+		{
+			"id": "card-sova",
+			"type": "file",
+			"file": "Projects/Сайт Сова.md",
+			"x": -1160,
+			"y": 80,
+			"width": 640,
+			"height": 180,
+			"color": "5"
+		},
+		{
+			"id": "card-airsoft",
+			"type": "file",
+			"file": "Projects/Airsoft marketplace.md",
+			"x": -1160,
+			"y": 290,
+			"width": 640,
+			"height": 180,
+			"color": "5"
+		},
+
+		{
+			"id": "group-systems",
+			"type": "group",
+			"label": "⚙️ Системы & OS",
+			"x": -360,
+			"y": 0,
+			"width": 720,
+			"height": 500,
+			"color": "4"
+		},
+		{
+			"id": "card-mimismart",
+			"type": "file",
+			"file": "Projects/MiMiSmart Control Centre.md",
+			"x": -320,
+			"y": 80,
+			"width": 640,
+			"height": 180,
+			"color": "4"
+		},
+		{
+			"id": "card-notaos",
+			"type": "file",
+			"file": "Projects/NotaOS.md",
+			"x": -320,
+			"y": 290,
+			"width": 640,
+			"height": 180,
+			"color": "4"
+		},
+
+		{
+			"id": "group-apps",
+			"type": "group",
+			"label": "🕹️ Приложения & Игры",
+			"x": 480,
+			"y": 0,
+			"width": 720,
+			"height": 500,
+			"color": "6"
+		},
+		{
+			"id": "card-pdf",
+			"type": "file",
+			"file": "Projects/Windows PDF Editor.md",
+			"x": 520,
+			"y": 80,
+			"width": 640,
+			"height": 180,
+			"color": "6"
+		},
+		{
+			"id": "card-game",
+			"type": "file",
+			"file": "Projects/Остров Мираж.md",
+			"x": 520,
+			"y": 290,
+			"width": 640,
+			"height": 180,
+			"color": "6"
+		},
+
+		{
+			"id": "legend",
+			"type": "text",
+			"text": "## 🗂️ Легенда\n\n🟦 **Web & Marketplace**\n🟩 **Системы & OS**\n🟪 **Приложения & Игры**\n\n---\n**Статусы:** Планирование · Прототип · Разработка · В работе\n\n_Кликните по карточке, чтобы открыть заметку проекта._",
+			"x": -360,
+			"y": 580,
+			"width": 720,
+			"height": 240,
+			"color": "1"
+		}
+	],
+	"edges": [
+		{
+			"id": "e-hub-web",
+			"fromNode": "hub",
+			"fromSide": "bottom",
+			"toNode": "group-web",
+			"toSide": "top",
+			"color": "5"
+		},
+		{
+			"id": "e-hub-systems",
+			"fromNode": "hub",
+			"fromSide": "bottom",
+			"toNode": "group-systems",
+			"toSide": "top",
+			"color": "4"
+		},
+		{
+			"id": "e-hub-apps",
+			"fromNode": "hub",
+			"fromSide": "bottom",
+			"toNode": "group-apps",
+			"toSide": "top",
+			"color": "6"
+		},
+		{
+			"id": "e-sova-airsoft",
+			"fromNode": "card-sova",
+			"fromSide": "bottom",
+			"toNode": "card-airsoft",
+			"toSide": "top",
+			"label": "связаны",
+			"color": "5"
+		},
+		{
+			"id": "e-mimismart-notaos",
+			"fromNode": "card-mimismart",
+			"fromSide": "bottom",
+			"toNode": "card-notaos",
+			"toSide": "top",
+			"label": "интеграция",
+			"color": "4"
+		}
+	]
+}
