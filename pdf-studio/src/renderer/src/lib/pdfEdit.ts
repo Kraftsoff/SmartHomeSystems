@@ -26,7 +26,8 @@ export async function rotatePage(
   const doc = await load(bytes)
   const page = doc.getPage(pageIndex)
   const current = page.getRotation().angle
-  page.setRotation(degrees((current + delta) % 360))
+  // Normalize to a positive multiple of 90 so stored rotation never drifts negative.
+  page.setRotation(degrees((((current + delta) % 360) + 360) % 360))
   return save(doc)
 }
 
@@ -48,20 +49,17 @@ export async function movePage(
   to: number
 ): Promise<Uint8Array> {
   if (from === to) return bytes
-  const src = await load(bytes)
-  const count = src.getPageCount()
+  const doc = await load(bytes)
+  const count = doc.getPageCount()
   if (from < 0 || from >= count || to < 0 || to >= count) return bytes
 
-  // Rebuild a fresh document with pages in the new order. Copying preserves
-  // each page's content and rotation.
-  const order = Array.from({ length: count }, (_, i) => i)
-  const [moved] = order.splice(from, 1)
-  order.splice(to, 0, moved)
-
-  const out = await PDFDocument.create()
-  const copied = await out.copyPages(src, order)
-  copied.forEach((p) => out.addPage(p))
-  return save(out)
+  // Move in place by detaching and re-inserting the same page object. Unlike
+  // rebuilding via copyPages, this preserves the document's AcroForm (fillable
+  // fields), outlines/bookmarks and any page-level interactive annotations.
+  const page = doc.getPage(from)
+  doc.removePage(from)
+  doc.insertPage(to, page)
+  return save(doc)
 }
 
 /** Append all pages of `otherBytes` to the end of the document. */
@@ -125,31 +123,68 @@ export async function bakeAnnotations(
   const doc = await load(bytes)
   const font = await doc.embedFont(StandardFonts.Helvetica)
 
+  const pageCount = doc.getPageCount()
+
   for (const ann of annotations) {
+    // Skip annotations whose page no longer exists rather than throwing and
+    // aborting the whole save (getPage throws on an out-of-range index).
+    if (ann.pageIndex < 0 || ann.pageIndex >= pageCount) continue
     const page = doc.getPage(ann.pageIndex)
-    if (!page) continue
     const { width: pw, height: ph } = page.getSize()
     const { r, g, b } = hexToRgb01(ann.color)
     const color = rgb(r, g, b)
 
+    // Renderer coordinates are normalized against the *visual* (rotation-aware)
+    // page, with a top-left origin. Map them into the page's unrotated user
+    // space (bottom-left origin) so drawing stays aligned on rotated pages.
+    const rot = (((page.getRotation().angle % 360) + 360) % 360) as 0 | 90 | 180 | 270
+    const visualHeight = rot === 90 || rot === 270 ? pw : ph
+    const mapNorm = (nx: number, ny: number): { x: number; y: number } => {
+      let ux: number
+      let uy: number
+      switch (rot) {
+        case 90:
+          ux = ny
+          uy = 1 - nx
+          break
+        case 180:
+          ux = 1 - nx
+          uy = 1 - ny
+          break
+        case 270:
+          ux = 1 - ny
+          uy = nx
+          break
+        default:
+          ux = nx
+          uy = ny
+      }
+      return { x: ux * pw, y: ph - uy * ph }
+    }
+    const mapRect = (
+      x: number,
+      y: number,
+      w: number,
+      h: number
+    ): { x: number; y: number; width: number; height: number } => {
+      const p1 = mapNorm(x, y)
+      const p2 = mapNorm(x + w, y + h)
+      return {
+        x: Math.min(p1.x, p2.x),
+        y: Math.min(p1.y, p2.y),
+        width: Math.abs(p2.x - p1.x),
+        height: Math.abs(p2.y - p1.y)
+      }
+    }
+
     switch (ann.type) {
       case 'highlight': {
-        page.drawRectangle({
-          x: ann.x * pw,
-          y: ph - (ann.y + ann.h) * ph,
-          width: ann.w * pw,
-          height: ann.h * ph,
-          color,
-          opacity: 0.35
-        })
+        page.drawRectangle({ ...mapRect(ann.x, ann.y, ann.w, ann.h), color, opacity: 0.35 })
         break
       }
       case 'rect': {
         page.drawRectangle({
-          x: ann.x * pw,
-          y: ph - (ann.y + ann.h) * ph,
-          width: ann.w * pw,
-          height: ann.h * ph,
+          ...mapRect(ann.x, ann.y, ann.w, ann.h),
           borderColor: color,
           borderWidth: ann.lineWidth,
           opacity: 0
@@ -158,11 +193,9 @@ export async function bakeAnnotations(
       }
       case 'ink': {
         for (let i = 1; i < ann.points.length; i++) {
-          const a = ann.points[i - 1]
-          const c = ann.points[i]
           page.drawLine({
-            start: { x: a.x * pw, y: ph - a.y * ph },
-            end: { x: c.x * pw, y: ph - c.y * ph },
+            start: mapNorm(ann.points[i - 1].x, ann.points[i - 1].y),
+            end: mapNorm(ann.points[i].x, ann.points[i].y),
             thickness: ann.lineWidth,
             color
           })
@@ -171,19 +204,24 @@ export async function bakeAnnotations(
       }
       case 'text': {
         const size = ann.fontSize
+        // Drop from the click point (text top) to the baseline by ~ the ascent,
+        // expressed in the visual page's coordinate space, then map.
+        const baselineNy = ann.y + (size * 0.8) / visualHeight
+        const anchor = mapNorm(ann.x, baselineNy)
         page.drawText(ann.text, {
-          x: ann.x * pw,
-          // Shift down by the cap height so the click point is the text's top.
-          y: ph - ann.y * ph - size,
+          x: anchor.x,
+          y: anchor.y,
           size,
           font,
-          color
+          color,
+          // Counter the page's display rotation so text stays upright.
+          rotate: degrees(rot)
         })
         break
       }
       case 'line': {
-        const start = { x: ann.x1 * pw, y: ph - ann.y1 * ph }
-        const end = { x: ann.x2 * pw, y: ph - ann.y2 * ph }
+        const start = mapNorm(ann.x1, ann.y1)
+        const end = mapNorm(ann.x2, ann.y2)
         page.drawLine({ start, end, thickness: ann.lineWidth, color })
         if (ann.arrow) {
           // Draw a simple two-stroke arrowhead at the end point.

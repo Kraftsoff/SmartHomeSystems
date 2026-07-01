@@ -49,6 +49,9 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     null
   )
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Ensures a text draft is finalized exactly once: pressing Enter unmounts the
+  // input, whose blur would otherwise commit it a second time.
+  const textDone = useRef(false)
 
   const toNorm = (e: ReactPointerEvent): { x: number; y: number } => {
     const rect = svgRef.current!.getBoundingClientRect()
@@ -67,6 +70,7 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     const p = toNorm(e)
 
     if (tool === 'text') {
+      textDone.current = false
       setTextDraft({ x: p.x, y: p.y, value: '' })
       return
     }
@@ -165,8 +169,10 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
     setDrag(null)
   }
 
-  const commitText = (): void => {
-    if (textDraft && textDraft.value.trim()) {
+  const finishText = (commit: boolean): void => {
+    if (textDone.current) return
+    textDone.current = true
+    if (commit && textDraft && textDraft.value.trim()) {
       onCommit({
         id: nextAnnotationId(),
         type: 'text',
@@ -256,7 +262,15 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
         {/* clickable hit targets for selection */}
         {tool === 'select' &&
           annotations.map((ann) => (
-            <g key={`hit-${ann.id}`} onPointerDown={() => setSelectedId(ann.id)}>
+            <g
+              key={`hit-${ann.id}`}
+              onPointerDown={(e) => {
+                // Stop the svg's own pointerdown (which clears selection) from
+                // firing after this and immediately deselecting.
+                e.stopPropagation()
+                setSelectedId(ann.id)
+              }}
+            >
               {selectionHitTarget(ann, size)}
             </g>
           ))}
@@ -300,26 +314,31 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
           placeholder="Введите текст…"
           onChange={(e) => setTextDraft({ ...textDraft, value: e.target.value })}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') commitText()
-            if (e.key === 'Escape') setTextDraft(null)
+            if (e.key === 'Enter') finishText(true)
+            if (e.key === 'Escape') finishText(false)
           }}
-          onBlur={commitText}
+          onBlur={() => finishText(true)}
         />
       )}
     </div>
   )
 }
 
-/** Arrowhead endpoints for a line drawn in CSS-pixel space. */
+/**
+ * Arrowhead endpoints for a line drawn in CSS-pixel space. `lineWidth` is in PDF
+ * points, so the head length is scaled by the current zoom to match the stroke
+ * (which is also rendered at `lineWidth * scale`).
+ */
 function arrowHead(
   x1: number,
   y1: number,
   x2: number,
   y2: number,
-  lineWidth: number
+  lineWidth: number,
+  scale: number
 ): Array<{ x: number; y: number }> {
   const angle = Math.atan2(y2 - y1, x2 - x1)
-  const headLen = 10 + lineWidth * 2
+  const headLen = (10 + lineWidth * 2) * scale
   const spread = Math.PI / 7
   return [1, -1].map((sign) => {
     const a = angle + Math.PI - sign * spread
@@ -388,7 +407,7 @@ function renderAnnotation(
         <g key={ann.id}>
           <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
           {ann.arrow &&
-            arrowHead(x1, y1, x2, y2, ann.lineWidth).map((h, i) => (
+            arrowHead(x1, y1, x2, y2, ann.lineWidth, scale).map((h, i) => (
               <line
                 key={i}
                 x1={x2}

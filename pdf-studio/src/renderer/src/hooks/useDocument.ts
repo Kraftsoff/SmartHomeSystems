@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer } from 'react'
+import { useCallback, useMemo, useReducer, useRef } from 'react'
 import type { Annotation } from '../lib/annotations'
 import {
   bakeAnnotations,
@@ -123,6 +123,10 @@ export interface DocumentController {
 
 export function useDocument(): DocumentController {
   const [state, dispatch] = useReducer(reducer, EMPTY)
+  // Guards against overlapping async structural edits: a second edit fired
+  // before the first resolves would be computed from stale bytes and clobber
+  // the first snapshot. We drop the overlapping edit instead.
+  const structuralBusy = useRef(false)
 
   const current = state.cursor >= 0 ? state.history[state.cursor] : null
   const bytes = current?.bytes ?? null
@@ -137,10 +141,15 @@ export function useDocument(): DocumentController {
   /** Bake the current annotations, then apply a structural transform to bytes. */
   const applyStructural = useCallback(
     async (transform: (baked: Uint8Array) => Promise<Uint8Array>) => {
-      if (!current) return
-      const baked = await bakeAnnotations(current.bytes, current.annotations)
-      const result = await transform(baked)
-      pushSnapshot({ bytes: result, annotations: [] })
+      if (!current || structuralBusy.current) return
+      structuralBusy.current = true
+      try {
+        const baked = await bakeAnnotations(current.bytes, current.annotations)
+        const result = await transform(baked)
+        pushSnapshot({ bytes: result, annotations: [] })
+      } finally {
+        structuralBusy.current = false
+      }
     },
     [current, pushSnapshot]
   )
