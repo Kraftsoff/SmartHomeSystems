@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import type { PendingImage } from './AnnotationLayer'
 
 interface SignatureModalProps {
@@ -28,6 +28,12 @@ export function SignatureModal({ onDone, onCancel }: SignatureModalProps): JSX.E
   const last = useRef<{ x: number; y: number } | null>(null)
   const [hasStrokes, setHasStrokes] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+
+  // Switching tabs unmounts and remounts a blank canvas, so any prior strokes
+  // are gone — reset the flag to avoid confirming an empty (invisible) pad.
+  useEffect(() => {
+    setHasStrokes(false)
+  }, [mode])
 
   const ctx = (): CanvasRenderingContext2D | null => canvasRef.current?.getContext('2d') ?? null
 

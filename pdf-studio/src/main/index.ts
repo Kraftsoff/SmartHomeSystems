@@ -3,6 +3,7 @@ import { join, basename } from 'path'
 import { readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
+import { pathToFileURL } from 'url'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import {
@@ -177,13 +178,12 @@ function registerIpcHandlers(): void {
       unlink(tmp).catch(() => {})
     }
     try {
-      await printWin.loadURL(`file://${tmp}`)
+      await printWin.loadURL(pathToFileURL(tmp).toString())
       // Give the embedded PDF viewer a moment to lay out before printing.
       await new Promise((r) => setTimeout(r, 400))
-      await new Promise<void>((resolve) => {
-        printWin.webContents.print({ silent: false }, () => resolve())
+      return await new Promise<boolean>((resolve) => {
+        printWin.webContents.print({ silent: false }, (success) => resolve(success))
       })
-      return true
     } catch {
       return false
     } finally {

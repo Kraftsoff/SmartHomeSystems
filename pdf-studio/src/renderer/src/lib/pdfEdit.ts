@@ -157,7 +157,9 @@ export async function bakeAnnotations(
     // page, with a top-left origin. Map them into the page's unrotated user
     // space (bottom-left origin) so drawing stays aligned on rotated pages.
     const rot = (((page.getRotation().angle % 360) + 360) % 360) as 0 | 90 | 180 | 270
-    const visualHeight = rot === 90 || rot === 270 ? pw : ph
+    const swap = rot === 90 || rot === 270
+    const visualWidth = swap ? ph : pw
+    const visualHeight = swap ? pw : ph
     const mapNorm = (nx: number, ny: number): { x: number; y: number } => {
       let ux: number
       let uy: number
@@ -196,7 +198,8 @@ export async function bakeAnnotations(
       }
     }
 
-    switch (ann.type) {
+    try {
+      switch (ann.type) {
       case 'highlight': {
         page.drawRectangle({ ...mapRect(ann.x, ann.y, ann.w, ann.h), color, opacity: 0.35 })
         break
@@ -270,35 +273,55 @@ export async function bakeAnnotations(
         break
       }
       case 'image': {
-        const rect = mapRect(ann.x, ann.y, ann.w, ann.h)
+        // Anchor at the visual bottom-left and counter the display rotation so
+        // the image stays upright. (Exact for unrotated pages; upright and
+        // near-correct for rotated pages.)
+        const anchor = mapNorm(ann.x, ann.y + ann.h)
         const img =
           ann.format === 'jpg' ? await doc.embedJpg(ann.bytes) : await doc.embedPng(ann.bytes)
-        page.drawImage(img, rect)
+        page.drawImage(img, {
+          x: anchor.x,
+          y: anchor.y,
+          width: ann.w * visualWidth,
+          height: ann.h * visualHeight,
+          rotate: degrees(rot)
+        })
         break
       }
       case 'stamp': {
-        const rect = mapRect(ann.x, ann.y, ann.w, ann.h)
+        const anchor = mapNorm(ann.x, ann.y + ann.h)
+        const w = ann.w * visualWidth
+        const h = ann.h * visualHeight
         const label = resolveStampText(ann.text)
-        // Fit the label to ~80% of the box width, capped by box height.
-        let fontSize = Math.min(rect.height * 0.6, 48)
-        const maxWidth = rect.width * 0.86
+        // Fit the label to ~86% of the box width, capped by box height.
+        let fontSize = Math.min(h * 0.6, 48)
+        const maxWidth = w * 0.86
         const textWidth = (size: number): number => fontBold.widthOfTextAtSize(label, size)
         while (fontSize > 6 && textWidth(fontSize) > maxWidth) fontSize -= 1
         page.drawRectangle({
-          ...rect,
+          x: anchor.x,
+          y: anchor.y,
+          width: w,
+          height: h,
           borderColor: color,
-          borderWidth: Math.max(1.5, rect.height * 0.06),
-          opacity: 0
+          borderWidth: Math.max(1.5, h * 0.06),
+          opacity: 0,
+          rotate: degrees(rot)
         })
         page.drawText(label, {
-          x: rect.x + (rect.width - textWidth(fontSize)) / 2,
-          y: rect.y + (rect.height - fontSize) / 2 + fontSize * 0.12,
+          x: anchor.x + (w - textWidth(fontSize)) / 2,
+          y: anchor.y + (h - fontSize) / 2 + fontSize * 0.12,
           size: fontSize,
           font: fontBold,
-          color
+          color,
+          rotate: degrees(rot)
         })
         break
       }
+      }
+    } catch {
+      // Skip a single annotation that fails to draw (e.g. corrupt image bytes
+      // or a mislabeled format) instead of aborting the whole save.
     }
   }
 

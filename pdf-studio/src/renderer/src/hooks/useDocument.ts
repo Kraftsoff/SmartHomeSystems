@@ -136,8 +136,8 @@ export interface DocumentController {
   extractRangeBytes(from: number, to: number): Promise<Uint8Array>
   /** Read interactive form fields from the current document. */
   getFormFields(): Promise<FormFieldInfo[]>
-  /** Apply edited form values as a new snapshot. */
-  applyFormValues(values: Record<string, FormFieldValue>): Promise<void>
+  /** Apply edited form values as a new snapshot. Resolves false if skipped. */
+  applyFormValues(values: Record<string, FormFieldValue>): Promise<boolean>
 }
 
 export function useDocument(): DocumentController {
@@ -157,10 +157,14 @@ export function useDocument(): DocumentController {
     dispatch({ type: 'push', snapshot })
   }, [])
 
-  /** Bake the current annotations, then apply a structural transform to bytes. */
-  const applyStructural = useCallback(
-    async (transform: (baked: Uint8Array) => Promise<Uint8Array>) => {
-      if (!current || structuralBusy.current) return
+  /**
+   * Bake the current annotations, then apply a structural transform to bytes.
+   * Returns whether it ran (false if dropped because another edit is in flight),
+   * so callers like form-fill can tell success from a silently-skipped edit.
+   */
+  const applyStructuralCore = useCallback(
+    async (transform: (baked: Uint8Array) => Promise<Uint8Array>): Promise<boolean> => {
+      if (!current || structuralBusy.current) return false
       structuralBusy.current = true
       try {
         // Bake + flatten so redactions are truly removed before we clear the
@@ -168,11 +172,19 @@ export function useDocument(): DocumentController {
         const baked = await bakeAndFlatten(current)
         const result = await transform(baked)
         pushSnapshot({ bytes: result, annotations: [] })
+        return true
       } finally {
         structuralBusy.current = false
       }
     },
     [current, pushSnapshot]
+  )
+
+  const applyStructural = useCallback(
+    async (transform: (baked: Uint8Array) => Promise<Uint8Array>): Promise<void> => {
+      await applyStructuralCore(transform)
+    },
+    [applyStructuralCore]
   )
 
   return useMemo<DocumentController>(
@@ -251,8 +263,8 @@ export function useDocument(): DocumentController {
         if (!current) return []
         return readFormFields(current.bytes)
       },
-      applyFormValues: (values) => applyStructural((b) => fillFormFields(b, values))
+      applyFormValues: (values) => applyStructuralCore((b) => fillFormFields(b, values))
     }),
-    [current, state, bytes, annotations, isDirty, pushSnapshot, applyStructural]
+    [current, state, bytes, annotations, isDirty, pushSnapshot, applyStructural, applyStructuralCore]
   )
 }

@@ -16,7 +16,7 @@ import { FormPanel } from './components/FormPanel'
 import { ExportModal } from './components/ExportModal'
 import { InfoModal } from './components/InfoModal'
 import type { PendingImage } from './components/AnnotationLayer'
-import { getPageBaseSize, renderPageToPng } from './lib/pdf'
+import { getPageBaseSize, renderPageToPng, loadPdfDocument } from './lib/pdf'
 import { STAMP_PRESETS, type Tool, type StampPreset } from './lib/annotations'
 import type { MenuCommand, RecentFile } from '../../shared/ipc'
 
@@ -195,12 +195,31 @@ export default function App(): JSX.Element {
     const bytes = await doc.extractPageBytes(currentPage)
     await window.api.savePdfAs(`${baseName()}-стр${currentPage + 1}.pdf`, bytes)
   }, [doc, currentPage, baseName])
+  // Render pages to PNG from *baked* bytes so exported images include
+  // annotations/signatures/redactions, matching the PDF export path.
+  const renderBakedPngs = useCallback(
+    async (indices: number[]): Promise<Array<{ index: number; png: Uint8Array }>> => {
+      const baked = await doc.exportBytes()
+      const bakedDoc = await loadPdfDocument(baked)
+      try {
+        const out: Array<{ index: number; png: Uint8Array }> = []
+        for (const i of indices) {
+          const page = await bakedDoc.getPage(i + 1)
+          out.push({ index: i, png: await renderPageToPng(page, PNG_EXPORT_SCALE) })
+        }
+        return out
+      } finally {
+        bakedDoc.destroy()
+      }
+    },
+    [doc]
+  )
+
   const exportPng = useCallback(async () => {
-    if (!pdfDoc) return
-    const page = await pdfDoc.getPage(currentPage + 1)
-    const png = await renderPageToPng(page, PNG_EXPORT_SCALE)
+    if (!doc.hasDocument) return
+    const [{ png }] = await renderBakedPngs([currentPage])
     await window.api.savePngAs(`${baseName()}-стр${currentPage + 1}.png`, png)
-  }, [pdfDoc, currentPage, baseName])
+  }, [doc, currentPage, baseName, renderBakedPngs])
 
   const print = useCallback(async () => {
     if (!doc.hasDocument) return
@@ -210,22 +229,24 @@ export default function App(): JSX.Element {
 
   const exportRange = useCallback(
     async (fromIndex: number, toIndex: number) => {
-      const bytes = await doc.extractRangeBytes(fromIndex, toIndex)
-      await window.api.savePdfAs(`${baseName()}-стр${fromIndex + 1}-${toIndex + 1}.pdf`, bytes)
+      const lo = Math.min(fromIndex, toIndex)
+      const hi = Math.max(fromIndex, toIndex)
+      const bytes = await doc.extractRangeBytes(lo, hi)
+      await window.api.savePdfAs(`${baseName()}-стр${lo + 1}-${hi + 1}.pdf`, bytes)
     },
     [doc, baseName]
   )
 
   const exportAllPng = useCallback(async () => {
-    if (!pdfDoc) return
-    const files: Array<{ name: string; data: Uint8Array }> = []
-    for (let i = 0; i < numPages; i++) {
-      const page = await pdfDoc.getPage(i + 1)
-      const png = await renderPageToPng(page, PNG_EXPORT_SCALE)
-      files.push({ name: `${baseName()}-стр${i + 1}.png`, data: png })
-    }
+    if (!doc.hasDocument) return
+    const indices = Array.from({ length: numPages }, (_, i) => i)
+    const rendered = await renderBakedPngs(indices)
+    const files = rendered.map((r) => ({
+      name: `${baseName()}-стр${r.index + 1}.png`,
+      data: r.png
+    }))
     await window.api.exportPngsToFolder(files)
-  }, [pdfDoc, numPages, baseName])
+  }, [doc, numPages, baseName, renderBakedPngs])
 
   // ---- View operations -----------------------------------------------------
 
@@ -412,8 +433,8 @@ export default function App(): JSX.Element {
           <FormPanel
             getFields={doc.getFormFields}
             onApply={async (values) => {
-              await doc.applyFormValues(values)
-              setShowForm(false)
+              const applied = await doc.applyFormValues(values)
+              if (applied) setShowForm(false)
             }}
             onClose={() => setShowForm(false)}
           />
