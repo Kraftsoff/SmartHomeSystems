@@ -12,6 +12,8 @@ export const IpcChannels = {
   savePngAs: 'pdf:save-png-as',
   exportPngsToFolder: 'pdf:export-pngs',
   printPdf: 'pdf:print',
+  openHtmlDialog: 'html:open-dialog',
+  convertHtmlUrl: 'html:convert-url',
   getRecentFiles: 'recent:get',
   addRecentFile: 'recent:add',
   // Renderer -> main notifications used to keep native menus in sync.
@@ -48,6 +50,14 @@ export interface ExportFolderResult {
   canceled: boolean
   count: number
   dir: string | null
+}
+
+/** Result of converting an HTML source (file or URL) into a PDF document. */
+export interface HtmlConvertResult {
+  canceled: boolean
+  name: string
+  data: Uint8Array | null
+  error: string | null
 }
 
 /** Commands the native menu can ask the renderer to perform. */

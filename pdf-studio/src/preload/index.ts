@@ -8,7 +8,8 @@ import {
   type MenuCommand,
   type RecentFile,
   type NamedBytes,
-  type ExportFolderResult
+  type ExportFolderResult,
+  type HtmlConvertResult
 } from '../shared/ipc'
 
 /** Typed, minimal surface exposed to the renderer. */
@@ -26,6 +27,10 @@ const api = {
     ipcRenderer.invoke(IpcChannels.exportPngsToFolder, files),
   printPdf: (data: Uint8Array): Promise<boolean> =>
     ipcRenderer.invoke(IpcChannels.printPdf, data),
+  openHtmlDialog: (): Promise<HtmlConvertResult> =>
+    ipcRenderer.invoke(IpcChannels.openHtmlDialog),
+  convertHtmlUrl: (url: string): Promise<HtmlConvertResult> =>
+    ipcRenderer.invoke(IpcChannels.convertHtmlUrl, url),
   getRecentFiles: (): Promise<RecentFile[]> => ipcRenderer.invoke(IpcChannels.getRecentFiles),
   addRecentFile: (path: string): void => ipcRenderer.send(IpcChannels.addRecentFile, path),
   notifyDocumentState: (state: DocumentState): void =>

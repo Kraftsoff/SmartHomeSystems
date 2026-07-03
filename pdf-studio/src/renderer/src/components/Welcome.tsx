@@ -2,21 +2,32 @@ import type { RecentFile } from '../../../shared/ipc'
 
 interface WelcomeProps {
   onOpen(): void
+  onOpenHtml(): void
   recentFiles: RecentFile[]
   onOpenRecent(path: string): void
 }
 
 /** Empty-state screen shown before any document is opened. */
-export function Welcome({ onOpen, recentFiles, onOpenRecent }: WelcomeProps): JSX.Element {
+export function Welcome({
+  onOpen,
+  onOpenHtml,
+  recentFiles,
+  onOpenRecent
+}: WelcomeProps): JSX.Element {
   return (
     <div className="welcome">
       <div className="welcome-card">
         <div className="welcome-logo">📄</div>
         <h1>PDF Studio</h1>
         <p className="welcome-sub">Удобный и комфортный PDF-редактор для Windows</p>
-        <button className="welcome-open" onClick={onOpen}>
-          Открыть PDF
-        </button>
+        <div className="welcome-open-row">
+          <button className="welcome-open" onClick={onOpen}>
+            Открыть PDF
+          </button>
+          <button className="welcome-open secondary" onClick={onOpenHtml}>
+            Открыть HTML / презентацию
+          </button>
+        </div>
 
         {recentFiles.length > 0 && (
           <div className="welcome-recent">
@@ -44,6 +55,7 @@ export function Welcome({ onOpen, recentFiles, onOpenRecent }: WelcomeProps): JS
           <li>Аннотации: выделение, подчёркивание, зачёркивание, рисование, заметки, фигуры, стрелки</li>
           <li>Страницы: поворот, удаление, дублирование, перестановка, вставка PDF</li>
           <li>Экспорт страницы в PNG, извлечение страницы, отмена/повтор, сохранение</li>
+          <li>Импорт HTML-страниц и презентаций (reveal.js) с конвертацией в PDF</li>
         </ul>
         <p className="welcome-hint">Подсказка: перетащите PDF-файл в окно, чтобы открыть его.</p>
       </div>

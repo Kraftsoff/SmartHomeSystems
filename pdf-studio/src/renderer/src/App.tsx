@@ -15,6 +15,7 @@ import { SignatureModal } from './components/SignatureModal'
 import { FormPanel } from './components/FormPanel'
 import { ExportModal } from './components/ExportModal'
 import { InfoModal } from './components/InfoModal'
+import { HtmlImportModal } from './components/HtmlImportModal'
 import type { PendingImage } from './components/AnnotationLayer'
 import { getPageBaseSize, renderPageToPng, loadPdfDocument } from './lib/pdf'
 import { STAMP_PRESETS, type Tool, type StampPreset } from './lib/annotations'
@@ -41,6 +42,7 @@ export default function App(): JSX.Element {
   const [showForm, setShowForm] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [showHtmlImport, setShowHtmlImport] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const zoom = useZoom(basePageSize, scrollRef)
@@ -117,6 +119,30 @@ export default function App(): JSX.Element {
     doc.open(file.name, file.path, file.data)
     resetViewState()
   }, [doc, resetViewState])
+
+  const openHtmlFile = useCallback(async () => {
+    const result = await window.api.openHtmlDialog()
+    if (result.canceled) return
+    if (result.error || !result.data) {
+      throw new Error(result.error ?? 'Не удалось преобразовать HTML в PDF')
+    }
+    doc.open(result.name, null, result.data)
+    resetViewState()
+    setShowHtmlImport(false)
+  }, [doc, resetViewState])
+
+  const openHtmlUrl = useCallback(
+    async (url: string) => {
+      const result = await window.api.convertHtmlUrl(url)
+      if (result.error || !result.data) {
+        throw new Error(result.error ?? 'Не удалось преобразовать страницу в PDF')
+      }
+      doc.open(result.name, null, result.data)
+      resetViewState()
+      setShowHtmlImport(false)
+    },
+    [doc, resetViewState]
+  )
 
   const openRecent = useCallback(
     async (path: string) => {
@@ -339,6 +365,7 @@ export default function App(): JSX.Element {
         numPages={numPages}
         theme={theme}
         onOpen={() => void openFile()}
+        onOpenHtml={() => setShowHtmlImport(true)}
         onSave={() => void save(false)}
         onSaveAs={() => void save(true)}
         onUndo={doc.undo}
@@ -396,6 +423,7 @@ export default function App(): JSX.Element {
           {!doc.hasDocument && (
             <Welcome
               onOpen={() => void openFile()}
+              onOpenHtml={() => setShowHtmlImport(true)}
               recentFiles={recentFiles}
               onOpenRecent={(p) => void openRecent(p)}
             />
@@ -480,6 +508,14 @@ export default function App(): JSX.Element {
           numPages={numPages}
           name={doc.name}
           onClose={() => setShowInfo(false)}
+        />
+      )}
+
+      {showHtmlImport && (
+        <HtmlImportModal
+          onOpenFile={openHtmlFile}
+          onOpenUrl={openHtmlUrl}
+          onClose={() => setShowHtmlImport(false)}
         />
       )}
     </div>

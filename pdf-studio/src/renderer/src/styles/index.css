@@ -665,6 +665,13 @@ button:disabled {
   margin: 0 0 24px;
 }
 
+.welcome-open-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .welcome-open {
   background: var(--accent);
   color: #fff;
@@ -677,6 +684,16 @@ button:disabled {
 
 .welcome-open:hover {
   background: var(--accent-hover);
+}
+
+.welcome-open.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.welcome-open.secondary:hover {
+  background: rgba(127, 127, 127, 0.1);
 }
 
 .welcome-recent {

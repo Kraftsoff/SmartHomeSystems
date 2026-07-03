@@ -17,6 +17,7 @@ interface ToolbarProps {
   theme: Theme
 
   onOpen(): void
+  onOpenHtml(): void
   onSave(): void
   onSaveAs(): void
   onUndo(): void
@@ -81,6 +82,9 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
       <div className="toolbar-group">
         <button className="tbtn" onClick={props.onOpen} title="Открыть (Ctrl+O)">
           📂 Открыть
+        </button>
+        <button className="tbtn" onClick={props.onOpenHtml} title="Открыть HTML / презентацию">
+          🌐 HTML
         </button>
         <button
           className="tbtn"

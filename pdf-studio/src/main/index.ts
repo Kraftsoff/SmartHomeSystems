@@ -13,9 +13,11 @@ import {
   type DocumentState,
   type RecentFile,
   type NamedBytes,
-  type ExportFolderResult
+  type ExportFolderResult,
+  type HtmlConvertResult
 } from '../shared/ipc'
 import { buildMenu } from './menu'
+import { convertHtmlToPdf } from './htmlConvert'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -190,6 +192,65 @@ function registerIpcHandlers(): void {
       cleanup()
     }
   })
+
+  // Pick a local .html/.htm file and convert it to PDF bytes.
+  ipcMain.handle(IpcChannels.openHtmlDialog, async (): Promise<HtmlConvertResult> => {
+    if (!mainWindow) return { canceled: true, name: '', data: null, error: null }
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      title: 'Открыть HTML / презентацию',
+      properties: ['openFile'],
+      filters: [{ name: 'HTML', extensions: ['html', 'htm'] }]
+    })
+    if (canceled || filePaths.length === 0) {
+      return { canceled: true, name: '', data: null, error: null }
+    }
+    const path = filePaths[0]
+    const name = `${basename(path).replace(/\.html?$/i, '')}.pdf`
+    try {
+      const data = await convertHtmlToPdf({ source: 'file', value: path })
+      return { canceled: false, name, data, error: null }
+    } catch (err) {
+      return {
+        canceled: false,
+        name,
+        data: null,
+        error: err instanceof Error ? err.message : 'Не удалось преобразовать HTML в PDF'
+      }
+    }
+  })
+
+  // Convert a remote URL to PDF bytes.
+  ipcMain.handle(
+    IpcChannels.convertHtmlUrl,
+    async (_e, url: string): Promise<HtmlConvertResult> => {
+      let name = 'webpage.pdf'
+      let parsed: URL
+      try {
+        parsed = new URL(url)
+      } catch {
+        return { canceled: false, name, data: null, error: 'Некорректный URL' }
+      }
+      // Restrict to http(s): this handler is reachable from any renderer-side
+      // script via window.api, so it must not double as a generic "read any
+      // local file" primitive (file:/, etc.) bypassing the openHtmlDialog
+      // file picker's implicit user consent and .html/.htm filter.
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        return { canceled: false, name, data: null, error: 'Поддерживаются только http(s)-адреса' }
+      }
+      name = `${(parsed.hostname + parsed.pathname).replace(/[\\/:*?"<>|]+/g, '-').replace(/^-|-$/g, '') || 'webpage'}.pdf`
+      try {
+        const data = await convertHtmlToPdf({ source: 'url', value: url })
+        return { canceled: false, name, data, error: null }
+      } catch (err) {
+        return {
+          canceled: false,
+          name,
+          data: null,
+          error: err instanceof Error ? err.message : 'Не удалось преобразовать страницу в PDF'
+        }
+      }
+    }
+  )
 
   ipcMain.handle(IpcChannels.getRecentFiles, (): RecentFile[] => readRecent())
   ipcMain.on(IpcChannels.addRecentFile, (_e, path: string) => addRecent(path))
