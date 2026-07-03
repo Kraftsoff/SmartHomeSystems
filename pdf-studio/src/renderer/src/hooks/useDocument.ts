@@ -10,6 +10,17 @@ import {
   duplicatePage,
   extractPage
 } from '../lib/pdfEdit'
+import { flattenRedactionPages } from '../lib/redact'
+
+/** Bake annotations to vector, then rasterize any pages carrying redactions. */
+async function bakeAndFlatten(snapshot: DocSnapshot): Promise<Uint8Array> {
+  const baked = await bakeAnnotations(snapshot.bytes, snapshot.annotations)
+  const redactedPages = snapshot.annotations
+    .filter((a) => a.type === 'redact')
+    .map((a) => a.pageIndex)
+  if (redactedPages.length === 0) return baked
+  return flattenRedactionPages(baked, redactedPages)
+}
 
 /** An immutable snapshot of the editable document state. */
 export interface DocSnapshot {
@@ -144,7 +155,9 @@ export function useDocument(): DocumentController {
       if (!current || structuralBusy.current) return
       structuralBusy.current = true
       try {
-        const baked = await bakeAnnotations(current.bytes, current.annotations)
+        // Bake + flatten so redactions are truly removed before we clear the
+        // annotation layer (a plain bake would leave content under the box).
+        const baked = await bakeAndFlatten(current)
         const result = await transform(baked)
         pushSnapshot({ bytes: result, annotations: [] })
       } finally {
@@ -195,7 +208,7 @@ export function useDocument(): DocumentController {
 
       exportBytes: async () => {
         if (!current) throw new Error('Документ не открыт')
-        return bakeAnnotations(current.bytes, current.annotations)
+        return bakeAndFlatten(current)
       },
       markSaved: (path, name, savedBytes) =>
         dispatch({
@@ -218,7 +231,7 @@ export function useDocument(): DocumentController {
         applyStructural((b) => duplicatePage(b, pageIndex)),
       extractPageBytes: async (pageIndex) => {
         if (!current) throw new Error('Документ не открыт')
-        const baked = await bakeAnnotations(current.bytes, current.annotations)
+        const baked = await bakeAndFlatten(current)
         return extractPage(baked, pageIndex)
       }
     }),

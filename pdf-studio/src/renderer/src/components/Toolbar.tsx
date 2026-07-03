@@ -50,7 +50,11 @@ const TOOLS: Array<{ id: Tool; label: string; icon: string }> = [
   { id: 'text', label: 'Текст', icon: 'T' },
   { id: 'rect', label: 'Прямоугольник', icon: '▭' },
   { id: 'line', label: 'Линия', icon: '／' },
-  { id: 'arrow', label: 'Стрелка', icon: '↗' }
+  { id: 'arrow', label: 'Стрелка', icon: '↗' },
+  { id: 'signature', label: 'Подпись', icon: '✒' },
+  { id: 'stamp', label: 'Штамп', icon: '🔖' },
+  { id: 'whiteout', label: 'Забелка', icon: '⬜' },
+  { id: 'redact', label: 'Редакция', icon: '⬛' }
 ]
 
 export function Toolbar(props: ToolbarProps): JSX.Element {

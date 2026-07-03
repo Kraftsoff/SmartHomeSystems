@@ -10,8 +10,11 @@ import { AnnotationLayer } from './components/AnnotationLayer'
 import { Welcome } from './components/Welcome'
 import { StatusBar } from './components/StatusBar'
 import { FindBar } from './components/FindBar'
+import { ToolOptionsBar } from './components/ToolOptionsBar'
+import { SignatureModal } from './components/SignatureModal'
+import type { PendingImage } from './components/AnnotationLayer'
 import { getPageBaseSize, renderPageToPng } from './lib/pdf'
-import type { Tool } from './lib/annotations'
+import { STAMP_PRESETS, type Tool, type StampPreset } from './lib/annotations'
 import type { MenuCommand, RecentFile } from '../../shared/ipc'
 
 const ROTATE_STEP = 90
@@ -29,6 +32,9 @@ export default function App(): JSX.Element {
   const [basePageSize, setBasePageSize] = useState<{ width: number; height: number } | null>(null)
   const [showFind, setShowFind] = useState(false)
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>([])
+  const [stampPreset, setStampPreset] = useState<StampPreset>(STAMP_PRESETS[0])
+  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null)
+  const [showSignatureModal, setShowSignatureModal] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const zoom = useZoom(basePageSize, scrollRef)
@@ -74,6 +80,15 @@ export default function App(): JSX.Element {
       canRedo: doc.canRedo
     })
   }, [doc.hasDocument, doc.isDirty, doc.canUndo, doc.canRedo])
+
+  const handleToolChange = useCallback(
+    (next: Tool) => {
+      setTool(next)
+      // Prompt for a signature the first time the tool is chosen.
+      if (next === 'signature' && !pendingImage) setShowSignatureModal(true)
+    },
+    [pendingImage]
+  )
 
   const onSized = useCallback((size: PageSize) => {
     setPageSize((prev) =>
@@ -276,7 +291,7 @@ export default function App(): JSX.Element {
         onSaveAs={() => void save(true)}
         onUndo={doc.undo}
         onRedo={doc.redo}
-        onToolChange={setTool}
+        onToolChange={handleToolChange}
         onColorChange={setColor}
         onZoomIn={zoom.zoomIn}
         onZoomOut={zoom.zoomOut}
@@ -298,6 +313,16 @@ export default function App(): JSX.Element {
 
       {showFind && pdfDoc && (
         <FindBar doc={pdfDoc} onClose={() => setShowFind(false)} onGoToPage={goToPage} />
+      )}
+
+      {doc.hasDocument && (
+        <ToolOptionsBar
+          tool={tool}
+          stampPreset={stampPreset}
+          onStampPreset={setStampPreset}
+          pendingImage={pendingImage}
+          onCreateSignature={() => setShowSignatureModal(true)}
+        />
       )}
 
       <div className="workspace">
@@ -337,6 +362,8 @@ export default function App(): JSX.Element {
                     tool={tool}
                     color={color}
                     annotations={pageAnnotations}
+                    pendingImage={pendingImage}
+                    stampPreset={stampPreset}
                     onCommit={doc.addAnnotation}
                     onDelete={doc.deleteAnnotation}
                   />
@@ -359,6 +386,17 @@ export default function App(): JSX.Element {
       )}
 
       {dragging && <div className="drop-overlay">Отпустите, чтобы открыть PDF</div>}
+
+      {showSignatureModal && (
+        <SignatureModal
+          onDone={(img) => {
+            setPendingImage(img)
+            setShowSignatureModal(false)
+            setTool('signature')
+          }}
+          onCancel={() => setShowSignatureModal(false)}
+        />
+      )}
     </div>
   )
 }

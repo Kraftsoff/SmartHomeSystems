@@ -3,9 +3,20 @@ import {
   type Annotation,
   type LineAnnotation,
   type Tool,
-  nextAnnotationId
+  type StampPreset,
+  nextAnnotationId,
+  resolveStampText
 } from '../lib/annotations'
 import type { PageSize } from './PdfCanvas'
+
+/** An image queued for placement by the signature tool. */
+export interface PendingImage {
+  dataUrl: string
+  bytes: Uint8Array
+  format: 'png' | 'jpg'
+  /** height / width of the source image, for aspect-preserving placement. */
+  aspect: number
+}
 
 interface AnnotationLayerProps {
   pageIndex: number
@@ -15,6 +26,8 @@ interface AnnotationLayerProps {
   tool: Tool
   color: string
   annotations: Annotation[]
+  pendingImage: PendingImage | null
+  stampPreset: StampPreset | null
   onCommit(ann: Annotation): void
   onDelete(id: string): void
 }
@@ -30,9 +43,18 @@ const DEFAULT_LINE_WIDTH = 2 // PDF points
 const DEFAULT_FONT_SIZE = 18 // PDF points
 
 /** Tools that draw by dragging a rectangle over a region. */
-const RECT_TOOLS: Tool[] = ['highlight', 'rect', 'underline', 'strikethrough']
+const RECT_TOOLS: Tool[] = [
+  'highlight',
+  'rect',
+  'underline',
+  'strikethrough',
+  'whiteout',
+  'redact'
+]
 /** Tools that draw a straight segment from a start to an end point. */
 const LINE_TOOLS: Tool[] = ['line', 'arrow']
+
+const clamp01 = (v: number): number => Math.min(1, Math.max(0, v))
 
 /**
  * Interactive overlay that both renders existing annotations and captures new
@@ -41,7 +63,18 @@ const LINE_TOOLS: Tool[] = ['line', 'arrow']
  * `scale` for display.
  */
 export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
-  const { pageIndex, size, scale, tool, color, annotations, onCommit, onDelete } = props
+  const {
+    pageIndex,
+    size,
+    scale,
+    tool,
+    color,
+    annotations,
+    pendingImage,
+    stampPreset,
+    onCommit,
+    onDelete
+  } = props
   const svgRef = useRef<SVGSVGElement>(null)
   const [drag, setDrag] = useState<DragBox | null>(null)
   const [inkPoints, setInkPoints] = useState<Array<{ x: number; y: number }>>([])
@@ -74,6 +107,14 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
       setTextDraft({ x: p.x, y: p.y, value: '' })
       return
     }
+    if (tool === 'signature' && pendingImage) {
+      placeImage(p)
+      return
+    }
+    if (tool === 'stamp' && stampPreset) {
+      placeStamp(p)
+      return
+    }
     if (tool === 'select') {
       setSelectedId(null)
       return
@@ -99,6 +140,47 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
 
   const commitLine = (line: Omit<LineAnnotation, 'id' | 'type' | 'pageIndex' | 'color'>): void => {
     onCommit({ id: nextAnnotationId(), type: 'line', pageIndex, color, ...line })
+  }
+
+  const placeImage = (p: { x: number; y: number }): void => {
+    if (!pendingImage) return
+    const w = 0.28
+    // Preserve the image aspect ratio in visual (pixel) space.
+    const h = Math.min(0.9, w * (size.width / size.height) * pendingImage.aspect)
+    const x = clamp01(p.x - w / 2)
+    const y = clamp01(p.y - h / 2)
+    onCommit({
+      id: nextAnnotationId(),
+      type: 'image',
+      pageIndex,
+      color,
+      x,
+      y,
+      w,
+      h,
+      dataUrl: pendingImage.dataUrl,
+      bytes: pendingImage.bytes,
+      format: pendingImage.format
+    })
+  }
+
+  const placeStamp = (p: { x: number; y: number }): void => {
+    if (!stampPreset) return
+    const w = 0.26
+    const h = 0.075
+    const x = clamp01(p.x - w / 2)
+    const y = clamp01(p.y - h / 2)
+    onCommit({
+      id: nextAnnotationId(),
+      type: 'stamp',
+      pageIndex,
+      color: stampPreset.color,
+      x,
+      y,
+      w,
+      h,
+      text: stampPreset.text
+    })
   }
 
   const handlePointerUp = (e: ReactPointerEvent): void => {
@@ -164,6 +246,10 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
           lineWidth: DEFAULT_LINE_WIDTH,
           arrow: false
         })
+      } else if (tool === 'whiteout') {
+        onCommit({ id: nextAnnotationId(), type: 'whiteout', pageIndex, color, x, y, w, h })
+      } else if (tool === 'redact') {
+        onCommit({ id: nextAnnotationId(), type: 'redact', pageIndex, color, x, y, w, h })
       }
     }
     setDrag(null)
@@ -210,8 +296,16 @@ export function AnnotationLayer(props: AnnotationLayerProps): JSX.Element {
             y={py(Math.min(drag.y0, drag.y1))}
             width={px(Math.abs(drag.x1 - drag.x0))}
             height={py(Math.abs(drag.y1 - drag.y0))}
-            fill={tool === 'highlight' ? color : 'none'}
-            fillOpacity={tool === 'highlight' ? 0.35 : 0}
+            fill={
+              tool === 'highlight'
+                ? color
+                : tool === 'whiteout'
+                  ? '#ffffff'
+                  : tool === 'redact'
+                    ? '#000000'
+                    : 'none'
+            }
+            fillOpacity={tool === 'highlight' ? 0.35 : tool === 'whiteout' || tool === 'redact' ? 0.6 : 0}
             stroke={color}
             strokeWidth={tool === 'rect' ? DEFAULT_LINE_WIDTH * scale : 0}
             strokeDasharray="4 3"
@@ -436,6 +530,79 @@ function renderAnnotation(
           {ann.text}
         </text>
       )
+    case 'whiteout':
+      return (
+        <rect
+          key={ann.id}
+          x={px(ann.x)}
+          y={py(ann.y)}
+          width={px(ann.w)}
+          height={py(ann.h)}
+          fill="#ffffff"
+          stroke={selected ? '#2196f3' : '#d0d0d0'}
+          strokeWidth={selected ? 1.5 : 0.5}
+        />
+      )
+    case 'redact':
+      return (
+        <rect
+          key={ann.id}
+          x={px(ann.x)}
+          y={py(ann.y)}
+          width={px(ann.w)}
+          height={py(ann.h)}
+          fill="#000000"
+          stroke={selected ? '#2196f3' : undefined}
+          strokeWidth={selected ? 1.5 : 0}
+        />
+      )
+    case 'image':
+      return (
+        <image
+          key={ann.id}
+          href={ann.dataUrl}
+          x={px(ann.x)}
+          y={py(ann.y)}
+          width={px(ann.w)}
+          height={py(ann.h)}
+          preserveAspectRatio="none"
+          style={selected ? { outline: '2px solid #2196f3' } : undefined}
+        />
+      )
+    case 'stamp': {
+      const x = px(ann.x)
+      const y = py(ann.y)
+      const w = px(ann.w)
+      const h = py(ann.h)
+      const label = resolveStampText(ann.text)
+      const fontSize = Math.min(h * 0.5, 40 * scale)
+      return (
+        <g key={ann.id}>
+          <rect
+            x={x}
+            y={y}
+            width={w}
+            height={h}
+            rx={4}
+            fill="none"
+            stroke={selected ? '#2196f3' : ann.color}
+            strokeWidth={Math.max(1.5, h * 0.06)}
+          />
+          <text
+            x={x + w / 2}
+            y={y + h / 2}
+            fill={ann.color}
+            fontSize={fontSize}
+            fontFamily="Helvetica, Arial, sans-serif"
+            fontWeight="bold"
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            {label}
+          </text>
+        </g>
+      )
+    }
   }
 }
 
@@ -447,6 +614,10 @@ function selectionHitTarget(ann: Annotation, size: PageSize): JSX.Element {
   switch (ann.type) {
     case 'highlight':
     case 'rect':
+    case 'whiteout':
+    case 'redact':
+    case 'image':
+    case 'stamp':
       return (
         <rect x={px(ann.x)} y={py(ann.y)} width={px(ann.w)} height={py(ann.h)} {...common} />
       )
@@ -479,6 +650,10 @@ function annotationAnchor(ann: Annotation, size: PageSize): { x: number; y: numb
     case 'highlight':
     case 'rect':
     case 'text':
+    case 'whiteout':
+    case 'redact':
+    case 'image':
+    case 'stamp':
       return { x: px(ann.x), y: py(ann.y) }
     case 'line':
       return { x: px(ann.x1), y: py(ann.y1) }

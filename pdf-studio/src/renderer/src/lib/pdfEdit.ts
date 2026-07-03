@@ -6,7 +6,8 @@
 import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib'
 import {
   type Annotation,
-  hexToRgb01
+  hexToRgb01,
+  resolveStampText
 } from './annotations'
 
 async function load(bytes: Uint8Array): Promise<PDFDocument> {
@@ -122,6 +123,7 @@ export async function bakeAnnotations(
   if (annotations.length === 0) return bytes
   const doc = await load(bytes)
   const font = await doc.embedFont(StandardFonts.Helvetica)
+  const fontBold = await doc.embedFont(StandardFonts.HelveticaBold)
 
   const pageCount = doc.getPageCount()
 
@@ -238,6 +240,46 @@ export async function bakeAnnotations(
             })
           }
         }
+        break
+      }
+      case 'whiteout': {
+        page.drawRectangle({ ...mapRect(ann.x, ann.y, ann.w, ann.h), color: rgb(1, 1, 1) })
+        break
+      }
+      case 'redact': {
+        // Solid black cover; the affected page is rasterized separately on save
+        // so the underlying content is truly removed.
+        page.drawRectangle({ ...mapRect(ann.x, ann.y, ann.w, ann.h), color: rgb(0, 0, 0) })
+        break
+      }
+      case 'image': {
+        const rect = mapRect(ann.x, ann.y, ann.w, ann.h)
+        const img =
+          ann.format === 'jpg' ? await doc.embedJpg(ann.bytes) : await doc.embedPng(ann.bytes)
+        page.drawImage(img, rect)
+        break
+      }
+      case 'stamp': {
+        const rect = mapRect(ann.x, ann.y, ann.w, ann.h)
+        const label = resolveStampText(ann.text)
+        // Fit the label to ~80% of the box width, capped by box height.
+        let fontSize = Math.min(rect.height * 0.6, 48)
+        const maxWidth = rect.width * 0.86
+        const textWidth = (size: number): number => fontBold.widthOfTextAtSize(label, size)
+        while (fontSize > 6 && textWidth(fontSize) > maxWidth) fontSize -= 1
+        page.drawRectangle({
+          ...rect,
+          borderColor: color,
+          borderWidth: Math.max(1.5, rect.height * 0.06),
+          opacity: 0
+        })
+        page.drawText(label, {
+          x: rect.x + (rect.width - textWidth(fontSize)) / 2,
+          y: rect.y + (rect.height - fontSize) / 2 + fontSize * 0.12,
+          size: fontSize,
+          font: fontBold,
+          color
+        })
         break
       }
     }
