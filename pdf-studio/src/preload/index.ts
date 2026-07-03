@@ -6,7 +6,9 @@ import {
   type SaveResult,
   type DocumentState,
   type MenuCommand,
-  type RecentFile
+  type RecentFile,
+  type NamedBytes,
+  type ExportFolderResult
 } from '../shared/ipc'
 
 /** Typed, minimal surface exposed to the renderer. */
@@ -20,6 +22,10 @@ const api = {
     ipcRenderer.invoke(IpcChannels.savePdfAs, suggestedName, data),
   savePngAs: (suggestedName: string, data: Uint8Array): Promise<SaveResult> =>
     ipcRenderer.invoke(IpcChannels.savePngAs, suggestedName, data),
+  exportPngsToFolder: (files: NamedBytes[]): Promise<ExportFolderResult> =>
+    ipcRenderer.invoke(IpcChannels.exportPngsToFolder, files),
+  printPdf: (data: Uint8Array): Promise<boolean> =>
+    ipcRenderer.invoke(IpcChannels.printPdf, data),
   getRecentFiles: (): Promise<RecentFile[]> => ipcRenderer.invoke(IpcChannels.getRecentFiles),
   addRecentFile: (path: string): void => ipcRenderer.send(IpcChannels.addRecentFile, path),
   notifyDocumentState: (state: DocumentState): void =>

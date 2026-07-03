@@ -1,7 +1,8 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join, basename } from 'path'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile, writeFile, unlink } from 'fs/promises'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { tmpdir } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import {
@@ -9,7 +10,9 @@ import {
   type OpenedFile,
   type SaveResult,
   type DocumentState,
-  type RecentFile
+  type RecentFile,
+  type NamedBytes,
+  type ExportFolderResult
 } from '../shared/ipc'
 import { buildMenu } from './menu'
 
@@ -140,6 +143,53 @@ function registerIpcHandlers(): void {
       return { canceled: false, path: filePath }
     }
   )
+
+  // Write several PNGs into a user-picked directory (batch page export).
+  ipcMain.handle(
+    IpcChannels.exportPngsToFolder,
+    async (_e, files: NamedBytes[]): Promise<ExportFolderResult> => {
+      if (!mainWindow) return { canceled: true, count: 0, dir: null }
+      const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+        title: 'Папка для экспорта страниц (PNG)',
+        properties: ['openDirectory', 'createDirectory']
+      })
+      if (canceled || filePaths.length === 0) return { canceled: true, count: 0, dir: null }
+      const dir = filePaths[0]
+      let count = 0
+      for (const f of files) {
+        await writeFile(join(dir, f.name), f.data)
+        count += 1
+      }
+      return { canceled: false, count, dir }
+    }
+  )
+
+  // Print the document via a hidden window using Chromium's built-in PDF viewer.
+  ipcMain.handle(IpcChannels.printPdf, async (_e, data: Uint8Array): Promise<boolean> => {
+    const tmp = join(tmpdir(), `pdf-studio-print-${Date.now()}.pdf`)
+    await writeFile(tmp, data)
+    const printWin = new BrowserWindow({
+      show: false,
+      webPreferences: { plugins: true }
+    })
+    const cleanup = (): void => {
+      if (!printWin.isDestroyed()) printWin.close()
+      unlink(tmp).catch(() => {})
+    }
+    try {
+      await printWin.loadURL(`file://${tmp}`)
+      // Give the embedded PDF viewer a moment to lay out before printing.
+      await new Promise((r) => setTimeout(r, 400))
+      await new Promise<void>((resolve) => {
+        printWin.webContents.print({ silent: false }, () => resolve())
+      })
+      return true
+    } catch {
+      return false
+    } finally {
+      cleanup()
+    }
+  })
 
   ipcMain.handle(IpcChannels.getRecentFiles, (): RecentFile[] => readRecent())
   ipcMain.on(IpcChannels.addRecentFile, (_e, path: string) => addRecent(path))

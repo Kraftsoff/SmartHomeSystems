@@ -12,6 +12,9 @@ import { StatusBar } from './components/StatusBar'
 import { FindBar } from './components/FindBar'
 import { ToolOptionsBar } from './components/ToolOptionsBar'
 import { SignatureModal } from './components/SignatureModal'
+import { FormPanel } from './components/FormPanel'
+import { ExportModal } from './components/ExportModal'
+import { InfoModal } from './components/InfoModal'
 import type { PendingImage } from './components/AnnotationLayer'
 import { getPageBaseSize, renderPageToPng } from './lib/pdf'
 import { STAMP_PRESETS, type Tool, type StampPreset } from './lib/annotations'
@@ -35,6 +38,9 @@ export default function App(): JSX.Element {
   const [stampPreset, setStampPreset] = useState<StampPreset>(STAMP_PRESETS[0])
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null)
   const [showSignatureModal, setShowSignatureModal] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+  const [showExport, setShowExport] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const zoom = useZoom(basePageSize, scrollRef)
@@ -196,6 +202,31 @@ export default function App(): JSX.Element {
     await window.api.savePngAs(`${baseName()}-стр${currentPage + 1}.png`, png)
   }, [pdfDoc, currentPage, baseName])
 
+  const print = useCallback(async () => {
+    if (!doc.hasDocument) return
+    const bytes = await doc.exportBytes()
+    await window.api.printPdf(bytes)
+  }, [doc])
+
+  const exportRange = useCallback(
+    async (fromIndex: number, toIndex: number) => {
+      const bytes = await doc.extractRangeBytes(fromIndex, toIndex)
+      await window.api.savePdfAs(`${baseName()}-стр${fromIndex + 1}-${toIndex + 1}.pdf`, bytes)
+    },
+    [doc, baseName]
+  )
+
+  const exportAllPng = useCallback(async () => {
+    if (!pdfDoc) return
+    const files: Array<{ name: string; data: Uint8Array }> = []
+    for (let i = 0; i < numPages; i++) {
+      const page = await pdfDoc.getPage(i + 1)
+      const png = await renderPageToPng(page, PNG_EXPORT_SCALE)
+      files.push({ name: `${baseName()}-стр${i + 1}.png`, data: png })
+    }
+    await window.api.exportPngsToFolder(files)
+  }, [pdfDoc, numPages, baseName])
+
   // ---- View operations -----------------------------------------------------
 
   const nextPage = useCallback(
@@ -309,6 +340,10 @@ export default function App(): JSX.Element {
         onExportPng={() => void exportPng()}
         onToggleFind={() => setShowFind((v) => !v)}
         onToggleTheme={toggleTheme}
+        onPrint={() => void print()}
+        onExport={() => setShowExport(true)}
+        onToggleForms={() => setShowForm((v) => !v)}
+        onShowInfo={() => setShowInfo(true)}
       />
 
       {showFind && pdfDoc && (
@@ -372,6 +407,17 @@ export default function App(): JSX.Element {
             </div>
           )}
         </main>
+
+        {doc.hasDocument && showForm && (
+          <FormPanel
+            getFields={doc.getFormFields}
+            onApply={async (values) => {
+              await doc.applyFormValues(values)
+              setShowForm(false)
+            }}
+            onClose={() => setShowForm(false)}
+          />
+        )}
       </div>
 
       {doc.hasDocument && (
@@ -395,6 +441,24 @@ export default function App(): JSX.Element {
             setTool('signature')
           }}
           onCancel={() => setShowSignatureModal(false)}
+        />
+      )}
+
+      {showExport && doc.hasDocument && (
+        <ExportModal
+          numPages={numPages}
+          onExportRange={exportRange}
+          onExportAllPng={exportAllPng}
+          onClose={() => setShowExport(false)}
+        />
+      )}
+
+      {showInfo && doc.hasDocument && (
+        <InfoModal
+          pdfDoc={pdfDoc}
+          numPages={numPages}
+          name={doc.name}
+          onClose={() => setShowInfo(false)}
         />
       )}
     </div>

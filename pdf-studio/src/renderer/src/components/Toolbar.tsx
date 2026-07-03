@@ -39,6 +39,10 @@ interface ToolbarProps {
   onExportPng(): void
   onToggleFind(): void
   onToggleTheme(): void
+  onPrint(): void
+  onExport(): void
+  onToggleForms(): void
+  onShowInfo(): void
 }
 
 const TOOLS: Array<{ id: Tool; label: string; icon: string }> = [
@@ -244,8 +248,23 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
       </div>
 
       <div className="toolbar-group">
+        <button className="tbtn icon" onClick={props.onToggleForms} disabled={!hasDocument} title="Поля формы">
+          📝
+        </button>
+        <button className="tbtn icon" onClick={props.onPrint} disabled={!hasDocument} title="Печать">
+          🖨
+        </button>
+        <button className="tbtn icon" onClick={props.onExport} disabled={!hasDocument} title="Экспорт (диапазон/PNG)">
+          📤
+        </button>
+      </div>
+
+      <div className="toolbar-group">
         <button className="tbtn icon" onClick={props.onToggleFind} disabled={!hasDocument} title="Найти (Ctrl+F)">
           🔍
+        </button>
+        <button className="tbtn icon" onClick={props.onShowInfo} disabled={!hasDocument} title="Сведения и горячие клавиши">
+          ℹ
         </button>
         <button
           className="tbtn icon"

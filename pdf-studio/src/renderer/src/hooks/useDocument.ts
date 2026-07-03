@@ -8,9 +8,11 @@ import {
   appendPdf,
   insertPdfAt,
   duplicatePage,
-  extractPage
+  extractPage,
+  extractRange
 } from '../lib/pdfEdit'
 import { flattenRedactionPages } from '../lib/redact'
+import { readFormFields, fillFormFields, type FormFieldInfo, type FormFieldValue } from '../lib/forms'
 
 /** Bake annotations to vector, then rasterize any pages carrying redactions. */
 async function bakeAndFlatten(snapshot: DocSnapshot): Promise<Uint8Array> {
@@ -130,6 +132,12 @@ export interface DocumentController {
   duplicateCurrentPage(pageIndex: number): Promise<void>
   /** Bake annotations and return a one-page PDF for the given page. */
   extractPageBytes(pageIndex: number): Promise<Uint8Array>
+  /** Bake annotations and return a PDF for the inclusive page range. */
+  extractRangeBytes(from: number, to: number): Promise<Uint8Array>
+  /** Read interactive form fields from the current document. */
+  getFormFields(): Promise<FormFieldInfo[]>
+  /** Apply edited form values as a new snapshot. */
+  applyFormValues(values: Record<string, FormFieldValue>): Promise<void>
 }
 
 export function useDocument(): DocumentController {
@@ -233,7 +241,17 @@ export function useDocument(): DocumentController {
         if (!current) throw new Error('Документ не открыт')
         const baked = await bakeAndFlatten(current)
         return extractPage(baked, pageIndex)
-      }
+      },
+      extractRangeBytes: async (from, to) => {
+        if (!current) throw new Error('Документ не открыт')
+        const baked = await bakeAndFlatten(current)
+        return extractRange(baked, from, to)
+      },
+      getFormFields: async () => {
+        if (!current) return []
+        return readFormFields(current.bytes)
+      },
+      applyFormValues: (values) => applyStructural((b) => fillFormFields(b, values))
     }),
     [current, state, bytes, annotations, isDirty, pushSnapshot, applyStructural]
   )

@@ -10,6 +10,8 @@ export const IpcChannels = {
   savePdf: 'pdf:save',
   savePdfAs: 'pdf:save-as',
   savePngAs: 'pdf:save-png-as',
+  exportPngsToFolder: 'pdf:export-pngs',
+  printPdf: 'pdf:print',
   getRecentFiles: 'recent:get',
   addRecentFile: 'recent:add',
   // Renderer -> main notifications used to keep native menus in sync.
@@ -35,6 +37,17 @@ export interface SaveResult {
 export interface RecentFile {
   path: string
   name: string
+}
+
+export interface NamedBytes {
+  name: string
+  data: Uint8Array
+}
+
+export interface ExportFolderResult {
+  canceled: boolean
+  count: number
+  dir: string | null
 }
 
 /** Commands the native menu can ask the renderer to perform. */

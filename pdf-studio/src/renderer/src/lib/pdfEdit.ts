@@ -111,6 +111,23 @@ export async function extractPage(
   return save(out)
 }
 
+/** Extract an inclusive page range [from, to] (0-based) into a new PDF. */
+export async function extractRange(
+  bytes: Uint8Array,
+  from: number,
+  to: number
+): Promise<Uint8Array> {
+  const src = await load(bytes)
+  const count = src.getPageCount()
+  const lo = Math.max(0, Math.min(from, to))
+  const hi = Math.min(count - 1, Math.max(from, to))
+  const indices = Array.from({ length: hi - lo + 1 }, (_, i) => lo + i)
+  const out = await PDFDocument.create()
+  const copied = await out.copyPages(src, indices)
+  copied.forEach((p) => out.addPage(p))
+  return save(out)
+}
+
 /**
  * Bake renderer annotations into the PDF content. Annotation coordinates are
  * normalized with a top-left origin; PDF uses a bottom-left origin, so the y
