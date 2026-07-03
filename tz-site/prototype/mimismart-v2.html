@@ -182,6 +182,49 @@
 
   .page{display:none} .page.on{display:block}
   :focus-visible{outline:2px solid var(--glow);outline-offset:3px;border-radius:6px}
+
+  /* ---- design elevation (moorgen-grade) ---- */
+  .wrap{position:relative}
+  .wrap::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(120% 90% at 50% 0%,transparent 55%,rgba(0,0,0,.28) 100%)}
+  .wrap>*{position:relative;z-index:2}
+  section{padding:104px 0}
+  .sec-head{margin-bottom:44px}
+  .sec-head h2{font-size:clamp(28px,4vw,50px);font-weight:500}
+  .sec-head p{font-size:16px}
+  #p-home section{counter-increment:sec}
+  #p-home .sec-head .eyebrow::before,#p-home .price-band .eyebrow::before{
+    content:"0" counter(sec) "  ·  ";color:var(--glow);letter-spacing:.18em}
+  .hero-in{min-height:min(86vh,900px);padding:64px 0 84px}
+  .hero h1{font-size:clamp(32px,4.9vw,64px);font-weight:500;line-height:1.03}
+  .lede{font-size:clamp(16px,1.6vw,19px)}
+  .card{background:color-mix(in srgb,var(--panel) 72%,transparent);backdrop-filter:blur(6px)}
+  .card:hover{box-shadow:0 18px 44px rgba(0,0,0,.35),0 0 0 1px color-mix(in srgb,var(--glow) 45%,transparent) inset}
+  .btn{letter-spacing:.02em}
+  .scroll-cue{display:flex;align-items:center;gap:10px;margin-top:34px;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+  .scroll-cue .line{width:56px;height:1px;background:linear-gradient(90deg,var(--glow),transparent);animation:cue 2.2s ease-in-out infinite}
+  @keyframes cue{0%,100%{transform:scaleX(.4);opacity:.5}50%{transform:scaleX(1);opacity:1}}
+
+  /* production video block */
+  .prod{display:grid;grid-template-columns:1.2fr .8fr;gap:44px;align-items:center}
+  @media (max-width:880px){.prod{grid-template-columns:1fr}}
+  .prod h2{font-size:clamp(28px,4vw,50px);font-weight:500}
+  .prod .facts{margin:26px 0 0;display:grid;gap:14px}
+  .prod .fact{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--line-soft);padding-top:14px}
+  .prod .fact .k{font-family:var(--mono);font-size:11px;color:var(--glow);letter-spacing:.14em;text-transform:uppercase;min-width:130px}
+  .prod .fact p{margin:0;color:var(--muted);font-size:14.5px}
+  .short{position:relative;aspect-ratio:9/16;max-width:320px;margin:0 auto;border-radius:26px;overflow:hidden;
+    border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--night-2));box-shadow:0 40px 80px rgba(0,0,0,.5)}
+  .short svg{position:absolute;inset:0;width:100%;height:100%}
+  .short .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;
+    background:color-mix(in srgb,var(--glow) 92%,white);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 0 color-mix(in srgb,var(--glow) 55%,transparent);animation:pulse 2.6s infinite}
+  .short .play::after{content:"";border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #241503;margin-left:5px}
+  .short .cap{position:absolute;left:0;right:0;bottom:0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.66));color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+  .belt{animation:belt 7s linear infinite}
+  @keyframes belt{from{transform:translateX(0)}to{transform:translateX(-120px)}}
+  .arm{transform-origin:60px 20px;animation:arm 3.2s ease-in-out infinite}
+  @keyframes arm{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(14deg)}}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 </style>
 
@@ -220,6 +263,7 @@
         </div>
         <div class="qualify">Работаем с квартирами <b>от 80 м²</b>, домами <b>от 300 м²</b> и объектами <b>от 40 млн ₽</b>&nbsp;<span class="prov">⚠️</span></div>
         <div class="hint"><span class="pulse"></span>Дом живой: наведите на инженерные зоны</div>
+        <div class="scroll-cue"><span class="line"></span>листайте</div>
       </div>
       <div>
         <svg class="house" viewBox="0 0 820 620" role="img" aria-label="Инженерный разрез дома: наведите на зону, чтобы увидеть систему">
@@ -364,6 +408,64 @@
       <div class="card reveal"><span class="kicker">Приложение</span><h3 style="margin-top:8px">Весь объект в смартфоне</h3><p>Вся электрика и инженерия дома — в одном приложении. Десятки действий одним касанием, состояние систем — в реальном времени, из любой точки мира.</p></div>
       <div class="card reveal"><span class="kicker">Выключатели</span><h3 style="margin-top:8px">Привычные, но сценарные</h3><p>Управляйте так, как привыкли. На одну кнопку — десятки действий: «Ушёл», «Кино», «Вечер». Премиальная фурнитура, совместимая с автоматикой.</p></div>
       <div class="card reveal"><span class="kicker">Голос</span><h3 style="margin-top:8px">Голосовые ассистенты</h3><p>Интеграция с голосовыми ассистентами — как дополнительный интерфейс системы: свет, шторы, музыка, сцены. Команда исполняется локальной логикой объекта.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="prod">
+      <div class="reveal">
+        <p class="eyebrow">Производство</p>
+        <h2 style="margin-top:14px">Контроллеры для вашего объекта собирают здесь.</h2>
+        <p style="color:var(--muted);max-width:52ch;margin:18px 0 0">Своя линия сборки и тестирования в Москве. Каждый контроллер проходит прогон под нагрузкой до отгрузки на объект — вы видите производство своими глазами, в шоуруме этажом выше.</p>
+        <div class="facts">
+          <div class="fact"><span class="k">С 2004</span><p>разработка железа и ПО в одной команде</p></div>
+          <div class="fact"><span class="k">Прогон 100%</span><p>каждый модуль тестируется под нагрузкой до отгрузки <span class="prov">⚠️ формулировку подтвердить</span></p></div>
+          <div class="fact"><span class="k">Видео</span><p>ролик с линии — на этапе реализации сюда встраивается ваш YouTube-шорт с производства</p></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="short" role="img" aria-label="Плейсхолдер видео с производства: анимированная линия сборки">
+          <svg viewBox="0 0 320 570" preserveAspectRatio="xMidYMid slice">
+            <rect width="320" height="570" fill="none"/>
+            <g opacity=".25" stroke="var(--line)" stroke-width="1">
+              <path d="M0 120 h320 M0 240 h320 M0 360 h320 M0 480 h320"/>
+            </g>
+            <!-- conveyor -->
+            <rect x="0" y="392" width="320" height="14" fill="var(--shell)" stroke="var(--line)"/>
+            <g class="belt">
+              <g fill="var(--room)" stroke="var(--glow)" stroke-width="1.4">
+                <rect x="10" y="360" width="52" height="30" rx="4"/><rect x="130" y="360" width="52" height="30" rx="4"/>
+                <rect x="250" y="360" width="52" height="30" rx="4"/><rect x="370" y="360" width="52" height="30" rx="4"/>
+              </g>
+              <g fill="var(--glow)">
+                <circle cx="24" cy="370" r="2.5"/><circle cx="36" cy="378" r="2.5"/>
+                <circle cx="144" cy="370" r="2.5"/><circle cx="156" cy="378" r="2.5"/>
+                <circle cx="264" cy="370" r="2.5"/><circle cx="276" cy="378" r="2.5"/>
+                <circle cx="384" cy="370" r="2.5"/><circle cx="396" cy="378" r="2.5"/>
+              </g>
+            </g>
+            <!-- robot arm -->
+            <g stroke="var(--muted)" stroke-width="5" fill="none" stroke-linecap="round">
+              <path class="arm" d="M60 20 L118 96 L150 190"/>
+            </g>
+            <circle cx="150" cy="196" r="9" fill="var(--glow)"/>
+            <!-- big PCB -->
+            <g transform="translate(70,120)">
+              <rect width="180" height="120" rx="8" fill="var(--room)" stroke="var(--room-line)" stroke-width="1.6"/>
+              <g stroke="var(--glow)" stroke-width="1.4" fill="none" opacity=".85">
+                <path d="M16 24 h60 v30 h44 M16 60 h34 v36 h60 M120 24 v20 h44"/>
+              </g>
+              <g fill="var(--glow)"><circle cx="16" cy="24" r="3"/><circle cx="120" cy="24" r="3"/><circle cx="164" cy="44" r="3"/><circle cx="110" cy="96" r="3"/></g>
+              <rect x="120" y="66" width="40" height="28" rx="3" fill="var(--shell)" stroke="var(--line)"/>
+              <text x="126" y="84" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="var(--glow)">ARM5</text>
+            </g>
+            <text x="20" y="452" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="var(--faint)" letter-spacing="2">MIMISMART · PRODUCTION LINE</text>
+            <text x="20" y="470" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="var(--faint)">MOSCOW · NOVODANILOVSKAYA 6k1</text>
+          </svg>
+          <div class="play" role="button" tabindex="0" aria-label="Здесь будет видео с производства"></div>
+          <div class="cap">▶ youtube short · с линии сборки · встраивается на этапе 3 ⚠️</div>
+        </div>
+      </div>
     </div>
   </div></section>
 
