@@ -1,28 +1,29 @@
 <title>MiMiSmart — инженерные системы и умный дом</title>
 <style>
   :root{
-    --night:#0b1020; --night-2:#0e1426; --panel:#121b31; --panel-2:#0f1728;
-    --line:#25324c; --line-soft:#1b2740;
-    --ink:#eaf0fb; --muted:#9aa8c4; --faint:#66748f;
-    --glow:#ffb765; --glow-2:#ff9a4d; --signal:#7bb0ff;
-    --good:#5fd6a0; --warn:#ffce5e; --crit:#ff7d84;
-    --shell:#16203a; --room:#101a30; --room-line:#2b3a5a; --dweller-head:#0b1020;
+    /* фирменная палитра MiMiSmart (из CSS реального сайта): #0a051a / #e27500 / #00d0ff */
+    --night:#0a051a; --night-2:#0d0a26; --panel:#131033; --panel-2:#0f0c29;
+    --line:#282354; --line-soft:#1c1840;
+    --ink:#f4f4f4; --muted:#a5a3c2; --faint:#6f6d92;
+    --glow:#e27500; --glow-2:#c76400; --signal:#00d0ff;
+    --good:#27ca40; --warn:#ffce5e; --crit:#ff7b7b;
+    --shell:#171338; --room:#0f0c2b; --room-line:#312a5e; --dweller-head:#0a051a;
     --radius:16px; --maxw:1180px;
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
   }
   @media (prefers-color-scheme: light){
-    :root{--night:#f0ece2;--night-2:#f5f1e8;--panel:#fffdf8;--panel-2:#faf6ee;--line:#e0d7c4;--line-soft:#eae3d3;
-      --ink:#1c2333;--muted:#5f6579;--faint:#8b8f9d;--glow:#d97f21;--glow-2:#c96f16;--signal:#2f6fd6;
-      --shell:#efe7d6;--room:#fbf7ee;--room-line:#e6dcc8;--dweller-head:#1c2333}
+    :root{--night:#f4f4f4;--night-2:#efefef;--panel:#ffffff;--panel-2:#f8f9fa;--line:#d9d9d9;--line-soft:#eaeaea;
+      --ink:#121212;--muted:#58595d;--faint:#95979e;--glow:#e27500;--glow-2:#c76400;--signal:#00576b;
+      --shell:#f0f4f6;--room:#f8f9fa;--room-line:#d9d9d9;--dweller-head:#121212}
   }
-  :root[data-theme="dark"]{--night:#0b1020;--night-2:#0e1426;--panel:#121b31;--panel-2:#0f1728;--line:#25324c;
-    --line-soft:#1b2740;--ink:#eaf0fb;--muted:#9aa8c4;--faint:#66748f;--glow:#ffb765;--glow-2:#ff9a4d;
-    --signal:#7bb0ff;--shell:#16203a;--room:#101a30;--room-line:#2b3a5a;--dweller-head:#0b1020}
-  :root[data-theme="light"]{--night:#f0ece2;--night-2:#f5f1e8;--panel:#fffdf8;--panel-2:#faf6ee;--line:#e0d7c4;
-    --line-soft:#eae3d3;--ink:#1c2333;--muted:#5f6579;--faint:#8b8f9d;--glow:#d97f21;--glow-2:#c96f16;
-    --signal:#2f6fd6;--shell:#efe7d6;--room:#fbf7ee;--room-line:#e6dcc8;--dweller-head:#1c2333}
+  :root[data-theme="dark"]{--night:#0a051a;--night-2:#0d0a26;--panel:#131033;--panel-2:#0f0c29;--line:#282354;
+    --line-soft:#1c1840;--ink:#f4f4f4;--muted:#a5a3c2;--faint:#6f6d92;--glow:#e27500;--glow-2:#c76400;
+    --signal:#00d0ff;--shell:#171338;--room:#0f0c2b;--room-line:#312a5e;--dweller-head:#0a051a}
+  :root[data-theme="light"]{--night:#f4f4f4;--night-2:#efefef;--panel:#ffffff;--panel-2:#f8f9fa;--line:#d9d9d9;
+    --line-soft:#eaeaea;--ink:#121212;--muted:#58595d;--faint:#95979e;--glow:#e27500;--glow-2:#c76400;
+    --signal:#00576b;--shell:#f0f4f6;--room:#f8f9fa;--room-line:#d9d9d9;--dweller-head:#121212}
 
   *{box-sizing:border-box} body{margin:0}
   .wrap{background:var(--night);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
@@ -225,6 +226,24 @@
   .arm{transform-origin:60px 20px;animation:arm 3.2s ease-in-out infinite}
   @keyframes arm{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(14deg)}}
 
+  /* ---- живой слой: аврора, дыхание, блики, телеметрия ---- */
+  .aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+  .aurora .a1{width:520px;height:520px;left:-140px;top:-120px;background:color-mix(in srgb,var(--glow) 55%,transparent);animation:drift1 16s ease-in-out infinite}
+  .aurora .a2{width:460px;height:460px;right:-160px;top:30%;background:color-mix(in srgb,var(--signal) 40%,transparent);animation:drift2 20s ease-in-out infinite}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(70px,40px) scale(1.12)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,-50px) scale(1.08)}}
+  .house-wrap{animation:floaty 7s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .btn-primary{position:relative;overflow:hidden}
+  .btn-primary::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-20deg);animation:shine 3.8s ease-in-out infinite}
+  @keyframes shine{0%,72%{left:-70%}100%{left:140%}}
+  .chip.cyan rect{stroke:var(--signal)} .chip.cyan text{fill:var(--signal)}
+  .room.on .rw{opacity:.24}
+  .brand .dot{animation:pulse 3s infinite}
+  .sec-head h2{background:linear-gradient(92deg,var(--ink) 60%,color-mix(in srgb,var(--ink) 55%,var(--glow)));-webkit-background-clip:text;background-clip:text}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 </style>
 
@@ -251,6 +270,7 @@
 <!-- ===================== HOME ===================== -->
 <main class="page" id="p-home">
   <div class="hero" id="hero">
+    <div class="aurora"><i class="a1"></i><i class="a2"></i></div>
     <div class="cursor-glow" id="cglow"></div>
     <div class="shell hero-in">
       <div>
@@ -265,7 +285,7 @@
         <div class="hint"><span class="pulse"></span>Дом живой: наведите на инженерные зоны</div>
         <div class="scroll-cue"><span class="line"></span>листайте</div>
       </div>
-      <div>
+      <div class="house-wrap">
         <svg class="house" viewBox="0 0 820 620" role="img" aria-label="Инженерный разрез дома: наведите на зону, чтобы увидеть систему">
           <path class="shellline" d="M80 210 L410 66 L740 210 Z"/>
           <rect class="shellline" x="110" y="206" width="600" height="384" rx="10"/>
@@ -274,7 +294,7 @@
             <path class="rf" d="M175 200 L410 98 L645 200 Z"/><path class="rw" d="M175 200 L410 98 L645 200 Z"/>
             <g class="ri" transform="translate(396,150)"><circle cx="10" cy="10" r="8"/><path d="M10 2 v4 M10 14 v4 M2 10 h4 M14 10 h4"/></g>
             <text class="rn" x="352" y="192">ВЕНТКАМЕРА</text>
-            <g class="chip" transform="translate(470,140)"><rect width="118" height="24" rx="12"/><text x="10" y="16">Приток · 320 м³/ч</text></g>
+            <g class="chip cyan" transform="translate(470,140)"><rect width="118" height="24" rx="12"/><text x="10" y="16" id="telV">Приток · 320 м³/ч</text></g>
           </g>
           <!-- living: light+curtains -->
           <g class="room" data-go="#/curtains-light" tabindex="0" role="link" aria-label="Гостиная — свет и шторы">
@@ -288,7 +308,7 @@
             <rect class="rf" x="316" y="222" width="188" height="172" rx="6"/><rect class="rw" x="316" y="222" width="188" height="172" rx="6"/>
             <g class="ri" transform="translate(338,244)"><path d="M10 2 v13"/><circle cx="10" cy="19" r="4"/></g>
             <text class="rn" x="338" y="378">СПАЛЬНЯ</text>
-            <g class="chip" transform="translate(392,232)"><rect width="112" height="24" rx="12"/><text x="10" y="16">22.0° · 45% RH</text></g>
+            <g class="chip cyan" transform="translate(392,232)"><rect width="112" height="24" rx="12"/><text x="10" y="16" id="telT">22.0° · 45% RH</text></g>
           </g>
           <!-- cinema -->
           <g class="room" data-go="#/multimedia" tabindex="0" role="link" aria-label="Кинозал — мультимедиа">
@@ -827,6 +847,30 @@
     r.addEventListener('click',go);
     r.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
   });
+
+  /* живая телеметрия: значения дышат */
+  if(!reduce){
+    var t=22.0,v=320,step=0;
+    setInterval(function(){
+      step++;
+      t=Math.max(21.4,Math.min(22.6,t+(Math.random()-.5)*.2));
+      v=Math.round(Math.max(280,Math.min(360,v+(Math.random()-.5)*18)));
+      var telT=document.getElementById('telT'),telV=document.getElementById('telV');
+      if(telT)telT.textContent=t.toFixed(1)+'° · '+(44+step%3)+'% RH';
+      if(telV)telV.textContent='Приток · '+v+' м³/ч';
+    },2200);
+
+    /* дом живёт сам: пока курсор не в hero, комнаты мягко вспыхивают по очереди */
+    var roomsIdle=[].slice.call(document.querySelectorAll('#hero .room')),idleOn=true,ptr=0;
+    hero.addEventListener('pointerenter',function(){idleOn=false;roomsIdle.forEach(function(r){r.classList.remove('on')})});
+    hero.addEventListener('pointerleave',function(){idleOn=true});
+    setInterval(function(){
+      if(!idleOn||!document.getElementById('p-home').classList.contains('on'))return;
+      roomsIdle.forEach(function(r){r.classList.remove('on')});
+      roomsIdle[ptr%roomsIdle.length].classList.add('on');
+      ptr++;
+    },2600);
+  }
 
   /* ---------- reveal ---------- */
   var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}})},{threshold:.1});

@@ -1,0 +1,42 @@
+# MiMiSmart — robots.txt
+# Политика: ИИ-поисковые боты разрешены (цель — цитируемость в ИИ-ответах).
+# Блокируем только training-only краулеры.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /favorites
+Disallow: /settings
+
+# --- ИИ-поиск: разрешено явно ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# --- training-only: закрыто (решение бизнеса — можно открыть) ---
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://ДОМЕН/sitemap.xml
+# ⚠️ заменить ДОМЕН при деплое; проверить, что llms.txt и pricing.md доступны в корне
