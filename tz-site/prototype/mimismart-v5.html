@@ -179,6 +179,13 @@
   .scen-btn:hover{border-color:var(--glow);color:var(--ink)}
   .scen-btn.on{background:var(--glow);border-color:var(--glow);color:#fff}
 
+  /* следы жителя за курсором — изометрический разворот, только внутри дома */
+  .footprint{position:absolute;left:0;top:0;width:15px;height:26px;pointer-events:none;
+    transform:translate(-50%,-50%);opacity:.85;transition:opacity 1.3s ease;z-index:6;will-change:opacity}
+  .footprint.fade{opacity:0}
+  .footprint svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 3px rgba(255,214,150,.6))}
+  .footprint svg path,.footprint svg circle{fill:rgba(255,224,178,.92)}
+
   /* cards & grids */
   .grid{display:grid;gap:14px}
   .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
@@ -967,6 +974,34 @@
     scenRow.appendChild(b); sceneBtns.push(b);
   });
   sceneBtns[0].classList.add('on'); applyScene(SCENES[0]);
+
+  /* ---------- следы жителя за курсором: изометрический разворот, только внутри дома ---------- */
+  if(!reduce){
+    var stage=document.getElementById('houseStage');
+    var FOOT='<svg viewBox="0 0 20 34"><path d="M10 2c-3 0-5 3-5 7 0 3 1 5 1 8 0 5-3 7-3 12 0 3 3 5 7 5s7-2 7-5c0-5-3-7-3-12 0-3 1-5 1-8 0-4-2-7-5-7z"/>'
+      +'<circle cx="5" cy="4" r="1.6"/><circle cx="8" cy="2" r="1.7"/><circle cx="11" cy="1.6" r="1.7"/>'
+      +'<circle cx="14" cy="2.2" r="1.6"/><circle cx="16.5" cy="4" r="1.4"/></svg>';
+    var lastX=null,lastY=null,lastT=0,side=1;
+    stage.addEventListener('pointermove',function(e){
+      var r=stage.getBoundingClientRect();
+      var x=e.clientX-r.left, y=e.clientY-r.top;
+      var now=performance.now();
+      if(lastX===null){lastX=x;lastY=y;lastT=now;return}
+      var dx=x-lastX, dy=y-lastY, dist=Math.hypot(dx,dy);
+      if(dist<20||now-lastT<80)return;
+      var angle=Math.atan2(dy,dx)*180/Math.PI;
+      var perp=(angle+90)*Math.PI/180, off=6*side;
+      var fx=x+Math.cos(perp)*off, fy=y+Math.sin(perp)*off;
+      var el=document.createElement('div'); el.className='footprint'; el.innerHTML=FOOT;
+      el.style.left=fx+'px'; el.style.top=fy+'px';
+      el.querySelector('svg').style.transform='rotate('+(angle+90)+'deg) skewX(-14deg) scaleX('+(side>0?1:-1)+') scale(.85)';
+      stage.appendChild(el);
+      requestAnimationFrame(function(){el.classList.add('fade')});
+      setTimeout(function(){el.remove()},1400);
+      side*=-1; lastX=x; lastY=y; lastT=now;
+    });
+    stage.addEventListener('pointerleave',function(){lastX=null});
+  }
 
   /* ---------- reveal ---------- */
   var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}})},{threshold:.1});
