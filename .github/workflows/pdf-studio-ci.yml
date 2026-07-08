@@ -37,6 +37,8 @@ jobs:
         run: npm ci
       - name: Type-check (main + renderer)
         run: npm run typecheck
+      - name: Unit tests (incl. HTML-preview sanitizer security tests)
+        run: npm test
       - name: Build (electron-vite)
         run: npm run build
 

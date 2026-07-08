@@ -760,6 +760,68 @@ button:disabled {
   transition-duration: 80ms;
 }
 
+.btn-ghost.sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: var(--radius-lg);
+}
+
+.btn-ghost:disabled {
+  opacity: 0.38;
+}
+
+/* ---- Live HTML editor ---- */
+.html-editor {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.html-editor-body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.html-source-editor {
+  flex: 1 1 40%;
+  min-width: 320px;
+  overflow: auto;
+  border-right: 1px solid var(--border);
+  background: var(--surface-container-lowest);
+}
+
+.html-source-editor .cm-editor {
+  height: 100%;
+  font-size: 13px;
+}
+
+.html-editor-preview-scroll {
+  flex: 1 1 60%;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 28px;
+  background: var(--viewer-bg);
+}
+
+.html-editor-preview-stage {
+  position: relative;
+  line-height: 0;
+  box-shadow: var(--shadow-3);
+  background: #fff;
+  animation: pageFadeIn 220ms var(--ease-premium);
+}
+
+.html-editor-preview {
+  display: block;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
+
 /* ---- Workspace ---- */
 .workspace {
   display: flex;

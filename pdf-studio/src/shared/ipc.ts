@@ -14,6 +14,9 @@ export const IpcChannels = {
   printPdf: 'pdf:print',
   openHtmlDialog: 'html:open-dialog',
   convertHtmlUrl: 'html:convert-url',
+  openHtmlEditDialog: 'html:open-edit-dialog',
+  saveHtml: 'html:save',
+  saveHtmlAs: 'html:save-as',
   getRecentFiles: 'recent:get',
   addRecentFile: 'recent:add',
   // Renderer -> main notifications used to keep native menus in sync.
@@ -57,6 +60,16 @@ export interface HtmlConvertResult {
   canceled: boolean
   name: string
   data: Uint8Array | null
+  error: string | null
+}
+
+/** An HTML file opened for direct (live, non-PDF) editing. */
+export interface OpenedHtmlText {
+  canceled: boolean
+  /** Absolute path on disk, or `null` for an in-memory / unsaved document. */
+  path: string | null
+  name: string
+  text: string | null
   error: string | null
 }
 

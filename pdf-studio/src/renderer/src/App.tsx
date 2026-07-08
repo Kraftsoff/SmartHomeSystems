@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDocument } from './hooks/useDocument'
 import { usePdfDoc } from './hooks/usePdfDoc'
+import { useHtmlDocument } from './hooks/useHtmlDocument'
 import { useZoom } from './hooks/useZoom'
 import { useTheme } from './hooks/useTheme'
 import { Toolbar } from './components/Toolbar'
 import { Sidebar } from './components/Sidebar'
 import { PdfCanvas, type PageSize } from './components/PdfCanvas'
 import { AnnotationLayer } from './components/AnnotationLayer'
+import { HtmlEditorView } from './components/HtmlEditorView'
 import { Welcome } from './components/Welcome'
 import { StatusBar } from './components/StatusBar'
 import { FindBar } from './components/FindBar'
@@ -26,6 +28,7 @@ const PNG_EXPORT_SCALE = 2
 
 export default function App(): JSX.Element {
   const doc = useDocument()
+  const htmlDoc = useHtmlDocument()
   const { doc: pdfDoc, numPages, loading, error } = usePdfDoc(doc.bytes)
   const { theme, toggleTheme } = useTheme()
 
@@ -116,9 +119,10 @@ export default function App(): JSX.Element {
   const openFile = useCallback(async () => {
     const file = await window.api.openPdfDialog()
     if (!file) return
+    htmlDoc.close()
     doc.open(file.name, file.path, file.data)
     resetViewState()
-  }, [doc, resetViewState])
+  }, [doc, htmlDoc, resetViewState])
 
   const openHtmlFile = useCallback(async () => {
     const result = await window.api.openHtmlDialog()
@@ -126,10 +130,11 @@ export default function App(): JSX.Element {
     if (result.error || !result.data) {
       throw new Error(result.error ?? 'Не удалось преобразовать HTML в PDF')
     }
+    htmlDoc.close()
     doc.open(result.name, null, result.data)
     resetViewState()
     setShowHtmlImport(false)
-  }, [doc, resetViewState])
+  }, [doc, htmlDoc, resetViewState])
 
   const openHtmlUrl = useCallback(
     async (url: string) => {
@@ -137,11 +142,44 @@ export default function App(): JSX.Element {
       if (result.error || !result.data) {
         throw new Error(result.error ?? 'Не удалось преобразовать страницу в PDF')
       }
+      htmlDoc.close()
       doc.open(result.name, null, result.data)
       resetViewState()
       setShowHtmlImport(false)
     },
-    [doc, resetViewState]
+    [doc, htmlDoc, resetViewState]
+  )
+
+  // Opens an .html file for direct, live editing (no PDF conversion) — a
+  // sibling feature to openHtmlFile above, not a replacement for it.
+  const openHtmlForEdit = useCallback(async () => {
+    const result = await window.api.openHtmlEditDialog()
+    if (result.canceled) return
+    if (result.error || result.text === null) {
+      throw new Error(result.error ?? 'Не удалось прочитать HTML-файл')
+    }
+    doc.close()
+    htmlDoc.open(result.name, result.path, result.text)
+    if (result.path) window.api.addRecentFile(result.path)
+    setShowHtmlImport(false)
+  }, [doc, htmlDoc])
+
+  const saveHtml = useCallback(
+    async (forceDialog: boolean, text: string) => {
+      if (!htmlDoc.hasDocument) return
+      if (!forceDialog && htmlDoc.path) {
+        const res = await window.api.saveHtml(htmlDoc.path, text)
+        if (!res.canceled && res.path) htmlDoc.markSaved(res.path, htmlDoc.name, text)
+      } else {
+        const res = await window.api.saveHtmlAs(htmlDoc.name || 'document.html', text)
+        if (!res.canceled && res.path) {
+          const name = res.path.split(/[\\/]/).pop() || htmlDoc.name
+          htmlDoc.markSaved(res.path, name, text)
+          window.api.addRecentFile(res.path)
+        }
+      }
+    },
+    [htmlDoc]
   )
 
   const openRecent = useCallback(
@@ -152,21 +190,23 @@ export default function App(): JSX.Element {
         window.api.getRecentFiles().then(setRecentFiles)
         return
       }
+      htmlDoc.close()
       doc.open(file.name, file.path, file.data)
       resetViewState()
     },
-    [doc, resetViewState]
+    [doc, htmlDoc, resetViewState]
   )
 
   const openFromDrop = useCallback(
     async (file: File) => {
       const buffer = await file.arrayBuffer()
       const path = (file as File & { path?: string }).path ?? null
+      htmlDoc.close()
       doc.open(file.name, path, new Uint8Array(buffer))
       if (path) window.api.addRecentFile(path)
       resetViewState()
     },
-    [doc, resetViewState]
+    [doc, htmlDoc, resetViewState]
   )
 
   const baseName = useCallback(
@@ -352,6 +392,10 @@ export default function App(): JSX.Element {
 
   return (
     <div className={`app ${dragging ? 'dragging' : ''}`}>
+      {htmlDoc.hasDocument ? (
+        <HtmlEditorView doc={htmlDoc} onSave={saveHtml} onClose={() => htmlDoc.close()} />
+      ) : (
+        <>
       <Toolbar
         hasDocument={doc.hasDocument}
         isDirty={doc.isDirty}
@@ -515,8 +559,11 @@ export default function App(): JSX.Element {
         <HtmlImportModal
           onOpenFile={openHtmlFile}
           onOpenUrl={openHtmlUrl}
+          onOpenForEdit={openHtmlForEdit}
           onClose={() => setShowHtmlImport(false)}
         />
+      )}
+        </>
       )}
     </div>
   )

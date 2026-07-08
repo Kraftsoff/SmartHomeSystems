@@ -3,6 +3,7 @@ import { useState } from 'react'
 interface HtmlImportModalProps {
   onOpenFile(): Promise<void>
   onOpenUrl(url: string): Promise<void>
+  onOpenForEdit(): Promise<void>
   onClose(): void
 }
 
@@ -10,6 +11,7 @@ interface HtmlImportModalProps {
 export function HtmlImportModal({
   onOpenFile,
   onOpenUrl,
+  onOpenForEdit,
   onClose
 }: HtmlImportModalProps): JSX.Element {
   const [url, setUrl] = useState('')
@@ -56,7 +58,7 @@ export function HtmlImportModal({
           </button>
         </div>
 
-        <div className="export-section" style={{ borderBottom: 'none' }}>
+        <div className="export-section">
           <div className="export-title">Адрес страницы (URL)</div>
           <div className="export-range">
             <input
@@ -74,6 +76,17 @@ export function HtmlImportModal({
               Открыть
             </button>
           </div>
+        </div>
+
+        <div className="export-section" style={{ borderBottom: 'none' }}>
+          <div className="export-title">Редактировать HTML напрямую (live, без PDF)</div>
+          <p className="tool-options-hint" style={{ marginBottom: 8 }}>
+            Открывает исходный код страницы в редакторе с живым предпросмотром и
+            сохраняет правки обратно в тот же .html — без преобразования в PDF.
+          </p>
+          <button className="btn-ghost sm" disabled={busy} onClick={() => void run(onOpenForEdit)}>
+            Редактировать HTML…
+          </button>
         </div>
 
         {busy && <div className="upload-error" style={{ color: 'var(--text-dim)' }}>Преобразование…</div>}

@@ -14,7 +14,8 @@ import {
   type RecentFile,
   type NamedBytes,
   type ExportFolderResult,
-  type HtmlConvertResult
+  type HtmlConvertResult,
+  type OpenedHtmlText
 } from '../shared/ipc'
 import { buildMenu } from './menu'
 import { convertHtmlToPdf } from './htmlConvert'
@@ -249,6 +250,58 @@ function registerIpcHandlers(): void {
           error: err instanceof Error ? err.message : 'Не удалось преобразовать страницу в PDF'
         }
       }
+    }
+  )
+
+  // Pick a local .html/.htm file and read it as literal text for live editing
+  // — no PDF conversion, distinct from openHtmlDialog above.
+  ipcMain.handle(IpcChannels.openHtmlEditDialog, async (): Promise<OpenedHtmlText> => {
+    if (!mainWindow) return { canceled: true, path: null, name: '', text: null, error: null }
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      title: 'Открыть HTML для редактирования',
+      properties: ['openFile'],
+      filters: [{ name: 'HTML', extensions: ['html', 'htm'] }]
+    })
+    if (canceled || filePaths.length === 0) {
+      return { canceled: true, path: null, name: '', text: null, error: null }
+    }
+    const path = filePaths[0]
+    try {
+      const text = await readFile(path, 'utf-8')
+      return { canceled: false, path, name: basename(path), text, error: null }
+    } catch (err) {
+      return {
+        canceled: false,
+        path: null,
+        name: basename(path),
+        text: null,
+        error: err instanceof Error ? err.message : 'Не удалось прочитать файл'
+      }
+    }
+  })
+
+  // Save HTML text to a known path.
+  ipcMain.handle(
+    IpcChannels.saveHtml,
+    async (_e, path: string, text: string): Promise<SaveResult> => {
+      await writeFile(path, text, 'utf-8')
+      return { canceled: false, path }
+    }
+  )
+
+  // Prompt for a destination and write the HTML text there.
+  ipcMain.handle(
+    IpcChannels.saveHtmlAs,
+    async (_e, suggestedName: string, text: string): Promise<SaveResult> => {
+      if (!mainWindow) return { canceled: true, path: null }
+      const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+        title: 'Сохранить HTML как…',
+        defaultPath: suggestedName,
+        filters: [{ name: 'HTML', extensions: ['html', 'htm'] }]
+      })
+      if (canceled || !filePath) return { canceled: true, path: null }
+      await writeFile(filePath, text, 'utf-8')
+      return { canceled: false, path: filePath }
     }
   )
 

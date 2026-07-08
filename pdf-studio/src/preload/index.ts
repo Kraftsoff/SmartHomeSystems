@@ -9,7 +9,8 @@ import {
   type RecentFile,
   type NamedBytes,
   type ExportFolderResult,
-  type HtmlConvertResult
+  type HtmlConvertResult,
+  type OpenedHtmlText
 } from '../shared/ipc'
 
 /** Typed, minimal surface exposed to the renderer. */
@@ -31,6 +32,12 @@ const api = {
     ipcRenderer.invoke(IpcChannels.openHtmlDialog),
   convertHtmlUrl: (url: string): Promise<HtmlConvertResult> =>
     ipcRenderer.invoke(IpcChannels.convertHtmlUrl, url),
+  openHtmlEditDialog: (): Promise<OpenedHtmlText> =>
+    ipcRenderer.invoke(IpcChannels.openHtmlEditDialog),
+  saveHtml: (path: string, text: string): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.saveHtml, path, text),
+  saveHtmlAs: (suggestedName: string, text: string): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.saveHtmlAs, suggestedName, text),
   getRecentFiles: (): Promise<RecentFile[]> => ipcRenderer.invoke(IpcChannels.getRecentFiles),
   addRecentFile: (path: string): void => ipcRenderer.send(IpcChannels.addRecentFile, path),
   notifyDocumentState: (state: DocumentState): void =>
