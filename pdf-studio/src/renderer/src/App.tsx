@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDocument } from './hooks/useDocument'
 import { usePdfDoc } from './hooks/usePdfDoc'
 import { useHtmlDocument } from './hooks/useHtmlDocument'
+import { useCustomStamps } from './hooks/useCustomStamps'
 import { useZoom } from './hooks/useZoom'
 import { useTheme } from './hooks/useTheme'
 import { Toolbar } from './components/Toolbar'
@@ -18,6 +19,7 @@ import { FormPanel } from './components/FormPanel'
 import { ExportModal } from './components/ExportModal'
 import { InfoModal } from './components/InfoModal'
 import { HtmlImportModal } from './components/HtmlImportModal'
+import { CommentsPanel } from './components/CommentsPanel'
 import type { PendingImage } from './components/AnnotationLayer'
 import { getPageBaseSize, renderPageToPng, loadPdfDocument } from './lib/pdf'
 import { STAMP_PRESETS, type Tool, type StampPreset } from './lib/annotations'
@@ -29,6 +31,7 @@ const PNG_EXPORT_SCALE = 2
 export default function App(): JSX.Element {
   const doc = useDocument()
   const htmlDoc = useHtmlDocument()
+  const customStamps = useCustomStamps()
   const { doc: pdfDoc, numPages, loading, error } = usePdfDoc(doc.bytes)
   const { theme, toggleTheme } = useTheme()
 
@@ -43,6 +46,7 @@ export default function App(): JSX.Element {
   const [pendingImage, setPendingImage] = useState<PendingImage | null>(null)
   const [showSignatureModal, setShowSignatureModal] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [showComments, setShowComments] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
   const [showHtmlImport, setShowHtmlImport] = useState(false)
@@ -435,6 +439,7 @@ export default function App(): JSX.Element {
         onPrint={() => void print()}
         onExport={() => setShowExport(true)}
         onToggleForms={() => setShowForm((v) => !v)}
+        onToggleComments={() => setShowComments((v) => !v)}
         onShowInfo={() => setShowInfo(true)}
       />
 
@@ -449,6 +454,9 @@ export default function App(): JSX.Element {
           onStampPreset={setStampPreset}
           pendingImage={pendingImage}
           onCreateSignature={() => setShowSignatureModal(true)}
+          customStamps={customStamps.stamps}
+          onAddCustomStamp={customStamps.addStamp}
+          onRemoveCustomStamp={customStamps.removeStamp}
         />
       )}
 
@@ -509,6 +517,15 @@ export default function App(): JSX.Element {
               if (applied) setShowForm(false)
             }}
             onClose={() => setShowForm(false)}
+          />
+        )}
+
+        {doc.hasDocument && showComments && (
+          <CommentsPanel
+            annotations={doc.annotations}
+            onJumpToPage={goToPage}
+            onDelete={doc.deleteAnnotation}
+            onClose={() => setShowComments(false)}
           />
         )}
       </div>

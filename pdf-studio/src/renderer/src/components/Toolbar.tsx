@@ -43,6 +43,7 @@ interface ToolbarProps {
   onPrint(): void
   onExport(): void
   onToggleForms(): void
+  onToggleComments(): void
   onShowInfo(): void
 }
 
@@ -254,6 +255,14 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
       <div className="toolbar-group">
         <button className="tbtn icon" onClick={props.onToggleForms} disabled={!hasDocument} title="Поля формы">
           📝
+        </button>
+        <button
+          className="tbtn icon"
+          onClick={props.onToggleComments}
+          disabled={!hasDocument}
+          title="Комментарии и разметка"
+        >
+          💬
         </button>
         <button className="tbtn icon" onClick={props.onPrint} disabled={!hasDocument} title="Печать">
           🖨
