@@ -203,11 +203,11 @@
   .scen-btn.on{background:var(--glow);border-color:var(--glow);color:#fff}
 
   /* следы жителя за курсором: план дома вид сверху, след — отпечаток подошвы, не силуэт сбоку */
-  .footprint{position:absolute;left:0;top:0;width:26px;height:45px;pointer-events:none;
+  .footprint{position:absolute;left:0;top:0;width:25px;height:44px;pointer-events:none;
     transform:translate(-50%,-50%);opacity:1;transition:opacity 1.3s ease;z-index:6;will-change:opacity}
   .footprint.fade{opacity:0}
   .footprint svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
-  .footprint svg ellipse{fill:var(--glow)}
+  .footprint svg ellipse,.footprint svg circle{fill:var(--glow)}
 
   /* cards & grids */
   .grid{display:grid;gap:14px}
@@ -1050,7 +1050,7 @@
     }
     // след подошвы (вид сверху: два овала — носок + пятка, чёткий разрыв между ними, без
     // размытия), не силуэт ботинка сбоку и не сплошная «гантель» — проверено визуально через рендер
-    var FOOTPRINT='<svg viewBox="0 0 22 38"><ellipse cx="11" cy="10" rx="8" ry="9.5"/><ellipse cx="11" cy="30" rx="6.5" ry="7"/></svg>';
+    var FOOTPRINT='<svg viewBox="0 0 24 42"><circle cx="6.3" cy="8" r="1.9"/><circle cx="10.6" cy="5.3" r="2.15"/><circle cx="14.6" cy="5.1" r="2.15"/><circle cx="18.2" cy="7.6" r="1.75"/><ellipse cx="12" cy="18" rx="8.2" ry="9"/><ellipse cx="12" cy="34" rx="6.4" ry="7.8"/></svg>';
     // физические объекты, через которые след не может «пройти»: мебель/стены — уже в маске
     // фонового плана (isFloor), а новые накладные элементы (устройства, инженерные иконки,
     // датчики, камеры) в маску не входят — исключаем их отдельно по факту их реального положения на экране
@@ -1082,7 +1082,9 @@
       if(isBlockedByObject(fx,fy))return;
       var el=document.createElement('div'); el.className='footprint'; el.innerHTML=FOOTPRINT;
       el.style.left=fx+'px'; el.style.top=fy+'px';
-      el.querySelector('svg').style.transform='rotate('+angle+'deg) scaleX('+(side>0?1:-1)+') scale(.8)';
+      // svg нарисован носком вверх (angle=-90°), поэтому к направлению шага прибавляем +90 —
+      // без этого след разворачивался на 90° мимо направления движения («идёт боком»)
+      el.querySelector('svg').style.transform='rotate('+(angle+90)+'deg) scaleX('+(side>0?1:-1)+')';
       stage.appendChild(el);
       requestAnimationFrame(function(){el.classList.add('fade')});
       setTimeout(function(){el.remove()},1400);
