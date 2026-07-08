@@ -1,0 +1,66 @@
+import { contextBridge, ipcRenderer } from 'electron'
+import { electronAPI } from '@electron-toolkit/preload'
+import {
+  IpcChannels,
+  type OpenedFile,
+  type SaveResult,
+  type DocumentState,
+  type MenuCommand,
+  type RecentFile,
+  type NamedBytes,
+  type ExportFolderResult,
+  type HtmlConvertResult,
+  type OpenedHtmlText
+} from '../shared/ipc'
+
+/** Typed, minimal surface exposed to the renderer. */
+const api = {
+  openPdfDialog: (): Promise<OpenedFile | null> => ipcRenderer.invoke(IpcChannels.openPdfDialog),
+  readPdf: (path: string): Promise<OpenedFile | null> =>
+    ipcRenderer.invoke(IpcChannels.readPdf, path),
+  savePdf: (path: string, data: Uint8Array): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.savePdf, path, data),
+  savePdfAs: (suggestedName: string, data: Uint8Array): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.savePdfAs, suggestedName, data),
+  savePngAs: (suggestedName: string, data: Uint8Array): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.savePngAs, suggestedName, data),
+  exportPngsToFolder: (files: NamedBytes[]): Promise<ExportFolderResult> =>
+    ipcRenderer.invoke(IpcChannels.exportPngsToFolder, files),
+  printPdf: (data: Uint8Array): Promise<boolean> =>
+    ipcRenderer.invoke(IpcChannels.printPdf, data),
+  openHtmlDialog: (): Promise<HtmlConvertResult> =>
+    ipcRenderer.invoke(IpcChannels.openHtmlDialog),
+  convertHtmlUrl: (url: string): Promise<HtmlConvertResult> =>
+    ipcRenderer.invoke(IpcChannels.convertHtmlUrl, url),
+  openHtmlEditDialog: (): Promise<OpenedHtmlText> =>
+    ipcRenderer.invoke(IpcChannels.openHtmlEditDialog),
+  saveHtml: (path: string, text: string): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.saveHtml, path, text),
+  saveHtmlAs: (suggestedName: string, text: string): Promise<SaveResult> =>
+    ipcRenderer.invoke(IpcChannels.saveHtmlAs, suggestedName, text),
+  getRecentFiles: (): Promise<RecentFile[]> => ipcRenderer.invoke(IpcChannels.getRecentFiles),
+  addRecentFile: (path: string): void => ipcRenderer.send(IpcChannels.addRecentFile, path),
+  notifyDocumentState: (state: DocumentState): void =>
+    ipcRenderer.send(IpcChannels.documentStateChanged, state),
+  onMenuCommand: (handler: (command: MenuCommand) => void): (() => void) => {
+    const listener = (_e: unknown, command: MenuCommand): void => handler(command)
+    ipcRenderer.on(IpcChannels.menuCommand, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.menuCommand, listener)
+  }
+}
+
+export type PdfApi = typeof api
+
+if (process.contextIsolated) {
+  try {
+    contextBridge.exposeInMainWorld('electron', electronAPI)
+    contextBridge.exposeInMainWorld('api', api)
+  } catch (error) {
+    console.error(error)
+  }
+} else {
+  // @ts-ignore (define on window when context isolation is disabled)
+  window.electron = electronAPI
+  // @ts-ignore
+  window.api = api
+}
