@@ -9,7 +9,7 @@ import { Toolbar } from './components/Toolbar'
 import { Sidebar } from './components/Sidebar'
 import { PdfCanvas, type PageSize } from './components/PdfCanvas'
 import { AnnotationLayer } from './components/AnnotationLayer'
-import { HtmlEditorView } from './components/HtmlEditorView'
+import { HtmlEditorView, type HtmlEditorViewHandle } from './components/HtmlEditorView'
 import { Welcome } from './components/Welcome'
 import { StatusBar } from './components/StatusBar'
 import { FindBar } from './components/FindBar'
@@ -52,6 +52,7 @@ export default function App(): JSX.Element {
   const [showHtmlImport, setShowHtmlImport] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
+  const htmlEditorRef = useRef<HtmlEditorViewHandle>(null)
   const zoom = useZoom(basePageSize, scrollRef)
   const scale = zoom.scale
 
@@ -87,14 +88,27 @@ export default function App(): JSX.Element {
   }, [doc.hasDocument])
 
   // Report state to the main process so native menu items enable correctly.
+  // doc and htmlDoc are mutually exclusive (opening one always closes the
+  // other — see openFile/openHtmlForEdit/etc. below), so whichever currently
+  // reports hasDocument is the one the native menu should reflect/act on.
   useEffect(() => {
+    const active = htmlDoc.hasDocument ? htmlDoc : doc
     window.api.notifyDocumentState({
-      hasDocument: doc.hasDocument,
-      isDirty: doc.isDirty,
-      canUndo: doc.canUndo,
-      canRedo: doc.canRedo
+      hasDocument: active.hasDocument,
+      isDirty: active.isDirty,
+      canUndo: active.canUndo,
+      canRedo: active.canRedo
     })
-  }, [doc.hasDocument, doc.isDirty, doc.canUndo, doc.canRedo])
+  }, [
+    doc.hasDocument,
+    doc.isDirty,
+    doc.canUndo,
+    doc.canRedo,
+    htmlDoc.hasDocument,
+    htmlDoc.isDirty,
+    htmlDoc.canUndo,
+    htmlDoc.canRedo
+  ])
 
   const handleToolChange = useCallback(
     (next: Tool) => {
@@ -213,10 +227,7 @@ export default function App(): JSX.Element {
     [doc, htmlDoc, resetViewState]
   )
 
-  const baseName = useCallback(
-    () => (doc.name || 'document').replace(/\.pdf$/i, ''),
-    [doc.name]
-  )
+  const baseName = useCallback(() => (doc.name || 'document').replace(/\.pdf$/i, ''), [doc.name])
 
   const save = useCallback(
     async (forceDialog: boolean) => {
@@ -336,11 +347,29 @@ export default function App(): JSX.Element {
   // ---- Native menu commands ------------------------------------------------
 
   useEffect(() => {
+    // While the live HTML editor is open, doc is closed and htmlDoc is the
+    // active document (see openFile/openHtmlForEdit — the two are always
+    // mutually exclusive). Route Save/Undo/Redo/Close there instead, flushing
+    // any pending debounced edit first exactly like HtmlEditorView's own
+    // keyboard shortcuts and buttons already do.
     const dispatch: Record<MenuCommand, () => void> = {
       open: () => void openFile(),
-      save: () => void save(false),
-      'save-as': () => void save(true),
-      'close-document': () => doc.close(),
+      save: () => {
+        if (htmlDoc.hasDocument) void saveHtml(false, htmlEditorRef.current?.flush() ?? '')
+        else void save(false)
+      },
+      'save-as': () => {
+        if (htmlDoc.hasDocument) void saveHtml(true, htmlEditorRef.current?.flush() ?? '')
+        else void save(true)
+      },
+      'close-document': () => {
+        if (htmlDoc.hasDocument) {
+          htmlEditorRef.current?.flush()
+          htmlDoc.close()
+        } else {
+          doc.close()
+        }
+      },
       'zoom-in': zoom.zoomIn,
       'zoom-out': zoom.zoomOut,
       'zoom-reset': zoom.setActual,
@@ -348,12 +377,26 @@ export default function App(): JSX.Element {
       'prev-page': prevPage,
       'rotate-page': rotate,
       'delete-page': deletePage,
-      undo: doc.undo,
-      redo: doc.redo,
+      undo: () => {
+        if (htmlDoc.hasDocument) {
+          htmlEditorRef.current?.flush()
+          htmlDoc.undo()
+        } else {
+          doc.undo()
+        }
+      },
+      redo: () => {
+        if (htmlDoc.hasDocument) {
+          htmlEditorRef.current?.flush()
+          htmlDoc.redo()
+        } else {
+          doc.redo()
+        }
+      },
       find: () => setShowFind(true)
     }
     return window.api.onMenuCommand((command) => dispatch[command]?.())
-  }, [openFile, save, doc, zoom, nextPage, prevPage, rotate, deletePage])
+  }, [openFile, save, saveHtml, doc, htmlDoc, zoom, nextPage, prevPage, rotate, deletePage])
 
   // ---- Drag & drop ---------------------------------------------------------
 
@@ -397,189 +440,207 @@ export default function App(): JSX.Element {
   return (
     <div className={`app ${dragging ? 'dragging' : ''}`}>
       {htmlDoc.hasDocument ? (
-        <HtmlEditorView doc={htmlDoc} onSave={saveHtml} onClose={() => htmlDoc.close()} />
+        <HtmlEditorView
+          ref={htmlEditorRef}
+          doc={htmlDoc}
+          onSave={saveHtml}
+          onClose={() => htmlDoc.close()}
+        />
       ) : (
         <>
-      <Toolbar
-        hasDocument={doc.hasDocument}
-        isDirty={doc.isDirty}
-        canUndo={doc.canUndo}
-        canRedo={doc.canRedo}
-        tool={tool}
-        color={color}
-        scale={scale}
-        zoomMode={zoom.zoomMode}
-        currentPage={currentPage}
-        numPages={numPages}
-        theme={theme}
-        onOpen={() => void openFile()}
-        onOpenHtml={() => setShowHtmlImport(true)}
-        onSave={() => void save(false)}
-        onSaveAs={() => void save(true)}
-        onUndo={doc.undo}
-        onRedo={doc.redo}
-        onToolChange={handleToolChange}
-        onColorChange={setColor}
-        onZoomIn={zoom.zoomIn}
-        onZoomOut={zoom.zoomOut}
-        onZoomActual={zoom.setActual}
-        onFitWidth={zoom.fitWidth}
-        onFitPage={zoom.fitPage}
-        onPrevPage={prevPage}
-        onNextPage={nextPage}
-        onGoToPage={goToPage}
-        onRotate={rotate}
-        onDeletePage={deletePage}
-        onDuplicatePage={duplicatePage}
-        onInsertPdf={() => void insertPdf()}
-        onExtractPage={() => void extractPage()}
-        onExportPng={() => void exportPng()}
-        onToggleFind={() => setShowFind((v) => !v)}
-        onToggleTheme={toggleTheme}
-        onPrint={() => void print()}
-        onExport={() => setShowExport(true)}
-        onToggleForms={() => setShowForm((v) => !v)}
-        onToggleComments={() => setShowComments((v) => !v)}
-        onShowInfo={() => setShowInfo(true)}
-      />
-
-      {showFind && pdfDoc && (
-        <FindBar doc={pdfDoc} onClose={() => setShowFind(false)} onGoToPage={goToPage} />
-      )}
-
-      {doc.hasDocument && (
-        <ToolOptionsBar
-          tool={tool}
-          stampPreset={stampPreset}
-          onStampPreset={setStampPreset}
-          pendingImage={pendingImage}
-          onCreateSignature={() => setShowSignatureModal(true)}
-          customStamps={customStamps.stamps}
-          onAddCustomStamp={customStamps.addStamp}
-          onRemoveCustomStamp={customStamps.removeStamp}
-        />
-      )}
-
-      <div className="workspace">
-        {doc.hasDocument && pdfDoc && (
-          <Sidebar
-            doc={pdfDoc}
-            numPages={numPages}
+          <Toolbar
+            hasDocument={doc.hasDocument}
+            isDirty={doc.isDirty}
+            canUndo={doc.canUndo}
+            canRedo={doc.canRedo}
+            tool={tool}
+            color={color}
+            scale={scale}
+            zoomMode={zoom.zoomMode}
             currentPage={currentPage}
-            onSelectPage={goToPage}
-            onReorder={reorder}
+            numPages={numPages}
+            theme={theme}
+            onOpen={() => void openFile()}
+            onOpenHtml={() => setShowHtmlImport(true)}
+            onSave={() => void save(false)}
+            onSaveAs={() => void save(true)}
+            onUndo={doc.undo}
+            onRedo={doc.redo}
+            onToolChange={handleToolChange}
+            onColorChange={setColor}
+            onZoomIn={zoom.zoomIn}
+            onZoomOut={zoom.zoomOut}
+            onZoomActual={zoom.setActual}
+            onFitWidth={zoom.fitWidth}
+            onFitPage={zoom.fitPage}
+            onPrevPage={prevPage}
+            onNextPage={nextPage}
+            onGoToPage={goToPage}
+            onRotate={rotate}
+            onDeletePage={deletePage}
+            onDuplicatePage={duplicatePage}
+            onInsertPdf={() => void insertPdf()}
+            onExtractPage={() => void extractPage()}
+            onExportPng={() => void exportPng()}
+            onToggleFind={() => setShowFind((v) => !v)}
+            onToggleTheme={toggleTheme}
+            onPrint={() => void print()}
+            onExport={() => setShowExport(true)}
+            onToggleForms={() => setShowForm((v) => !v)}
+            onToggleComments={() => setShowComments((v) => !v)}
+            onShowInfo={() => setShowInfo(true)}
           />
-        )}
 
-        <main className="viewer">
-          {!doc.hasDocument && (
-            <Welcome
-              onOpen={() => void openFile()}
-              onOpenHtml={() => setShowHtmlImport(true)}
-              recentFiles={recentFiles}
-              onOpenRecent={(p) => void openRecent(p)}
+          {showFind && pdfDoc && (
+            <FindBar doc={pdfDoc} onClose={() => setShowFind(false)} onGoToPage={goToPage} />
+          )}
+
+          {doc.hasDocument && (
+            <ToolOptionsBar
+              tool={tool}
+              stampPreset={stampPreset}
+              onStampPreset={setStampPreset}
+              pendingImage={pendingImage}
+              onCreateSignature={() => setShowSignatureModal(true)}
+              customStamps={customStamps.stamps}
+              onAddCustomStamp={customStamps.addStamp}
+              onRemoveCustomStamp={(id) => {
+                // Deleting the currently-selected preset would otherwise leave
+                // stampPreset pointing at a stamp no longer in the palette —
+                // still fully placeable, with no chip showing it as active.
+                if (stampPreset.id === id) setStampPreset(STAMP_PRESETS[0])
+                customStamps.removeStamp(id)
+              }}
             />
           )}
 
-          {doc.hasDocument && loading && <div className="viewer-message">Загрузка документа…</div>}
-          {doc.hasDocument && error && (
-            <div className="viewer-message error">Ошибка: {error}</div>
+          <div className="workspace">
+            {doc.hasDocument && pdfDoc && (
+              <Sidebar
+                doc={pdfDoc}
+                numPages={numPages}
+                currentPage={currentPage}
+                onSelectPage={goToPage}
+                onReorder={reorder}
+              />
+            )}
+
+            <main className="viewer">
+              {!doc.hasDocument && (
+                <Welcome
+                  onOpen={() => void openFile()}
+                  onOpenHtml={() => setShowHtmlImport(true)}
+                  recentFiles={recentFiles}
+                  onOpenRecent={(p) => void openRecent(p)}
+                />
+              )}
+
+              {doc.hasDocument && loading && (
+                <div className="viewer-message">Загрузка документа…</div>
+              )}
+              {doc.hasDocument && error && (
+                <div className="viewer-message error">Ошибка: {error}</div>
+              )}
+
+              {doc.hasDocument && pdfDoc && !loading && (
+                <div className="page-scroll" ref={scrollRef}>
+                  <div className="page-stage">
+                    <PdfCanvas
+                      doc={pdfDoc}
+                      pageIndex={currentPage}
+                      scale={scale}
+                      onSized={onSized}
+                    />
+                    {pageSize && (
+                      <AnnotationLayer
+                        pageIndex={currentPage}
+                        size={pageSize}
+                        scale={scale}
+                        tool={tool}
+                        color={color}
+                        annotations={pageAnnotations}
+                        pendingImage={pendingImage}
+                        stampPreset={stampPreset}
+                        onCommit={doc.addAnnotation}
+                        onDelete={doc.deleteAnnotation}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </main>
+
+            {doc.hasDocument && showForm && (
+              <FormPanel
+                getFields={doc.getFormFields}
+                onApply={async (values) => {
+                  const applied = await doc.applyFormValues(values)
+                  if (applied) setShowForm(false)
+                }}
+                onClose={() => setShowForm(false)}
+              />
+            )}
+
+            {doc.hasDocument && showComments && (
+              <CommentsPanel
+                annotations={doc.annotations}
+                onJumpToPage={goToPage}
+                onDelete={doc.deleteAnnotation}
+                onClose={() => setShowComments(false)}
+              />
+            )}
+          </div>
+
+          {doc.hasDocument && (
+            <StatusBar
+              name={doc.name}
+              path={doc.path}
+              isDirty={doc.isDirty}
+              currentPage={currentPage}
+              numPages={numPages}
+              annotationCount={doc.annotations.length}
+            />
           )}
 
-          {doc.hasDocument && pdfDoc && !loading && (
-            <div className="page-scroll" ref={scrollRef}>
-              <div className="page-stage">
-                <PdfCanvas doc={pdfDoc} pageIndex={currentPage} scale={scale} onSized={onSized} />
-                {pageSize && (
-                  <AnnotationLayer
-                    pageIndex={currentPage}
-                    size={pageSize}
-                    scale={scale}
-                    tool={tool}
-                    color={color}
-                    annotations={pageAnnotations}
-                    pendingImage={pendingImage}
-                    stampPreset={stampPreset}
-                    onCommit={doc.addAnnotation}
-                    onDelete={doc.deleteAnnotation}
-                  />
-                )}
-              </div>
-            </div>
+          {dragging && <div className="drop-overlay">Отпустите, чтобы открыть PDF</div>}
+
+          {showSignatureModal && (
+            <SignatureModal
+              onDone={(img) => {
+                setPendingImage(img)
+                setShowSignatureModal(false)
+                setTool('signature')
+              }}
+              onCancel={() => setShowSignatureModal(false)}
+            />
           )}
-        </main>
 
-        {doc.hasDocument && showForm && (
-          <FormPanel
-            getFields={doc.getFormFields}
-            onApply={async (values) => {
-              const applied = await doc.applyFormValues(values)
-              if (applied) setShowForm(false)
-            }}
-            onClose={() => setShowForm(false)}
-          />
-        )}
+          {showExport && doc.hasDocument && (
+            <ExportModal
+              numPages={numPages}
+              onExportRange={exportRange}
+              onExportAllPng={exportAllPng}
+              onClose={() => setShowExport(false)}
+            />
+          )}
 
-        {doc.hasDocument && showComments && (
-          <CommentsPanel
-            annotations={doc.annotations}
-            onJumpToPage={goToPage}
-            onDelete={doc.deleteAnnotation}
-            onClose={() => setShowComments(false)}
-          />
-        )}
-      </div>
+          {showInfo && doc.hasDocument && (
+            <InfoModal
+              pdfDoc={pdfDoc}
+              numPages={numPages}
+              name={doc.name}
+              onClose={() => setShowInfo(false)}
+            />
+          )}
 
-      {doc.hasDocument && (
-        <StatusBar
-          name={doc.name}
-          path={doc.path}
-          isDirty={doc.isDirty}
-          currentPage={currentPage}
-          numPages={numPages}
-          annotationCount={doc.annotations.length}
-        />
-      )}
-
-      {dragging && <div className="drop-overlay">Отпустите, чтобы открыть PDF</div>}
-
-      {showSignatureModal && (
-        <SignatureModal
-          onDone={(img) => {
-            setPendingImage(img)
-            setShowSignatureModal(false)
-            setTool('signature')
-          }}
-          onCancel={() => setShowSignatureModal(false)}
-        />
-      )}
-
-      {showExport && doc.hasDocument && (
-        <ExportModal
-          numPages={numPages}
-          onExportRange={exportRange}
-          onExportAllPng={exportAllPng}
-          onClose={() => setShowExport(false)}
-        />
-      )}
-
-      {showInfo && doc.hasDocument && (
-        <InfoModal
-          pdfDoc={pdfDoc}
-          numPages={numPages}
-          name={doc.name}
-          onClose={() => setShowInfo(false)}
-        />
-      )}
-
-      {showHtmlImport && (
-        <HtmlImportModal
-          onOpenFile={openHtmlFile}
-          onOpenUrl={openHtmlUrl}
-          onOpenForEdit={openHtmlForEdit}
-          onClose={() => setShowHtmlImport(false)}
-        />
-      )}
+          {showHtmlImport && (
+            <HtmlImportModal
+              onOpenFile={openHtmlFile}
+              onOpenUrl={openHtmlUrl}
+              onOpenForEdit={openHtmlForEdit}
+              onClose={() => setShowHtmlImport(false)}
+            />
+          )}
         </>
       )}
     </div>

@@ -16,6 +16,12 @@ interface HtmlDocumentModel {
   cursor: number
   /** `cursor` value that matches what is on disk (-1 = never saved). */
   savedCursor: number
+  /** Increments only on 'open' — lets consumers detect "this is a different
+   * document now" versus "the same document changed", even though `history`
+   * changes on every edit too. Used by HtmlEditorView to discard (not
+   * commit) a pending debounced edit that belonged to the previous document
+   * rather than splicing it onto the new one. */
+  sessionId: number
 }
 
 type Action =
@@ -31,7 +37,8 @@ const EMPTY: HtmlDocumentModel = {
   path: null,
   history: [],
   cursor: -1,
-  savedCursor: -1
+  savedCursor: -1,
+  sessionId: 0
 }
 
 function reducer(state: HtmlDocumentModel, action: Action): HtmlDocumentModel {
@@ -42,7 +49,8 @@ function reducer(state: HtmlDocumentModel, action: Action): HtmlDocumentModel {
         path: action.path,
         history: [{ text: action.text, annotations: [] }],
         cursor: 0,
-        savedCursor: action.path ? 0 : -1
+        savedCursor: action.path ? 0 : -1,
+        sessionId: state.sessionId + 1
       }
     case 'push': {
       // Drop any redo branch, then append the new snapshot.
@@ -87,6 +95,11 @@ export interface HtmlDocumentController {
   isDirty: boolean
   canUndo: boolean
   canRedo: boolean
+  /** Increments each time a *different* document is opened (not on every
+   * edit) — lets HtmlEditorView discard a pending debounced edit that
+   * belonged to the previous document instead of committing it onto the
+   * newly-opened one's history. */
+  sessionId: number
 
   open(name: string, path: string | null, text: string): void
   close(): void
@@ -123,6 +136,7 @@ export function useHtmlDocument(): HtmlDocumentController {
       isDirty,
       canUndo: state.cursor > 0,
       canRedo: state.cursor < state.history.length - 1,
+      sessionId: state.sessionId,
 
       open: (name, path, text) => dispatch({ type: 'open', name, path, text }),
       close: () => dispatch({ type: 'close' }),

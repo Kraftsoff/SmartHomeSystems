@@ -2,6 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import type { StampPreset } from '../lib/annotations'
 
 const STORAGE_KEY = 'pdf-studio:custom-stamps'
+/** Bounds a corrupted/tampered-with localStorage entry from bloating the
+ * toolbar with an unbounded number of stamp chips. */
+const MAX_STAMPS = 100
+const MAX_FIELD_LENGTH = 200
 
 function load(): StampPreset[] {
   try {
@@ -9,14 +13,19 @@ function load(): StampPreset[] {
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (p): p is StampPreset =>
-        !!p &&
-        typeof p.id === 'string' &&
-        typeof p.label === 'string' &&
-        typeof p.color === 'string' &&
-        typeof p.text === 'string'
-    )
+    return parsed
+      .filter(
+        (p): p is StampPreset =>
+          !!p &&
+          typeof p.id === 'string' &&
+          typeof p.label === 'string' &&
+          typeof p.color === 'string' &&
+          typeof p.text === 'string' &&
+          p.id.length <= MAX_FIELD_LENGTH &&
+          p.label.length <= MAX_FIELD_LENGTH &&
+          p.text.length <= MAX_FIELD_LENGTH
+      )
+      .slice(0, MAX_STAMPS)
   } catch {
     return []
   }

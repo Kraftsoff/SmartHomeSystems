@@ -47,6 +47,11 @@ export function ToolOptionsBar({
       setCreating(false)
     }
 
+    const cancel = (): void => {
+      setLabel('')
+      setCreating(false)
+    }
+
     return (
       <div className="tool-options">
         <span className="tool-options-label">Штамп:</span>
@@ -80,7 +85,11 @@ export function ToolOptionsBar({
         ))}
 
         {!creating && (
-          <button className="tbtn icon" title="Создать свой штамп" onClick={() => setCreating(true)}>
+          <button
+            className="tbtn icon"
+            title="Создать свой штамп"
+            onClick={() => setCreating(true)}
+          >
             +
           </button>
         )}
@@ -95,7 +104,7 @@ export function ToolOptionsBar({
               onChange={(e) => setLabel(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') submit()
-                if (e.key === 'Escape') setCreating(false)
+                if (e.key === 'Escape') cancel()
               }}
             />
             {DEFAULT_COLORS.map((c) => (
@@ -109,7 +118,7 @@ export function ToolOptionsBar({
             <button className="btn-primary sm" disabled={!label.trim()} onClick={submit}>
               Добавить
             </button>
-            <button className="btn-ghost sm" onClick={() => setCreating(false)}>
+            <button className="btn-ghost sm" onClick={cancel}>
               Отмена
             </button>
           </span>
@@ -143,8 +152,8 @@ export function ToolOptionsBar({
       <div className="tool-options">
         <span className="tool-options-warn">⚠ Редакция</span>
         <span className="tool-options-hint">
-          Выделите область — при сохранении содержимое под ней будет удалено безвозвратно
-          (страница растрируется).
+          Выделите область — при сохранении содержимое под ней будет удалено безвозвратно (страница
+          растрируется).
         </span>
       </div>
     )

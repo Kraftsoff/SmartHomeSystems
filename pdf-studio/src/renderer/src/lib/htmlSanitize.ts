@@ -34,10 +34,28 @@ export function sanitizeForPreview(html: string): string {
   })
 
   // Offline-first: never let the preview phone home for remote resources.
-  doc.querySelectorAll('link[href], img[src], source[src]').forEach((el) => {
-    const attr = el.hasAttribute('href') ? 'href' : 'src'
-    const value = el.getAttribute(attr) ?? ''
-    if (/^(https?:)?\/\//i.test(value)) el.removeAttribute(attr)
+  // The injected CSP below is the primary enforcement (it blocks the actual
+  // fetch regardless of which DOM attribute triggers it); this pass is
+  // defense-in-depth so the guarantee holds even if default-src is ever
+  // loosened for a future feature (e.g. an img-src allowance).
+  const REMOTE_URL = /^(https?:)?\/\//i
+  doc.querySelectorAll('link[href], img[src], source[src], video[src], video[poster], audio[src], track[src]').forEach(
+    (el) => {
+      for (const attr of ['href', 'src', 'poster']) {
+        const value = el.getAttribute(attr)
+        if (value && REMOTE_URL.test(value)) el.removeAttribute(attr)
+      }
+    }
+  )
+  doc.querySelectorAll('img[srcset], source[srcset]').forEach((el) => {
+    const value = el.getAttribute('srcset') ?? ''
+    if (REMOTE_URL.test(value)) el.removeAttribute('srcset')
+  })
+  doc.querySelectorAll('image, use').forEach((el) => {
+    for (const attr of ['href', 'xlink:href']) {
+      const value = el.getAttribute(attr)
+      if (value && REMOTE_URL.test(value)) el.removeAttribute(attr)
+    }
   })
 
   const csp = doc.createElement('meta')

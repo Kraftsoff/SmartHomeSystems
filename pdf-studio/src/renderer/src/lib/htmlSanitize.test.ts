@@ -66,4 +66,27 @@ describe('sanitizeForPreview', () => {
     expect(out).toContain('<h1>Title</h1>')
     expect(out).toContain('<b>bold</b>')
   })
+
+  it('strips remote srcset references on <img>/<source>', () => {
+    const out = sanitizeForPreview(
+      '<img srcset="https://evil.example/x.png 1x"><source srcset="http://evil.example/y.png 2x">'
+    )
+    expect(out).not.toContain('evil.example')
+  })
+
+  it('strips remote src/poster on <video>/<audio>/<track>', () => {
+    const out = sanitizeForPreview(
+      '<video src="https://evil.example/v.mp4" poster="https://evil.example/p.png"></video>' +
+        '<audio src="https://evil.example/a.mp3"></audio>' +
+        '<track src="https://evil.example/t.vtt">'
+    )
+    expect(out).not.toContain('evil.example')
+  })
+
+  it('strips remote xlink:href on SVG <image>/<use>', () => {
+    const out = sanitizeForPreview(
+      '<svg><image href="https://evil.example/x.png"></image><use xlink:href="https://evil.example/#sprite"></use></svg>'
+    )
+    expect(out).not.toContain('evil.example')
+  })
 })

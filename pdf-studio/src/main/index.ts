@@ -43,7 +43,7 @@ function createWindow(): void {
     icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
-      sandbox: false,
+      sandbox: true,
       contextIsolation: true
     }
   })
@@ -53,7 +53,12 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    // The app now explicitly renders untrusted HTML (the live HTML editor's
+    // preview, though it's sandboxed with no allow-popups, and the HTML-import
+    // conversion pipeline). Only forward http(s) links to the OS's default
+    // handler — never file:/custom-protocol/etc., which shell.openExternal
+    // would otherwise happily hand off unvalidated.
+    if (/^https?:\/\//i.test(details.url)) shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
@@ -339,10 +344,7 @@ function addRecent(path: string): void {
   if (!path) return
   try {
     const existing = readRecent().filter((r) => r.path !== path)
-    const next: RecentFile[] = [{ path, name: basename(path) }, ...existing].slice(
-      0,
-      RECENT_LIMIT
-    )
+    const next: RecentFile[] = [{ path, name: basename(path) }, ...existing].slice(0, RECENT_LIMIT)
     writeFileSync(recentStorePath(), JSON.stringify(next, null, 2), 'utf-8')
   } catch {
     // Non-fatal: recent list is a convenience only.

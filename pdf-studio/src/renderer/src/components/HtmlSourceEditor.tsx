@@ -29,6 +29,20 @@ export const HtmlSourceEditor = forwardRef<HtmlSourceEditorHandle, HtmlSourceEdi
     // Avoids feeding a setText()-driven update back through onChange.
     const applyingExternal = useRef(false)
 
+    // The CodeMirror EditorView below is constructed exactly once (see the
+    // `[]` deps): its extensions close over onChange/onBlur permanently. If
+    // those extensions called the props directly, they'd keep calling
+    // whatever onChange/onBlur were passed on the *first* render forever —
+    // stale closures over a `doc` (and its `commitText`) that no longer
+    // reflects later annotations/undo state. Routing through refs updated on
+    // every render means the extensions always invoke the latest callback.
+    const onChangeRef = useRef(onChange)
+    const onBlurRef = useRef(onBlur)
+    useEffect(() => {
+      onChangeRef.current = onChange
+      onBlurRef.current = onBlur
+    }, [onChange, onBlur])
+
     useEffect(() => {
       if (!hostRef.current) return
 
@@ -40,12 +54,12 @@ export const HtmlSourceEditor = forwardRef<HtmlSourceEditorHandle, HtmlSourceEdi
           EditorView.lineWrapping,
           EditorView.updateListener.of((update) => {
             if (update.docChanged && !applyingExternal.current) {
-              onChange(update.state.doc.toString())
+              onChangeRef.current(update.state.doc.toString())
             }
           }),
           EditorView.domEventHandlers({
             blur: () => {
-              onBlur()
+              onBlurRef.current()
               return false
             }
           })

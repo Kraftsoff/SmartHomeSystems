@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Annotation } from '../lib/annotations'
 
 interface CommentsPanelProps {
@@ -67,6 +67,13 @@ export function CommentsPanel({
     return Array.from(seen)
   }, [annotations])
 
+  // If the selected filter's type disappears (its last annotation was
+  // deleted), fall back to "all" rather than stranding the user on a filter
+  // that can no longer match anything and may no longer even be selectable.
+  useEffect(() => {
+    if (filter !== 'all' && !types.includes(filter)) setFilter('all')
+  }, [filter, types])
+
   const sorted = useMemo(
     () =>
       [...annotations]
@@ -108,38 +115,24 @@ export function CommentsPanel({
           </div>
         )}
         {sorted.map((ann) => (
-          <button
-            key={ann.id}
-            className="comment-row"
-            onClick={() => onJumpToPage(ann.pageIndex)}
-            title="Перейти к странице"
-          >
-            <span className="comment-row-swatch" style={{ background: ann.color }} />
-            <span className="comment-row-icon">{TYPE_ICONS[ann.type] ?? '•'}</span>
-            <span className="comment-row-body">
-              <span className="comment-row-type">{TYPE_LABELS[ann.type] ?? ann.type}</span>
-              <span className="comment-row-snippet">{snippet(ann)}</span>
-            </span>
-            <span className="comment-row-page">стр. {ann.pageIndex + 1}</span>
-            <span
-              className="comment-row-delete"
-              role="button"
-              tabIndex={0}
-              title="Удалить"
-              onClick={(e) => {
-                e.stopPropagation()
-                onDelete(ann.id)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.stopPropagation()
-                  onDelete(ann.id)
-                }
-              }}
+          <div key={ann.id} className="comment-row">
+            <button
+              className="comment-row-main"
+              onClick={() => onJumpToPage(ann.pageIndex)}
+              title="Перейти к странице"
             >
+              <span className="comment-row-swatch" style={{ background: ann.color }} />
+              <span className="comment-row-icon">{TYPE_ICONS[ann.type] ?? '•'}</span>
+              <span className="comment-row-body">
+                <span className="comment-row-type">{TYPE_LABELS[ann.type] ?? ann.type}</span>
+                <span className="comment-row-snippet">{snippet(ann)}</span>
+              </span>
+              <span className="comment-row-page">стр. {ann.pageIndex + 1}</span>
+            </button>
+            <button className="comment-row-delete" title="Удалить" onClick={() => onDelete(ann.id)}>
               ✕
-            </span>
-          </button>
+            </button>
+          </div>
         ))}
       </div>
     </aside>
