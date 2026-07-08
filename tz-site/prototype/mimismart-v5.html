@@ -173,7 +173,7 @@
   .house-stage.is-dali-dim .dali circle{opacity:.6}
   .house-stage.is-dali-bright .dali circle{opacity:1} .house-stage.is-dali-bright .dali .cone{opacity:.55}
   .garage-zone .corridor-led{position:absolute;left:-9.5%;top:2%;width:6%;height:96%;border-radius:6px;
-    background:linear-gradient(180deg,transparent,var(--glow),transparent);opacity:.18;
+    background:linear-gradient(180deg,transparent,var(--glow),transparent);opacity:.4;
     box-shadow:0 0 10px 2px var(--glow);transition:opacity .25s,box-shadow .25s}
   /* базовые состояния (день, «в покое») */
   .lamp-off{opacity:1} .lamp-on{opacity:0}
@@ -1082,11 +1082,11 @@
         var cx=cr.left+cr.width/2-r.left, cy=cr.top+cr.height/2-r.top;
         var mx=e.clientX-r.left, my=e.clientY-r.top;
         var d=Math.hypot(mx-cx,my-cy), near=Math.max(0,1-d/260);
-        corridorLed.style.opacity=(.18+near*.75).toFixed(2);
+        corridorLed.style.opacity=(.4+near*.55).toFixed(2);
         corridorLed.style.boxShadow='0 0 '+(10+near*22).toFixed(0)+'px '+(2+near*4).toFixed(0)+'px var(--glow)';
       });
       stage.addEventListener('pointerleave',function(){
-        corridorLed.style.opacity='.18'; corridorLed.style.boxShadow='0 0 10px 2px var(--glow)';
+        corridorLed.style.opacity='.4'; corridorLed.style.boxShadow='0 0 10px 2px var(--glow)';
       });
     }
   }
