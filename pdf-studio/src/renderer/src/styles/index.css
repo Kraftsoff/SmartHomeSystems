@@ -965,12 +965,20 @@ button:disabled {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 10;
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
 }
 
 .annotation-svg {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 10;
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
 }
 
 .annotation-svg.tool-highlight,
