@@ -1,4 +1,54 @@
-<title>MiMiSmart — инженерные системы и умный дом</title>
+<title>MiMiSmart — инженерные системы и умный дом под ключ</title>
+<!-- ===== МЕТА-СЛОЙ И SCHEMA.ORG =====
+     Демонстрация обязательного слоя из tz-site/04. В прототипе (одностраничник с hash-роутингом)
+     это статический пример; в продакшене на Next.js мета и JSON-LD генерируются ПОСТРАНИЧНО
+     (свой title/description/canonical/FAQPage на каждый /answers/{slug}), плюс SSR — контент
+     должен быть в HTML до JS, иначе ИИ-боты его не увидят.
+     ВАЖНО: телефон и e-mail сюда НЕ вписаны намеренно — на текущем сайте это заглушки
+     (см. tz-site/99). Как только придут реальные контакты, добавить в Organization/LocalBusiness
+     поля telephone и email — без них LocalBusiness-разметка неполная. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Проектируем и монтируем инженерные системы премиальных объектов: умный дом, климат, свет, шторы, безопасность. Своё производство контроллеров, локальное управление без облака. Квартиры от 80 м², дома от 300 м².">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MiMiSmart — инженерные системы и умный дом под ключ">
+<meta property="og:description" content="Единый инженерный подрядчик для премиальных объектов: 13 систем в одном проекте, своё производство, локальное управление без облака.">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json" id="ldOrg">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "MiMiSmart",
+  "description": "Инженерный подрядчик премиальных объектов: умный дом, климат, освещение, шторы, безопасность. Собственное производство контроллеров.",
+  "foundingDate": "2004",
+  "areaServed": "RU",
+  "location": {
+    "@type": "Place",
+    "name": "Шоурум MiMiSmart",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Новоданиловская наб., 6к1",
+      "addressLocality": "Москва",
+      "addressCountry": "RU"
+    },
+    "openingHours": "Mo-Fr 09:00-18:00"
+  }
+}
+</script>
+<script type="application/ld+json" id="ldBreadcrumb">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Главная"},
+    {"@type":"ListItem","position":2,"name":"Статьи — база инженерных ответов"}
+  ]
+}
+</script>
+<!-- FAQPage строится из тех же карточек-рычагов, что видит человек: один источник правды,
+     без отдельного «контента для роботов» (это прямо запрещено стандартом в tz-site/03). -->
+<script type="application/ld+json" id="ldFaq">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]}</script>
 <style>
   :root{
     /* НОЧЬ (инженерный режим, тёмный) — дефолт. Переопределяется тумблером День/Ночь ниже. */
@@ -1180,6 +1230,29 @@
   document.addEventListener('keydown',function(e){if(e.key==='Escape')modal.classList.remove('open')});
 
   route();
+
+  /* ---------- FAQPage JSON-LD из тех же карточек, что видит человек ----------
+     Один источник правды: разметка строится из реального DOM статей-рычагов, а не
+     дублируется отдельным списком — иначе они разъезжаются при правке текста.
+     В продакшене (Next.js/SSR) это делает сервер на этапе рендера: JSON-LD должен
+     быть в HTML до выполнения JS, иначе часть ИИ-ботов его не увидит. */
+  (function buildFaqLd(){
+    var cards=document.querySelectorAll('#p-news .card');
+    var items=[];
+    cards.forEach(function(c){
+      var q=c.querySelector('h3'), a=c.querySelector('p');
+      if(!q||!a)return;
+      items.push({
+        "@type":"Question",
+        "name":q.textContent.trim(),
+        "acceptedAnswer":{"@type":"Answer","text":a.textContent.replace(/\s+/g,' ').trim()}
+      });
+    });
+    var node=document.getElementById('ldFaq');
+    if(node&&items.length){
+      node.textContent=JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":items});
+    }
+  })();
 })();
 </script>
 </div>
