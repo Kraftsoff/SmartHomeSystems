@@ -54,7 +54,10 @@
     /* НОЧЬ (инженерный режим, тёмный) — дефолт. Переопределяется тумблером День/Ночь ниже. */
     --night:#0a051a; --night-2:#0d0a26; --panel:#131033; --panel-2:#0f0c29;
     --line:#282354; --line-soft:#1c1840;
-    --ink:#f4f4f4; --muted:#a5a3c2; --faint:#6f6d92;
+    --ink:#f4f4f4; --muted:#a5a3c2; --faint:#8b89ae;
+    --accent-ink:#e27500;
+    --prov-bg:rgba(255,206,94,.14); --prov-line:rgba(255,206,94,.34); --prov-ink:#e8c07d;
+    --hz-chip-bg:rgba(13,10,38,.92); --hz-chip-ink:#b9b7d6;
     --glow:#e27500; --glow-2:#c76400; --signal:#00d0ff;
     --good:#27ca40; --warn:#ffce5e; --crit:#ff7b7b;
     --shell:#171338; --room:#0f0c2b; --room-line:#312a5e;
@@ -71,7 +74,11 @@
   :root[data-mode="day"]{
     --night:#f4f4f4; --night-2:#efefef; --panel:#ffffff; --panel-2:#f8f9fa;
     --line:#e5e5e5; --line-soft:#ececec;
-    --ink:#0b0d10; --muted:#5f6368; --faint:#8a8f98;
+    --ink:#0b0d10; --muted:#4d5157; --faint:#666b73;
+    --good:#0d7532; --warn:#7d5000; --crit:#ad2019;
+    --accent-ink:#2f63ae;
+    --prov-bg:#fff4da; --prov-line:#d9b972; --prov-ink:#7d5000;
+    --hz-chip-bg:rgba(242,244,247,.95); --hz-chip-ink:#454a52;
     --glow:#478beb; --glow-2:#3a74c9; --signal:#00576b;
     --shell:#f0f4f6; --room:#f8f9fa; --room-line:#e5e5e5;
     --btn-bg:#f8f9fa; --btn-text:#00576b; --btn-border:#fff;
@@ -81,7 +88,10 @@
   :root[data-mode="night"]{
     --night:#0a051a; --night-2:#0d0a26; --panel:#131033; --panel-2:#0f0c29;
     --line:#282354; --line-soft:#1c1840;
-    --ink:#f4f4f4; --muted:#a5a3c2; --faint:#6f6d92;
+    --ink:#f4f4f4; --muted:#a5a3c2; --faint:#8b89ae;
+    --accent-ink:#e27500;
+    --prov-bg:rgba(255,206,94,.14); --prov-line:rgba(255,206,94,.34); --prov-ink:#e8c07d;
+    --hz-chip-bg:rgba(13,10,38,.92); --hz-chip-ink:#b9b7d6;
     --glow:#e27500; --glow-2:#c76400; --signal:#00d0ff;
     --shell:#171338; --room:#0f0c2b; --room-line:#312a5e;
     --btn-bg:linear-gradient(180deg,#e27500,#c76400); --btn-text:#241503; --btn-border:transparent;
@@ -96,7 +106,11 @@
   .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--faint)}
   .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
   .amber{color:var(--glow)}
-  .prov{color:var(--warn);font-family:var(--mono);font-size:11px}
+  .prov{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+    font-family:var(--mono);font-size:11px;line-height:1.4;padding:1px 6px;margin:0 1px;
+    border-radius:5px;border:1px solid var(--prov-line);background:var(--prov-bg);
+    color:var(--prov-ink);white-space:normal}
+  p.prov{display:block;padding:6px 10px;margin-top:10px}
 
   .draft{background:linear-gradient(90deg,var(--glow-2),var(--glow));color:#231402;font-family:var(--mono);font-size:12px;letter-spacing:.03em;text-align:center;padding:6px 12px}
   header.nav{position:sticky;top:0;z-index:40;backdrop-filter:blur(10px);background:color-mix(in srgb,var(--night) 80%,transparent);border-bottom:1px solid var(--line-soft)}
@@ -242,15 +256,43 @@
   .bedroom-zone:hover .curtain-open{opacity:0} .bedroom-zone:hover .curtain-close{opacity:1}
   .kitchen-zone:hover .conditioner-off{opacity:0} .kitchen-zone:hover .conditioner-on{opacity:1}
 
-  .hz-label{position:absolute;top:-30px;left:0;font-family:var(--mono);font-size:10.5px;color:var(--faint);
+  .hz-label{position:absolute;top:-30px;left:0;font-family:var(--mono);font-size:10.5px;
+    color:var(--hz-chip-ink);background:var(--hz-chip-bg);padding:3px 7px;border-radius:6px;
     letter-spacing:.05em;text-transform:uppercase;opacity:0;transition:opacity .25s;white-space:nowrap}
   .hz:hover .hz-label{opacity:1}
 
+  /* кластеры базы ответов: H2 = кластер, H3 = вопрос (было 60 плоских H3 подряд) */
+  .cluster{margin:0 0 54px}
+  .cluster-h{font-size:clamp(20px,2.4vw,27px);margin:0 0 18px;display:flex;align-items:baseline;gap:10px}
+  .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
+  .cluster-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+  .cluster-nav a{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 15px;
+    border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
+    transition:.2s;min-height:36px;display:inline-flex;align-items:center}
+  .cluster-nav a:hover{border-color:var(--glow);color:var(--ink)}
+
+
+  /* ---------- тач-мишени >=44px на телефоне (WCAG 2.5.5) ----------
+     Растим только по вертикали: min-height + вертикальные паддинги. Горизонталь не трогаем —
+     шапка на 360px и так впритык, шире станет — поедет. */
+  @media (max-width:480px){
+    .btn{padding:13px 18px;min-height:44px}
+    .btn.btn-sm{padding:12px 14px;min-height:44px}
+    .scen-btn{padding:12px 15px;min-height:44px}
+    .scen-row{gap:10px}
+    .cluster-nav a{min-height:44px}
+    .brand{min-height:44px}
+    /* 60x32 -> 60x44: ширина та же, поэтому translateX(28px) у кнопки остаётся верным;
+       кнопка 24px при top:9px центрируется (9 сверху / 9 снизу) */
+    .daynight{height:44px}
+    .dn-knob{top:9px}
+    .xclose{min-width:44px;min-height:44px;line-height:1}
+  }
   .scen-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
   .scen-btn{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:999px;
     border:1px solid var(--line);background:var(--panel-2);color:var(--muted);cursor:pointer;transition:.2s}
   .scen-btn:hover{border-color:var(--glow);color:var(--ink)}
-  .scen-btn.on{background:var(--glow);border-color:var(--glow);color:#fff}
+  .scen-btn.on{background:var(--accent-ink);border-color:var(--accent-ink);color:#fff}
 
   /* следы жителя за курсором: план дома вид сверху, след — отпечаток подошвы ботинка (протектор) */
   .footprint{position:absolute;left:0;top:0;width:13px;height:22px;pointer-events:none;
@@ -269,8 +311,8 @@
   .card h3{font-size:17.5px;margin:0 0 6px}
   .card p{color:var(--muted);font-size:13.5px;margin:0}
   .card.link{cursor:pointer} .card.link:hover{transform:translateY(-3px)}
-  .card .go{margin-top:12px;font-size:13px;color:var(--glow);font-weight:600}
-  .kicker{font-family:var(--mono);font-size:11px;color:var(--glow);letter-spacing:.08em;text-transform:uppercase}
+  .card .go{margin-top:12px;font-size:13px;color:var(--accent-ink);font-weight:600}
+  .kicker{font-family:var(--mono);font-size:11px;color:var(--accent-ink);letter-spacing:.08em;text-transform:uppercase}
 
   .risk{display:flex;gap:12px;align-items:flex-start;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   .risk .x{color:var(--crit);font-family:var(--mono);font-weight:700}
@@ -283,12 +325,12 @@
   .stage .n{font-family:var(--mono);font-size:11px;color:var(--good)}
   .stage p{margin:6px 0 0;font-size:13px;color:var(--muted)}
   .stage.hot{border-color:var(--good)}
-  .stage.late{opacity:.55} .stage.late .n{color:var(--crit)}
+  .stage.late{opacity:.85} .stage.late .n{color:var(--crit)}
 
   .steps{counter-reset:st;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
   @media (max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
   .step{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel-2)}
-  .step::before{counter-increment:st;content:counter(st,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--glow)}
+  .step::before{counter-increment:st;content:counter(st,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--accent-ink)}
   .step p{margin:6px 0 0;font-size:13px;color:var(--muted)}
 
   .price-band{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:24px;padding:36px}
@@ -304,14 +346,14 @@
   .tag{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
   .filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
   .filter button{font-family:var(--mono);font-size:12px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
-  .filter button.on{border-color:var(--glow);color:var(--glow)}
+  .filter button.on{border-color:var(--glow);color:var(--accent-ink)}
 
   /* subpage template */
   .sub-hero{padding:52px 0 40px;border-bottom:1px solid var(--line-soft)}
   .sub-hero h1{font-size:clamp(28px,4vw,44px)}
   .answer{margin-top:18px;max-width:64ch;background:color-mix(in srgb,var(--glow) 8%,var(--panel-2));border-left:3px solid var(--glow);border-radius:0 12px 12px 0;padding:16px 20px;font-size:16px}
   .crumbs{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-bottom:16px}
-  .crumbs a{color:var(--faint)} .crumbs a:hover{color:var(--glow)}
+  .crumbs a{color:var(--faint)} .crumbs a:hover{color:var(--accent-ink)}
   .list-col{columns:2;column-gap:28px;max-width:760px}
   @media (max-width:640px){.list-col{columns:1}}
   .list-col li{margin:0 0 8px;color:var(--muted);font-size:14.5px;break-inside:avoid}
@@ -341,7 +383,8 @@
   @media (max-width:820px){.fgrid{grid-template-columns:1fr 1fr}}
   .fgrid h4{font-size:13px;color:var(--ink);margin:0 0 10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
   .fgrid a{display:block;color:var(--faint);font-size:13px;margin:6px 0}
-  .fgrid a:hover{color:var(--glow)}
+  .fgrid a:hover{color:var(--accent-ink)}
+  @media (max-width:480px){.fgrid a{display:inline-block;padding:6px 0;min-height:32px}}
   .foot-note{margin-top:14px;color:var(--warn);font-family:var(--mono);font-size:11.5px}
 
   .page{display:none} .page.on{display:block}
@@ -359,7 +402,7 @@
   .sec-head p{font-size:16px}
   #p-home section{counter-increment:sec}
   #p-home .sec-head .eyebrow::before,#p-home .price-band .eyebrow::before{
-    content:"0" counter(sec) "  ·  ";color:var(--glow);letter-spacing:.18em}
+    content:"0" counter(sec) "  ·  ";color:var(--accent-ink);letter-spacing:.18em}
   .hero-in{min-height:min(86vh,900px);padding:64px 0 84px}
   .hero h1{font-size:clamp(32px,4.9vw,64px);font-weight:500;line-height:1.03}
   .lede{font-size:clamp(16px,1.6vw,19px)}
@@ -376,7 +419,7 @@
   .prod h2{font-size:clamp(28px,4vw,50px);font-weight:500}
   .prod .facts{margin:26px 0 0;display:grid;gap:14px}
   .prod .fact{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--line-soft);padding-top:14px}
-  .prod .fact .k{font-family:var(--mono);font-size:11px;color:var(--glow);letter-spacing:.14em;text-transform:uppercase;min-width:130px}
+  .prod .fact .k{font-family:var(--mono);font-size:11px;color:var(--accent-ink);letter-spacing:.14em;text-transform:uppercase;min-width:130px}
   .prod .fact p{margin:0;color:var(--muted);font-size:14.5px}
   .short{position:relative;aspect-ratio:9/16;max-width:320px;margin:0 auto;border-radius:26px;overflow:hidden;
     border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--night-2));box-shadow:0 40px 80px rgba(0,0,0,.5)}
@@ -419,11 +462,12 @@
   <button class="daynight" id="dnToggle" type="button" role="switch" aria-checked="false" aria-label="Переключить сценарий День/Ночь">
     <span class="dn-ico sun">☀</span><span class="dn-knob"></span><span class="dn-ico moon">☾</span>
   </button>
-  <button class="btn btn-primary btn-sm" data-form>Предварительный расчёт</button>
+  <button type="button" class="btn btn-primary btn-sm" data-form>Предварительный расчёт</button>
 </div></header>
 
 <!-- ===================== HOME ===================== -->
-<main class="page" id="p-home">
+<main>
+<section class="page" id="p-home">
   <div class="hero" id="hero">
     <div class="aurora"><i class="a1"></i><i class="a2"></i></div>
     <div class="cursor-glow" id="cglow"></div>
@@ -433,8 +477,8 @@
         <h1>Инженерные системы и <span class="amber">умный дом</span> для квартир и домов на стадии ремонта и строительства</h1>
         <p class="lede">MiMiSmart проектирует, поставляет и настраивает системы управления, климата, вентиляции, отопления, увлажнения, штор, Wi-Fi, электрики, безопасности и мультимедиа — в единой логике объекта.</p>
         <div class="cta-row">
-          <button class="btn btn-primary" data-form>Получить предварительный расчёт</button>
-          <button class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
+          <button type="button" class="btn btn-primary" data-form>Получить предварительный расчёт</button>
+          <button type="button" class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
         </div>
         <div class="qualify">Работаем с квартирами <b>от 80 м²</b>, домами <b>от 300 м²</b> и объектами <b>от 40 млн ₽</b>&nbsp;<span class="prov">⚠️</span></div>
         <div class="hint"><span class="pulse"></span>Выберите сценарий ниже — дом отреагирует как настоящий</div>
@@ -627,7 +671,7 @@
         <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Поуправляйте системой вживую — до того, как заказывать проект.</p>
         <p class="cut">Вы сами включите сцены света, шторы и климат, увидите щит автоматизации и поймёте, почему обычная электрика устарела ещё 30 лет назад. Новоданиловская наб., 6к1 · 09:00–18:00.</p>
       </div>
-      <button class="btn btn-primary" data-form data-goal="showroom">Записаться в шоурум</button>
+      <button type="button" class="btn btn-primary" data-form data-goal="showroom">Записаться в шоурум</button>
     </div>
   </div></section>
 
@@ -636,21 +680,21 @@
       <p class="eyebrow" style="margin-bottom:12px">Стоимость</p>
       <p class="big">Комплексные инженерные решения рассчитываются индивидуально. Для квартир и домов премиального уровня проекты обычно начинаются <span class="amber">от 2–3 млн ₽</span> <span class="prov">⚠️</span> — и зависят от площади, стадии объекта, состава систем и оборудования.</p>
       <p class="cut"><b>Мы не работаем</b> с запросами на отдельные лампочки, розетки и бытовые гаджеты.</p>
-      <div class="cta-row" style="margin-top:22px"><button class="btn btn-primary" data-form>Получить предварительный расчёт по объекту</button></div>
+      <div class="cta-row" style="margin-top:22px"><button type="button" class="btn btn-primary" data-form>Получить предварительный расчёт по объекту</button></div>
     </div>
   </div></section>
 
   <section><div class="shell">
     <div class="sec-head reveal"><p class="eyebrow">Кейсы</p>
       <h2>Кейсы: стадия, системы, участники, результат.</h2>
-      <p>Читаются как инженерные отчёты — потому что ими и являются. <a href="#/cases" style="color:var(--glow)">Все кейсы →</a></p></div>
+      <p>Читаются как инженерные отчёты — потому что ими и являются. <a href="#/cases" style="color:var(--accent-ink)">Все кейсы →</a></p></div>
     <div class="grid g3" id="homeCases"></div>
   </div></section>
 
   <section><div class="shell">
     <div class="sec-head reveal"><p class="eyebrow">Статьи</p>
       <h2>Инженерные ответы, а не блог о лампочках.</h2>
-      <p>На текущем сайте здесь тестовые заглушки <span class="prov">⚠️</span> — заменяем на статьи-рычаги: вопрос клиента → прямой ответ → как реализуется → почему мы. <a href="#/news" style="color:var(--glow)">Все статьи →</a></p></div>
+      <p>На текущем сайте здесь тестовые заглушки <span class="prov">⚠️</span> — заменяем на статьи-рычаги: вопрос клиента → прямой ответ → как реализуется → почему мы. <a href="#/news" style="color:var(--accent-ink)">Все статьи →</a></p></div>
     <div class="grid g3">
       <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Раньше — дешевле. На стадии проекта трассы под датчики, приводы штор и щит автоматизации закладывают в черновую, без штробления готовых стен. После чистовой отделки систему тоже смонтируют, но часть решений пойдёт поверх — с демонтажем и доплатой.</p></div>
       <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Точная цифра — только после техзадания: смета складывается из стадии объекта, состава систем и класса оборудования. Ориентир по нижней границе для премиальных объектов — от 2–3 млн ₽ за проект <span class="prov">⚠️ порог уточняется</span>. Решение дешевле этой вилки обычно означает урезанный состав, а не экономию.</p></div>
@@ -667,14 +711,14 @@
       </div>
       <div class="cta-row" style="flex-direction:column;align-items:stretch">
         <a class="btn btn-primary" href="#/partners">Стать партнёром</a>
-        <button class="btn btn-ghost" data-form data-goal="partner">Передать клиента</button>
+        <button type="button" class="btn btn-ghost" data-form data-goal="partner">Передать клиента</button>
       </div>
     </div>
   </div></section>
-</main>
+</section>
 
 <!-- ===================== SUBPAGE TEMPLATE ===================== -->
-<main class="page" id="p-sub">
+<section class="page" id="p-sub">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> <span id="s-crumb"></span></p>
     <p class="eyebrow" id="s-eyebrow"></p>
@@ -693,15 +737,15 @@
     <div class="price-band">
       <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Подключаемся на стадии проекта — проверим, что заложено, и покажем, что нужно добавить.</p>
       <div class="cta-row" style="margin-top:18px">
-        <button class="btn btn-primary" data-form>Предварительный расчёт</button>
-        <button class="btn btn-ghost" data-form data-goal="audit">Аудит проекта</button>
+        <button type="button" class="btn btn-primary" data-form>Предварительный расчёт</button>
+        <button type="button" class="btn btn-ghost" data-form data-goal="audit">Аудит проекта</button>
       </div>
     </div>
   </div></section>
-</main>
+</section>
 
 <!-- ===================== EQUIPMENT ===================== -->
-<main class="page" id="p-equipment">
+<section class="page" id="p-equipment">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Оборудование</p>
     <p class="eyebrow">Оборудование собственного производства</p>
@@ -732,39 +776,83 @@
     <div class="price-band">
       <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Своё железо и ПО — это контроль качества, совместимости и поддержки на годы вперёд.</p>
       <div class="cta-row" style="margin-top:18px">
-        <button class="btn btn-primary" data-form>Предварительный расчёт</button>
-        <button class="btn btn-ghost" data-form data-goal="showroom">Посмотреть вживую в шоуруме</button>
+        <button type="button" class="btn btn-primary" data-form>Предварительный расчёт</button>
+        <button type="button" class="btn btn-ghost" data-form data-goal="showroom">Посмотреть вживую в шоуруме</button>
       </div>
     </div>
   </div></section>
-</main>
+</section>
 
 <!-- ===================== CASES ===================== -->
-<main class="page" id="p-cases">
+<section class="page" id="p-cases">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Кейсы</p>
     <p class="eyebrow">Кейсы</p><h1>Инженерные истории объектов</h1>
     <div class="answer">Каждый кейс — стадия подключения, состав систем, участники и решённые проблемы. Данные ниже — <b>шаблоны-заглушки ⚠️</b>: реальные объекты добавим из вашей базы.</div>
   </div></div>
   <section><div class="shell">
+    <h2 class="cluster-h">Реализованные объекты</h2>
     <div class="filter" id="caseFilter"></div>
     <div class="grid g3" id="caseGrid"></div>
   </div></section>
-</main>
+</section>
 
 <!-- ===================== NEWS ===================== -->
-<main class="page" id="p-news">
+<section class="page" id="p-news">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Статьи</p>
     <p class="eyebrow">Статьи</p><h1>База инженерных ответов</h1>
     <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание») <span class="prov">⚠️</span>. Ниже — все 60 статей-рычагов ядра ТЗ по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы. Черновой проход завершён; часть цифр (пороги цен, условия партнёрского вознаграждения, гарантия) помечена <span class="prov">⚠️</span> и ждёт подтверждения фактами от клиента.</div>
   </div></div>
-  <section><div class="shell">
-    <div class="grid g3">
-      <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Раньше — дешевле. На стадии проекта трассы под датчики, приводы штор и щит автоматизации закладывают в черновую, без штробления готовых стен. После чистовой отделки систему тоже смонтируют, но часть решений пойдёт поверх — с демонтажем и доплатой.</p></div>
+  <div class="shell">
+    <nav class="cluster-nav" aria-label="Разделы базы ответов"><a href="#c-trust">Доверие и выбор</a><a href="#c-price">Цена и экономика</a><a href="#c-segments">Сегменты</a><a href="#c-compare">Сравнения</a><a href="#c-subsystems">Подсистемы</a><a href="#c-tech">Технологии</a><a href="#c-process">Процесс</a><a href="#c-objections">Возражения</a><a href="#c-partners-b2b">Партнёрам</a><a href="#c-operation">Эксплуатация</a></nav>
+    <section class="cluster" id="c-trust" aria-labelledby="h-trust">
+      <h2 id="h-trust" class="cluster-h">Доверие и выбор <span class="cluster-n">5</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Как выбрать интегратора умного дома?</h3><p>Пять проверяемых пунктов важнее сайта и портфолио: свой контроллер или перепродажа чужого оборудования; инженерный проект с расчётами или комплект «из коробки»; локальное управление без облака производителя; отдельная гарантия на монтаж и на оборудование; контакт владельца готового объекта, которому можно позвонить. Каждый пункт проверяется до подписания договора.</p></div>
+      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Кто лучшие интеграторы умного дома в Москве?</h3><p>Единого рейтинга «лучших» в природе нет: агентства и сайты-отзовики публикуют платные топы, которые не отражают качество монтажа. Сравнивать стоит по проверяемым параметрам — собственное производство контроллеров, инженерный проект под объект, локальная архитектура без облака, условия гарантии и сервиса после сдачи, реальный объект для осмотра. Эти критерии работают в любом городе, не только в Москве.</p></div>
+      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Почему стоит выбирать российского производителя умного дома?</h3><p>Локальное производство означает, что запчасти и сервис не зависят от трансграничных поставок: контроллер и модули расширения выпускаются или собираются в России, склад и сервисная служба работают без растаможки и валютных рисков. При поломке через несколько лет замену узла получают за дни — логистическая цепочка из-за рубежа тут не участвует.</p></div>
+      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">DIY-умный дом (готовые гаджеты) или интегратор — в чём разница?</h3><p>DIY-сборка — это независимые гаджеты, каждый в своём облаке: выключатель, датчик и камера настраиваются по отдельности, единой инженерной логики между ними нет, и на монтаж никто гарантию не даёт. Интегратор поставляет одну систему с проектом, расчётом нагрузок и сценариями и отвечает за результат целиком — от щита до сценария на стене.</p></div>
+      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Каким отзывам об умном доме можно доверять?</h3><p>Скриншот пяти звёзд с сайта-отзовика ничего не подтверждает. Просят показать реальный объект: адрес, работающие сценарии, разговор с хозяином о трёх годах эксплуатации системы. Второй вопрос — что происходит при поломке: кто платит за выезд и сколько ждать замену узла. Проектная система строится из конкретного оборудования на конкретных стенах — его можно увидеть вживую.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-price" aria-labelledby="h-price">
+      <h2 id="h-price" class="cluster-h">Цена и экономика <span class="cluster-n">7</span></h2>
+      <div class="grid g3">
       <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Точная цифра — только после техзадания: смета складывается из стадии объекта, состава систем и класса оборудования. Ориентир по нижней границе для премиальных объектов — от 2–3 млн ₽ за проект <span class="prov">⚠️ порог уточняется</span>. Решение дешевле этой вилки обычно означает урезанный состав, а не экономию.</p></div>
-      <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Проводной умный дом или облачные гаджеты?</h3><p>Проводная система с локальным контроллером работает без интернета и без сервера производителя: свет и климат переключаются, даже если провайдер лёг. Экосистема из облачных гаджетов зависит от связи и от того, продолжит ли производитель поддерживать сервис.</p></div>
+      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Из чего складывается смета на умный дом?</h3><p>Смета — это сумма пяти статей, а не цена одной коробки с гаджетами: инженерный проект с расчётом нагрузок и трасс, контроллеры и датчики, исполнительные устройства — приводы штор, клапаны климата, диммеры, кабель и монтажные работы, пусконаладка с программированием сценариев. Каждая статья видна отдельной строкой, а не растворяется в общей наценке.</p></div>
+      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Почему инженерный умный дом стоит дороже готовых гаджетов?</h3><p>Цена включает спроектированный результат: расчёт нагрузок и трасс кабеля до начала отделки, интеграцию устройств разных производителей в единую логику сценариев и гарантию на систему в целом. Готовый гаджет отвечает только за собственную исправность. Инженерный подход берёт на себя согласованную работу всего дома — это и формирует разницу в стоимости.</p></div>
+      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Чем опасно дешёвое решение по умному дому?</h3><p>Дешёвое решение обычно означает отсутствие инженерного проекта: конфликты между системами всплывают уже на этапе отделки, когда трассы кабеля скрыты за стенами. Устройства разных производителей могут не согласовать протоколы между собой, а спросить за это не с кого — единого ответственного нет. Переделка на этом этапе обходится дороже исходной экономии.</p></div>
+      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит умный дом за квадратный метр?</h3><p>Цена за квадратный метр без состава систем — почти всегда неточная цифра: одна и та же площадь может нести три сценария освещения или пятнадцать, простой климат-контроль или полное управление шторами и мультирумом. Ориентир, которым можно оперировать до техзадания, — нижняя граница инженерного проекта для премиальных объектов от 2–3 млн ₽ <span class="prov">⚠️ порог уточняется</span>. Точная стоимость за метр считается только после проекта.</p></div>
+      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Окупается ли умный дом на энергосбережении?</h3><p>Умный дом продаёт управление, комфорт и безопасность — это его основная ценность. Согласованная работа климата и освещения по расписанию снижает лишний расход энергии: обогрев не работает в пустой комнате, свет не горит без присутствия. Но считать всю систему инвестицией с окупаемостью в годах — преувеличение: экономия здесь побочный эффект, точного срока возврата никто не считает.</p></div>
+      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Можно ли внедрять умный дом поэтапно без потери качества?</h3><p>Да, если кабельная трасса и логика контроллеров спроектированы сразу под полный объём дома, а устройства и комнаты подключаются поэтапно по бюджету заказчика. Обратный порядок — одна комната без общего проекта, затем вторая — приводит к тем же конфликтам, что и дешёвое решение без инженерии: штробление уже отделанных стен и переделку логики сценариев.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-segments" aria-labelledby="h-segments">
+      <h2 id="h-segments" class="cluster-h">Сегменты <span class="cluster-n">7</span></h2>
+      <div class="grid g3">
       <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Умный дом для офиса: с чего начать?</h3><p>С инженерного аудита помещения, а не с каталога устройств: нагрузка по климату и освещению на количество людей и зон, сценарии по переговорным и open space, точки интеграции с СКУД и пожарной сигнализацией. Коммерческий объект отличается от квартиры количеством пользователей и требованиями безопасности.</p></div>
+      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Нужен ли умный дом в обычной квартире?</h3><p>Проект имеет смысл от 80 м² — это порог, с которого квартира распадается на независимые зоны: спальня, гостиная, кухня со своей логикой света, климата и штор. В студии или однушке сценариев меньше, а разводка кабеля и щит обходятся в ту же цену — инженерный проект не окупается количеством автоматизируемых зон.</p></div>
+      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Чем отличается умный дом для коттеджа от квартиры?</h3><p>В доме появляются системы, которых нет в квартире: периметральная охрана, автоматика ворот и гаража, освещение и полив участка, часто резервный генератор на случай отключения электричества. Проект коттеджа масштабнее: инженерной системой становится сама оболочка здания — участок, забор, подъезд, вместе с помещениями внутри.</p></div>
+      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Как подключить умный дом в новостройке на этапе проекта ЖК?</h3><p>Чем раньше техническое задание передано застройщику или генподрядчику — до того как закрыты стены и разведены короба, — тем больше решений закладывается на уровне кабельной трассы. На этапе проектирования ЖК согласовываются места под щиты, трассы слаботочки, точки под датчики и панели: застройщик закладывает это в проект дома, и монтаж после отделки квартиры не нужен.</p></div>
+      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Что отличает премиальный объект в проектировании умного дома?</h3><p>Премиальный объект отличается количеством независимых зон со своей логикой климата и света: бассейн, сауна, кинозал, несколько гаражей — и у каждой свой сценарий. Освещение строится на протоколе DALI, где яркость и цветовая температура регулируются для каждого светильника отдельно, а базовый проект ограничивается простыми группами включения. Дело в масштабе инженерной интеграции, а бюджет складывается из него.</p></div>
+      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Стоит ли ставить умный дом на дачу?</h3><p>Для сезонного объекта приоритет смещается с ежедневного комфорта на удалённый контроль: датчики протечки и температуры в трубах предупреждают о разморозке системы отопления, пока дом пустует зимой, а сигнализация с датчиками движения сообщает о проникновении. Сценарии вроде «вечер · кино» здесь второстепенны — на даче дом чаще охраняют и мониторят, чем включают светом настроение.</p></div>
+      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Чем умный дом для коммерческого объекта с посетителями отличается от жилого?</h3><p>Автоматика в коммерческом проекте реагирует на занятость помещения: датчики движения и расписание переговорных управляют светом и климатом по факту присутствия людей в зоне. Интеграция с пожарной сигнализацией и СКУД жёстче — этого требуют нормы безопасности для посетителей. Персональных сценариев вроде «вечер дома» здесь нет: только режимы по зонам и времени суток.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-compare" aria-labelledby="h-compare">
+      <h2 id="h-compare" class="cluster-h">Сравнения <span class="cluster-n">5</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Чем умный дом отличается от KNX-системы?</h3><p>KNX — открытый международный стандарт шины связи между датчиками, выключателями и контроллером; на нём строят оборудование десятки производителей, работающее в одной системе. Умный дом описывает результат — управляемый объект целиком, а KNX описывает уровень ниже — протокол внутри него. Систему проектируют либо на KNX, либо на Modbus, либо на закрытом протоколе одного вендора — выбор делают на этапе проекта, до закупки оборудования.</p></div>
+      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">В чём разница между умным домом и экосистемами вроде Яндекс, Apple, SberDevices?</h3><p>Экосистема Яндекс, Apple или SberDevices — облачный сервис для потребительских устройств одного бренда: колонка, розетки, камеры управляются через приложение производителя и работают в пределах его каталога. Инженерная система проектируется под конкретный объект на открытом или закрытом протоколе, объединяет оборудование разных производителей и продолжает работать локально при обрыве интернета. Разница — в архитектуре управления, не в списке функций.</p></div>
+      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Чем инженерный умный дом отличается от китайских DIY-решений с AliExpress?</h3><p>Устройства с AliExpress работают каждое в своём приложении и своём облаке: выключатель одного бренда, датчик другого, шлюз третьего — без единого проекта, объединяющего их в систему, и без гарантии на результат совместной работы. Если два устройства конфликтуют или облако одного из них отключается, разбираться приходится владельцу объекта самостоятельно. Цена ниже на старте, риск интеграции переходит на владельца дома.</p></div>
+      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Сколько стоит умный дом на KNX по сравнению с обычной автоматизацией?</h3><p>Оборудование KNX и сертифицированный монтаж обычно дороже системы на проприетарном контроллере одного производителя — за счёт двух факторов: каждый модуль на шине (реле, диммер, датчик) — отдельное сертифицированное устройство с собственной ценой, а установку вправе выполнять только KNX-партнёр с лицензией ETS. Итоговая стоимость складывается из числа модулей на объекте и трудозатрат сертифицированного инженера, а не фиксируется прайс-листом.</p></div>
+      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Купить комплект умного дома или заказать проект — в чём разница?</h3><p>Комплект — фиксированный набор устройств, подобранный под усреднённую квартиру: количество розеток, длину кабельных трасс и расположение датчиков под конкретный объект в нём никто не считал. Проект рассчитывает нагрузку щита, трассы под реальную планировку и сценарии под привычки жильцов до начала монтажа. Разница проявляется на монтаже: комплекта на объекте либо не хватает, либо остаётся неиспользованное оборудование.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-subsystems" aria-labelledby="h-subsystems">
+      <h2 id="h-subsystems" class="cluster-h">Подсистемы <span class="cluster-n">10</span></h2>
+      <div class="grid g3">
       <div class="card reveal"><span class="kicker">Освещение</span><h3 style="margin-top:8px">DALI-освещение: когда оправдано?</h3><p>DALI даёт индивидуальный адрес каждому светильнику на одной шине — диммирование, сцены и группировка без отдельного управляющего провода на каждую линию. Оправдано там, где светильников много и сценариев света больше двух: трек-освещение, несколько групп в одной комнате, коммерческие пространства.</p></div>
       <div class="card reveal"><span class="kicker">Безопасность</span><h3 style="margin-top:8px">Что делать, если топят соседи?</h3><p>Датчик протечки под мойкой, в санузле и у стиральной машины передаёт сигнал на контроллер, который перекрывает воду автоматически — до того, как вода дойдёт до соседей снизу. Сценарий воспроизведён в демо дома на этой странице: сработавший датчик перекрывает воду и включает эвакуационный свет.</p></div>
       <div class="card reveal"><span class="kicker">Климат</span><h3 style="margin-top:8px">Как совместить отопление и кондиционирование в одной системе?</h3><p>Один контроллер держит логику: пока кондиционер охлаждает комнату, радиатор в ней отключается автоматически — иначе система тратит энергию на борьбу сама с собой. Датчик температуры в каждой зоне решает, что включать: обогрев зимой, охлаждение летом, ничего — в межсезонье. Демо на этой странице: сценарий «Жара за окном» отключает отопление и включает вентиляцию и увлажнение.</p></div>
@@ -772,67 +860,74 @@
       <div class="card reveal"><span class="kicker">Шторы</span><h3 style="margin-top:8px">Как работают электрокарнизы и стоит ли их ставить на все окна?</h3><p>Привод тянет полотно по треку от контроллера — по расписанию, по сценарию («кино», «жара») или вручную с панели. Смысл есть там, где штора длиннее 2–3 м или расположена высоко: руками неудобно, а гостю не нужно разбираться в цепочках. На небольшом окне обычный карниз дешевле и не менее эффективен.</p></div>
       <div class="card reveal"><span class="kicker">Мультирум</span><h3 style="margin-top:8px">Что такое мультирум и чем он отличается от колонки в каждой комнате?</h3><p>Мультирум — один источник звука (плеер, ТВ, стрим), который синхронно или раздельно играет из скрытых потолочных или встроенных динамиков в разных комнатах, без проводных колонок на виду и без рассинхрона между зонами. Обычная колонка в каждой комнате — это N независимых источников без единого управления.</p></div>
       <div class="card reveal"><span class="kicker">Домофон</span><h3 style="margin-top:8px">Как интегрировать домофон в умный дом?</h3><p>Вызов приходит не только на трубку у двери, но и на панель, телефон и в сценарий: свет в прихожей включается сам, картинка с камеры выводится на ближайший экран, дверь можно открыть с телефона даже не из дома. Интеграция зависит от протокола конкретной модели домофона — уточняется на этапе проекта под установленное оборудование.</p></div>
-      <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Не привязывает ли умный дом к одному производителю навсегда?</h3><p>Зависит от архитектуры, а не от бренда: система на открытых протоколах (KNX, Modbus) позволяет менять периферию — датчики, выключатели, приводы — без замены контроллера и логики. Закрытая экосистема с проприетарным хабом такой свободы не даёт. Протокол уточняют до подписания договора, а не после.</p></div>
-      <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Что будет с домом, если компания-интегратор закроется?</h3><p>Если контроллер работает локально и логика хранится в нём самом, а не в облаке производителя, система продолжает управлять светом, климатом и шторами без связи с компанией. Теряются сервис и обновления, но не базовая работоспособность дома — это прямое следствие децентрализованной архитектуры, а не обещание на словах.</p></div>
-      <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Сложно ли пользоваться умным домом человеку без технического опыта?</h3><p>Повседневное управление — один выключатель на стене или один сценарий с панели («ушёл», «кино»), без приложения и настроек: гостю не нужно объяснять систему. Сложность остаётся на стороне интегратора при проектировании и настройке, а не на стороне жителя при обычном использовании.</p></div>
-      <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Что будет, если один датчик или контроллер сломается?</h3><p>При децентрализованной архитектуре сбой одного устройства не останавливает остальные: лампа с неисправным драйвером не гасит свет во всём доме, один вышедший из строя датчик движения не отключает сигнализацию целиком. Замена элемента — это замена одного устройства на линии, а не переустановка системы.</p></div>
-      <div class="card reveal"><span class="kicker">Кибербезопасность</span><h3 style="margin-top:8px">Можно ли взломать умный дом через интернет?</h3><p>Локальная система без выхода в интернет физически недоступна для удалённой атаки — нужен физический доступ к сети внутри объекта. Риск появляется там, где систему специально открывают наружу для удалённого доступа с телефона: тогда точку входа защищают отдельно (VPN, сегментация сети), а не оставляют как есть.</p></div>
-      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Как выбрать интегратора умного дома?</h3><p>Пять проверяемых пунктов важнее сайта и портфолио: свой контроллер или перепродажа чужого оборудования; инженерный проект с расчётами или комплект «из коробки»; локальное управление без облака производителя; отдельная гарантия на монтаж и на оборудование; контакт владельца готового объекта, которому можно позвонить. Каждый пункт проверяется до подписания договора.</p></div>
-      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Кто лучшие интеграторы умного дома в Москве?</h3><p>Единого рейтинга «лучших» в природе нет: агентства и сайты-отзовики публикуют платные топы, которые не отражают качество монтажа. Сравнивать стоит по проверяемым параметрам — собственное производство контроллеров, инженерный проект под объект, локальная архитектура без облака, условия гарантии и сервиса после сдачи, реальный объект для осмотра. Эти критерии работают в любом городе, не только в Москве.</p></div>
-      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Почему стоит выбирать российского производителя умного дома?</h3><p>Локальное производство означает, что запчасти и сервис не зависят от трансграничных поставок: контроллер и модули расширения выпускаются или собираются в России, склад и сервисная служба работают без растаможки и валютных рисков. При поломке через несколько лет замену узла получают за дни — логистическая цепочка из-за рубежа тут не участвует.</p></div>
-      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">DIY-умный дом (готовые гаджеты) или интегратор — в чём разница?</h3><p>DIY-сборка — это независимые гаджеты, каждый в своём облаке: выключатель, датчик и камера настраиваются по отдельности, единой инженерной логики между ними нет, и на монтаж никто гарантию не даёт. Интегратор поставляет одну систему с проектом, расчётом нагрузок и сценариями и отвечает за результат целиком — от щита до сценария на стене.</p></div>
-      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Чем инженерный умный дом отличается от готовой экосистемы (типа Яндекс/Sber/Apple)?</h3><p>Экосистема — набор потребительских устройств на облаке производителя: колонка, розетки и камеры работают через приложение бренда и ограничены его каталогом. Инженерная система проектируется под конкретный объект — щит, кабельные трассы, протокол, — управляет локально и не имеет потолка интеграции: нестандартное оборудование добавляют на этапе проекта. Экосистему настраивают за вечер, систему — проектируют неделями.</p></div>
-      <div class="card reveal"><span class="kicker">Доверие</span><h3 style="margin-top:8px">Каким отзывам об умном доме можно доверять?</h3><p>Скриншот пяти звёзд с сайта-отзовика ничего не подтверждает. Просят показать реальный объект: адрес, работающие сценарии, разговор с хозяином о трёх годах эксплуатации системы. Второй вопрос — что происходит при поломке: кто платит за выезд и сколько ждать замену узла. Проектная система строится из конкретного оборудования на конкретных стенах — его можно увидеть вживую.</p></div>
-      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Чем умный дом отличается от KNX-системы?</h3><p>KNX — открытый международный стандарт шины связи между датчиками, выключателями и контроллером; на нём строят оборудование десятки производителей, работающее в одной системе. Умный дом описывает результат — управляемый объект целиком, а KNX описывает уровень ниже — протокол внутри него. Систему проектируют либо на KNX, либо на Modbus, либо на закрытом протоколе одного вендора — выбор делают на этапе проекта, до закупки оборудования.</p></div>
-      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">В чём разница между умным домом и экосистемами вроде Яндекс, Apple, SberDevices?</h3><p>Экосистема Яндекс, Apple или SberDevices — облачный сервис для потребительских устройств одного бренда: колонка, розетки, камеры управляются через приложение производителя и работают в пределах его каталога. Инженерная система проектируется под конкретный объект на открытом или закрытом протоколе, объединяет оборудование разных производителей и продолжает работать локально при обрыве интернета. Разница — в архитектуре управления, не в списке функций.</p></div>
-      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Чем инженерный умный дом отличается от китайских DIY-решений с AliExpress?</h3><p>Устройства с AliExpress работают каждое в своём приложении и своём облаке: выключатель одного бренда, датчик другого, шлюз третьего — без единого проекта, объединяющего их в систему, и без гарантии на результат совместной работы. Если два устройства конфликтуют или облако одного из них отключается, разбираться приходится владельцу объекта самостоятельно. Цена ниже на старте, риск интеграции переходит на владельца дома.</p></div>
-      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Сколько стоит умный дом на KNX по сравнению с обычной автоматизацией?</h3><p>Оборудование KNX и сертифицированный монтаж обычно дороже системы на проприетарном контроллере одного производителя — за счёт двух факторов: каждый модуль на шине (реле, диммер, датчик) — отдельное сертифицированное устройство с собственной ценой, а установку вправе выполнять только KNX-партнёр с лицензией ETS. Итоговая стоимость складывается из числа модулей на объекте и трудозатрат сертифицированного инженера, а не фиксируется прайс-листом.</p></div>
-      <div class="card reveal"><span class="kicker">Сравнения</span><h3 style="margin-top:8px">Купить комплект умного дома или заказать проект — в чём разница?</h3><p>Комплект — фиксированный набор устройств, подобранный под усреднённую квартиру: количество розеток, длину кабельных трасс и расположение датчиков под конкретный объект в нём никто не считал. Проект рассчитывает нагрузку щита, трассы под реальную планировку и сценарии под привычки жильцов до начала монтажа. Разница проявляется на монтаже: комплекта на объекте либо не хватает, либо остаётся неиспользованное оборудование.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Из чего складывается смета на умный дом?</h3><p>Смета — это сумма пяти статей, а не цена одной коробки с гаджетами: инженерный проект с расчётом нагрузок и трасс, контроллеры и датчики, исполнительные устройства — приводы штор, клапаны климата, диммеры, кабель и монтажные работы, пусконаладка с программированием сценариев. Каждая статья видна отдельной строкой, а не растворяется в общей наценке.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Почему инженерный умный дом стоит дороже готовых гаджетов?</h3><p>Цена включает спроектированный результат: расчёт нагрузок и трасс кабеля до начала отделки, интеграцию устройств разных производителей в единую логику сценариев и гарантию на систему в целом. Готовый гаджет отвечает только за собственную исправность. Инженерный подход берёт на себя согласованную работу всего дома — это и формирует разницу в стоимости.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Чем опасно дешёвое решение по умному дому?</h3><p>Дешёвое решение обычно означает отсутствие инженерного проекта: конфликты между системами всплывают уже на этапе отделки, когда трассы кабеля скрыты за стенами. Устройства разных производителей могут не согласовать протоколы между собой, а спросить за это не с кого — единого ответственного нет. Переделка на этом этапе обходится дороже исходной экономии.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит умный дом за квадратный метр?</h3><p>Цена за квадратный метр без состава систем — почти всегда неточная цифра: одна и та же площадь может нести три сценария освещения или пятнадцать, простой климат-контроль или полное управление шторами и мультирумом. Ориентир, которым можно оперировать до техзадания, — нижняя граница инженерного проекта для премиальных объектов от 2–3 млн ₽ <span class="prov">⚠️ порог уточняется</span>. Точная стоимость за метр считается только после проекта.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Окупается ли умный дом на энергосбережении?</h3><p>Умный дом продаёт управление, комфорт и безопасность — это его основная ценность. Согласованная работа климата и освещения по расписанию снижает лишний расход энергии: обогрев не работает в пустой комнате, свет не горит без присутствия. Но считать всю систему инвестицией с окупаемостью в годах — преувеличение: экономия здесь побочный эффект, точного срока возврата никто не считает.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Можно ли внедрять умный дом поэтапно без потери качества?</h3><p>Да, если кабельная трасса и логика контроллеров спроектированы сразу под полный объём дома, а устройства и комнаты подключаются поэтапно по бюджету заказчика. Обратный порядок — одна комната без общего проекта, затем вторая — приводит к тем же конфликтам, что и дешёвое решение без инженерии: штробление уже отделанных стен и переделку логики сценариев.</p></div>
-      <div class="card reveal"><span class="kicker">Партнёрам</span><h3 style="margin-top:8px">Как стать партнёром (дилером) MiMiSmart?</h3><p>Партнёр приводит клиента с подходящим объектом — квартира от 80 м², дом от 300 м² или объект от 40 млн ₽ — и передаёт инженерную часть проекта компании. Своя часть — архитектура, дизайн или генподряд — остаётся у партнёра. Вознаграждение выплачивается при успешной продаже <span class="prov">⚠️ условия уточняются</span>; сумма и условия сейчас не зафиксированы.</p></div>
-      <div class="card reveal"><span class="kicker">Партнёрам</span><h3 style="margin-top:8px">Работаете ли вы с интеграторами и поставляете оборудование другим компаниям?</h3><p>Да — собственное производство контроллеров позволяет поставлять оборудование интеграторам напрямую, минуя наценку посредника-перепродавца. Партнёр получает прямой канал между производством и объектом вместо цепочки дистрибьюторов. Формат поставки, минимальные объёмы заказа и ценовые условия для интеграторов сейчас уточняются <span class="prov">⚠️ условия уточняются</span>.</p></div>
-      <div class="card reveal"><span class="kicker">Партнёрам</span><h3 style="margin-top:8px">Как застройщику или ЖК подключить умный дом на этапе проекта?</h3><p>Чем раньше застройщик подключает инженерию умного дома, на этапе проектирования, тем дешевле обходится кабельная трасса в расчёте на квартиру: скрытая проводка закладывается одновременно с прочими инженерными сетями, до штукатурных работ. Модель сотрудничества — инженерная спецификация передаётся генподрядчику до начала отделочных работ, чтобы трассы легли в стены один раз.</p></div>
-      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Нужен ли умный дом в обычной квартире?</h3><p>Проект имеет смысл от 80 м² — это порог, с которого квартира распадается на независимые зоны: спальня, гостиная, кухня со своей логикой света, климата и штор. В студии или однушке сценариев меньше, а разводка кабеля и щит обходятся в ту же цену — инженерный проект не окупается количеством автоматизируемых зон.</p></div>
-      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Чем отличается умный дом для коттеджа от квартиры?</h3><p>В доме появляются системы, которых нет в квартире: периметральная охрана, автоматика ворот и гаража, освещение и полив участка, часто резервный генератор на случай отключения электричества. Проект коттеджа масштабнее: инженерной системой становится сама оболочка здания — участок, забор, подъезд, вместе с помещениями внутри.</p></div>
-      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Как подключить умный дом в новостройке на этапе проекта ЖК?</h3><p>Чем раньше техническое задание передано застройщику или генподрядчику — до того как закрыты стены и разведены короба, — тем больше решений закладывается на уровне кабельной трассы. На этапе проектирования ЖК согласовываются места под щиты, трассы слаботочки, точки под датчики и панели: застройщик закладывает это в проект дома, и монтаж после отделки квартиры не нужен.</p></div>
-      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Что отличает премиальный объект в проектировании умного дома?</h3><p>Премиальный объект отличается количеством независимых зон со своей логикой климата и света: бассейн, сауна, кинозал, несколько гаражей — и у каждой свой сценарий. Освещение строится на протоколе DALI, где яркость и цветовая температура регулируются для каждого светильника отдельно, а базовый проект ограничивается простыми группами включения. Дело в масштабе инженерной интеграции, а бюджет складывается из него.</p></div>
-      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Стоит ли ставить умный дом на дачу?</h3><p>Для сезонного объекта приоритет смещается с ежедневного комфорта на удалённый контроль: датчики протечки и температуры в трубах предупреждают о разморозке системы отопления, пока дом пустует зимой, а сигнализация с датчиками движения сообщает о проникновении. Сценарии вроде «вечер · кино» здесь второстепенны — на даче дом чаще охраняют и мониторят, чем включают светом настроение.</p></div>
-      <div class="card reveal"><span class="kicker">Сегменты</span><h3 style="margin-top:8px">Чем умный дом для коммерческого объекта с посетителями отличается от жилого?</h3><p>Автоматика в коммерческом проекте реагирует на занятость помещения: датчики движения и расписание переговорных управляют светом и климатом по факту присутствия людей в зоне. Интеграция с пожарной сигнализацией и СКУД жёстче — этого требуют нормы безопасности для посетителей. Персональных сценариев вроде «вечер дома» здесь нет: только режимы по зонам и времени суток.</p></div>
-      <div class="card reveal"><span class="kicker">Эксплуатация</span><h3 style="margin-top:8px">Как работает приложение управления умным домом?</h3><p>В повседневном использовании панель показывает несколько готовых сценариев — «утро», «ухожу», «кино вечером», — и жилец нажимает один пункт вместо переключения десятка приборов по отдельности. Управление каждым устройством отдельно тоже доступно в интерфейсе, но им пользуется установщик на этапе настройки — для жильца это не основной сценарий работы с приложением.</p></div>
-      <div class="card reveal"><span class="kicker">Эксплуатация</span><h3 style="margin-top:8px">Как настраиваются сценарии автоматизации умного дома?</h3><p>Сценарий — это набор состояний устройств, включаемый одной командой: кнопкой, по расписанию или от датчика. «Ухожу» гасит свет, опускает шторы и переводит климат в экономный режим; «кино» приглушает свет и опускает экран. Сценарии настраиваются на этапе пусконаладки под привычки конкретных жильцов — инженер уточняет, как проходит их обычный день, и собирает сценарий под это.</p></div>
-      <div class="card reveal"><span class="kicker">Эксплуатация</span><h3 style="margin-top:8px">Проводится ли обучение при сдаче объекта умного дома?</h3><p>При сдаче объекта инженер показывает жильцу физические панели и выключатели вживую и проходит с ним по сценариям, настроенным конкретно под этот дом — что включает «утро», что делает кнопка у кровати, как отменить сценарий вручную. Готового мануала на все случаи не существует: проект у каждого объекта свой, поэтому и объяснение привязано к тому, что реально смонтировано и настроено.</p></div>
       <div class="card reveal"><span class="kicker">Электропитание</span><h3 style="margin-top:8px">Как управлять электропитанием и энергопотреблением через умный дом?</h3><p>Контроллер видит нагрузку по каждой линии отдельно и отключает второстепенные контуры — тёплый пол, розетки в неиспользуемых комнатах — при пиковой нагрузке или когда дом пуст. При аварии электросети система переключает питание на резервный ДГУ автоматически, без участия человека, и возвращает дом на городскую сеть, когда напряжение восстановится.</p></div>
       <div class="card reveal"><span class="kicker">Фасад/ландшафт</span><h3 style="margin-top:8px">Как умный дом управляет фасадом, ландшафтным освещением и поливом?</h3><p>Освещение фасада включается по сумеречному датчику: время сдвигается автоматически между зимой и летом. Полив реагирует на влажность почвы — пропускает цикл после дождя и добавляет полив в жару, без ручной подстройки таймера. Сценарий «гости приехали» разом поднимает яркость подъездной дорожки и фасада.</p></div>
       <div class="card reveal"><span class="kicker">Инженерные системы</span><h3 style="margin-top:8px">Можно ли объединить сауну, бассейн и камин в одну систему умного дома?</h3><p>Да, но каждый узел сохраняет свою сертифицированную логику безопасности: таймер отключения печи в сауне, контроль уровня воды и график фильтрации в бассейне, розжиг и заслонка камина работают по своим правилам и не заменяются общим контроллером. В общую систему выводится включение и сценарии — камин и подсветка бассейна становятся частью сценария «вечер» наравне со светом и климатом.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-tech" aria-labelledby="h-tech">
+      <h2 id="h-tech" class="cluster-h">Технологии <span class="cluster-n">8</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Проводной умный дом или облачные гаджеты?</h3><p>Проводная система с локальным контроллером работает без интернета и без сервера производителя: свет и климат переключаются, даже если провайдер лёг. Экосистема из облачных гаджетов зависит от связи и от того, продолжит ли производитель поддерживать сервис.</p></div>
       <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Что такое децентрализованная архитектура умного дома и зачем она нужна?</h3><p>В децентрализованной архитектуре нет одного центрального хаба, отказ которого гасит весь дом: у каждой линии и зоны — свой контроллер со своей логикой. Если один узел перестаёт отвечать, свет и климат в остальных комнатах продолжают работать штатно. Авария локализуется на уровне одного устройства или линии, дом в целом сохраняет управление.</p></div>
       <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Что значит «умный дом без облака» и почему это важно?</h3><p>Логика управления работает на локальном контроллере внутри дома: команды выполняются на месте, без обращения к серверу производителя. Поэтому система продолжает работать без интернета — свет, климат и сценарии переключаются локально. Если производитель закроет облачный сервис или обанкротится, на работе дома это никак не скажется: обращаться не к чему.</p></div>
       <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Почему у вас свои контроллеры, а не сторонние?</h3><p>Контроль над железом и прошивкой целиком означает более короткий путь от обнаруженной проблемы до исправления: изменение логики не ждёт согласования с внешним производителем контроллера. Это также снимает зависимость от чужой продуктовой линейки — снятие модели с производства или смена политики поддержки стороннего вендора не отражается на объектах на нашей платформе.</p></div>
       <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Какие протоколы использует умный дом (KNX, Modbus и другие) и почему это важно?</h3><p>KNX, Modbus и другие открытые протоколы позволяют совмещать на одной шине оборудование разных производителей и менять отдельные устройства позже, не переделывая всю систему. Поэтому на этапе проектирования протокол важнее конкретного бренда: выбор в пользу открытого стандарта определяет, можно ли будет через несколько лет заменить один контроллер освещения, не трогая остальную инфраструктуру дома.</p></div>
       <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Что такое отказоустойчивость в умном доме и как она обеспечивается?</h3><p>Отказоустойчивость — это когда сбой одного устройства или линии не распространяется на остальную систему: вышедший из строя диммер в одной комнате не выключает свет в доме и не блокирует работу климата или сигнализации. Обеспечивается это децентрализованными контроллерами по зонам — каждая зона обрабатывает свою логику самостоятельно, вместо одной точки, от которой зависит всё.</p></div>
       <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Можно ли обновлять и расширять систему умного дома со временем?</h3><p>Да: открытый протокол и децентрализованная архитектура позволяют добавить новую зону или устройство на существующую шину, не перепроектируя всю инсталляцию — контроллер новой комнаты просто встаёт рядом с остальными. В закрытой экосистеме одного вендора расширение обычно означает покупку устройств именно этой линейки продуктов, совместимых только друг с другом.</p></div>
+      <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Проводной умный дом или беспроводной — что выбрать?</h3><p>Проводная шина не зависит от радиоэфира и батареек: сигнал идёт по кабелю, задержки предсказуемы, питание постоянное. Беспроводные устройства (радиопротоколы) выигрывают там, где штробить уже нельзя — в готовой отделке. На стадии ремонта выбирают провод, в готовой квартире — радио или смешанную схему, где критичные узлы всё равно проводные.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-process" aria-labelledby="h-process">
+      <h2 id="h-process" class="cluster-h">Процесс <span class="cluster-n">6</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Раньше — дешевле. На стадии проекта трассы под датчики, приводы штор и щит автоматизации закладывают в черновую, без штробления готовых стен. После чистовой отделки систему тоже смонтируют, но часть решений пойдёт поверх — с демонтажем и доплатой.</p></div>
       <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Из каких этапов состоит проект умного дома?</h3><p>Проект идёт по пяти стадиям: техническое задание и инженерный расчёт, разводка кабельных трасс до финишной отделки, монтаж контроллеров и устройств, пусконаладка со сценариями, сдача объекта с обучением жильца. Пропуск инженерного этапа в начале — самая частая причина переделок позже.</p></div>
       <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Сколько времени занимает монтаж умного дома?</h3><p>Срок зависит от площади объекта и стадии ремонта, а не фиксируется одной цифрой для всех проектов: разводка кабеля идёт параллельно с общестроительными работами и не добавляет отдельного времени, если начата вовремя. Пусконаладка и настройка сценариев — отдельный этап уже после того, как отделка закончена и оборудование смонтировано.</p></div>
       <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Что входит в проектирование умного дома?</h3><p>Расчёт электрических и слаботочных нагрузок по каждой зоне, схема кабельных трасс от щита до каждого устройства, спецификация оборудования под сценарии заказчика, согласование с архитектором и электриком по местам установки. Проект — это документ, по которому монтажники работают на объекте, а не эскиз для презентации.</p></div>
       <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Какая гарантия действует на умный дом?</h3><p>Гарантия распространяется отдельно на оборудование (срок производителя) и на монтажные работы (срок компании-интегратора) — это две разные гарантии, которые стоит разделять при сравнении предложений. Условия и сроки для конкретных линеек оборудования уточняются в договоре на этапе проекта <span class="prov">⚠️ уточняется</span>.</p></div>
       <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Как устроена сервисная поддержка после сдачи объекта умного дома?</h3><p>Заявка на сервис идёт напрямую в компанию, которая монтировала систему и знает конкретный объект — не в чат поддержки производителя устройства. Инженер видит историю проекта: какое оборудование стоит, по какой схеме разведены трассы, что настроено в сценариях — и не тратит визит на диагностику с нуля.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-objections" aria-labelledby="h-objections">
+      <h2 id="h-objections" class="cluster-h">Возражения <span class="cluster-n">6</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Не привязывает ли умный дом к одному производителю навсегда?</h3><p>Зависит от архитектуры, а не от бренда: система на открытых протоколах (KNX, Modbus) позволяет менять периферию — датчики, выключатели, приводы — без замены контроллера и логики. Закрытая экосистема с проприетарным хабом такой свободы не даёт. Протокол уточняют до подписания договора, а не после.</p></div>
+      <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Что будет с домом, если компания-интегратор закроется?</h3><p>Если контроллер работает локально и логика хранится в нём самом, а не в облаке производителя, система продолжает управлять светом, климатом и шторами без связи с компанией. Теряются сервис и обновления, но не базовая работоспособность дома — это прямое следствие децентрализованной архитектуры, а не обещание на словах.</p></div>
+      <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Сложно ли пользоваться умным домом человеку без технического опыта?</h3><p>Повседневное управление — один выключатель на стене или один сценарий с панели («ушёл», «кино»), без приложения и настроек: гостю не нужно объяснять систему. Сложность остаётся на стороне интегратора при проектировании и настройке, а не на стороне жителя при обычном использовании.</p></div>
+      <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Что будет, если один датчик или контроллер сломается?</h3><p>При децентрализованной архитектуре сбой одного устройства не останавливает остальные: лампа с неисправным драйвером не гасит свет во всём доме, один вышедший из строя датчик движения не отключает сигнализацию целиком. Замена элемента — это замена одного устройства на линии, а не переустановка системы.</p></div>
+      <div class="card reveal"><span class="kicker">Кибербезопасность</span><h3 style="margin-top:8px">Можно ли взломать умный дом через интернет?</h3><p>Локальная система без выхода в интернет физически недоступна для удалённой атаки — нужен физический доступ к сети внутри объекта. Риск появляется там, где систему специально открывают наружу для удалённого доступа с телефона: тогда точку входа защищают отдельно (VPN, сегментация сети), а не оставляют как есть.</p></div>
       <div class="card reveal"><span class="kicker">Возражения</span><h3 style="margin-top:8px">Можно ли пристроить новую комнату или флигель к уже существующей системе умного дома?</h3><p>Да, если исходная система построена на открытом протоколе и децентрализованной архитектуре: новая зона получает свой контроллер и подключается к существующей шине, без замены щита или перепрошивки остального дома. Ограничение — ёмкость самой шины и щита, которая закладывается в проект заранее с запасом под будущее расширение.</p></div>
-    </div>
-  </div></section>
-</main>
+      </div>
+    </section>
+    <section class="cluster" id="c-partners-b2b" aria-labelledby="h-partners-b2b">
+      <h2 id="h-partners-b2b" class="cluster-h">Партнёрам <span class="cluster-n">3</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Партнёрам</span><h3 style="margin-top:8px">Как стать партнёром (дилером) MiMiSmart?</h3><p>Партнёр приводит клиента с подходящим объектом — квартира от 80 м², дом от 300 м² или объект от 40 млн ₽ — и передаёт инженерную часть проекта компании. Своя часть — архитектура, дизайн или генподряд — остаётся у партнёра. Вознаграждение выплачивается при успешной продаже <span class="prov">⚠️ условия уточняются</span>; сумма и условия сейчас не зафиксированы.</p></div>
+      <div class="card reveal"><span class="kicker">Партнёрам</span><h3 style="margin-top:8px">Работаете ли вы с интеграторами и поставляете оборудование другим компаниям?</h3><p>Да — собственное производство контроллеров позволяет поставлять оборудование интеграторам напрямую, минуя наценку посредника-перепродавца. Партнёр получает прямой канал между производством и объектом вместо цепочки дистрибьюторов. Формат поставки, минимальные объёмы заказа и ценовые условия для интеграторов сейчас уточняются <span class="prov">⚠️ условия уточняются</span>.</p></div>
+      <div class="card reveal"><span class="kicker">Партнёрам</span><h3 style="margin-top:8px">Как застройщику или ЖК подключить умный дом на этапе проекта?</h3><p>Чем раньше застройщик подключает инженерию умного дома, на этапе проектирования, тем дешевле обходится кабельная трасса в расчёте на квартиру: скрытая проводка закладывается одновременно с прочими инженерными сетями, до штукатурных работ. Модель сотрудничества — инженерная спецификация передаётся генподрядчику до начала отделочных работ, чтобы трассы легли в стены один раз.</p></div>
+      </div>
+    </section>
+    <section class="cluster" id="c-operation" aria-labelledby="h-operation">
+      <h2 id="h-operation" class="cluster-h">Эксплуатация <span class="cluster-n">3</span></h2>
+      <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Эксплуатация</span><h3 style="margin-top:8px">Как работает приложение управления умным домом?</h3><p>В повседневном использовании панель показывает несколько готовых сценариев — «утро», «ухожу», «кино вечером», — и жилец нажимает один пункт вместо переключения десятка приборов по отдельности. Управление каждым устройством отдельно тоже доступно в интерфейсе, но им пользуется установщик на этапе настройки — для жильца это не основной сценарий работы с приложением.</p></div>
+      <div class="card reveal"><span class="kicker">Эксплуатация</span><h3 style="margin-top:8px">Как настраиваются сценарии автоматизации умного дома?</h3><p>Сценарий — это набор состояний устройств, включаемый одной командой: кнопкой, по расписанию или от датчика. «Ухожу» гасит свет, опускает шторы и переводит климат в экономный режим; «кино» приглушает свет и опускает экран. Сценарии настраиваются на этапе пусконаладки под привычки конкретных жильцов — инженер уточняет, как проходит их обычный день, и собирает сценарий под это.</p></div>
+      <div class="card reveal"><span class="kicker">Эксплуатация</span><h3 style="margin-top:8px">Проводится ли обучение при сдаче объекта умного дома?</h3><p>При сдаче объекта инженер показывает жильцу физические панели и выключатели вживую и проходит с ним по сценариям, настроенным конкретно под этот дом — что включает «утро», что делает кнопка у кровати, как отменить сценарий вручную. Готового мануала на все случаи не существует: проект у каждого объекта свой, поэтому и объяснение привязано к тому, что реально смонтировано и настроено.</p></div>
+      </div>
+    </section>
+  </div>
+</section>
 
 <!-- ===================== PARTNERS ===================== -->
-<main class="page" id="p-partners">
+<section class="page" id="p-partners">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Партнёрам</p>
     <p class="eyebrow">Партнёрам</p><h1>Дизайнерам, архитекторам, строителям и смежникам</h1>
     <div class="answer">Передайте нам клиента с квартирой от 80 м², домом от 300 м² или объектом от 40 млн ₽ — мы возьмём инженерную часть, сохраним ваши зоны ответственности и выплатим вознаграждение при успешной продаже. <span class="prov">⚠️ размер и условия — уточняются</span></div>
   </div></div>
   <section><div class="shell">
+    <h2 class="cluster-h">Кому и что мы даём</h2>
     <div class="grid g2">
       <div class="card"><span class="kicker">Дизайнеру / архитектору</span><h3>Инженерия не испортит дизайн</h3><p>Заранее заложим выключатели, датчики, карнизы, климат и свет; согласуем с потолками и нишами; снизим конфликты смежников на объекте.</p></div>
       <div class="card"><span class="kicker">Строителю / прорабу</span><h3>Без переделок и простоев</h3><p>Кабели, щиты, трассы и оборудование — вовремя и согласованно. Подрядчик, который помогает стройке, а не мешает ей.</p></div>
@@ -840,33 +935,34 @@
       <div class="card"><span class="kicker">Как это работает</span><h3>Передача клиента за 3 шага</h3><p>Заявка → совместная встреча/аудит проекта → фиксация вознаграждения. Партнёрские материалы вышлем после регистрации.</p></div>
     </div>
     <div class="cta-row" style="margin-top:24px">
-      <button class="btn btn-primary" data-form data-goal="partner">Стать партнёром</button>
-      <button class="btn btn-ghost" data-form data-goal="partner">Передать клиента</button>
-      <button class="btn btn-ghost" data-form data-goal="partner">Получить материалы</button>
+      <button type="button" class="btn btn-primary" data-form data-goal="partner">Стать партнёром</button>
+      <button type="button" class="btn btn-ghost" data-form data-goal="partner">Передать клиента</button>
+      <button type="button" class="btn btn-ghost" data-form data-goal="partner">Получить материалы</button>
     </div>
   </div></section>
-</main>
+</section>
 
 <!-- ===================== ABOUT ===================== -->
-<main class="page" id="p-about">
+<section class="page" id="p-about">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / О компании</p>
     <p class="eyebrow">О компании</p><h1>Разработчик, производитель и инженерный подрядчик</h1>
     <div class="answer">MiMiSmart с 2004 года разрабатывает и производит собственные контроллеры и ПО для автоматизации, проектирует и реализует инженерные системы премиальных квартир и домов. Проводная архитектура, локальная работа без облака, бессрочная гарантия <span class="prov">⚠️ условия уточнить</span>.</div>
   </div></div>
   <section><div class="shell">
+    <h2 class="cluster-h">Чем мы отличаемся</h2>
     <div class="grid g4">
       <div class="card"><span class="kicker">Производство</span><h3>Своё железо и ПО</h3><p>Контроллеры и софт разрабатываем и выпускаем сами — контролируем качество, совместимость и поддержку на годы вперёд.</p></div>
       <div class="card"><span class="kicker">Архитектура</span><h3>Проводная, децентрализованная</h3><p>Система работает локально, без зависимости от интернета и облачных сервисов. Нет единой точки отказа.</p></div>
       <div class="card"><span class="kicker">Опыт</span><h3>5000+ объектов <span class="prov">⚠️</span></h3><p>Более 20 лет проектов: квартиры, дома, офисы. 20 представительств <span class="prov">⚠️</span>.</p></div>
       <div class="card"><span class="kicker">Гарантия</span><h3>Бессрочная <span class="prov">⚠️</span></h3><p>Отвечаем за систему на всём жизненном цикле объекта: сервис, развитие, поддержка.</p></div>
     </div>
-    <div class="conclusion" style="margin-top:22px">Шоурум в Москве: Новоданиловская наб., 6к1 — приходите поуправлять системой вживую. <button class="btn btn-ghost btn-sm" data-form data-goal="showroom" style="margin-left:10px">Записаться</button></div>
+    <div class="conclusion" style="margin-top:22px">Шоурум в Москве: Новоданиловская наб., 6к1 — приходите поуправлять системой вживую. <button type="button" class="btn btn-ghost btn-sm" data-form data-goal="showroom" style="margin-left:10px">Записаться</button></div>
   </div></section>
-</main>
+</section>
 
 <!-- ===================== CONTACTS ===================== -->
-<main class="page" id="p-contacts">
+<section class="page" id="p-contacts">
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Контакты</p>
     <p class="eyebrow">Контакты</p><h1>Обсудим ваш объект</h1>
@@ -874,9 +970,9 @@
   </div></div>
   <section><div class="shell">
     <div class="cta-row">
-      <button class="btn btn-primary" data-form>Получить предварительный расчёт</button>
-      <button class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
-      <button class="btn btn-ghost" data-form data-goal="showroom">Записаться в шоурум</button>
+      <button type="button" class="btn btn-primary" data-form>Получить предварительный расчёт</button>
+      <button type="button" class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
+      <button type="button" class="btn btn-ghost" data-form data-goal="showroom">Записаться в шоурум</button>
     </div>
   </div></section>
 </main>
@@ -928,7 +1024,7 @@
       <label class="fl"><span>Кто принимает решение</span><select><option>Я</option><option>Совместно с семьёй</option><option>Заказчик (я представитель)</option></select></label>
     </div>
     <label class="fl"><span>Планировка или проект</span><select><option>Могу прислать</option><option>Пока нет</option></select></label>
-    <button class="btn btn-primary" style="width:100%;margin-top:6px">Отправить</button>
+    <button type="button" class="btn btn-primary" style="width:100%;margin-top:6px">Отправить</button>
     <p class="done" style="display:none;color:var(--good);font-size:14px;margin:12px 0 0">Заявка принята (прототип — отправка в CRM будет подключена на этапе 1).</p>
     <p class="note">Нажимая «Отправить», вы соглашаетесь с политикой обработки персональных данных.</p>
   </form>
@@ -936,6 +1032,9 @@
 
 <script>
 (function(){
+  /* Файл — фрагмент: <html> подставляет обёртка Artifact, поэтому lang ставим из JS.
+     В продакшене на Next.js это обязано быть в HTML: <html lang="ru"> — до выполнения JS. */
+  document.documentElement.lang='ru';
   var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- декоративная разметка кнопок (лепестки+блик, видны только в дневном режиме) ---------- */
@@ -1024,7 +1123,7 @@
   /* cases page + filters */
   var FTAGS=['все','квартира','дом','климат','умный дом','шторы','свет','мультимедиа','безопасность','комплекс'];
   var cf=document.getElementById('caseFilter'),cg=document.getElementById('caseGrid');
-  FTAGS.forEach(function(t,i){var b=document.createElement('button');b.textContent=t;if(!i)b.classList.add('on');
+  FTAGS.forEach(function(t,i){var b=document.createElement('button');b.type='button';b.textContent=t;if(!i)b.classList.add('on');
     b.onclick=function(){cf.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');draw(t)};cf.appendChild(b)});
   function draw(t){cg.innerHTML='';CASES.filter(function(c){return t==='все'||c.tags.indexOf(t)>-1}).forEach(function(c){var n=caseCard(c);n.classList.add('in');cg.appendChild(n)});
     if(!cg.children.length)cg.innerHTML='<p style="color:var(--faint)">Кейсы этой категории добавим из вашей базы ⚠️</p>'}
@@ -1228,6 +1327,65 @@
     if(e.target.closest('[data-close]')||e.target===modal)modal.classList.remove('open');
   });
   document.addEventListener('keydown',function(e){if(e.key==='Escape')modal.classList.remove('open')});
+
+  /* ---------- a11y модалки: фокус на открытии, ловушка Tab, возврат на закрытии ----------
+     Наблюдатель поверх существующего делегированного обработчика: не трогает open/close,
+     а реагирует на смену класса .open — поэтому одинаково работает для Escape,
+     клика по подложке и крестика. */
+  (function(){
+    if(!modal)return;
+    var SEL='a[href],area[href],button,input,select,textarea,iframe,object,embed,[tabindex],[contenteditable="true"]';
+    var lastTrigger=null;
+    var titleEl=document.getElementById('formTitle');
+    if(titleEl){
+      modal.setAttribute('aria-labelledby',titleEl.id);
+      modal.removeAttribute('aria-label'); /* статичный label спорил бы с динамическим заголовком */
+    }
+    if(!modal.hasAttribute('tabindex'))modal.setAttribute('tabindex','-1');
+
+    function isOpen(){return modal.classList.contains('open')}
+    function usable(el){
+      if(el.disabled)return false;
+      if(el.getAttribute('aria-hidden')==='true')return false;
+      if(el.tabIndex<0)return false;
+      if(!el.getClientRects().length)return false;
+      return getComputedStyle(el).visibility!=='hidden';
+    }
+    function focusables(){
+      var all=modal.querySelectorAll(SEL),out=[],i;
+      for(i=0;i<all.length;i++){if(usable(all[i]))out.push(all[i])}
+      return out;
+    }
+    function focusSafe(el){try{el.focus({preventScroll:false})}catch(err){el.focus()}}
+    function onOpen(){var f=focusables();focusSafe(f.length?f[0]:modal)}
+    function onClose(){
+      var t=lastTrigger;lastTrigger=null;
+      if(t&&document.contains(t)&&t.getClientRects().length&&typeof t.focus==='function'){focusSafe(t)}
+      else if(document.activeElement&&modal.contains(document.activeElement)){document.activeElement.blur()}
+    }
+    /* инициатора ловим на фазе перехвата — до делегированного обработчика, который откроет окно */
+    document.addEventListener('click',function(e){
+      var el=e.target;if(!el||!el.closest)return;
+      var t=el.closest('[data-form]');if(t)lastTrigger=t;
+    },true);
+
+    var wasOpen=isOpen();
+    new MutationObserver(function(){
+      var now=isOpen();if(now===wasOpen)return;wasOpen=now;
+      if(now)onOpen();else onClose();
+    }).observe(modal,{attributes:true,attributeFilter:['class']});
+
+    document.addEventListener('keydown',function(e){
+      if(e.key!=='Tab'&&e.keyCode!==9)return;
+      if(!isOpen())return;
+      var f=focusables();
+      if(!f.length){e.preventDefault();focusSafe(modal);return}
+      var first=f[0],last=f[f.length-1],a=document.activeElement;
+      if(!modal.contains(a)){e.preventDefault();focusSafe(e.shiftKey?last:first);return}
+      if(e.shiftKey&&(a===first||a===modal)){e.preventDefault();focusSafe(last)}
+      else if(!e.shiftKey&&a===last){e.preventDefault();focusSafe(first)}
+    },true);
+  })();
 
   route();
 
