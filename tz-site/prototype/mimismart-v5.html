@@ -461,6 +461,7 @@
     <a href="#/functions/curtains">Шторы</a><a href="#/functions/lighting">Свет</a>
     <a href="#/functions/multimedia">Мультимедиа</a>
     <a href="#/functions/security">Безопасность</a>
+    <a href="#/pricing">Цены</a>
     <a href="#/equipment">Оборудование</a>
     <a href="#/cases">Кейсы</a>
     <a href="#/news">Статьи</a>
@@ -704,9 +705,9 @@
       <h2>Инженерные ответы, а не блог о лампочках.</h2>
       <p>На текущем сайте здесь тестовые заглушки <span class="prov">⚠️</span> — заменяем на статьи-рычаги: вопрос клиента → прямой ответ → как реализуется → почему мы. <a href="#/news" style="color:var(--accent-ink)">Все статьи →</a></p></div>
     <div class="grid g3">
-      <div class="card reveal"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Раньше — дешевле. На стадии проекта трассы под датчики, приводы штор и щит автоматизации закладывают в черновую, без штробления готовых стен. После чистовой отделки систему тоже смонтируют, но часть решений пойдёт поверх — с демонтажем и доплатой.</p></div>
-      <div class="card reveal"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Точная цифра — только после техзадания: смета складывается из стадии объекта, состава систем и класса оборудования. Ориентир по нижней границе для премиальных объектов — от 2–3 млн ₽ за проект <span class="prov">⚠️ порог уточняется</span>. Решение дешевле этой вилки обычно означает урезанный состав, а не экономию.</p></div>
-      <div class="card reveal"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Проводной умный дом или облачные гаджеты?</h3><p>Проводная система с локальным контроллером работает без интернета и без сервера производителя: свет и климат переключаются, даже если провайдер лёг. Экосистема из облачных гаджетов зависит от связи и от того, продолжит ли производитель поддерживать сервис.</p></div>
+      <a class="card card-link reveal" data-lever="Когда подключать умный дом при ремонте?"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Раньше — дешевле: до чистовой отделки трассы закладывают без штробления.</p><div class="go">Читать ответ →</div></a>
+      <a class="card card-link reveal" data-lever="Сколько стоит инженерия для квартиры 150 м²?"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Смета зависит от стадии объекта, состава систем и класса оборудования.</p><div class="go">Читать ответ →</div></a>
+      <a class="card card-link reveal" data-lever="Проводной умный дом или облачные гаджеты?"><span class="kicker">Технологии</span><h3 style="margin-top:8px">Проводной умный дом или облачные гаджеты?</h3><p>Локальный контроллер работает без интернета и без сервера производителя.</p><div class="go">Читать ответ →</div></a>
     </div>
   </div></section>
 
@@ -925,6 +926,65 @@
       </div>
     </section>
   </div>
+</section>
+
+<!-- ===================== PRICING =====================
+     ИА помечает /pricing как критично отсутствующую страницу. Это хаб, а не копия рычагов:
+     собственный текст + ссылки на 7 рычагов кластера «Цена». Дублировать их текст сюда нельзя —
+     два одинаковых ответа делят вес и заставляют ИИ выбирать между ними. -->
+<section class="page" id="p-pricing">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Цены</p>
+    <p class="eyebrow">Стоимость</p>
+    <h1>Сколько стоит инженерия объекта</h1>
+    <div class="answer">Точную цифру даёт только техзадание: смета зависит от стадии объекта,
+      состава систем и класса оборудования. Ориентир по нижней границе для премиальных квартир и
+      домов — <span class="amber">от 2–3 млн ₽ за проект</span> <span class="prov">⚠️ порог уточняется</span>.
+      Ниже — из чего складывается эта цифра и что её двигает.</div>
+  </div></div>
+
+  <section><div class="shell">
+    <h2 class="cluster-h">Из чего складывается смета</h2>
+    <div class="grid g3">
+      <div class="card reveal"><span class="kicker">01</span><h3>Инженерный проект</h3><p>Расчёт нагрузок, схема трасс от щита до каждого устройства, спецификация под сценарии. Документ, по которому работают монтажники.</p></div>
+      <div class="card reveal"><span class="kicker">02</span><h3>Оборудование</h3><p>Контроллеры, датчики, исполнительные устройства — приводы штор, клапаны климата, диммеры. Класс оборудования двигает смету сильнее всего.</p></div>
+      <div class="card reveal"><span class="kicker">03</span><h3>Кабель и монтаж</h3><p>Разводка трасс и щит автоматизации. На стадии черновой идёт параллельно общестроительным работам и почти не добавляет срока.</p></div>
+      <div class="card reveal"><span class="kicker">04</span><h3>Пусконаладка</h3><p>Программирование сценариев под то, как люди реально живут в доме, а не под шаблон. Отдельный этап после отделки.</p></div>
+      <div class="card reveal"><span class="kicker">05</span><h3>Сдача и обучение</h3><p>Прогон по объекту, передача жильцу, гарантия на систему в целом — отдельно на оборудование, отдельно на работы.</p></div>
+      <div class="card reveal"><span class="kicker">06</span><h3>Сервис после сдачи</h3><p>Заявка идёт в компанию, которая монтировала объект и знает его схему, а не в общий чат поддержки производителя устройства.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <h2 class="cluster-h">Что двигает цену</h2>
+    <div class="grid g2">
+      <div class="card reveal"><h3>Стадия объекта</h3><p>До закрытия стен решения закладываются в кабельную трассу. После чистовой отделки часть из них идёт поверх — с демонтажем и доплатой. Это самый крупный множитель в смете.</p></div>
+      <div class="card reveal"><h3>Количество независимых зон</h3><p>Площадь сама по себе значит меньше, чем число зон со своей логикой света и климата. 150 м² с тремя сценариями и 150 м² с пятнадцатью — разные проекты.</p></div>
+      <div class="card reveal"><h3>Состав систем</h3><p>Свет и шторы — это один бюджет. Плюс климат, вентиляция, увлажнение, безопасность, мультирум, ДГУ — другой. Считается по факту техзадания.</p></div>
+      <div class="card reveal"><h3>Класс оборудования</h3><p>Один и тот же сценарий собирается на разной технике. Разница в классе даёт разницу в смете при одинаковом наборе функций.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="price-band reveal">
+      <p class="eyebrow" style="margin-bottom:12px">Отсечка</p>
+      <p class="big">Мы не беремся за отдельные лампочки, розетки и бытовые гаджеты. Инженерный
+        проект окупается там, где систем несколько и их надо согласовать между собой: квартиры
+        от 80 м², дома от 300 м², объекты от 40 млн ₽ <span class="prov">⚠️ пороги уточняются</span>.</p>
+      <p class="cut">Решение заметно дешевле этой вилки обычно означает урезанный состав, а не
+        экономию: отсутствие проекта всплывает на отделке, когда трассы уже в стенах.</p>
+      <div class="cta-row" style="margin-top:22px">
+        <button type="button" class="btn btn-primary" data-form>Получить расчёт по объекту</button>
+        <button type="button" class="btn btn-ghost" data-form data-goal="showroom">Посмотреть систему в шоуруме</button>
+      </div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <h2 class="cluster-h">Разборы по деньгам</h2>
+    <p style="color:var(--muted);margin:0 0 18px">Отдельные вопросы про стоимость — с прямыми ответами.</p>
+    <div class="grid g3" id="pricingLevers"></div>
+  </div></section>
 </section>
 
 <!-- ===================== ONE ANSWER (per-lever page) =====================
@@ -1239,8 +1299,27 @@
     setAnswerLd(rec);
   }
 
+  /* ссылки на рычаги кластера «Цена» — только заголовки, без копирования текста:
+     дубль ответа делит вес и заставляет ИИ выбирать между двумя версиями одного и того же */
+  (function(){
+    var box=document.getElementById('pricingLevers');
+    if(!box)return;
+    LEVERS.filter(function(x){return x.cluster==='Цена и экономика'}).forEach(function(x){
+      box.appendChild(el('<a class="card card-link reveal" href="#/a/'+x.slug+'">'+
+        '<span class="kicker">'+x.kicker+'</span><h3 style="margin-top:8px">'+x.q+'</h3>'+
+        '<div class="go">Читать ответ →</div></a>'));
+    });
+  })();
+
+  /* превью на главной ведут на страницу ответа. Текст на карточке — тизер, а не копия:
+     один и тот же ответ в трёх местах делит вес и заставляет ИИ выбирать между копиями */
+  document.querySelectorAll('[data-lever]').forEach(function(a){
+    var rec=LEVERS.filter(function(x){return x.q===a.getAttribute('data-lever')})[0];
+    if(rec)a.setAttribute('href','#/a/'+rec.slug); else a.removeAttribute('data-lever');
+  });
+
   /* ---------- router ---------- */
-  var pages={'':'p-home','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
+  var pages={'':'p-home','pricing':'p-pricing','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
     var h=location.hash.replace(/^#\//,'');
     var sub=SUB[h];
