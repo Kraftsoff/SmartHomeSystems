@@ -262,6 +262,14 @@
   .hz:hover .hz-label{opacity:1}
 
   /* кластеры базы ответов: H2 = кластер, H3 = вопрос (было 60 плоских H3 подряд) */
+  .a-grid{display:grid;grid-template-columns:1fr 320px;gap:34px;align-items:start}
+  @media (max-width:900px){.a-grid{grid-template-columns:1fr}}
+  .a-side{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;position:sticky;top:88px}
+  @media (max-width:900px){.a-side{position:static}}
+  .a-side .btn{width:100%;justify-content:center}
+  #p-answer .card h3{font-size:16px}
+  .card-link{display:block;color:inherit}
+  .card-link:hover h3{color:var(--accent-ink)}
   .cluster{margin:0 0 54px}
   .cluster-h{font-size:clamp(20px,2.4vw,27px);margin:0 0 18px;display:flex;align-items:baseline;gap:10px}
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
@@ -447,12 +455,12 @@
 <header class="nav"><div class="shell nav-in">
   <a class="brand" href="#/"><span class="dot"></span>MiMiSmart</a>
   <nav class="links" id="topnav">
-    <a href="#/smart-home">Умный дом</a>
-    <a href="#/climate">Климат</a>
-    <a href="#/electric">Электрика и сети</a>
-    <a href="#/curtains-light">Шторы и свет</a>
-    <a href="#/multimedia">Мультимедиа</a>
-    <a href="#/security">Безопасность</a>
+    <a href="#/functions/automation">Умный дом</a>
+    <a href="#/functions/climate">Климат</a>
+    <a href="#/functions/electric">Электрика и сети</a>
+    <a href="#/functions/curtains">Шторы</a><a href="#/functions/lighting">Свет</a>
+    <a href="#/functions/multimedia">Мультимедиа</a>
+    <a href="#/functions/security">Безопасность</a>
     <a href="#/equipment">Оборудование</a>
     <a href="#/cases">Кейсы</a>
     <a href="#/news">Статьи</a>
@@ -919,6 +927,34 @@
   </div>
 </section>
 
+<!-- ===================== ONE ANSWER (per-lever page) =====================
+     Каждый рычаг — свой URL, свой H1-вопрос, свой title/description и своя разметка.
+     Ради этого весь проект и затевался: ИИ-поиску нужна страница под конкретный вопрос,
+     а не один общий список. В продакшене это /answers/{slug} на SSR. -->
+<section class="page" id="p-answer">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / <a href="#/news">Ответы</a> / <span id="a-cluster-crumb"></span></p>
+    <p class="eyebrow" id="a-kicker"></p>
+    <h1 id="a-q"></h1>
+    <div class="answer" id="a-a"></div>
+  </div></div>
+  <section><div class="shell">
+    <div class="a-grid">
+      <div>
+        <h2 class="cluster-h" id="a-rel-h"></h2>
+        <div class="grid g2" id="a-related"></div>
+      </div>
+      <aside class="a-side">
+        <p class="kicker">Дальше</p>
+        <p style="margin:8px 0 16px;color:var(--muted);font-size:14.5px">Ответ выше — короткий.
+          Под ваш объект нужен расчёт: площадь, стадия ремонта, состав систем.</p>
+        <button type="button" class="btn btn-primary" data-form>Получить расчёт по объекту</button>
+        <p style="margin-top:18px"><a href="#/news" id="a-back">← Все ответы</a></p>
+      </aside>
+    </div>
+  </div></section>
+</section>
+
 <!-- ===================== PARTNERS ===================== -->
 <section class="page" id="p-partners">
   <div class="sub-hero"><div class="shell">
@@ -980,7 +1016,8 @@
 <footer><div class="shell">
   <div class="fgrid">
     <div><h4>MiMiSmart</h4><p style="max-width:38ch;margin:0">Единый инженерный подрядчик для дорогих квартир и домов. Проектируем и реализуем инженерные системы в единой логике управления объектом.</p></div>
-    <div><h4>Направления</h4><a href="#/smart-home">Умный дом</a><a href="#/climate">Климат и вентиляция</a><a href="#/electric">Электрика и сети</a><a href="#/curtains-light">Шторы и свет</a><a href="#/multimedia">Мультимедиа</a><a href="#/security">Безопасность</a></div>
+    <div><h4>Направления</h4><a href="#/functions/automation">Умный дом</a><a href="#/functions/climate">Климат и вентиляция</a><a href="#/functions/electric">Электрика и сети</a><a href="#/functions/curtains">Шторы</a>
+    <a href="#/functions/lighting">Свет</a><a href="#/functions/multimedia">Мультимедиа</a><a href="#/functions/security">Безопасность</a></div>
     <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/cases">Кейсы</a><a href="#/news">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a></div>
     <div><h4>Шоурум</h4><p style="margin:0">Москва, Новоданиловская наб., 6к1<br>09:00–18:00</p></div>
   </div>
@@ -1049,18 +1086,18 @@
 
   /* ---------- data ---------- */
   var DIRS=[
-    ['Умный дом и автоматизация','Свет, климат, шторы, протечки, сценарии — единая логика на своих контроллерах.','#/smart-home'],
-    ['Кондиционирование','Подбор, трассы, интеграция с управлением — до закрытия потолков.','#/climate'],
-    ['Вентиляция','Приток и вытяжка, согласованные с дизайном и климатом.','#/climate'],
-    ['Отопление и тёплые полы','Котельная, радиаторы, контуры полов — по графику и по присутствию.','#/climate'],
-    ['Увлажнение','Форсуночные и паровые системы, RH-контроль по зонам.','#/climate'],
-    ['Электрокарнизы и шторы','Карнизы и рулонные, ниши и питание — согласовано с потолками.','#/curtains-light'],
-    ['Wi-Fi и слаботочные сети','Радиопланирование, СКС, стабильная сеть после ремонта.','#/electric'],
-    ['Электрика','Щиты, линии, сценарные выключатели — по согласованию с проектом.','#/electric'],
-    ['Акустика и кинотеатры','Кинозалы и мультирум со сценарием «Кино» — свет, шторы, климат вместе.','#/multimedia'],
-    ['Электрофурнитура','Выключатели и розетки премиальных серий, совместимые с автоматикой.','#/curtains-light'],
-    ['Видеонаблюдение и безопасность','Камеры, домофония, контроль доступа, удалённый мониторинг.','#/security'],
-    ['ДГУ, молниезащита, заземление','Резервное питание и защита объекта по нормам.','#/security']
+    ['Умный дом и автоматизация','Свет, климат, шторы, протечки, сценарии — единая логика на своих контроллерах.','#/functions/automation'],
+    ['Кондиционирование','Подбор, трассы, интеграция с управлением — до закрытия потолков.','#/functions/climate'],
+    ['Вентиляция','Приток и вытяжка, согласованные с дизайном и климатом.','#/functions/climate'],
+    ['Отопление и тёплые полы','Котельная, радиаторы, контуры полов — по графику и по присутствию.','#/functions/climate'],
+    ['Увлажнение','Форсуночные и паровые системы, RH-контроль по зонам.','#/functions/climate'],
+    ['Электрокарнизы и шторы','Карнизы и рулонные, ниши и питание — согласовано с потолками.','#/functions/curtains'],
+    ['Wi-Fi и слаботочные сети','Радиопланирование, СКС, стабильная сеть после ремонта.','#/functions/electric'],
+    ['Электрика','Щиты, линии, сценарные выключатели — по согласованию с проектом.','#/functions/electric'],
+    ['Акустика и кинотеатры','Кинозалы и мультирум со сценарием «Кино» — свет, шторы, климат вместе.','#/functions/multimedia'],
+    ['Электрофурнитура','Выключатели и розетки премиальных серий, совместимые с автоматикой.','#/functions/lighting'],
+    ['Видеонаблюдение и безопасность','Камеры, домофония, контроль доступа, удалённый мониторинг.','#/functions/security'],
+    ['ДГУ, молниезащита, заземление','Резервное питание и защита объекта по нормам.','#/functions/security']
   ];
   var WHO=[
     ['Для собственника','Не набор подрядчиков, а единая инженерная система объекта с понятной ответственностью.'],
@@ -1071,27 +1108,31 @@
     ['Для смежного подрядчика','Передайте клиента на комплекс — сохраним ваши зоны ответственности и заплатим вознаграждение.']
   ];
   var SUB={
-    'smart-home':{crumb:'/ Умный дом',eyebrow:'Умный дом и автоматизация',title:'Автоматизация в единой логике объекта',
+    'functions/automation':{crumb:'/ Умный дом',eyebrow:'Умный дом и автоматизация',title:'Автоматизация в единой логике объекта',
       answer:'Свет, климат, шторы, протечки и безопасность управляются одной системой на собственных контроллерах MiMiSmart. Проводная архитектура, работает локально — без интернета и облака. Сценарии, приложение, выключатели и датчики проектируются до начала электрики.',
       items:['<b>Свет</b> — DALI, диммирование, сцены','<b>Климат</b> — единый контур с вентиляцией и отоплением','<b>Шторы</b> — карнизы в сценариях','<b>Протечки</b> — автоматическое перекрытие воды','<b>Сценарии</b> — «Утро», «Ушёл», «Кино», «Авария»','<b>Приложение</b> — весь объект в смартфоне','<b>Выключатели</b> — привычные, сценарные','<b>Датчики</b> — присутствие, климат, открытие','<b>Интеграции</b> — оборудование любых брендов'],
       risks:['Контроллеры выбраны после электрики — трассы не совпадают','Датчики не заложены до закрытия потолков','«Умный дом» из облачных гаджетов отваливается без интернета','Сценарии невозможно расширить — система закрытая']},
-    'climate':{crumb:'/ Климат и вентиляция',eyebrow:'Климат · вентиляция · отопление · увлажнение',title:'Микроклимат как одна система, а не четыре подрядчика',
+    'functions/climate':{crumb:'/ Климат и вентиляция',eyebrow:'Климат · вентиляция · отопление · увлажнение',title:'Микроклимат как одна система, а не четыре подрядчика',
       answer:'Кондиционирование, вентиляция, отопление, тёплые полы и увлажнение проектируются вместе и управляются одной логикой: температура, свежесть и влажность по зонам, по расписанию и по присутствию. Подключаемся до закрытия потолков и стяжки.',
       items:['<b>Кондиционирование</b> — мульти/VRF, скрытая установка','<b>Вентиляция</b> — приток/вытяжка, рекуперация','<b>Отопление</b> — котельная, радиаторы, погодозависимость','<b>Тёплые полы</b> — контуры по зонам и графику','<b>Увлажнение</b> — RH-контроль по помещениям','<b>Управление</b> — единый контур в системе объекта'],
       risks:['Кондиционеры не интегрируются с управлением — два пульта на стене','Вентиляция конфликтует с дизайном и потолками','Полы греют по таймеру, а не по присутствию — перерасход','Увлажнение добавили после отделки — пятна и переделки']},
-    'electric':{crumb:'/ Электрика и сети',eyebrow:'Электрика · щиты · Wi-Fi · слаботочные',title:'Электрика и сети, заложенные с первого раза',
+    'functions/electric':{crumb:'/ Электрика и сети',eyebrow:'Электрика · щиты · Wi-Fi · слаботочные',title:'Электрика и сети, заложенные с первого раза',
       answer:'Черновая и чистовая электрика по согласованию, щиты с резервом под расширение, радиопланирование Wi-Fi и СКС — до штукатурки. После ремонта сеть работает стабильно во всех комнатах, а щит остаётся обслуживаемым.',
       items:['<b>Черновая электрика</b> — трассы, согласованные со всеми системами','<b>Щиты</b> — маркировка линий, резерв слотов','<b>Wi-Fi</b> — радиопланирование, точки в проекте','<b>СКС</b> — слаботочные сети объекта','<b>Домофония</b> — интеграция с системой','<b>Контроль доступа</b> — замки, ворота'],
       risks:['Кабели «не туда» — штробление по чистовой','Щит без резерва — расширение невозможно','Wi-Fi поставили после ремонта — мёртвые зоны','Слаботочку вели разные бригады — никто не отвечает']},
-    'curtains-light':{crumb:'/ Шторы и свет',eyebrow:'Электрокарнизы · свет · электрофурнитура',title:'Свет и шторы, согласованные с дизайн-проектом',
-      answer:'Электрокарнизы, рулонные шторы, DALI-освещение, световые сценарии и премиальная фурнитура проектируются вместе с дизайнером: ниши, питание и управление закладываются до потолков — и не портят интерьер.',
-      items:['<b>Электрокарнизы</b> — ниши и питание в проекте','<b>Рулонные шторы</b> — скрытый монтаж','<b>DALI</b> — управляемый свет без мерцания','<b>Световые сценарии</b> — сцены по зонам и времени','<b>Выключатели</b> — премиальные серии, сценарные','<b>Согласование</b> — с дизайн-проектом и потолками'],
-      risks:['Карнизы не согласованы с нишами — видимые крепления','Питание штор забыли — кабель-канал по чистовой','Свет мерцает на диммерах — несовместимость','Фурнитура «из другой оперы» — дизайн рассыпается']},
-    'multimedia':{crumb:'/ Мультимедиа',eyebrow:'Акустика · мультирум · кинотеатры',title:'Кино и музыка как инженерная система',
+    'functions/curtains':{crumb:'/ Шторы',eyebrow:'Электрокарнизы · рулонные шторы · привязка к сценариям',title:'Шторы, которые закладывают до потолков',
+      answer:'Электрокарнизы и рулонные шторы проектируются вместе с дизайнером: ниша, питание и управление закладываются до чистовой отделки. Иначе привод ставят поверх — с видимыми креплениями и кабель-каналом по стене.',
+      items:['<b>Электрокарнизы</b> — ниши и питание в проекте','<b>Рулонные шторы</b> — скрытый монтаж','<b>Привязка к сценариям</b> — «ушёл», «кино», «жара»','<b>Датчик солнца</b> — шторы против перегрева','<b>Согласование</b> — с дизайн-проектом и потолками','<b>Тихие приводы</b> — для спален'],
+      risks:['Карнизы не согласованы с нишами — видимые крепления','Питание штор забыли — кабель-канал по чистовой','Привод шумит в спальне — выбран не тот класс','Шторы не связаны со сценариями — управление отдельным пультом']},
+    'functions/lighting':{crumb:'/ Свет',eyebrow:'DALI · световые сценарии · электрофурнитура',title:'Свет как сценарий, а не набор выключателей',
+      answer:'DALI даёт каждому светильнику свой адрес: яркость и группы меняются сценарием, без отдельного провода на каждую линию. Сценарии и premium-фурнитура согласуются с дизайн-проектом до чистовой отделки.',
+      items:['<b>DALI</b> — управляемый свет без мерцания','<b>Световые сценарии</b> — сцены по зонам и времени','<b>Треки и подсветка</b> — акценты и ниши','<b>Выключатели</b> — премиальные серии, сценарные','<b>Датчики присутствия</b> — свет по факту нахождения','<b>Расчёт нагрузок</b> — до разводки кабеля'],
+      risks:['Свет мерцает на диммерах — несовместимость драйверов','Групп мало — сценарии невозможно собрать','Фурнитура «из другой оперы» — дизайн рассыпается','Трассы под треки не заложены — штробление по чистовой']},
+    'functions/multimedia':{crumb:'/ Мультимедиа',eyebrow:'Акустика · мультирум · кинотеатры',title:'Кино и музыка как инженерная система',
       answer:'Домашние кинотеатры и мультирум проектируются как часть инженерии объекта: акустика в конструктиве, трассы до отделки, сценарий «Кино» управляет светом, шторами и климатом одновременно.',
       items:['<b>Кинозал</b> — акустический расчёт, изоляция','<b>Кино в гостиной</b> — скрытая акустика','<b>Мультирум</b> — музыка по зонам, AirPlay','<b>Сценарий «Кино»</b> — свет+шторы+климат+экран','<b>Интеграция</b> — в единую систему объекта'],
       risks:['Акустику вспомнили после отделки — провода по плинтусам','Кинозал без вентиляции — духота через час','AV-подрядчик спорит с электриком за трассы','Оборудование не управляется из единой системы']},
-    'security':{crumb:'/ Безопасность',eyebrow:'Протечки · видеонаблюдение · ДГУ · молниезащита',title:'Инженерная безопасность объекта',
+    'functions/security':{crumb:'/ Безопасность',eyebrow:'Протечки · видеонаблюдение · ДГУ · молниезащита',title:'Инженерная безопасность объекта',
       answer:'Защита от протечек с автоматическим перекрытием, видеонаблюдение, резервное питание (ДГУ), молниезащита и заземление — проектируются вместе с электрикой и управляются из единой системы с удалённым контролем.',
       items:['<b>Протечки</b> — датчики + краны, авария за секунды','<b>Видеонаблюдение</b> — камеры, архив, доступ с телефона','<b>ДГУ</b> — резервное питание объекта','<b>Молниезащита</b> — по нормам, с проектом','<b>Заземление</b> — контур, измерения, протоколы','<b>Удалённый контроль</b> — состояние объекта 24/7'],
       risks:['Протечка ночью — без автоматики это ремонт у соседей','Камеры «повесили потом» — провода по фасаду','ДГУ не согласован с щитом — переключение вручную','Заземление «как получилось» — риск для оборудования']}
@@ -1129,12 +1170,94 @@
     if(!cg.children.length)cg.innerHTML='<p style="color:var(--faint)">Кейсы этой категории добавим из вашей базы ⚠️</p>'}
   draw('все');
 
+  /* ---------- индекс рычагов: строится из тех же карточек, что видит человек ----------
+     Тот же принцип, что у FAQPage: один источник правды. Правишь текст карточки —
+     страница ответа и разметка меняются сами, разъехаться нечему. */
+  var TR={'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y',
+    'к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h',
+    'ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
+  function slugify(t){
+    var x=t.toLowerCase().replace(/[«»"'`]/g,'').replace(/ё/g,'е'),o='',i,c;
+    for(i=0;i<x.length;i++){c=x[i];o+=(TR[c]!==undefined?TR[c]:c)}
+    return o.replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').split('-').slice(0,7).join('-');
+  }
+  var LEVERS=[],BY_SLUG={};
+  (function buildIndex(){
+    var seen={};
+    document.querySelectorAll('#p-news .cluster').forEach(function(cl){
+      var cluster=cl.querySelector('.cluster-h').firstChild.textContent.trim();
+      cl.querySelectorAll('.card').forEach(function(c){
+        var q=c.querySelector('h3'),a=c.querySelector('p');
+        if(!q||!a)return;
+        var sl=slugify(q.textContent);
+        while(seen[sl])sl+='-2';      /* коллизии слагов недопустимы — это разные URL */
+        seen[sl]=1;
+        var rec={slug:sl,q:q.textContent.trim(),html:a.innerHTML,
+                 text:a.textContent.replace(/\s+/g,' ').trim(),
+                 kicker:(c.querySelector('.kicker')||{}).textContent||'',cluster:cluster};
+        LEVERS.push(rec);BY_SLUG[sl]=rec;
+        /* заголовок карточки становится ссылкой на свою страницу */
+        var link=document.createElement('a');
+        link.className='card-link';link.href='#/a/'+sl;
+        q.parentNode.insertBefore(link,q);link.appendChild(q);
+      });
+    });
+  })();
+
+  /* мета: правим то, что уже стоит в <head>, и возвращаем как было при уходе со страницы */
+  var BASE_TITLE=document.title,
+      DESC_EL=document.querySelector('meta[name="description"]'),
+      BASE_DESC=DESC_EL?DESC_EL.getAttribute('content'):'';
+  function setMeta(title,desc,canonicalHash){
+    document.title=title;
+    if(DESC_EL)DESC_EL.setAttribute('content',desc);
+    var c=document.getElementById('canonicalLink');
+    if(!c){c=document.createElement('link');c.rel='canonical';c.id='canonicalLink';document.head.appendChild(c)}
+    c.href=location.href.split('#')[0]+(canonicalHash||'');
+  }
+  function setAnswerLd(rec){
+    var n=document.getElementById('ldAnswer');
+    if(!rec){if(n)n.textContent='{}';return}
+    if(!n){n=document.createElement('script');n.type='application/ld+json';n.id='ldAnswer';document.head.appendChild(n)}
+    n.textContent=JSON.stringify({"@context":"https://schema.org","@type":"QAPage",
+      "mainEntity":{"@type":"Question","name":rec.q,"answerCount":1,
+        "acceptedAnswer":{"@type":"Answer","text":rec.text}}});
+  }
+  function renderAnswer(rec){
+    document.getElementById('a-cluster-crumb').textContent=rec.cluster;
+    document.getElementById('a-kicker').textContent=rec.kicker;
+    document.getElementById('a-q').textContent=rec.q;
+    document.getElementById('a-a').innerHTML=rec.html;
+    var rel=LEVERS.filter(function(x){return x.cluster===rec.cluster&&x.slug!==rec.slug}).slice(0,4);
+    document.getElementById('a-rel-h').textContent=rel.length?('Ещё по теме «'+rec.cluster+'»'):'';
+    var box=document.getElementById('a-related');box.innerHTML='';
+    rel.forEach(function(x){
+      box.appendChild(el('<a class="card card-link reveal" href="#/a/'+x.slug+'">'+
+        '<span class="kicker">'+x.kicker+'</span><h3 style="margin-top:8px">'+x.q+'</h3></a>'));
+    });
+    setMeta(rec.q+' — MiMiSmart', rec.text.slice(0,155), '#/a/'+rec.slug);
+    setAnswerLd(rec);
+  }
+
   /* ---------- router ---------- */
   var pages={'':'p-home','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
     var h=location.hash.replace(/^#\//,'');
     var sub=SUB[h];
     document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+    if(h.indexOf('a/')===0){
+      var rec=BY_SLUG[h.slice(2)];
+      if(rec){
+        renderAnswer(rec);
+        document.getElementById('p-answer').classList.add('on');
+        document.querySelectorAll('#topnav a').forEach(function(a){a.classList.remove('on')});
+        window.scrollTo(0,0); observeAll();
+        return;
+      }
+      /* неизвестный слаг — не притворяемся, что страница есть: уводим на список */
+      location.hash='#/news'; return;
+    }
+    setMeta(BASE_TITLE,BASE_DESC,h?'#/'+h:''); setAnswerLd(null);
     if(sub){
       document.getElementById('s-crumb').textContent=' '+sub.crumb;
       document.getElementById('s-eyebrow').textContent=sub.eyebrow;
