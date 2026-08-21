@@ -47,6 +47,7 @@ page.on('console', (m) => { if (m.type() === 'error') errs.push('CE: ' + m.text(
 
 /* ---------- 1. Обход: собираем все маршруты по ссылкам ---------- */
 const routes = new Set();
+const inbound = new Map();
 const queue = ['#/'];
 while (queue.length) {
   const h = queue.shift();
@@ -56,9 +57,30 @@ while (queue.length) {
   await page.waitForTimeout(100);
   /* мегаменю скрыто до наведения — раскрываем, иначе половина ссылок не видна обходу */
   await page.evaluate(() => document.querySelectorAll('.megamenu').forEach((m) => (m.hidden = false)));
-  const links = await page.evaluate(() =>
-    [...new Set([...document.querySelectorAll('a[href^="#/"]')].map((a) => a.getAttribute('href')))]);
-  links.forEach((x) => { if (!routes.has(x)) queue.push(x); });
+  /* Считаем только ссылки внутри видимой страницы: сквозные меню и подвал есть
+     везде и связность ими не измеряется. */
+  const links = await page.evaluate(() => {
+    const v = [...document.querySelectorAll('section.page')]
+      .filter((s) => getComputedStyle(s).display !== 'none')[0];
+    const all = [...new Set([...document.querySelectorAll('a[href^="#/"]')].map((a) => a.getAttribute('href')))];
+    const inPage = v ? [...new Set([...v.querySelectorAll('a[href^="#/"]')].map((a) => a.getAttribute('href')))] : [];
+    return { all, inPage };
+  });
+  links.inPage.forEach((x) => {
+    if (!inbound.has(x)) inbound.set(x, new Set());
+    inbound.get(x).add(h);
+  });
+  links.all.forEach((x) => { if (!routes.has(x)) queue.push(x); });
+}
+/* Страница, до которой ведёт один путь, весит меньше и теряется при обходе.
+   Замерено: 21 ответ из 75 висел на одной ссылке из общего списка. */
+{
+  const lonely = [...routes].filter((h) => h.startsWith('#/answers/') && (inbound.get(h) || new Set()).size <= 1);
+  lonely.forEach((h) => fail(`страница ответа с одной входящей ссылкой: ${h}`));
+  const counts = [...routes].filter((h) => h.startsWith('#/answers/')).map((h) => (inbound.get(h) || new Set()).size);
+  if (counts.length) {
+    console.log(`перелинковка ответов: минимум входящих ${Math.min(...counts)}, максимум ${Math.max(...counts)}`);
+  }
 }
 
 /* ---------- 2. Постраничные проверки ---------- */

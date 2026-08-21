@@ -2636,6 +2636,31 @@
      внутри блока читатель не замечает — и не видит как раз то, ради чего таблица
      нужна. Проставляем каждой ячейке подпись её колонки: по ней CSS разворачивает
      строку в блок. Зовём на каждой смене маршрута — таблицы есть и на хабах. */
+  /* Перелинковка: подстраницы и разборы ведут в базу ответов.
+     Замерено: 21 страница ответа имела ровно одну входящую ссылку — из общего
+     списка. Страница, до которой ведёт один путь, и весит меньше, и теряется. */
+  var REL_ANSWERS={"solutions/flat": [15, 48, 55, 21, 28, 71, 5, 46], "solutions/house": [16, 38, 35, 36, 34, 29, 19, 61], "solutions/office": [14, 20, 30, 34, 54], "solutions/developers": [65, 66, 17, 54, 51], "solutions/premium": [18, 32, 31, 36, 40, 53], "functions/automation": [68, 73, 70, 44, 45, 72, 74], "functions/climate": [29, 37, 38, 55, 48], "functions/electric": [34, 38, 55, 59, 60, 72], "functions/curtains": [31, 48, 21, 32, 53], "functions/lighting": [27, 71, 58, 48, 55], "functions/multimedia": [32, 31, 48, 18, 74], "functions/security": [30, 28, 33, 60, 62], "compare/knx": [22, 25, 43, 56, 47], "compare/ecosystems": [23, 41, 39, 45, 57], "compare/diy": [24, 3, 26, 8, 9, 46]};
+  /* Блок «Ответы по теме»: строится из тех же карточек, что и база ответов,
+     поэтому расходиться нечему. Ставится один раз на страницу. */
+  function renderRelAnswers(key, host){
+    if(!host)return;
+    var old=document.getElementById('relAnswers'); if(old)old.parentNode.removeChild(old);
+    var idx=REL_ANSWERS[key]; if(!idx||!idx.length||!LEVERS.length)return;
+    var box=document.createElement('section'); box.id='relAnswers';
+    var html='<div class="shell"><h2 class="cluster-h">Ответы по теме</h2><div class="grid g3">';
+    var n=0;
+    idx.forEach(function(i){
+      var rec=LEVERS[i]; if(!rec)return;
+      n++;
+      html+='<a class="card card-link reveal" href="#/answers/'+rec.slug+'">'+
+            '<span class="kicker">'+rec.kicker+'</span>'+
+            '<h3 style="margin-top:8px">'+rec.q+'</h3>'+
+            '<div class="go">Читать ответ →</div></a>';
+    });
+    if(!n)return;
+    box.innerHTML=html+'</div></div>';
+    host.parentNode.insertBefore(box, host.nextSibling);
+  }
   function labelTables(root){
     if(!root)return;
     [].forEach.call(root.querySelectorAll('.tbl-wrap table'),function(t){
@@ -2891,6 +2916,7 @@
     document.getElementById('c-when-b-k').textContent=head[2];
     document.getElementById('c-when-b-h').textContent='Когда лучше '+head[2].toLowerCase();
     document.getElementById('c-when-b').innerHTML=rec.whenB;
+    renderRelAnswers(rec._k, document.querySelector('#p-compare .shell:last-of-type')||document.getElementById('p-compare'));
     var rk=document.getElementById('c-risks');rk.innerHTML='';
     rec.risks.forEach(function(x){rk.appendChild(el('<div class="risk"><span class="x">✕</span><p>'+x+'</p></div>'))});
     setMeta(rec.title+' — MiMiSmart',rec.answer.replace(/<[^>]+>/g,'').slice(0,155),'#/'+rec._k);
@@ -3184,6 +3210,7 @@
       document.getElementById('s-answer').innerHTML=sub.answer;
       var it=document.getElementById('s-items');it.innerHTML='';sub.items.forEach(function(x){var li=document.createElement('li');li.innerHTML=x;it.appendChild(li)});
       var rk=document.getElementById('s-risks');rk.innerHTML='';sub.risks.forEach(function(x){rk.appendChild(el('<div class="risk"><span class="x">✕</span><p>'+x+'</p></div>'))});
+      renderRelAnswers(h, document.querySelector('#p-sub .shell:last-of-type')||document.querySelector('#p-sub'));
       document.getElementById('p-sub').classList.add('on');
       /* своя мета на каждую подстраницу. Раньше все пятнадцать наследовали заголовок
          главной: пятнадцать URL с одним title — для поиска это дубли, а не разделы */
