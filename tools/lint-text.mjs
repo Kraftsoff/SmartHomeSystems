@@ -89,7 +89,10 @@ function isDiscussed(win, word) {
   if (i < 0) return false;
   const before = win.slice(Math.max(0, i - 60), i);
   const after = win.slice(i + word.length, i + word.length + 60);
-  if (/(^|[^а-яё])(не|без|вместо|избегать|запрещ|убрать|снять|заменить)([^а-яё]|$)/i.test(before)) return true;
+  /* Отрицание засчитываем, только если оно управляет самим словом: стоит вплотную
+     перед ним. Раньше проверялись все 60 знаков, а в русской прозе «не» встречается
+     почти в каждом предложении — правило глохло на большинстве текстов. */
+  if (/(^|[^а-яё])(не|без|вместо|избегать|запрещ\w*|убрать|снять|заменить)\s*(на\s*)?$/i.test(before)) return true;
   if (QUOTED.test(before) && QUOTED.test(after)) return true;
   return /[«„]$/.test(before.trim()) || /^[»“]/.test(after.trim());
 }
@@ -116,14 +119,18 @@ const superHits = [];
 
 const hits = [];
 for (const r of RULES) {
-  let found = text.match(r.re);
-  if (!found) continue;
-  found = found.filter((w) => {
-    const i = text.indexOf(w);
-    const win = text.slice(Math.max(0, i - 80), i + w.length + 80);
+  /* Каждое совпадение судим по СВОЕМУ окружению. Раньше здесь стоял
+     text.indexOf(w) — он находит первое вхождение слова во всём документе, поэтому
+     все повторы получали контекст первого: исключение, законное в одном месте,
+     глушило нарушение в другом. */
+  const all = [...text.matchAll(r.re)];
+  if (!all.length) continue;
+  const found = all.filter((m) => {
+    const i = m.index;
+    const win = text.slice(Math.max(0, i - 80), i + m[0].length + 80);
     if (r.skip && r.skip.test(win)) return false;
-    return !isDiscussed(win, w);
-  });
+    return !isDiscussed(win, m[0]);
+  }).map((m) => m[0]);
   if (!found.length) continue;
   const uniq = [...new Set(found.map((x) => x.toLowerCase()))];
   hits.push({ why: r.why, soft: !!r.soft, count: found.length, examples: uniq.slice(0, 4) });

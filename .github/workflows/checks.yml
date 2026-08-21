@@ -23,18 +23,7 @@ jobs:
       # Зависимостей нет: проверка языка работает на голом Node.
       - name: Сайт и все документы проекта
         run: |
-          status=0
-          shopt -s nullglob
-          files=(tz-site/prototype/mimismart-v5.html tz-site/*.md audit/*.md \
-                 site-foundation/*.md strategy/*.md strategy/levers/*.md CLAUDE.md)
-          for f in "${files[@]}"; do
-            if ! node tools/lint-text.mjs "$f" > /tmp/out.txt 2>&1; then
-              echo "::error file=$f::нарушения стандарта языка"
-              cat /tmp/out.txt
-              status=1
-            fi
-          done
-          exit $status
+          node tools/lint-all.mjs
 
       # Числа в документах устаревают молча: прототип растёт, а «73 рычага»
       # остаётся. Один раз это уже привело к работе по устаревшей картине.
