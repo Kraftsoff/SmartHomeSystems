@@ -1995,6 +1995,23 @@
   var BASE_TITLE=document.title,
       DESC_EL=document.querySelector('meta[name="description"]'),
       BASE_DESC=DESC_EL?DESC_EL.getAttribute('content'):'';
+  /* Своя мета на каждый верхнеуровневый раздел. До этого тринадцать страниц —
+     включая «Цены», «О компании» и «Контакты» — наследовали заголовок главной.
+     Для поиска тринадцать URL с одним title и description это дубли, а не разделы. */
+  var PAGE_META={
+    'pricing':['Сколько стоит инженерия объекта','Из чего складывается смета: доли оборудования, работ и проектирования, что двигает цену вверх и на каком этапе она перестаёт быть управляемой.'],
+    'compare':['С чем сравнивают инженерный умный дом','Инженерный умный дом против KNX, экосистем и самосборки: чем отличаются по архитектуре, стоимости владения и поведению при отказе.'],
+    'answers':['База инженерных ответов','Ответы на вопросы про умный дом: цена, сроки, гарантия, что ломается за пять лет и что передают при сдаче. Прямой ответ в первых строках.'],
+    'equipment':['Контроллеры, датчики и щиты собственного производства','Что мы производим сами и почему это определяет, чем заменить модуль через десять лет.'],
+    'portfolio':['Инженерные истории объектов','Что было до, что смонтировали и что изменилось после — по каждому объекту.'],
+    'partners':['Дизайнерам, архитекторам, строителям и смежникам','Как передаются планы, кто отвечает за трассы и на какой стадии подключается инженерия, чтобы не переделывать за отделочниками.'],
+    'about':['Разработчик, производитель и инженерный подрядчик','Российский производитель контроллеров умного дома. Проект, монтаж, программирование и сервис — одним подрядчиком, без передачи объекта между компаниями.'],
+    'contacts':['Обсудим ваш объект','Что подготовить к первому разговору: стадия ремонта, площадь, планировка. Выезд на объект и оценка состава работ.'],
+    'solutions':['Кому и что мы проектируем','Квартира, дом, офис, жилой комплекс: что входит в проект для каждого типа объекта и на какой стадии ремонта заходить.'],
+    'functions':['Что входит в инженерию объекта','Освещение, климат, безопасность, шторы, мультимедиа и электрика — что делает каждая подсистема и как они связаны между собой.'],
+    'showroom':['Систему лучше один раз потрогать','Шоурум: сценарии, панели и щит в работе — посмотреть до того, как принимать решение по проекту.'],
+    'privacy':['Политика обработки персональных данных','Кто обрабатывает данные из форм сайта, на каком основании, сколько хранит и как отозвать согласие.']
+  };
   function setMeta(title,desc,canonicalHash){
     document.title=title;
     if(DESC_EL)DESC_EL.setAttribute('content',desc);
@@ -2503,7 +2520,10 @@
       setMeta('Страница не найдена — MiMiSmart','Такой страницы нет. Ниже — основные разделы сайта.','');
       window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); return;
     }
-    setMeta(BASE_TITLE,BASE_DESC,h?'#/'+h:''); setAnswerLd(null);
+    var pm=PAGE_META[h];
+    if(pm)setMeta(pm[0]+' — MiMiSmart',pm[1],'#/'+h);
+    else setMeta(BASE_TITLE,BASE_DESC,h?'#/'+h:'');
+    setAnswerLd(null);
     if(sub){
       var mid=h.indexOf('solutions/')===0?['#/solutions','Решения']
              :h.indexOf('functions/')===0?['#/functions','Направления']:null;
@@ -2512,10 +2532,15 @@
                       :(' '+sub.crumb);
       document.getElementById('s-eyebrow').textContent=sub.eyebrow;
       document.getElementById('s-title').textContent=sub.title;
-      document.getElementById('s-answer').textContent=sub.answer;
+      /* innerHTML, а не textContent: в ответах есть пометки о непроверенных данных
+         разметкой, и с textContent пользователь видел сырые теги */
+      document.getElementById('s-answer').innerHTML=sub.answer;
       var it=document.getElementById('s-items');it.innerHTML='';sub.items.forEach(function(x){var li=document.createElement('li');li.innerHTML=x;it.appendChild(li)});
       var rk=document.getElementById('s-risks');rk.innerHTML='';sub.risks.forEach(function(x){rk.appendChild(el('<div class="risk"><span class="x">✕</span><p>'+x+'</p></div>'))});
       document.getElementById('p-sub').classList.add('on');
+      /* своя мета на каждую подстраницу. Раньше все пятнадцать наследовали заголовок
+         главной: пятнадцать URL с одним title — для поиска это дубли, а не разделы */
+      setMeta(sub.title+' — MiMiSmart', sub.answer.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim().slice(0,155), '#/'+h);
     } else {
       var target=pages[h];
       if(!target){   /* неизвестный адрес — честная 404, а не тихая подмена главной */
