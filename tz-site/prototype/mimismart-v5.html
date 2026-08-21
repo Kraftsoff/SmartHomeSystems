@@ -281,6 +281,11 @@
   /* ---------- печать ----------
      Страницу проекта распечатывают, чтобы показать супругу, дизайнеру или прорабу.
      На бумаге не нужны навигация, кнопки и интерактив, а тёмная тема выжигает тонер. */
+  /* Цели нажатия в калькуляторе: метка кликабельна, но при высоте 18px цель
+     меньше минимума WCAG 2.5.8 (24px), а соседние стоят вплотную. Даём высоту
+     и просвет — это касается пальца, а не только формального критерия. */
+  #cSys label{display:flex;align-items:center;gap:9px;min-height:32px;padding:5px 2px;cursor:pointer}
+  #cSys input[type="checkbox"]{width:18px;height:18px;accent-color:var(--glow);flex:0 0 auto}
   @media print{
     header.nav,footer,.cookie,.skip-link,.cluster-nav,.qsearch,.qcount,.qempty,
     .scen-row,.house-stage,.a-side,.cta-row,.btn,.daynight,.draft,.filter,#calc{display:none!important}

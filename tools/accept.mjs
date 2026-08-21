@@ -379,6 +379,59 @@ await ctx.close();
   console.log('исходный HTML: парные теги сходятся, ячейки таблиц согласованы');
 }
 
+/* ---------- 7a. Масштаб 200% (WCAG 1.4.4) ---------- */
+{
+  /* 1280x1024 при двукратном увеличении — это 640x512 CSS-пикселей.
+     Текст должен переверстаться, а не уехать в горизонтальную прокрутку. */
+  const ctx = await browser.newContext({ viewport: { width: 640, height: 512 } });
+  const z = await ctx.newPage();
+  for (const h of ['#/', '#/answers', '#/pricing', '#/contacts']) {
+    if (!routes.has(h)) continue;
+    await z.goto(F + h);
+    await z.waitForTimeout(280);
+    const over = await z.evaluate(() =>
+      document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+    if (over) fail(`при масштабе 200% появляется горизонтальная прокрутка: ${h}`);
+  }
+  await ctx.close();
+  console.log('масштаб 200%: горизонтальной прокрутки нет');
+}
+
+/* ---------- 7b. Размер целей нажатия (WCAG 2.5.8) ---------- */
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const t = await ctx.newPage();
+  for (const h of ['#/', '#/answers', '#/contacts', '#/pricing']) {
+    if (!routes.has(h)) continue;
+    await t.goto(F + h);
+    await t.waitForTimeout(320);
+    const small = await t.evaluate(() => {
+      const out = [];
+      const sel = 'a[href],button,input[type=checkbox],select';
+      [...document.querySelectorAll('section.page.on ' + sel + ', header ' + sel)]
+        .filter((e) => e.offsetParent !== null)
+        .forEach((e) => {
+          /* Цель — вся кликабельная область. У чекбокса с меткой нажимается
+             метка целиком, поэтому мерить надо её, а не сам квадратик. */
+          const lab = e.closest('label')
+            || (e.id ? document.querySelector(`label[for="${CSS.escape(e.id)}"]`) : null);
+          const target = lab && lab.contains(e) ? lab : (lab || e);
+          const r = target.getBoundingClientRect();
+          if (r.height < 1 || (r.height >= 24 && r.width >= 24)) return;
+          /* Исключение «Inline» из критерия: ссылка внутри предложения или
+             хлебных крошек ограничена межстрочным интервалом соседнего текста
+             и под требование не подпадает. */
+          if (target.closest('p,li,td,th,.crumbs,.lede,.answer')) return;
+          out.push(`${target.tagName}.${(target.className || '-').toString().split(' ')[0]} ${Math.round(r.width)}x${Math.round(r.height)}`);
+        });
+      return [...new Set(out)];
+    });
+    small.forEach((x) => fail(`цель нажатия меньше 24px вне исключения (${h}): ${x}`));
+  }
+  await ctx.close();
+  console.log('размер целей нажатия: вне исключения «в тексте» нарушений нет');
+}
+
 /* ---------- 7c. Клавиатура: фокус виден на каждом шаге ---------- */
 {
   for (const h of ['#/', '#/answers']) {
