@@ -589,6 +589,35 @@ await ctx.close();
   }
 }
 
+/* ---------- 7g. robots.txt: персональные группы не открывают служебное ---------- */
+{
+  /* Бот исполняет только свою группу; правила из «User-agent: *» не наследуются,
+     а заменяются. Персональный блок с одним «Allow: /» открывает боту /admin и
+     /settings — ровно это и было в файле. */
+  const { readFileSync: readRb } = await import('node:fs');
+  let rb = '';
+  try { rb = readRb(resolve('site-foundation/robots.txt'), 'utf8'); } catch (e) {}
+  if (rb) {
+    const groups = [...rb.matchAll(/User-agent:\s*(\S+)\n((?:(?:Allow|Disallow):.*\n)+)/g)];
+    const service = [...(rb.match(/^Disallow: (\S+)$/gm) || [])]
+      .map((l) => l.split(':')[1].trim()).filter((x) => x !== '/');
+    const need = [...new Set(service)];
+    let open = 0;
+    for (const [, ua, body] of groups) {
+      const closedAll = /Disallow:\s*\/\s*$/m.test(body) && !/Allow:/.test(body);
+      if (closedAll) continue;
+      const have = new Set((body.match(/Disallow:\s*(\S+)/g) || []).map((l) => l.split(':')[1].trim()));
+      const missing = need.filter((x) => !have.has(x));
+      if (missing.length) { open++; fail(`robots.txt: группа ${ua} открывает служебное — ${missing.join(', ')}`); }
+    }
+    /* YandexBot закрывать нельзя: Алиса берёт кандидатов из обычной выдачи Яндекса. */
+    const yandex = groups.find(([, ua]) => ua === 'YandexBot');
+    if (!yandex) fail('robots.txt: нет группы YandexBot');
+    else if (/Disallow:\s*\/\s*$/m.test(yandex[2]) && !/Allow:/.test(yandex[2])) fail('robots.txt: YandexBot закрыт');
+    console.log(`robots.txt: групп ${groups.length}, служебных путей ${need.length}, групп с утечкой ${open}`);
+  }
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
