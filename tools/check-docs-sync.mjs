@@ -27,7 +27,9 @@ const cfgStart = redirects.indexOf('## Next.js-конфиг');
 const cfgEnd = redirects.indexOf('# Часть B.');
 const rules = (redirects.slice(cfgStart, cfgEnd).match(/source: '/g) || []).length;
 
-const sitemap = readFileSync('site-foundation/sitemap.xml', 'utf8');
+/* Комментарии вырезаем: внутри них лежат примеры разметки для будущих разделов,
+   и без этого проверка считает несуществующие URL. */
+const sitemap = readFileSync('site-foundation/sitemap.xml', 'utf8').replace(/<!--[\s\S]*?-->/g, '');
 const urls = (sitemap.match(/<loc>/g) || []).length;
 
 /* Что считаем истиной. Маршруты сюда не берём: их знает только браузер,

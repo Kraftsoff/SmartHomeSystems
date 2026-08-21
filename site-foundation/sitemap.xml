@@ -284,14 +284,12 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-  <!-- ⚠️ /blog: раздел объявлен в архитектуре, но не построен и, возможно, не нужен —
-       решение A7 в tz-site/16. Пока строка остаётся, но в карту на продакшене её
-       выкладывать нельзя: URL без страницы даёт ошибку сканирования. -->
-  <url>
-    <loc>BASE_URL/blog</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <!-- /blog здесь намеренно нет. Раздел объявлен в архитектуре, но не построен, и
+       нужен ли он вообще — решение A7 в tz-site/16. URL без страницы даёт ошибку
+       сканирования и тратит краулинговый бюджет, поэтому карта содержит только то,
+       что отдаёт 200. Когда раздел появится, вернуть строку:
+         <url><loc>BASE_URL/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+       Легаси-редирект /news сейчас ведёт на /answers — переставить одновременно. -->
   <url>
     <loc>BASE_URL/about</loc>
     <changefreq>monthly</changefreq>

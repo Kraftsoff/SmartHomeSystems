@@ -14,7 +14,7 @@
  */
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 /* playwright ищем сначала обычным способом, потом в глобальной установке.
    ESM не читает NODE_PATH, поэтому без этого скрипт работает только там,
@@ -581,11 +581,15 @@ await ctx.close();
      Один раз 75 страниц ответов отсутствовали в карте целиком. */
   const { readFileSync: readSm } = await import('node:fs');
   let sm = '';
-  try { sm = readSm(resolve('site-foundation/sitemap.xml'), 'utf8'); } catch (e) {}
+  /* Комментарии вырезаем: в них лежат примеры разметки для ещё не построенных
+     разделов, и без этого в подсчёт попадают несуществующие URL. */
+  try { sm = readSm(resolve('site-foundation/sitemap.xml'), 'utf8').replace(/<!--[\s\S]*?-->/g, ''); } catch (e) {}
   if (sm) {
     const inSitemap = new Set([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('BASE_URL', '')));
     const implemented = [...routes].map((h) => h.slice(1));
-    const PLANNED = new Set(['/blog']);   /* раздел объявлен, но ещё не построен */
+    /* Исключений быть не должно: карта содержит только то, что отдаёт 200.
+       /blog был здесь, пока карта его рекламировала; строку из карты убрали. */
+    const PLANNED = new Set();
     const missingFromSitemap = implemented.filter((r) => !inSitemap.has(r));
     const missingFromSite = [...inSitemap].filter((r) => !implemented.includes(r) && !PLANNED.has(r));
     missingFromSitemap.slice(0, 6).forEach((r) => fail(`маршрут есть, в sitemap.xml его нет: ${r}`));
