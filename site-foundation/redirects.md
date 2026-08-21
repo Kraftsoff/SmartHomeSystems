@@ -111,7 +111,7 @@ Google трактует это как soft-404 и вес не передаёт.
 ## 9. Инфо-страницы
 | Старый | Новый |
 |---|---|
-| `/news` | `/blog` |
+| `/news` | `/answers` | ⚠️ раздела `/blog` нет; см. решение A7 в `../tz-site/16` |
 | `/article/1` | ⚠️ **вручную** — ID→slug не выводится автоматически; составить таблицу по факту переноса статей |
 | `/about` · `/contacts` · `/partners` · `/showroom` · `/privacy` · `/portfolio` | без изменений |
 
@@ -322,7 +322,7 @@ module.exports = {
       { source: '/private', destination: '/privacy', permanent: true },
       { source: '/czenyi', destination: '/pricing', permanent: true },
       // инфо
-      { source: '/news', destination: '/blog', permanent: true },
+      { source: '/news', destination: '/answers', permanent: true },  // ⚠️ /blog не построен, см. A7
     ]
   },
 }

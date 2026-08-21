@@ -641,6 +641,24 @@ await ctx.close();
   }
 }
 
+/* ---------- 7i. Цели редиректов существуют ---------- */
+{
+  /* Редирект на несуществующую страницу хуже отсутствующего: он тратит вес и
+     отдаёт посетителю 404 вместо старой страницы, которая хотя бы работала. */
+  const { readFileSync: readRd } = await import('node:fs');
+  let rd = '';
+  try { rd = readRd(resolve('site-foundation/redirects.md'), 'utf8'); } catch (e) {}
+  if (rd) {
+    let smRaw2 = '';
+    try { smRaw2 = readRd(resolve('site-foundation/sitemap.xml'), 'utf8'); } catch (e) {}
+    const known2 = new Set([...smRaw2.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('BASE_URL', '')));
+    const dests = [...new Set([...rd.matchAll(/destination: '([^']+)'/g)].map((m) => m[1]))];
+    const broken = dests.filter((d) => !known2.has(d));
+    broken.forEach((d) => fail(`редирект ведёт на несуществующую страницу: ${d}`));
+    console.log(`редиректы: уникальных целей ${dests.length}, вне карты сайта ${broken.length}`);
+  }
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
