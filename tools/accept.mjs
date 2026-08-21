@@ -591,6 +591,34 @@ await ctx.close();
   console.log(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
 }
 
+/* ---------- Выгрузка содержимого не устарела ---------- */
+{
+  /* content-export.json — то, что переносится на боевой стек. Файл производный,
+     и устаревает молча: правку в прототипе легко забыть выгрузить. Сверяем состав
+     и тексты, а не только количество. */
+  const { readFileSync: readEx } = await import('node:fs');
+  if (existsSync(resolve('site-foundation/content-export.json'))) {
+    const ex = JSON.parse(readEx(resolve('site-foundation/content-export.json'), 'utf8'));
+    const live = new Map();
+    for (const h of [...routes].filter((x) => x.startsWith('#/answers/'))) {
+      await page.goto(F + h);
+      await page.waitForTimeout(30);
+      const t = await page.evaluate(() => {
+        const p = document.querySelector('#a-a p');
+        return p ? p.innerText.replace(/\s+/g, ' ').trim() : '';
+      });
+      live.set(h.replace('#', ''), t);
+    }
+    const missing = [...live.keys()].filter((u) => !ex.answers.some((a) => a.url === u));
+    const extra = ex.answers.map((a) => a.url).filter((u) => !live.has(u));
+    const changed = ex.answers.filter((a) => live.has(a.url) && live.get(a.url) !== a.answer);
+    missing.slice(0, 3).forEach((u) => fail(`выгрузка устарела: ответа ${u} в ней нет`));
+    extra.slice(0, 3).forEach((u) => fail(`выгрузка устарела: ${u} есть в ней, но не на сайте`));
+    changed.slice(0, 3).forEach((a) => fail(`выгрузка устарела: текст ${a.url} расходится с сайтом`));
+    console.log(`выгрузка содержимого: ответов ${ex.answers.length}, расхождений ${missing.length + extra.length + changed.length}`);
+  }
+}
+
 /* ---------- Текст ссылается на то, чего на странице нет ---------- */
 {
   /* Нашлось так: два ответа обещали «демо на этой странице», а интерактивная модель
