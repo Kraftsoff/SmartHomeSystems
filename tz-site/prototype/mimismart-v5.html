@@ -278,6 +278,27 @@
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .a-hub a{color:var(--accent-ink);font-weight:600;font-size:14px}
+  .calc{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px;margin:0 0 34px}
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:22px}
+  @media (max-width:900px){.calc-grid{grid-template-columns:1fr}}
+  .calc-fs{border:none;padding:0;margin:0;min-width:0}
+  .calc-fs legend{font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--accent-ink);padding:0;margin:0 0 10px}
+  .calc-checks{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+  @media (max-width:560px){.calc-checks{grid-template-columns:1fr}}
+  .calc-checks label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;
+    color:var(--muted);cursor:pointer;line-height:1.35}
+  .calc-checks input{margin:2px 0 0;accent-color:var(--accent-ink);flex:none}
+  .calc-out{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+  .calc-out h3{font-size:16px;margin:0 0 8px}
+  .calc-out h4{font-size:13px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent-ink);margin:18px 0 8px}
+  .calc-out ul{margin:0;padding-left:18px;color:var(--muted);font-size:14px}
+  .calc-out li{margin:5px 0}
+  .calc-risk{border-left:3px solid var(--crit);padding:10px 14px;background:var(--panel-2);
+    border-radius:0 10px 10px 0;margin:10px 0;color:var(--muted);font-size:14px}
+  .calc-empty{color:var(--faint);font-size:14px}
   .legal-block{margin:26px 0 18px;padding-top:18px;border-top:1px solid var(--line)}
   .legal-block h4{margin:0 0 8px}
   .legal-block p{color:var(--muted);font-size:13px;max-width:80ch;margin:0 0 10px}
@@ -1119,6 +1140,49 @@
   </div></section>
 
   <section><div class="shell">
+    <h2 class="cluster-h" id="h-calc">Что войдёт в проект на вашем объекте</h2>
+    <p style="color:var(--muted);margin:0 0 18px;max-width:74ch">Цену калькулятор не считает —
+      без техзадания любая цифра была бы выдумкой. Он показывает другое: состав работ, что нужно
+      закладывать именно сейчас и чем рискует ваша стадия. Это те же вопросы, которые задаст
+      инженер, только без звонка.</p>
+
+    <div class="calc" id="calc">
+      <div class="calc-grid">
+        <fieldset class="calc-fs">
+          <legend>Объект</legend>
+          <label class="fl"><span>Тип</span>
+            <select id="cObj">
+              <option value="flat">Квартира</option>
+              <option value="house">Дом / коттедж</option>
+              <option value="office">Офис / коммерция</option>
+            </select></label>
+          <label class="fl"><span>Площадь, м²</span>
+            <input id="cArea" type="number" inputmode="numeric" min="0" step="10" placeholder="например, 180"></label>
+        </fieldset>
+        <fieldset class="calc-fs">
+          <legend>Стадия</legend>
+          <label class="fl"><span>Что сейчас на объекте</span>
+            <select id="cStage">
+              <option value="design">Идёт проектирование</option>
+              <option value="rough">Черновые работы, стены открыты</option>
+              <option value="finish">Чистовая отделка</option>
+              <option value="done">Ремонт закончен, живём</option>
+            </select></label>
+          <label class="fl"><span>Дизайн-проект</span>
+            <select id="cDesign">
+              <option value="yes">Есть, утверждён</option>
+              <option value="progress">В работе</option>
+              <option value="no">Нет</option>
+            </select></label>
+        </fieldset>
+        <fieldset class="calc-fs calc-sys">
+          <legend>Что нужно</legend>
+          <div class="calc-checks" id="cSys"></div>
+        </fieldset>
+      </div>
+      <div class="calc-out" id="cOut" role="status" aria-live="polite"></div>
+    </div>
+
     <h2 class="cluster-h">Разборы по деньгам</h2>
     <p style="color:var(--muted);margin:0 0 18px">Отдельные вопросы про стоимость — с прямыми ответами.</p>
     <div class="grid g3" id="pricingLevers"></div>
@@ -2060,6 +2124,99 @@
     else if(saved!=='no'){bar.hidden=false}
     document.getElementById('ckAccept').addEventListener('click',function(){decide('yes')});
     document.getElementById('ckDecline').addEventListener('click',function(){decide('no')});
+  })();
+
+  /* ---------- калькулятор состава работ ----------
+     Сознательно НЕ считает деньги: без техзадания любая цифра была бы выдуманной, а выдумывать
+     цифры в этом проекте запрещено. Считает то, что определяется однозначно — состав систем,
+     что закладывать на текущей стадии и чем эта стадия рискует. */
+  (function(){
+    var box=document.getElementById('calc'); if(!box)return;
+    var SYS=[
+      ['light','Свет и сценарии'],['climate','Климат и отопление'],['vent','Вентиляция и увлажнение'],
+      ['curtains','Шторы и карнизы'],['leak','Защита от протечек'],['security','Охрана и видеонаблюдение'],
+      ['av','Мультирум и кинозал'],['net','Wi-Fi и слаботочка'],['power','Резервное питание, ДГУ'],
+      ['gates','Ворота, участок, полив']
+    ];
+    var wrap=document.getElementById('cSys');
+    SYS.forEach(function(x){
+      var id='cs-'+x[0];
+      wrap.appendChild(el('<label for="'+id+'"><input type="checkbox" id="'+id+'" value="'+x[0]+'">'+
+        '<span>'+x[1]+'</span></label>'));
+    });
+
+    var STAGE={
+      design:{n:'проектирование',lay:['трассы под датчики, приводы и панели — в раздел электрики','место и габарит щита автоматизации до расстановки мебели','точки Wi-Fi и слаботочку по комнатам'],
+        risk:'Лучшая стадия: всё уходит в конструктив, переделок нет. Дороже станет с каждым следующим этапом.'},
+      rough:{n:'черновые работы',lay:['кабель до каждой точки, пока штробы открыты','резерв линий в щите под будущее расширение','закладные под электрокарнизы и питание приводов'],
+        risk:'Ещё можно всё. Решение по составу систем нужно принять до закрытия стен — после штукатурки добавление линии означает повторную отделку.'},
+      finish:{n:'чистовая отделка',lay:['то, что ещё не зашито: подрозетники, ниши карнизов','радиорешения там, где кабель уже не проложить'],
+        risk:'Часть решений пойдёт поверх — с демонтажом и доплатой. Приводы штор без заложенного питания и DALI без шины к светильникам вернуть без вскрытия не получится.'},
+      done:{n:'ремонт закончен',lay:['реле в подрозетники за существующие выключатели','радиодатчики и сценарии на уже проложенной проводке'],
+        risk:'Результат будет слабее, чем при закладке до отделки — это честная оценка, а не оговорка. Новые силовые группы и DALI к светильникам без шины не появятся без вскрытия стен.'}
+    };
+    var SYSNOTE={
+      vent:'Увлажнение после чистовой — временная трасса и риск сырых пятен на откосах.',
+      curtains:'Приводу нужно питание в карнизе: если его не заложили, кабель пойдёт по стене.',
+      av:'Кинозалу нужна отдельная вентиляция и вынесенная стойка оборудования.',
+      power:'ДГУ требует согласования с щитом: приоритетные группы и автозапуск.',
+      leak:'Краны на вводе ставятся в узел, к которому нужен доступ для обслуживания.',
+      gates:'Кабель до ворот и полива кладут до благоустройства участка.'
+    };
+    var out=document.getElementById('cOut');
+    function render(){
+      var obj=document.getElementById('cObj').value,
+          area=parseInt(document.getElementById('cArea').value,10)||0,
+          stage=document.getElementById('cStage').value,
+          design=document.getElementById('cDesign').value,
+          picked=[].slice.call(wrap.querySelectorAll('input:checked')).map(function(i){return i.value});
+      if(!picked.length){
+        out.innerHTML='<p class="calc-empty">Отметьте, какие системы нужны — покажу состав работ и что важно на вашей стадии.</p>';
+        return;
+      }
+      var st=STAGE[stage], h='';
+      h+='<h3>'+picked.length+' систем'+(picked.length===1?'а':(picked.length<5?'ы':''))+
+         ' на стадии «'+st.n+'»'+(area?', '+area+' м²':'')+'</h3>';
+
+      /* порог квалификации — говорим прямо, а не после часа переписки */
+      var min=obj==='house'?300:(obj==='flat'?80:0);
+      if(area&&min&&area<min){
+        h+='<div class="calc-risk">Ваша площадь ниже порога, с которым мы работаем ('+
+           (obj==='house'?'дома от 300 м²':'квартиры от 80 м²')+
+           ' <span class="prov">⚠️ порог уточняется</span>). Инженерный проект окупается числом '+
+           'независимых зон, а не площадью — на меньшем объекте состав систем обычно не набирается. '+
+           'Скажем об этом сразу, чтобы не тратить ваше время.</div>';
+      }
+
+      h+='<h4>Что закладывать сейчас</h4><ul>';
+      st.lay.forEach(function(x){h+='<li>'+x+'</li>'});
+      h+='</ul>';
+
+      var notes=picked.filter(function(p){return SYSNOTE[p]});
+      if(notes.length){
+        h+='<h4>По выбранным системам</h4><ul>';
+        notes.forEach(function(p){h+='<li>'+SYSNOTE[p]+'</li>'});
+        h+='</ul>';
+      }
+
+      h+='<div class="calc-risk"><b>Риск вашей стадии.</b> '+st.risk+'</div>';
+
+      if(design==='no'&&(stage==='design'||stage==='rough')){
+        h+='<div class="calc-risk">Дизайн-проекта нет. Инженерное задание можно начать и без него, '+
+           'но расстановку клавиш, датчиков и светильников придётся согласовывать дважды — '+
+           'сначала с планировкой, потом с дизайном.</div>';
+      }
+
+      h+='<h4>Что дальше</h4><ul>'+
+         '<li>Цена считается после техзадания: она зависит от стадии, числа независимых зон и класса оборудования — <a href="#/answers/iz-chego-skladyvaetsya-smeta-na-umnyy-dom">из чего складывается смета →</a></li>'+
+         '<li>Ориентир по нижней границе для премиальных объектов — от 2–3 млн ₽ <span class="prov">⚠️ порог уточняется</span></li>'+
+         '</ul>'+
+         '<div class="cta-row" style="margin-top:16px"><button type="button" class="btn btn-primary" data-form>Отправить эти данные инженеру</button></div>';
+      out.innerHTML=h;
+    }
+    box.addEventListener('change',render);
+    box.addEventListener('input',render);
+    render();
   })();
 
   /* ---------- router ---------- */
