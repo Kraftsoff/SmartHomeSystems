@@ -186,12 +186,20 @@ module.exports = {
       { source: '/catalog', destination: '/equipment', permanent: true },
       { source: '/products', destination: '/equipment', permanent: true },
       // ══ ЧАСТЬ B: легаси-домены. Порядок важен — частные выше общих ══
-      // Источник: перебор индекса 21.08.2026, ~190 подтверждённых URL.
+      // Источник: перебор индекса 21.08.2026, ~250 подтверждённых URL.
+      // Слеш в конце снят везде, кроме .html: иначе правило со слешем дублирует правило без.
       // Зеркало mimismart.ru имеет свою транслитерацию — см. B4, общей склейкой не покрывается.
+      // ── Зеркало mimismart.ru: своя транслитерация, применять на своём хосте ──
+      { source: '/smart-home/razrabotka-sistem/modulnye-resheniya/index.html', destination: '/equipment/controllers', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/provodnye-sistemy/index.html', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
+      { source: '/oborudovanie/prilozheniya/dlya-windows/index.html', destination: '/equipment/app', permanent: true },
+      { source: '/smart-home/multimedia/multirum/index.html', destination: '/functions/multimedia/multiroom', permanent: true },
+      { source: '/smart-home/bezopasnost/vorota/index.html', destination: '/functions/security/access', permanent: true },
       { source: '/oborudovanie/avtomatizatsiya-kvartir/oborudovanie-dlya-kvartir', destination: '/equipment', permanent: true },
       { source: '/oborudovanie/avtomatizatsiya-kvartir/upravlenie-temperaturoy', destination: '/functions/climate', permanent: true },
       { source: '/smart-home/bezopasnost/okhranno-pozharnaya-signalizatsiya', destination: '/functions/security/fire', permanent: true },
       { source: '/oborudovanie/avtomatizatsiya-kvartir/upravlenie-svetom', destination: '/functions/lighting', permanent: true },
+      { source: '/smart-home/osveshhenie/distanczionnoe-upravlenie.html', destination: '/functions/lighting', permanent: true },
       { source: '/smart-home/razrabotka-sistem/besprovodnye-resheniya', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
       { source: '/oborudovanie/upravlenie-domom/golosovoe-upravlenie', destination: '/compare/ecosystems', permanent: true },
       { source: '/smart-home/razrabotka-sistem/udalyennoe-upravlenie', destination: '/equipment/app', permanent: true },
@@ -206,12 +214,15 @@ module.exports = {
       { source: '/smart-home/razrabotka-sistem/provodnye-sistemy', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
       { source: '/oborudovanie/upravlenie-domom/cherez-internet', destination: '/answers/chto-znachit-umnyy-dom-bez-oblaka-i', permanent: true },
       { source: '/avtomatizacziya/kompleksnyie-resheniya/dacha', destination: '/solutions/house', permanent: true },
+      { source: '/oborudovanie/prilozheniya/dliya-iphone.html', destination: '/equipment/app', permanent: true },
       { source: '/smart-home/osveshchenie/upravlenie-golosom', destination: '/compare/ecosystems', permanent: true },
       { source: '/smart-home/razrabotka-sistem/gsm-resheniya', destination: '/compare/diy', permanent: true },
       { source: '/smart-home/elektrika/upravlenie-rozetkami', destination: '/functions/electric/sockets', permanent: true },
       { source: '/smart-home/mikroklimat/konditsionirovanie', destination: '/functions/climate/cooling', permanent: true },
+      { source: '/smart-home/mikroklimat/ventilyacziya.html', destination: '/functions/climate/ventilation', permanent: true },
       { source: '/smart-home/multimedia/domashniy-kinoteatr', destination: '/functions/multimedia/cinema', permanent: true },
       { source: '/oborudovanie/upravlenie-domom/s-telefona', destination: '/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom', permanent: true },
+      { source: '/smart-home/bezopasnost/gsm-sistemyi.html', destination: '/functions/security/alarm', permanent: true },
       { source: '/smart-home/elektrika/upravlenie-shtorami', destination: '/functions/curtains', permanent: true },
       { source: '/smart-home/bezopasnost/videonablyudenie', destination: '/functions/security/cctv', permanent: true },
       { source: '/smart-home/osveshchenie/avtomatizatsiya', destination: '/functions/lighting', permanent: true },
@@ -226,6 +237,7 @@ module.exports = {
       { source: '/smart-home/mikroklimat/ventilyatsiya', destination: '/functions/climate/ventilation', permanent: true },
       { source: '/smart-home/elektrika/vodosnabzhenie', destination: '/functions/security/leaks', permanent: true },
       { source: '/smart-home/bezopasnost/gsm-sistemy', destination: '/functions/security/alarm', permanent: true },
+      { source: '/smart-home/osveshchenie/index.html', destination: '/functions/lighting', permanent: true },
       { source: '/oborudovanie/datchiki/temperatury', destination: '/equipment/sensors/temperature', permanent: true },
       { source: '/smart-home/mikroklimat/teplyy-pol', destination: '/functions/climate/floor', permanent: true },
       { source: '/oborudovanie/datchiki/dvizheniya', destination: '/equipment/sensors/motion', permanent: true },
@@ -244,6 +256,7 @@ module.exports = {
       { source: '/articles/proizvoditeli-oborudovaniya-dlya-umnogo-doma', destination: '/equipment', permanent: true },
       { source: '/proektyi/prostornaya-kvartira-dlya-semi-s-4-mya-detmi', destination: '/portfolio', permanent: true },
       { source: '/articles/sovety-po-vyboru-ustroystv-dlya-umnogo-doma', destination: '/answers/kak-vybrat-integratora-umnogo-doma', permanent: true },
+      { source: '/articles/umnyij-dom-%E2%80%93-plyusyi-i-minusyi.html', destination: '/compare', permanent: true },
       { source: '/proektyi/umnyy-dom-v-nebolshoy-i-akkuratnoy-kvartire', destination: '/portfolio', permanent: true },
       { source: '/proektyi/vpechatlyayushchiy-osobnyak-v-sosnovom-lesu', destination: '/portfolio', permanent: true },
       { source: '/proektyi/uyutnaya-kvartira-zhk-riverdale-apartments', destination: '/portfolio', permanent: true },
@@ -279,9 +292,11 @@ module.exports = {
       { source: '/articles/umnaya-kolonka-dlya-doma', destination: '/compare/ecosystems', permanent: true },
       { source: '/articles/vozmozhnosti-umnogo-doma', destination: '/functions', permanent: true },
       { source: '/czenyi/proektirovanie-umnogo-doma', destination: '/answers/chto-vhodit-v-proektirovanie-umnogo-doma', permanent: true },
+      { source: '/oborudovanie/komplektuyushie.html', destination: '/equipment', permanent: true },
       { source: '/articles/kontrol-dostupa-na-dver', destination: '/functions/security/access', permanent: true },
       { source: '/articles/aktualnost-umnogo-doma', destination: '/functions', permanent: true },
       { source: '/articles/umnyij-dom-dlya-ofisa', destination: '/solutions/office', permanent: true },
+      { source: '/articles/umnyij-dom-wi-fi.html', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
       { source: '/oborudovanie/komplektuyushchie', destination: '/equipment', permanent: true },
       { source: '/proektyi/v-poselke-park-avenue', destination: '/portfolio', permanent: true },
       { source: '/articles/umnyy-dom-dlya-dachi', destination: '/answers/stoit-li-stavit-umnyy-dom-na-dachu', permanent: true },
@@ -291,6 +306,7 @@ module.exports = {
       { source: '/smart-home/gotovye-resheniya', destination: '/solutions', permanent: true },
       { source: '/articles/server-umnogo-doma', destination: '/equipment/controllers', permanent: true },
       { source: '/articles/skhemy-umnogo-doma', destination: '/functions/automation', permanent: true },
+      { source: '/upload/Proect_Umniy_Dom.pdf', destination: '/pricing', permanent: true },
       { source: '/czenyi/montazh-umnogo-doma', destination: '/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma', permanent: true },
       { source: '/articles/umnyy-dom-i-deti', destination: '/answers/smogut-li-gosti-deti-i-pozhilye-roditeli', permanent: true },
       { source: '/oborudovanie/prilozheniya', destination: '/equipment/app', permanent: true },
@@ -310,9 +326,11 @@ module.exports = {
       { source: '/kontaktyi/moskva', destination: '/contacts', permanent: true },
       { source: '/kontaktyi/kazan', destination: '/contacts', permanent: true },
       { source: '/kontaktyi/sochi', destination: '/contacts', permanent: true },
+      { source: '/kontaktyi/baku', destination: '/contacts', permanent: true },
       { source: '/czenyi/servis', destination: '/pricing', permanent: true },
       { source: '/avtomatizacziya', destination: '/functions/automation', permanent: true },
       { source: '/oborudovanie', destination: '/equipment', permanent: true },
+      { source: '/index.html', destination: '/', permanent: true },
       { source: '/o-kompanii', destination: '/about', permanent: true },
       { source: '/smart-home', destination: '/solutions', permanent: true },
       { source: '/kontaktyi', destination: '/contacts', permanent: true },
@@ -331,7 +349,7 @@ module.exports = {
 # Часть B. Легаси-домены → новый сайт
 
 **Здесь на кону накопленный вес.** Источник — перебор поискового индекса по пяти доменам
-(21.08.2026): **около 190 подтверждённых URL**. Каждый показан выдачей; путей, достроенных по
+(21.08.2026): **около 250 подтверждённых URL, 194 правила в конфиге**. Каждый показан выдачей; путей, достроенных по
 догадке, в карте нет — выдуманный URL в карте редиректов хуже отсутствующего.
 
 ## ⚠️ Исправление к прежней версии этого раздела
@@ -503,24 +521,94 @@ module.exports = {
 | `/proektyi/umnyy-dom-br-dlya-nayka-borzova/` | `/portfolio` |
 
 
-## B4. Зеркало `mimismart.ru` — отдельные правила
-Полный список зеркала поиском не раскрывается: показаны фрагменты. Подтверждённое ниже,
-остальное — только из выгрузки Вебмастера.
+## B4. Зеркало `mimismart.ru` — своя схема адресов
+
+Перебор индекса дал **59 подтверждённых URL зеркала**. Главное здесь не список, а закономерность:
+у зеркала нет одной схемы транслитерации — на нём сосуществуют **два поколения слагов**.
+
+| Буква | Старые ветки (`avtomatizacziya/`, `czenyi/`, `proektyi/`, `kontaktyi/`, плоские `.html`) | Новые ветки (`smart-home/`, `oborudovanie/`, `partneram/`) | На основном домене |
+|---|---|---|---|
+| ц | `cz` — `avtomatizacziya`, `ventilyacziya` | `ts` — `konditsionirovanie` | `ts` |
+| ы | `yi` — `proektyi`, `gsm-sistemyi` | `y` — `provodnye-sistemy` | `y` |
+| й | `j` — `umnyij-dom` | `y` — `teplyy-pol` | `y` |
+| щ | `shh` — `osveshhenie` | `shch` — `osveshchenie` | `shch` |
+
+Отдельно: **у «щ» на зеркале три написания** — `shh`, `shch` и `sh` (`komplektuyushie.html`, где
+одна `h` потеряна). Угадать нельзя: каждый адрес проверяется отдельно.
+
+Формат адреса тоже не один. Живут одновременно каталог со слешем, каталог с `/index.html` и
+плоский `.html`, причём вперемешку внутри одной секции: `/mikroklimat/ventilyacziya.html` рядом с
+`/mikroklimat/otoplenie/`. По четырём страницам выдача показала **обе** формы сразу — значит
+правила нужны на оба варианта. Плюс часть страниц индексируется по `http://`.
+
+Практический вывод: **общей склейкой зеркало не покрывается**. Ниже — подтверждённые адреса.
 
 | Старый | Новый | Примечание |
 |---|---|---|
-| `/index.html` | `/` | ⚠️ корень зеркала отдаётся с index.html |
+| `/index.html` | `/` |  |
+| `/avtomatizacziya/vozmozhnosti/` | `/functions` |  |
+| `/avtomatizacziya/funktsii-umnogo-doma/` | `/functions/automation` |  |
+| `/avtomatizacziya/kompleksnyie-resheniya/` | `/solutions` |  |
+| `/avtomatizacziya/kompleksnyie-resheniya/kottedzh/` | `/solutions/house` |  |
+| `/avtomatizacziya/kompleksnyie-resheniya/dacha/` | `/solutions/house` | ⚠️ дачи нет отдельно |
 | `/articles/umnyij-dom-wi-fi.html` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` | ⚠️ плоский .html |
-| `/articles/umnyij-dom-%E2%80%93-plyusyi-i-minusyi.html` | `/compare` | ⚠️ тире в URL закодировано |
-| `/smart-home/osveshhenie/distanczionnoe-upravlenie.html` | `/functions/lighting` | ⚠️ своя транслитерация: osveshhenie, distanczionnoe |
-| `/smart-home/mikroklimat/ventilyacziya.html` | `/functions/climate/ventilation` | ⚠️ своя транслитерация: ventilyacziya |
-| `/oborudovanie/komplektuyushie.html` | `/equipment` | ⚠️ своя транслитерация: komplektuyushie |
-| `/partneram/integrator/` | `/partners` | ⚠️ раздела нет на основном домене |
+| `/articles/umnyij-dom-%E2%80%93-plyusyi-i-minusyi.html` | `/compare` | ⚠️ в слаге настоящее тире, закодировано |
+| `/articles/umnyij-dom-dlya-ofisa/` | `/solutions/office` |  |
+| `/articles/provodka-dlya-umnogo-doma/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |  |
+| `/articles/umnaya-kolonka-dlya-doma/` | `/compare/ecosystems` |  |
+| `/articles/server-umnogo-doma/` | `/equipment/controllers` |  |
+| `/proektyi/` | `/portfolio` |  |
+| `/proektyi/umnyy-dom-br-dlya-nayka-borzova/` | `/portfolio` |  |
+| `/proektyi/vysokie-tekhnologii-v-klassicheskom-ispolnenii/` | `/portfolio` |  |
+| `/proektyi/bolshoy-dom-dlya-bolshoy-semi/` | `/portfolio` |  |
+| `/proektyi/v-poselke-park-avenue/` | `/portfolio` |  |
+| `/smart-home/gotovye-resheniya/` | `/solutions` |  |
+| `/smart-home/gotovye-resheniya/nedorogie-resheniya/` | `/compare/diy` |  |
+| `/smart-home/gotovye-resheniya/dopolnitelnye-optsii/` | `/functions` |  |
+| `/smart-home/razrabotka-sistem/komplekty/` | `/compare/diy` |  |
+| `/smart-home/razrabotka-sistem/modulnye-resheniya/` | `/equipment/controllers` |  |
+| `/smart-home/razrabotka-sistem/modulnye-resheniya/index.html` | `/equipment/controllers` | ⚠️ вторая форма того же адреса |
+| `/smart-home/razrabotka-sistem/provodnye-sistemy/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |  |
+| `/smart-home/razrabotka-sistem/provodnye-sistemy/index.html` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` | ⚠️ вторая форма |
+| `/smart-home/osveshchenie/index.html` | `/functions/lighting` | ⚠️ щ → shch |
+| `/smart-home/osveshhenie/distanczionnoe-upravlenie.html` | `/functions/lighting` | ⚠️ щ → shh, ц → cz |
+| `/smart-home/mikroklimat/otoplenie/` | `/functions/climate/heating` |  |
+| `/smart-home/mikroklimat/konditsionirovanie/` | `/functions/climate/cooling` |  |
+| `/smart-home/mikroklimat/teplyy-pol/` | `/functions/climate/floor` |  |
+| `/smart-home/mikroklimat/ventilyacziya.html` | `/functions/climate/ventilation` | ⚠️ ц → cz, плоский .html |
+| `/smart-home/elektrika/upravlenie-rozetkami/` | `/functions/electric/sockets` |  |
+| `/smart-home/bezopasnost/vorota/` | `/functions/security/access` |  |
+| `/smart-home/bezopasnost/vorota/index.html` | `/functions/security/access` | ⚠️ вторая форма |
+| `/smart-home/bezopasnost/signalizatsiya/` | `/functions/security/alarm` |  |
+| `/smart-home/bezopasnost/okhranno-pozharnaya-signalizatsiya/` | `/functions/security/fire` |  |
+| `/smart-home/bezopasnost/gsm-sistemyi.html` | `/functions/security/alarm` | ⚠️ ы → yi |
+| `/smart-home/bezopasnost/kontrol-dostupa/` | `/functions/security/access` |  |
+| `/smart-home/multimedia/multirum/` | `/functions/multimedia/multiroom` |  |
+| `/smart-home/multimedia/multirum/index.html` | `/functions/multimedia/multiroom` | ⚠️ вторая форма |
+| `/smart-home/multimedia/upravlenie-audio-i-video/` | `/functions/multimedia/audio` |  |
+| `/oborudovanie/prilozheniya/` | `/equipment/app` |  |
+| `/oborudovanie/prilozheniya/dlya-windows/index.html` | `/equipment/app` |  |
+| `/oborudovanie/prilozheniya/dliya-iphone.html` | `/equipment/app` | ⚠️ другое написание «для» |
+| `/oborudovanie/komplektuyushie.html` | `/equipment` | ⚠️ щ → sh, одна h потеряна |
+| `/oborudovanie/datchiki/dvizheniya/` | `/equipment/sensors/motion` |  |
+| `/oborudovanie/datchiki/protechki/` | `/equipment/sensors/leak` |  |
+| `/oborudovanie/datchiki/temperatury/` | `/equipment/sensors/temperature` |  |
+| `/oborudovanie/upravlenie-domom/golosovoe-upravlenie/` | `/compare/ecosystems` |  |
+| `/oborudovanie/upravlenie-domom/cherez-internet/` | `/answers/chto-znachit-umnyy-dom-bez-oblaka-i` |  |
+| `/oborudovanie/avtomatizatsiya-kvartir/oborudovanie-dlya-kvartir/` | `/equipment` |  |
+| `/czenyi/montazh-umnogo-doma/` | `/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma` |  |
+| `/czenyi/servis/` | `/pricing` | ⚠️ раздела /service нет |
+| `/partneram/` | `/partners` |  |
+| `/partneram/dileram/` | `/answers/kak-stat-partnerom-dilerom-mimismart` |  |
+| `/partneram/integrator/` | `/partners` | ⚠️ страница для агентств недвижимости |
+| `/kontaktyi/sochi/` | `/contacts` |  |
+| `/kontaktyi/baku/` | `/contacts` |  |
+| `/upload/Proect_Umniy_Dom.pdf` | `/pricing` | ⚠️ PDF-презентация в индексе |
 
-Кроме перечисленного, на зеркале подтверждены пути, совпадающие с основным доменом
-(`/articles/server-umnogo-doma/`, `/proektyi/…`, `/partneram/dileram/`, `/czenyi/servis/`,
-`/kontaktyi/sochi/` и другие) — для них работают те же правила, что в B1–B3, но применять их
-надо на своём хосте, а не через общую склейку.
+**Чего на зеркале не нашлось** (в выдаче по этим темам только адреса основного домена):
+видеонаблюдение, домофон, шторы и жалюзи, беспроводные системы, удалённое управление, датчики
+дыма и газа, «о компании», отзывы. Либо страниц нет, либо они вне индекса — достраивать по
+шаблону нельзя, особенно при трёх вариантах написания «щ».
 
 ## B5. Ещё три домена
 `mimismart.com` — корень и `/catalog/`, плюс PDF-буклет `/files/Kit.pdf` в индексе.
