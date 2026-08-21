@@ -278,6 +278,21 @@
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .a-hub a{color:var(--accent-ink);font-weight:600;font-size:14px}
+  .legal-block{margin:26px 0 18px;padding-top:18px;border-top:1px solid var(--line)}
+  .legal-block h4{margin:0 0 8px}
+  .legal-block p{color:var(--muted);font-size:13px;max-width:80ch;margin:0 0 10px}
+  .legal-list{margin:0 0 10px;padding-left:18px;color:var(--muted);font-size:13px}
+  .legal-list li{margin:4px 0}
+  .legal-note{color:var(--faint);font-size:12.5px}
+  .cookie{position:fixed;left:16px;right:16px;bottom:16px;z-index:120;max-width:720px;
+    margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:18px 20px;box-shadow:0 24px 60px rgba(0,0,0,.45);display:flex;gap:16px;
+    align-items:center;flex-wrap:wrap}
+  .cookie[hidden]{display:none}
+  .cookie p{margin:0;flex:1 1 320px;font-size:13.5px;color:var(--muted)}
+  .cookie a{color:var(--accent-ink);text-decoration:underline}
+  .cookie-btns{display:flex;gap:10px;flex-wrap:wrap}
+  @media (max-width:520px){.cookie{left:8px;right:8px;bottom:8px;padding:14px}}
   .a-meta{font-size:12.5px;color:var(--muted);margin-top:14px}
   .req{color:var(--accent-ink);font-weight:700}
   .skip-link{position:absolute;left:-9999px;top:0;z-index:200;padding:12px 18px;
@@ -768,8 +783,8 @@
     <div class="sec-head reveal"><p class="eyebrow">Пять фактов о системе</p>
       <h2>Обещания, которые проверяются на объекте, а не на словах.</h2></div>
     <div class="grid g4">
-      <div class="card reveal"><span class="kicker">Гарантия</span><h3 style="margin-top:8px">Пожизненная <span class="prov">⚠️ условия подтвердить</span></h3><p>Гарантия на систему и поддержка на весь срок службы объекта. <span class="prov">⚠️ сроки и условия подтвердить</span> Сравнений с рынком не пишем: по ст. 5 ФЗ-38 превосходная степень требует документально обоснованного критерия.</p></div>
-      <div class="card reveal"><span class="kicker">Датчики</span><h3 style="margin-top:8px">Произведение техники</h3><p>Миниатюрные датчики собственной разработки — размер видно вживую в шоуруме. <span class="prov">⚠️ сравнение с категорией не заявляем без критерия (ст. 5 ФЗ-38)</span></p></div>
+      <div class="card reveal"><span class="kicker">Гарантия</span><h3 style="margin-top:8px">Пожизненная <span class="prov">⚠️ условия подтвердить</span></h3><p>Гарантия на систему и поддержка на весь срок службы объекта. <span class="prov">⚠️ сроки и условия подтвердить</span> Сравнений с рынком не пишем: превосходная степень без документально обоснованного критерия — риск по ст. 14.2–14.3 ФЗ-135 и ст. 10 ЗоЗПП.</p></div>
+      <div class="card reveal"><span class="kicker">Датчики</span><h3 style="margin-top:8px">Произведение техники</h3><p>Миниатюрные датчики собственной разработки — размер видно вживую в шоуруме. <span class="prov">⚠️ сравнение с категорией не заявляем без критерия (ФЗ-135)</span></p></div>
       <div class="card reveal"><span class="kicker">Масштаб</span><h3 style="margin-top:8px">5000+ объектов <span class="prov">⚠️</span></h3><p>20 представительств по миру <span class="prov">⚠️</span> — опыт, который снижает риск на вашем объекте.</p></div>
       <div class="card reveal"><span class="kicker">Архитектура</span><h3 style="margin-top:8px">Децентрализация</h3><p>Высокая надёжность при авариях: элементы системы работают автономно, без единой точки отказа.</p></div>
     </div>
@@ -1411,9 +1426,39 @@
     <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/portfolio">Кейсы</a><a href="#/answers">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a><a href="#/showroom">Шоурум</a><a href="#/privacy">Политика ПД</a></div>
     <div><h4>Шоурум</h4><p style="margin:0">Москва, Новоданиловская наб., 6к1<br>09:00–18:00</p></div>
   </div>
+  <div class="legal-block">
+    <h4>Сведения об исполнителе</h4>
+    <p>Размещаются по <b>п. 1 и п. 1.2 ст. 9 Закона РФ «О защите прав потребителей»</b> —
+      наименование, адрес и режим работы обязаны быть на сайте исполнителя.
+      Отсутствие влечёт ответственность по ч. 1 ст. 14.8 КоАП.</p>
+    <ul class="legal-list">
+      <li>Наименование: <span class="prov">⚠️ заполнить: полное наименование с ОПФ</span></li>
+      <li>Адрес (место нахождения): <span class="prov">⚠️ заполнить: юридический адрес</span></li>
+      <li>ОГРН / ИНН: <span class="prov">⚠️ заполнить</span> <span class="legal-note">(для ИП обязателен ОГРНИП и наименование регистрирующего органа)</span></li>
+      <li>Режим работы: будни 09:00–18:00 · шоурум: Москва, Новоданиловская наб., 6к1</li>
+      <li>Лицензия МЧС: <span class="prov">⚠️ уточнить, есть ли в составе работ пожарная сигнализация/СОУЭ</span>
+        <span class="legal-note">— если да, п. 2 ст. 9 ЗоЗПП требует опубликовать номер, срок и орган</span></li>
+    </ul>
+    <p class="legal-note">Информация на сайте носит справочный характер и не является публичной
+      офертой (п. 1 ст. 437 ГК РФ): состав работ и стоимость определяются техническим заданием.</p>
+  </div>
   © 2026 MiMiSmart
   <div class="foot-note">⚠️ Прототип. Пороги (80 м²/300 м²/40 млн), «от 2–3 млн ₽», цифры-пруфы, контакты и кейсы — заглушки до подтверждения (tz-site/99).</div>
 </div></footer>
+
+<!-- ===================== COOKIE =====================
+     По ст. 9 ФЗ-152 обязателен не баннер сам по себе, а СОГЛАСИЕ до запуска аналитических
+     скриптов. Формулировка «продолжая пользоваться сайтом, вы соглашаетесь» согласием
+     не считается. Метрика и GA4 не запускаются, пока пользователь не согласился. -->
+<div class="cookie" id="cookieBar" role="region" aria-label="Согласие на аналитические cookie" hidden>
+  <p>Технические cookie нужны, чтобы сайт помнил выбранную тему — они работают всегда.
+    Аналитические (Яндекс.Метрика, GA4) запускаем только с вашего согласия.
+    <a href="#/privacy">Политика обработки данных</a></p>
+  <div class="cookie-btns">
+    <button type="button" class="btn btn-primary btn-sm" id="ckAccept">Разрешить аналитику</button>
+    <button type="button" class="btn btn-ghost btn-sm" id="ckDecline">Только необходимые</button>
+  </div>
+</div>
 
 <!-- ===================== QUALIFY FORM ===================== -->
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Квалификационная заявка">
@@ -1972,6 +2017,30 @@
     node.textContent=items.length?JSON.stringify({"@context":"https://schema.org",
       "@type":"ItemList","numberOfItems":items.length,"itemListElement":items}):'{}';
   }
+
+  /* ---------- согласие на аналитические cookie ----------
+     Скрипты аналитики НЕ подключаются до явного согласия (ст. 9 ФЗ-152). Выбор храним
+     локально; «Только необходимые» — полноценный отказ, а не отложенный показ баннера. */
+  (function(){
+    var bar=document.getElementById('cookieBar');
+    if(!bar)return;
+    var KEY='mm-analytics-consent',saved=null;
+    try{saved=localStorage.getItem(KEY)}catch(e){}
+    function loadAnalytics(){
+      /* здесь подключаются Метрика и GA4 — в прототипе только отметка,
+         чтобы было видно, что запуск привязан к согласию */
+      window.__analyticsLoaded=true;
+    }
+    function decide(v){
+      try{localStorage.setItem(KEY,v)}catch(e){}
+      bar.hidden=true;
+      if(v==='yes')loadAnalytics();
+    }
+    if(saved==='yes'){loadAnalytics()}
+    else if(saved!=='no'){bar.hidden=false}
+    document.getElementById('ckAccept').addEventListener('click',function(){decide('yes')});
+    document.getElementById('ckDecline').addEventListener('click',function(){decide('no')});
+  })();
 
   /* ---------- router ---------- */
   var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','solutions':'p-solutions-idx','functions':'p-functions-idx','showroom':'p-showroom','equipment':'p-equipment','portfolio':'p-cases','answers':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
