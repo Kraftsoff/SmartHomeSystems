@@ -521,6 +521,42 @@ await ctx.close();
   await ctx.close();
 }
 
+/* ---------- 7e. Дублирование текста между страницами ---------- */
+{
+  /* Один и тот же ответ в трёх местах делит вес и заставляет ИИ-поиск выбирать
+     между копиями. Раз уже случалось: три ответа стояли дословно на главной,
+     в списке и на своей странице. */
+  const seen = new Map();
+  const check = [...routes].filter((h) => !h.startsWith('#/answers/')).slice(0, 30);
+  for (const h of check) {
+    await page.goto(F + h);
+    await page.waitForTimeout(90);
+    const sentences = await page.evaluate(() => {
+      const v = [...document.querySelectorAll('section.page')]
+        .filter((s) => getComputedStyle(s).display !== 'none')[0];
+      if (!v) return [];
+      /* Берём только прозу и только вне ссылок: заголовки карточек «Ответы по
+         теме» повторяются по построению — это навигация, а не текст. Карточки
+         кейсов на главной — тизер того же блока, тоже не дубль контента. */
+      const nodes = [...v.querySelectorAll('p, li, dd, blockquote')]
+        .filter((e) => !e.closest('a[href]') && !e.closest('.case') && e.offsetParent !== null);
+      return nodes
+        .flatMap((e) => e.innerText.split(/(?<=[.!?])\s+/))
+        .map((x) => x.trim().replace(/\s+/g, ' '))
+        .filter((x) => x.length > 90);
+    });
+    for (const s of sentences) {
+      if (!seen.has(s)) seen.set(s, []);
+      seen.get(s).push(h);
+    }
+  }
+  const dups = [...seen.entries()].filter(([, hs]) => new Set(hs).size > 1);
+  dups.slice(0, 5).forEach(([sent, hs]) => {
+    fail(`одно предложение дословно на ${new Set(hs).size} страницах (${[...new Set(hs)].slice(0, 3).join(', ')}): «${sent.slice(0, 60)}…»`);
+  });
+  console.log(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
