@@ -878,6 +878,37 @@ await ctx.close();
   const gated = await page.evaluate(() => !window.__analyticsLoaded);
   if (!gated) fail('аналитика стартовала без согласия на cookie');
 
+  /* Одной первой загрузки мало: РКН прямо не считает согласием формулу
+     «продолжая пользоваться сайтом». Проверяем два случая, в которых
+     согласие могло бы «появиться» само. */
+  for (const h of ['#/pricing', '#/answers', '#/contacts']) {
+    await page.goto(F + h);
+    await page.waitForTimeout(200);
+  }
+  if (await page.evaluate(() => !!window.__analyticsLoaded))
+    fail('аналитика включилась просто от переходов по сайту — это не согласие (ст. 9 ФЗ-152)');
+
+  /* Явный отказ: аналитика не стартует и решение переживает переход. */
+  const deny = await page.$('text=Только необходимые');
+  if (deny) {
+    await page.goto(F);
+    await page.waitForTimeout(300);
+    const d2 = await page.$('text=Только необходимые');
+    if (d2) {
+      await d2.click();
+      await page.waitForTimeout(250);
+      await page.goto(F + '#/pricing');
+      await page.waitForTimeout(300);
+      const st = await page.evaluate(() => ({
+        loaded: !!window.__analyticsLoaded,
+        stored: Object.keys(localStorage).some((k) => /consent/i.test(k)),
+      }));
+      if (st.loaded) fail('аналитика стартовала после явного отказа');
+      if (!st.stored) fail('отказ от аналитики не сохранён — баннер спросит снова и решение потеряется');
+      console.log('согласие на аналитику: без ответа не стартует, отказ сохраняется и переживает переход');
+    }
+  }
+
   /* Форма заявки: согласие обязательно, метка на месте, Esc закрывает */
   await page.goto(F + '#/contacts');
   await page.waitForTimeout(400);
