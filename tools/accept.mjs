@@ -398,7 +398,19 @@ const noJsFaq = await nojs.evaluate(() => {
   try { return JSON.parse(document.getElementById('ldFaq').textContent).mainEntity.length; } catch (e) { return 0; }
 });
 if (noJsFaq !== ld.faq) fail(`без JS в разметке ${noJsFaq} ответов вместо ${ld.faq} — разметка собирается скриптом`);
-console.log('без JavaScript: ответов в разметке', noJsFaq);
+/* Что достаётся краулеру, который парсит сырой HTML, а не рендерит DOM — так
+   работает большинство ИИ-ботов. Развёрнутая часть лежит в <template>: в сыром
+   HTML она есть, в отрендеренном дереве её нет. Для прототипа это осознанный
+   размен, для продакшена — пункт D7 в tz-site/16. */
+const rawSrc = (await import('node:fs')).readFileSync(resolve(FILE), 'utf8');
+const plainText = rawSrc
+  .replace(/<script(?![^>]*application\/ld)[\s\S]*?<\/script>/g, ' ')
+  .replace(/<style[\s\S]*?<\/style>/g, ' ')
+  .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const inTpl = (rawSrc.match(/<template class="more">[\s\S]*?<\/template>/g) || []).join(' ')
+  .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+if (plainText.length < 100000) fail(`в сыром HTML только ${plainText.length} знаков текста — краулеру нечего извлекать`);
+console.log(`без JavaScript: ответов в разметке ${noJsFaq}; в сыром HTML ${plainText.length} знаков, из них ${inTpl.length} в <template>`);
 await ctx.close();
 
 /* ---------- 7b. Исходный HTML: то, что браузер молча чинит ---------- */

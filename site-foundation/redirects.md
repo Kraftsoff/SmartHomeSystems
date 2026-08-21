@@ -186,7 +186,93 @@ module.exports = {
       { source: '/catalog', destination: '/equipment', permanent: true },
       { source: '/products', destination: '/equipment', permanent: true },
       // ══ ЧАСТЬ B: легаси-домены. Порядок важен — частные выше общих ══
-      // /articles/ ведём адресно: склейка в раздел обнуляет ранжирующиеся страницы
+      // Источник: перебор индекса 21.08.2026, ~190 подтверждённых URL.
+      // Зеркало mimismart.ru имеет свою транслитерацию — см. B4, общей склейкой не покрывается.
+{ source: '/oborudovanie', destination: '/equipment', permanent: true },
+      { source: '/oborudovanie/kontrollery', destination: '/equipment/controllers', permanent: true },
+      { source: '/oborudovanie/datchiki', destination: '/equipment/sensors', permanent: true },
+      { source: '/oborudovanie/datchiki/protechki', destination: '/equipment/sensors/leak', permanent: true },
+      { source: '/oborudovanie/datchiki/dvizheniya', destination: '/equipment/sensors/motion', permanent: true },
+      { source: '/oborudovanie/datchiki/vlazhnosti', destination: '/equipment/sensors/humidity', permanent: true },
+      { source: '/oborudovanie/datchiki/temperatury', destination: '/equipment/sensors/temperature', permanent: true },
+      { source: '/oborudovanie/datchiki/dyma', destination: '/equipment/sensors/smoke', permanent: true },
+      { source: '/oborudovanie/komplektuyushchie', destination: '/equipment', permanent: true },
+      { source: '/oborudovanie/prilozheniya/dlya-android', destination: '/equipment/app', permanent: true },
+      { source: '/oborudovanie/prilozheniya/dlya-iphone', destination: '/equipment/app', permanent: true },
+      { source: '/oborudovanie/prilozheniya/dlya-windows', destination: '/equipment/app', permanent: true },
+      { source: '/oborudovanie/prilozheniya', destination: '/equipment/app', permanent: true },
+      { source: '/oborudovanie/upravlenie-domom/s-telefona', destination: '/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom', permanent: true },
+      { source: '/oborudovanie/upravlenie-domom/cherez-internet', destination: '/answers/chto-znachit-umnyy-dom-bez-oblaka-i', permanent: true },
+      { source: '/oborudovanie/upravlenie-domom/golosovoe-upravlenie', destination: '/compare/ecosystems', permanent: true },
+      { source: '/oborudovanie/upravlenie-domom', destination: '/functions/automation', permanent: true },
+      { source: '/oborudovanie/avtomatizatsiya-kvartir/upravlenie-svetom', destination: '/functions/lighting', permanent: true },
+      { source: '/oborudovanie/avtomatizatsiya-kvartir/upravlenie-temperaturoy', destination: '/functions/climate', permanent: true },
+      { source: '/oborudovanie/avtomatizatsiya-kvartir/oborudovanie-dlya-kvartir', destination: '/equipment', permanent: true },
+      { source: '/oborudovanie/avtomatizatsiya-kvartir', destination: '/solutions/flat', permanent: true },
+      { source: '/smart-home/osveshchenie/avtomatizatsiya', destination: '/functions/lighting', permanent: true },
+      { source: '/smart-home/osveshchenie/distantsionnoe-upravlenie', destination: '/functions/lighting', permanent: true },
+      { source: '/smart-home/osveshchenie/upravlenie-golosom', destination: '/compare/ecosystems', permanent: true },
+      { source: '/smart-home/osveshchenie', destination: '/functions/lighting', permanent: true },
+      { source: '/smart-home/mikroklimat/otoplenie', destination: '/functions/climate/heating', permanent: true },
+      { source: '/smart-home/mikroklimat/teplyy-pol', destination: '/functions/climate/floor', permanent: true },
+      { source: '/smart-home/mikroklimat/ventilyatsiya', destination: '/functions/climate/ventilation', permanent: true },
+      { source: '/smart-home/mikroklimat/konditsionirovanie', destination: '/functions/climate/cooling', permanent: true },
+      { source: '/smart-home/mikroklimat', destination: '/functions/climate', permanent: true },
+      { source: '/smart-home/elektrika/upravlenie-rozetkami', destination: '/functions/electric/sockets', permanent: true },
+      { source: '/smart-home/elektrika/upravlenie-shtorami', destination: '/functions/curtains', permanent: true },
+      { source: '/smart-home/elektrika/zhalyuzi', destination: '/functions/curtains', permanent: true },
+      { source: '/smart-home/elektrika/energosberezhenie', destination: '/answers/okupaetsya-li-umnyy-dom-na-energosberezhenii', permanent: true },
+      { source: '/smart-home/elektrika/vodosnabzhenie', destination: '/functions/security/leaks', permanent: true },
+      { source: '/smart-home/elektrika', destination: '/functions/electric', permanent: true },
+      { source: '/smart-home/bezopasnost/signalizatsiya', destination: '/functions/security/alarm', permanent: true },
+      { source: '/smart-home/bezopasnost/okhranno-pozharnaya-signalizatsiya', destination: '/functions/security/fire', permanent: true },
+      { source: '/smart-home/bezopasnost/videonablyudenie', destination: '/functions/security/cctv', permanent: true },
+      { source: '/smart-home/bezopasnost/kontrol-dostupa', destination: '/functions/security/access', permanent: true },
+      { source: '/smart-home/bezopasnost/domofon', destination: '/functions/security/intercom', permanent: true },
+      { source: '/smart-home/bezopasnost/vorota', destination: '/functions/security/access', permanent: true },
+      { source: '/smart-home/bezopasnost/protechka-vody', destination: '/functions/security/leaks', permanent: true },
+      { source: '/smart-home/bezopasnost/gsm-sistemy', destination: '/functions/security/alarm', permanent: true },
+      { source: '/smart-home/bezopasnost', destination: '/functions/security', permanent: true },
+      { source: '/smart-home/multimedia/multirum', destination: '/functions/multimedia/multiroom', permanent: true },
+      { source: '/smart-home/multimedia/domashniy-kinoteatr', destination: '/functions/multimedia/cinema', permanent: true },
+      { source: '/smart-home/multimedia/upravlenie-audio-i-video', destination: '/functions/multimedia/audio', permanent: true },
+      { source: '/smart-home/multimedia', destination: '/functions/multimedia', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/provodnye-sistemy', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/besprovodnye-resheniya', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/gsm-resheniya', destination: '/compare/diy', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/komplekty', destination: '/compare/diy', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/modulnye-resheniya', destination: '/equipment/controllers', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/udalyennoe-upravlenie', destination: '/equipment/app', permanent: true },
+      { source: '/smart-home/gotovye-resheniya/premialnyy-segment', destination: '/solutions/premium', permanent: true },
+      { source: '/smart-home/gotovye-resheniya/nedorogie-resheniya', destination: '/compare/diy', permanent: true },
+      { source: '/smart-home/gotovye-resheniya/dopolnitelnye-optsii', destination: '/functions', permanent: true },
+      { source: '/smart-home/gotovye-resheniya', destination: '/solutions', permanent: true },
+      { source: '/smart-home', destination: '/solutions', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya/kvartira', destination: '/solutions/flat', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya/kottedzh', destination: '/solutions/house', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya/dacha', destination: '/solutions/house', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya', destination: '/solutions', permanent: true },
+      { source: '/avtomatizacziya/funktsii-umnogo-doma', destination: '/functions/automation', permanent: true },
+      { source: '/avtomatizacziya/vozmozhnosti', destination: '/functions', permanent: true },
+      { source: '/avtomatizacziya', destination: '/functions/automation', permanent: true },
+      { source: '/czenyi/montazh-umnogo-doma', destination: '/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma', permanent: true },
+      { source: '/czenyi/proektirovanie-umnogo-doma', destination: '/answers/chto-vhodit-v-proektirovanie-umnogo-doma', permanent: true },
+      { source: '/czenyi/servis', destination: '/pricing', permanent: true },
+      { source: '/czenyi', destination: '/pricing', permanent: true },
+      { source: '/o-kompanii', destination: '/about', permanent: true },
+      { source: '/partneram/dileram', destination: '/answers/kak-stat-partnerom-dilerom-mimismart', permanent: true },
+      { source: '/partneram/designer', destination: '/partners', permanent: true },
+      { source: '/partneram/integrator', destination: '/partners', permanent: true },
+      { source: '/partneram', destination: '/partners', permanent: true },
+      { source: '/kontaktyi/moskva', destination: '/contacts', permanent: true },
+      { source: '/kontaktyi/sochi', destination: '/contacts', permanent: true },
+      { source: '/kontaktyi/kazan', destination: '/contacts', permanent: true },
+      { source: '/kontaktyi/tashkent', destination: '/contacts', permanent: true },
+      { source: '/kontaktyi/nur-sultan', destination: '/contacts', permanent: true },
+      { source: '/kontaktyi', destination: '/contacts', permanent: true },
+      { source: '/private', destination: '/privacy', permanent: true },
+      { source: '/proektyi', destination: '/portfolio', permanent: true },
+      { source: '/articles', destination: '/answers', permanent: true },
       { source: '/articles/detsentralizovannyy-umnyy-dom', destination: '/answers/chto-takoe-decentralizovannaya-arhitektura-umnogo-doma-i', permanent: true },
       { source: '/articles/server-umnogo-doma', destination: '/equipment/controllers', permanent: true },
       { source: '/articles/reyting-sistem-umnyy-dom', destination: '/compare', permanent: true },
@@ -195,26 +281,46 @@ module.exports = {
       { source: '/articles/skhemy-umnogo-doma', destination: '/functions/automation', permanent: true },
       { source: '/articles/avtomatizatsiya-umnogo-doma', destination: '/functions/automation', permanent: true },
       { source: '/articles/umnyij-dom-dlya-ofisa', destination: '/solutions/office', permanent: true },
-      // сегменты и цены
-      { source: '/smart-home/gotovye-resheniya/premialnyy-segment', destination: '/solutions/premium', permanent: true },
-      { source: '/smart-home/razrabotka-sistem/provodnye-sistemy', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
-      { source: '/smart-home/razrabotka-sistem/modulnye-resheniya', destination: '/equipment/controllers', permanent: true },
-      { source: '/smart-home/razrabotka-sistem/udalyennoe-upravlenie', destination: '/equipment/app', permanent: true },
-      { source: '/smart-home/bezopasnost/domofon', destination: '/functions/security/intercom', permanent: true },
-      { source: '/smart-home/multimedia', destination: '/functions/multimedia', permanent: true },
-      { source: '/smart-home', destination: '/solutions', permanent: true },
-      { source: '/avtomatizacziya/kompleksnyie-resheniya/kvartira', destination: '/solutions/flat', permanent: true },
-      { source: '/avtomatizacziya/kompleksnyie-resheniya/kottedzh', destination: '/solutions/house', permanent: true },
-      { source: '/avtomatizacziya/kompleksnyie-resheniya/dacha', destination: '/solutions/house', permanent: true },  // ⚠️ /solutions/country-house в архитектуре нет
-      { source: '/avtomatizacziya', destination: '/functions/automation', permanent: true },
-      { source: '/oborudovanie/kontrollery', destination: '/equipment/controllers', permanent: true },
-      { source: '/oborudovanie', destination: '/equipment', permanent: true },
-      { source: '/czenyi/servis', destination: '/pricing', permanent: true },  // ⚠️ временно: /service в архитектуре нет
-      { source: '/czenyi', destination: '/pricing', permanent: true },
-      { source: '/o-kompanii', destination: '/about', permanent: true },
-      { source: '/partneram/dileram', destination: '/partners', permanent: true },
-      { source: '/partneram/designer', destination: '/partners', permanent: true },  // ⚠️ страницы для дизайнеров нет
-      { source: '/partneram', destination: '/partners', permanent: true },
+      { source: '/articles/avtomatizatsiya-kottedzha', destination: '/solutions/house', permanent: true },
+      { source: '/articles/sovety-po-vyboru-ustroystv-dlya-umnogo-doma', destination: '/answers/kak-vybrat-integratora-umnogo-doma', permanent: true },
+      { source: '/articles/proizvoditeli-oborudovaniya-dlya-umnogo-doma', destination: '/equipment', permanent: true },
+      { source: '/articles/provodka-dlya-umnogo-doma', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
+      { source: '/articles/podklyuchenie-umnogo-vyklyuchatelya', destination: '/answers/ostanutsya-li-obychnye-vyklyuchateli-na-stene', permanent: true },
+      { source: '/articles/upravlenie-svetom-s-telefona', destination: '/functions/lighting', permanent: true },
+      { source: '/articles/upravlenie-umnym-domom-s-kompyutera', destination: '/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom', permanent: true },
+      { source: '/articles/domashnij-kinoteatr-umnyij-dom', destination: '/functions/multimedia/cinema', permanent: true },
+      { source: '/articles/umnaya-kolonka-dlya-doma', destination: '/compare/ecosystems', permanent: true },
+      { source: '/articles/kontrol-dostupa-na-dver', destination: '/functions/security/access', permanent: true },
+      { source: '/articles/ustanovka-kontrolya-dostupa-na-dver', destination: '/functions/security/access', permanent: true },
+      { source: '/articles/sistemy-bezopasnosti-umnogo-doma', destination: '/functions/security', permanent: true },
+      { source: '/articles/umnyij-dom-bezopasnost-i-oxrana', destination: '/functions/security', permanent: true },
+      { source: '/articles/signalizatsiya-dlya-zagorodnogo-doma', destination: '/functions/security/alarm', permanent: true },
+      { source: '/articles/avtomatizirovannaya-sistema-upravleniya-zdaniem', destination: '/solutions/office', permanent: true },
+      { source: '/articles/dlya-chego-nuzhen-umnyy-dom', destination: '/functions', permanent: true },
+      { source: '/articles/aktualnost-umnogo-doma', destination: '/functions', permanent: true },
+      { source: '/articles/kak-sdelat-sistemu-umnyy-dom', destination: '/answers/iz-kakih-etapov-sostoit-proekt-umnogo-doma', permanent: true },
+      { source: '/articles/umnyy-dom-i-deti', destination: '/answers/smogut-li-gosti-deti-i-pozhilye-roditeli', permanent: true },
+      { source: '/articles/komandy-dlya-umnogo-doma', destination: '/answers/kak-nastraivayutsya-scenarii-avtomatizacii-umnogo-doma', permanent: true },
+      { source: '/articles/solnechnyie-batarei-v-umnom-dome', destination: '/answers/chto-prodolzhit-rabotat-v-dome-pri-otklyuchenii', permanent: true },
+      { source: '/articles/umnyy-dom-plyusy-i-minusy', destination: '/compare', permanent: true },
+      { source: '/articles/sistema-umnyij-dom-dlya-dachi', destination: '/answers/stoit-li-stavit-umnyy-dom-na-dachu', permanent: true },
+      { source: '/articles/umnyy-dom-dlya-dachi', destination: '/answers/stoit-li-stavit-umnyy-dom-na-dachu', permanent: true },
+      { source: '/articles/umnaya-dacha-moskva', destination: '/answers/stoit-li-stavit-umnyy-dom-na-dachu', permanent: true },
+      { source: '/articles/umnoe-elektricheskoe-otoplenie-v-chastnom-dome', destination: '/functions/climate/heating', permanent: true },
+      { source: '/articles/umnyij-dom-dlya-invalidov', destination: '/answers/smogut-li-gosti-deti-i-pozhilye-roditeli', permanent: true },
+      { source: '/articles/mebel-umnyy-dom', destination: '/functions', permanent: true },
+      { source: '/proektyi/v-poselke-park-avenue', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/umnyy-dom-v-nebolshoy-i-akkuratnoy-kvartire', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/vpechatlyayushchiy-osobnyak-v-sosnovom-lesu', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/dom-2-etazha-dlya-pary-v-stile-modern', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/uyutnaya-kvartira-zhk-riverdale-apartments', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/2-kh-urovnevaya-kvartira-zhk-festivalnyy', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/prestizhnyy-dom-v-elitnom-poselke', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/vysokie-tekhnologii-v-klassicheskom-ispolnenii', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/bolshoy-dom-dlya-bolshoy-semi', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/prostornaya-kvartira-dlya-semi-s-4-mya-detmi', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/bolshaya-kvartira-s-panoramnym-vidom-na-gorod', destination: '/portfolio', permanent: true },
+      { source: '/proektyi/umnyy-dom-br-dlya-nayka-borzova', destination: '/portfolio', permanent: true },
       // инфо
       { source: '/news', destination: '/blog', permanent: true },
     ]
@@ -224,94 +330,232 @@ module.exports = {
 
 # Часть B. Легаси-домены → новый сайт
 
-**Здесь на кону накопленный вес.** Источник — замер выдачи 21.08.2026 (`../audit/08-serp-baseline.md`):
-это URL, присутствие которых в индексе подтверждено. Обходом меню они не находятся: часть
-доступна только из поиска.
+**Здесь на кону накопленный вес.** Источник — перебор поискового индекса по пяти доменам
+(21.08.2026): **около 190 подтверждённых URL**. Каждый показан выдачей; путей, достроенных по
+догадке, в карте нет — выдуманный URL в карте редиректов хуже отсутствующего.
 
-`mmsmart.ru` работает как основной домен, `mimismart.ru` держит зеркальные пути с той же
-структурой — значит одна и та же карта применяется к обоим доменам.
+## ⚠️ Исправление к прежней версии этого раздела
+Раньше здесь стояло: «`mmsmart.ru` — основной домен, `mimismart.ru` держит зеркальные пути с той
+же структурой, значит одна карта применяется к обоим». **Это неверно.** У доменов расходится
+транслитерация и формат адресов:
 
-## B1. Раздел `/articles/` — самый уязвимый
-Единственный источник органики по технологическому кластеру. `/articles/detsentralizovannyy-umnyy-dom/`
-стоит в органической выдаче третьим. **Каждый URL ведём адресно, склейка в раздел недопустима** —
-она обнуляет именно ту страницу, которая работает.
-
-| Старый | Новый |
-|---|---|
-| `/articles/detsentralizovannyy-umnyy-dom/` | `/answers/chto-takoe-decentralizovannaya-arhitektura-umnogo-doma-i` |
-| `/articles/server-umnogo-doma/` | `/equipment/controllers` |
-| `/articles/reyting-sistem-umnyy-dom/` | `/compare` |
-| `/articles/vozmozhnosti-umnogo-doma/` | `/functions` |
-| `/articles/umnyy-dom-kak-eto-rabotaet/` | `/functions/automation` |
-| `/articles/skhemy-umnogo-doma/` | `/functions/automation` |
-| `/articles/avtomatizatsiya-umnogo-doma/` | `/functions/automation` |
-| `/articles/umnyij-dom-dlya-ofisa/` | `/solutions/office` |
-
-## B2. Разделы, которые ранжируются по целевым запросам
-| Старый | Запрос из замера | Новый |
+| Тема | mmsmart.ru | mimismart.ru |
 |---|---|---|
-| `/smart-home/gotovye-resheniya/premialnyy-segment/` | умный дом премиум класса что входит | `/solutions/premium` |
-| `/avtomatizacziya/kompleksnyie-resheniya/dacha/` | умный дом на даче зимой присмотр | `/solutions/house` ⚠️ |
-| `/avtomatizacziya/kompleksnyie-resheniya/kvartira/` | умный дом в квартире | `/solutions/flat` |
-| `/avtomatizacziya/kompleksnyie-resheniya/kottedzh/` | умный дом в коттедже | `/solutions/house` |
-| `/czenyi/` | гарантия на умный дом сколько лет | `/pricing` |
-| `/czenyi/servis/` | сервисное обслуживание умного дома | `/pricing` ⚠️ |
+| Вентиляция | `/smart-home/mikroklimat/ventilyatsiya/` | `/smart-home/mikroklimat/ventilyacziya.html` |
+| Освещение | `/smart-home/osveshchenie/` | `/smart-home/osveshhenie/…html` |
+| Комплектующие | `/oborudovanie/komplektuyushchie/` | `/oborudovanie/komplektuyushie.html` |
+| Корень | `/` | `/index.html` |
 
-## B3. Остальные подтверждённые в индексе
+Механически копировать пути между доменами нельзя: получится карта, которая на зеркале не
+срабатывает вообще. Зеркало ведётся отдельным списком (B4).
+
+## B1. Основной домен `mmsmart.ru` — разделы
+
+| Старый | Новый | Примечание |
+|---|---|---|
+| `/oborudovanie/` | `/equipment` |  |
+| `/oborudovanie/kontrollery/` | `/equipment/controllers` |  |
+| `/oborudovanie/datchiki/` | `/equipment/sensors` |  |
+| `/oborudovanie/datchiki/protechki/` | `/equipment/sensors/leak` |  |
+| `/oborudovanie/datchiki/dvizheniya/` | `/equipment/sensors/motion` |  |
+| `/oborudovanie/datchiki/vlazhnosti/` | `/equipment/sensors/humidity` |  |
+| `/oborudovanie/datchiki/temperatury/` | `/equipment/sensors/temperature` |  |
+| `/oborudovanie/datchiki/dyma/` | `/equipment/sensors/smoke` |  |
+| `/oborudovanie/komplektuyushchie/` | `/equipment` |  |
+| `/oborudovanie/prilozheniya/dlya-android/` | `/equipment/app` |  |
+| `/oborudovanie/prilozheniya/dlya-iphone/` | `/equipment/app` |  |
+| `/oborudovanie/prilozheniya/dlya-windows/` | `/equipment/app` |  |
+| `/oborudovanie/prilozheniya/` | `/equipment/app` |  |
+| `/oborudovanie/upravlenie-domom/s-telefona/` | `/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom` |  |
+| `/oborudovanie/upravlenie-domom/cherez-internet/` | `/answers/chto-znachit-umnyy-dom-bez-oblaka-i` |  |
+| `/oborudovanie/upravlenie-domom/golosovoe-upravlenie/` | `/compare/ecosystems` |  |
+| `/oborudovanie/upravlenie-domom/` | `/functions/automation` |  |
+| `/oborudovanie/avtomatizatsiya-kvartir/upravlenie-svetom/` | `/functions/lighting` |  |
+| `/oborudovanie/avtomatizatsiya-kvartir/upravlenie-temperaturoy/` | `/functions/climate` |  |
+| `/oborudovanie/avtomatizatsiya-kvartir/oborudovanie-dlya-kvartir/` | `/equipment` |  |
+| `/oborudovanie/avtomatizatsiya-kvartir/` | `/solutions/flat` |  |
+| `/smart-home/osveshchenie/avtomatizatsiya/` | `/functions/lighting` |  |
+| `/smart-home/osveshchenie/distantsionnoe-upravlenie/` | `/functions/lighting` |  |
+| `/smart-home/osveshchenie/upravlenie-golosom/` | `/compare/ecosystems` |  |
+| `/smart-home/osveshchenie/` | `/functions/lighting` |  |
+| `/smart-home/mikroklimat/otoplenie/` | `/functions/climate/heating` |  |
+| `/smart-home/mikroklimat/teplyy-pol/` | `/functions/climate/floor` |  |
+| `/smart-home/mikroklimat/ventilyatsiya/` | `/functions/climate/ventilation` |  |
+| `/smart-home/mikroklimat/konditsionirovanie/` | `/functions/climate/cooling` |  |
+| `/smart-home/mikroklimat/` | `/functions/climate` |  |
+| `/smart-home/elektrika/upravlenie-rozetkami/` | `/functions/electric/sockets` |  |
+| `/smart-home/elektrika/upravlenie-shtorami/` | `/functions/curtains` |  |
+| `/smart-home/elektrika/zhalyuzi/` | `/functions/curtains` |  |
+| `/smart-home/elektrika/energosberezhenie/` | `/answers/okupaetsya-li-umnyy-dom-na-energosberezhenii` |  |
+| `/smart-home/elektrika/vodosnabzhenie/` | `/functions/security/leaks` |  |
+| `/smart-home/elektrika/` | `/functions/electric` |  |
+| `/smart-home/bezopasnost/signalizatsiya/` | `/functions/security/alarm` |  |
+| `/smart-home/bezopasnost/okhranno-pozharnaya-signalizatsiya/` | `/functions/security/fire` |  |
+| `/smart-home/bezopasnost/videonablyudenie/` | `/functions/security/cctv` |  |
+| `/smart-home/bezopasnost/kontrol-dostupa/` | `/functions/security/access` |  |
+| `/smart-home/bezopasnost/domofon/` | `/functions/security/intercom` |  |
+| `/smart-home/bezopasnost/vorota/` | `/functions/security/access` |  |
+| `/smart-home/bezopasnost/protechka-vody/` | `/functions/security/leaks` |  |
+| `/smart-home/bezopasnost/gsm-sistemy/` | `/functions/security/alarm` |  |
+| `/smart-home/bezopasnost/` | `/functions/security` |  |
+| `/smart-home/multimedia/multirum/` | `/functions/multimedia/multiroom` |  |
+| `/smart-home/multimedia/domashniy-kinoteatr/` | `/functions/multimedia/cinema` |  |
+| `/smart-home/multimedia/upravlenie-audio-i-video/` | `/functions/multimedia/audio` |  |
+| `/smart-home/multimedia/` | `/functions/multimedia` |  |
+| `/smart-home/razrabotka-sistem/provodnye-sistemy/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |  |
+| `/smart-home/razrabotka-sistem/besprovodnye-resheniya/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |  |
+| `/smart-home/razrabotka-sistem/gsm-resheniya/` | `/compare/diy` |  |
+| `/smart-home/razrabotka-sistem/komplekty/` | `/compare/diy` |  |
+| `/smart-home/razrabotka-sistem/modulnye-resheniya/` | `/equipment/controllers` |  |
+| `/smart-home/razrabotka-sistem/udalyennoe-upravlenie/` | `/equipment/app` |  |
+| `/smart-home/gotovye-resheniya/premialnyy-segment/` | `/solutions/premium` |  |
+| `/smart-home/gotovye-resheniya/nedorogie-resheniya/` | `/compare/diy` |  |
+| `/smart-home/gotovye-resheniya/dopolnitelnye-optsii/` | `/functions` |  |
+| `/smart-home/gotovye-resheniya/` | `/solutions` |  |
+| `/smart-home/` | `/solutions` |  |
+| `/avtomatizacziya/kompleksnyie-resheniya/kvartira/` | `/solutions/flat` |  |
+| `/avtomatizacziya/kompleksnyie-resheniya/kottedzh/` | `/solutions/house` |  |
+| `/avtomatizacziya/kompleksnyie-resheniya/dacha/` | `/solutions/house` | ⚠️ дача → дом: отдельной страницы дачи нет |
+| `/avtomatizacziya/kompleksnyie-resheniya/` | `/solutions` |  |
+| `/avtomatizacziya/funktsii-umnogo-doma/` | `/functions/automation` |  |
+| `/avtomatizacziya/vozmozhnosti/` | `/functions` |  |
+| `/avtomatizacziya/` | `/functions/automation` |  |
+| `/czenyi/montazh-umnogo-doma/` | `/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma` |  |
+| `/czenyi/proektirovanie-umnogo-doma/` | `/answers/chto-vhodit-v-proektirovanie-umnogo-doma` |  |
+| `/czenyi/servis/` | `/pricing` | ⚠️ временно: раздела /service в архитектуре нет |
+| `/czenyi/` | `/pricing` |  |
+| `/o-kompanii/` | `/about` |  |
+| `/partneram/dileram/` | `/answers/kak-stat-partnerom-dilerom-mimismart` |  |
+| `/partneram/designer/` | `/partners` | ⚠️ страницы для дизайнеров нет |
+| `/partneram/integrator/` | `/partners` |  |
+| `/partneram/` | `/partners` |  |
+| `/kontaktyi/moskva/` | `/contacts` |  |
+| `/kontaktyi/sochi/` | `/contacts` |  |
+| `/kontaktyi/kazan/` | `/contacts` |  |
+| `/kontaktyi/tashkent/` | `/contacts` |  |
+| `/kontaktyi/nur-sultan/` | `/contacts` |  |
+| `/kontaktyi/` | `/contacts` |  |
+| `/private/` | `/privacy` |  |
+| `/proektyi/` | `/portfolio` |  |
+| `/articles/` | `/answers` |  |
+
+## B2. Раздел `/articles/` — самый уязвимый
+В индексе **36 статей**. Это единственный источник органики по технологическому кластеру:
+`/articles/detsentralizovannyy-umnyy-dom/` стоит в органической выдаче третьим. Ведём адресно —
+склейка в раздел обнуляет именно ту страницу, которая работает.
+
+| Старый | Новый | Примечание |
+|---|---|---|
+| `/articles/detsentralizovannyy-umnyy-dom/` | `/answers/chto-takoe-decentralizovannaya-arhitektura-umnogo-doma-i` | ⚠️ стоит в органике третьим |
+| `/articles/server-umnogo-doma/` | `/equipment/controllers` |  |
+| `/articles/reyting-sistem-umnyy-dom/` | `/compare` |  |
+| `/articles/vozmozhnosti-umnogo-doma/` | `/functions` |  |
+| `/articles/umnyy-dom-kak-eto-rabotaet/` | `/functions/automation` |  |
+| `/articles/skhemy-umnogo-doma/` | `/functions/automation` |  |
+| `/articles/avtomatizatsiya-umnogo-doma/` | `/functions/automation` |  |
+| `/articles/umnyij-dom-dlya-ofisa/` | `/solutions/office` |  |
+| `/articles/avtomatizatsiya-kottedzha/` | `/solutions/house` |  |
+| `/articles/sovety-po-vyboru-ustroystv-dlya-umnogo-doma/` | `/answers/kak-vybrat-integratora-umnogo-doma` |  |
+| `/articles/proizvoditeli-oborudovaniya-dlya-umnogo-doma/` | `/equipment` |  |
+| `/articles/provodka-dlya-umnogo-doma/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |  |
+| `/articles/podklyuchenie-umnogo-vyklyuchatelya/` | `/answers/ostanutsya-li-obychnye-vyklyuchateli-na-stene` |  |
+| `/articles/upravlenie-svetom-s-telefona/` | `/functions/lighting` |  |
+| `/articles/upravlenie-umnym-domom-s-kompyutera/` | `/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom` |  |
+| `/articles/domashnij-kinoteatr-umnyij-dom/` | `/functions/multimedia/cinema` |  |
+| `/articles/umnaya-kolonka-dlya-doma/` | `/compare/ecosystems` |  |
+| `/articles/kontrol-dostupa-na-dver/` | `/functions/security/access` |  |
+| `/articles/ustanovka-kontrolya-dostupa-na-dver/` | `/functions/security/access` |  |
+| `/articles/sistemy-bezopasnosti-umnogo-doma/` | `/functions/security` |  |
+| `/articles/umnyij-dom-bezopasnost-i-oxrana/` | `/functions/security` |  |
+| `/articles/signalizatsiya-dlya-zagorodnogo-doma/` | `/functions/security/alarm` |  |
+| `/articles/avtomatizirovannaya-sistema-upravleniya-zdaniem/` | `/solutions/office` |  |
+| `/articles/dlya-chego-nuzhen-umnyy-dom/` | `/functions` |  |
+| `/articles/aktualnost-umnogo-doma/` | `/functions` |  |
+| `/articles/kak-sdelat-sistemu-umnyy-dom/` | `/answers/iz-kakih-etapov-sostoit-proekt-umnogo-doma` |  |
+| `/articles/umnyy-dom-i-deti/` | `/answers/smogut-li-gosti-deti-i-pozhilye-roditeli` |  |
+| `/articles/komandy-dlya-umnogo-doma/` | `/answers/kak-nastraivayutsya-scenarii-avtomatizacii-umnogo-doma` |  |
+| `/articles/solnechnyie-batarei-v-umnom-dome/` | `/answers/chto-prodolzhit-rabotat-v-dome-pri-otklyuchenii` |  |
+| `/articles/umnyy-dom-plyusy-i-minusy/` | `/compare` |  |
+| `/articles/sistema-umnyij-dom-dlya-dachi/` | `/answers/stoit-li-stavit-umnyy-dom-na-dachu` |  |
+| `/articles/umnyy-dom-dlya-dachi/` | `/answers/stoit-li-stavit-umnyy-dom-na-dachu` |  |
+| `/articles/umnaya-dacha-moskva/` | `/answers/stoit-li-stavit-umnyy-dom-na-dachu` |  |
+| `/articles/umnoe-elektricheskoe-otoplenie-v-chastnom-dome/` | `/functions/climate/heating` |  |
+| `/articles/umnyij-dom-dlya-invalidov/` | `/answers/smogut-li-gosti-deti-i-pozhilye-roditeli` |  |
+| `/articles/mebel-umnyy-dom/` | `/functions` |  |
+
+## B3. Проекты `/proektyi/` — 12 объектов
+Все ведут на `/portfolio` до тех пор, пока у кейсов не появятся свои URL (`../tz-site/16`, D6).
+Когда появятся — переставить адресно, объекты узнаваемы по слагам.
+
 | Старый | Новый |
 |---|---|
-| `/smart-home/razrabotka-sistem/provodnye-sistemy/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |
-| `/smart-home/razrabotka-sistem/modulnye-resheniya/` | `/equipment/controllers` |
-| `/smart-home/razrabotka-sistem/udalyennoe-upravlenie/` | `/equipment/app` |
-| `/smart-home/bezopasnost/domofon/` | `/functions/security/intercom` |
-| `/smart-home/multimedia/` | `/functions/multimedia` |
-| `/smart-home/` | `/solutions` |
-| `/oborudovanie/kontrollery/` | `/equipment/controllers` |
-| `/oborudovanie/` | `/equipment` |
-| `/avtomatizacziya/` | `/functions/automation` |
-| `/o-kompanii/` | `/about` |
-| `/partneram/dileram/` | `/partners` |
-| `/partneram/designer/` | `/partners` ⚠️ |
-| `/partneram/` | `/partners` |
+| `/proektyi/v-poselke-park-avenue/` | `/portfolio` |
+| `/proektyi/umnyy-dom-v-nebolshoy-i-akkuratnoy-kvartire/` | `/portfolio` |
+| `/proektyi/vpechatlyayushchiy-osobnyak-v-sosnovom-lesu/` | `/portfolio` |
+| `/proektyi/dom-2-etazha-dlya-pary-v-stile-modern/` | `/portfolio` |
+| `/proektyi/uyutnaya-kvartira-zhk-riverdale-apartments/` | `/portfolio` |
+| `/proektyi/2-kh-urovnevaya-kvartira-zhk-festivalnyy/` | `/portfolio` |
+| `/proektyi/prestizhnyy-dom-v-elitnom-poselke/` | `/portfolio` |
+| `/proektyi/vysokie-tekhnologii-v-klassicheskom-ispolnenii/` | `/portfolio` |
+| `/proektyi/bolshoy-dom-dlya-bolshoy-semi/` | `/portfolio` |
+| `/proektyi/prostornaya-kvartira-dlya-semi-s-4-mya-detmi/` | `/portfolio` |
+| `/proektyi/bolshaya-kvartira-s-panoramnym-vidom-na-gorod/` | `/portfolio` |
+| `/proektyi/umnyy-dom-br-dlya-nayka-borzova/` | `/portfolio` |
 
-## B4. Домены: что решить до выкатки
 
-**Порядок операций критичен.** Сначала на каждом легаси-домене отрабатывают путевые правила
-части B, и только потом домен склеивается с основным. Если поставить сквозной 301 с домена на
-главную нового сайта первым, он съест путь — все страницы уедут на `/`, а Google засчитает это
-как soft-404 и вес не передаст. В Next.js это разводится через `has: [{ type: 'host', value: … }]`
-либо настраивается на обратном прокси до приложения.
+## B4. Зеркало `mimismart.ru` — отдельные правила
+Полный список зеркала поиском не раскрывается: показаны фрагменты. Подтверждённое ниже,
+остальное — только из выгрузки Вебмастера.
 
-- **Раздел «Партнёрам» разорван между доменами.** `/partneram/` и `/partneram/designer/` отдаются
-  с `mmsmart.ru`, а `/partneram/dileram/` — с `mimismart.ru`. Один логический раздел живёт на двух
-  сайтах. При склейке развести в одну ветку.
-- **Дубли заголовков.** Главные `mmsmart.ru` и `mimismart.com` индексируются с идентичным title.
-  Для поиска это два разных сайта с одинаковым заголовком.
-- **www.** `mimismart.com` показан с `www`, остальные без. Канонизацию www/non-www проверить
-  до настройки редиректов.
-- **`mmsmart-russia.ru` и `mimismart-home.ru`** подтверждены в индексе как минимум по корню;
-  внутренние URL поиском не вскрылись. Снимать из Вебмастера или логов.
-- **`mimismart.com`** в замере не подтверждён ни разу. Отсутствие в выдаче не доказывает, что
-  домена нет в индексе.
-- **Приложение в App Store** (`apps.apple.com/ru/app/mimismart/id6444528782`) — проверить, откуда
-  на него ведут ссылки со старых страниц.
+| Старый | Новый | Примечание |
+|---|---|---|
+| `/index.html` | `/` | ⚠️ корень зеркала отдаётся с index.html |
+| `/articles/umnyij-dom-wi-fi.html` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` | ⚠️ плоский .html |
+| `/articles/umnyij-dom-%E2%80%93-plyusyi-i-minusyi.html` | `/compare` | ⚠️ тире в URL закодировано |
+| `/smart-home/osveshhenie/distanczionnoe-upravlenie.html` | `/functions/lighting` | ⚠️ своя транслитерация: osveshhenie, distanczionnoe |
+| `/smart-home/mikroklimat/ventilyacziya.html` | `/functions/climate/ventilation` | ⚠️ своя транслитерация: ventilyacziya |
+| `/oborudovanie/komplektuyushie.html` | `/equipment` | ⚠️ своя транслитерация: komplektuyushie |
+| `/partneram/integrator/` | `/partners` | ⚠️ раздела нет на основном домене |
 
-## B5. Чего в этой карте нет — и почему это блокирующий пункт
-Тридцать URL — это верхушка, которую показал поиск, а не карта сайта. Реальный `mmsmart.ru`
-больше: у него есть меню, каталог оборудования и статьи, которые в замер не попали.
+Кроме перечисленного, на зеркале подтверждены пути, совпадающие с основным доменом
+(`/articles/server-umnogo-doma/`, `/proektyi/…`, `/partneram/dileram/`, `/czenyi/servis/`,
+`/kontaktyi/sochi/` и другие) — для них работают те же правила, что в B1–B3, но применять их
+надо на своём хосте, а не через общую склейку.
 
-**Без выгрузки «Страницы в поиске» из Яндекс.Вебмастера по всем пяти доменам переезд делать
-нельзя.** Это единственный способ увидеть полный список проиндексированных URL. Всё, что в него
-не попало, уйдёт в 404 молча — без ошибки в логах и без сигнала в аналитике.
+## B5. Ещё три домена
+`mimismart.com` — корень и `/catalog/`, плюс PDF-буклет `/files/Kit.pdf` в индексе.
+`mmsmart-russia.ru` и `mimismart-home.ru` — одностраничники, в индексе только корень.
+Все три склеиваются на основной домен корневым правилом; внутренних путей, кроме `/catalog/`
+и PDF, поиск не показал.
 
-## B6. Целей, которых нет в архитектуре
-- **`/service`** в `sitemap.xml` отсутствует, хотя `/czenyi/servis/` ранжируется, а запрос
-  «сервисное обслуживание умного дома» свободен — весь топ занят прайсами интеграторов, которые
-  отвечают одинаково успокаивающе. **Рекомендация: завести раздел** и переставить редирект на него.
-- **`/solutions/country-house`** нет; дача уходит на `/solutions/house`. Загородный дом и дача —
-  разные сценарии и разный чек (`../audit/07-buyer-voice.md`: спрос есть, чек не наш). Решение за клиентом.
-- **Страницы для дизайнеров** нет, хотя `/partneram/designer/` проиндексирована. Для премиум-сегмента
-  дизайнер — реальный канал рекомендаций. Либо заводим, либо осознанно теряем.
+## B6. Двадцать две цели ещё не реализованы
+Карта ведёт на страницы третьего уровня, которые есть в `sitemap.xml`, но которых нет в
+прототипе: датчики по типам, климат по системам, безопасность по контурам, мультимедиа.
+
+`/equipment/app` · `/equipment/controllers` · `/equipment/sensors` и пять типов датчиков ·
+`/functions/climate/{heating,cooling,ventilation,floor}` · `/functions/electric/sockets` ·
+`/functions/multimedia/{cinema,multiroom,audio}` · `/functions/security/{alarm,fire,cctv,access,intercom,leaks}`
+
+**Это условие запуска, а не замечание.** Либо страницы создаются до выкатки редиректов, либо
+правила временно ведут на родительский раздел — но тогда теряется соответствие запросу, ради
+которого редирект и делается. Вести на 404 нельзя ни в каком случае.
+
+## B7. Что карта всё ещё не покрывает
+Сто девяносто URL — это то, что показал поиск, а не карта сайта. Известные пробелы:
+
+- **Города.** В индексе пять страниц `/kontaktyi/{город}/` — Москва, Сочи, Казань, Ташкент,
+  Нур-Султан. В тексте сайта упоминаются ещё офисы: СПб, Владимир, Лангепас, Красноярск, Тюмень,
+  Саранск. Слаги неизвестны, достраивать нельзя. *(Побочно: это же расхождение — материал к
+  проверке утверждения «20 представительств», `../tz-site/16`, B6.)*
+- **Дубли в индексе:** `https://mmsmart.ru:443/…` — артефакт индексации; пары «слэш» и
+  `index.html` на зеркале. Оба варианта нужно обрабатывать правилом.
+- **Пагинация** списков статей и проектов: формат не выяснен.
+- **Полный объём зеркала** и внутренние страницы трёх малых доменов.
+
+Полный список даёт только выгрузка «Страницы в поиске» из Яндекс.Вебмастера и Search Console по
+каждому домену плюс `sitemap.xml` каждого сайта. Дополнительно стоит снять историю из Wayback
+Machine CDX (`web.archive.org/cdx/search/cdx?url=mmsmart.ru*`) — она покажет и то, что из индекса
+уже выпало, но на что ещё ведут внешние ссылки.
 
 ## Известные расхождения (проверено сверкой с `sitemap.xml`)
 Прогнал все цели редиректов против `sitemap.xml` — одно расхождение, оставлено осознанно:
