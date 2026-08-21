@@ -591,6 +591,40 @@ await ctx.close();
   console.log(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
 }
 
+/* ---------- Текст ссылается на то, чего на странице нет ---------- */
+{
+  /* Нашлось так: два ответа обещали «демо на этой странице», а интерактивная модель
+     дома стоит только на главной. Обещание, которое читатель опровергает одним
+     взглядом, дороже технической ошибки. Ложных срабатываний на текущем сайте нет,
+     поэтому проверка блокирующая — в отличие от tools/hint-list-counts.mjs. */
+  const REFS = [
+    [String.raw`таблиц\w*\s+(ниже|выше|рядом)`, 'table'],
+    [String.raw`списк\w*\s+(ниже|выше)`, 'ol,ul'],
+    [String.raw`(калькулятор|расч[её]т)\w*\s+(на этой странице|ниже|здесь)`, '#calc'],
+    [String.raw`форм\w+\s+(ниже|на этой странице|здесь)`, 'form'],
+    [String.raw`(демо|модел\w+)(\s+[а-яё]+){0,2}\s+(на этой странице|здесь)`, '#houseStage'],
+  ];
+  let broken = 0;
+  for (const h of [...routes]) {
+    await page.goto(F + h);
+    await page.waitForTimeout(35);
+    const bad = await page.evaluate((refs) => {
+      const v = [...document.querySelectorAll('section.page')].find((s) => getComputedStyle(s).display !== 'none');
+      if (!v) return [];
+      const out = [];
+      for (const [src, sel] of refs) {
+        const m = v.innerText.match(new RegExp(src, 'i'));
+        if (!m) continue;
+        const scope = sel.startsWith('#') ? document : v;
+        if (![...scope.querySelectorAll(sel)].some((e) => e.offsetParent !== null)) out.push({ m: m[0], sel });
+      }
+      return out;
+    }, REFS);
+    for (const x of bad) { broken++; fail(`${h}: текст обещает «${x.m}», но ${x.sel} на странице нет`); }
+  }
+  console.log(`ссылки текста на элементы страницы: проверено ${routes.size} маршрутов, несуществующих ${broken}`);
+}
+
 /* ---------- Повторы между страницами ответов ---------- */
 {
   /* Проверка выше исключает #/answers/ и это обосновано: прямой ответ по построению
