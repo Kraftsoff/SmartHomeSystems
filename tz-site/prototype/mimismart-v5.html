@@ -2703,8 +2703,14 @@
       clusters.forEach(function(cl){
         cl.querySelectorAll('.card').forEach(function(c){
           var h=c.querySelector('h3'),p=c.querySelector('p');
+          /* Развёрнутая часть лежит в <template>: её текста нет в DOM карточки,
+             а объёмом она больше прямого ответа. Без неё поиск не находил
+             «рекуператор», «нейтраль», «SIP», «арендатор» — слова, которые
+             есть только там. Берём текст из содержимого шаблона. */
+          var mo=c.querySelector('.more'), moTxt='';
+          if(mo)moTxt=(mo.content?mo.content.textContent:mo.textContent)||'';
           c._q=norm(h.textContent); c._a=p?norm(p.textContent):'';
-          c._st=stems(h.textContent+' '+(p?p.textContent:''));
+          c._st=stems(h.textContent+' '+(p?p.textContent:'')+' '+moTxt);
           c._qh=h.innerHTML; if(p)c._ah=p.innerHTML;
         });
       });

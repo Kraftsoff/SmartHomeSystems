@@ -309,6 +309,15 @@ await ctx.close();
     /* Запрос в единственном числе, в тексте — «протечки». Проверяем, что
        стеммер на месте: без него поиск отдавал ноль. */
     if (!found) fail('поиск «протечка» не находит ответов — сломан стеммер');
+    /* Термины, которые встречаются только в развёрнутой части. Она лежит в
+       <template>, её текста нет в DOM карточки — и поиск переставал их видеть. */
+    for (const term of ['рекуператор', 'нейтраль', 'SIP', 'арендатор']) {
+      await input.fill(term);
+      await page.waitForTimeout(280);
+      const n = await page.evaluate(() =>
+        [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
+      if (!n) fail(`поиск не находит «${term}» — развёрнутая часть выпала из индекса`);
+    }
     await input.fill('');
     await page.waitForTimeout(300);
     const all = await page.evaluate(() =>
