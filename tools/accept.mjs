@@ -277,6 +277,130 @@ if (noJsFaq !== ld.faq) fail(`без JS в разметке ${noJsFaq} отве�
 console.log('без JavaScript: ответов в разметке', noJsFaq);
 await ctx.close();
 
+/* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
+{
+  /* Поиск по ответам */
+  await page.goto(F + '#/answers');
+  await page.waitForTimeout(500);
+  const input = await page.$('#leverSearch, input[type=search]');
+  if (!input) fail('поле поиска по ответам не найдено');
+  else {
+    await input.fill('протечка');
+    await page.waitForTimeout(400);
+    const found = await page.evaluate(() =>
+      [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
+    /* Запрос в единственном числе, в тексте — «протечки». Проверяем, что
+       стеммер на месте: без него поиск отдавал ноль. */
+    if (!found) fail('поиск «протечка» не находит ответов — сломан стеммер');
+    await input.fill('');
+    await page.waitForTimeout(300);
+    const all = await page.evaluate(() =>
+      [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
+    if (all !== 75) fail(`сброс поиска показывает ${all} ответов вместо 75`);
+    console.log(`поиск: «протечка» → ${found}, сброс → ${all}`);
+  }
+
+  /* Калькулятор состава работ. Цену он называть не должен: методика не подтверждена. */
+  await page.goto(F + '#/pricing');
+  await page.waitForTimeout(400);
+  const boxes = await page.$$('#calc input[type=checkbox]');
+  if (!boxes.length) fail('калькулятор состава работ не найден');
+  else {
+    for (const c of boxes.slice(0, 3)) await c.check();
+    await page.waitForTimeout(300);
+    const r = await page.evaluate(() => {
+      const c = document.getElementById('calc');
+      return { len: c.innerText.trim().length, price: /\d[\d\s]{3,}\s*₽/.test(c.innerText) };
+    });
+    if (r.len < 200) fail('калькулятор не выдаёт состав работ');
+    if (r.price) fail('калькулятор называет цену — методика не подтверждена, цифры быть не должно');
+    console.log('калькулятор: состав выдан, цены нет');
+  }
+
+  /* Переключатель темы */
+  await page.goto(F);
+  await page.waitForTimeout(400);
+  const before = await page.evaluate(() => document.documentElement.getAttribute('data-mode'));
+  const toggle = await page.$('#dnToggle');
+  if (!toggle) fail('переключатель темы не найден');
+  else {
+    await toggle.click();
+    await page.waitForTimeout(350);
+    const after = await page.evaluate(() => document.documentElement.getAttribute('data-mode'));
+    if (before === after) fail('переключатель темы не меняет тему');
+  }
+
+  /* Аналитика не стартует без согласия — ст. 9 ФЗ-152 */
+  await page.goto(F);
+  await page.waitForTimeout(500);
+  const gated = await page.evaluate(() => !window.__analyticsLoaded);
+  if (!gated) fail('аналитика стартовала без согласия на cookie');
+
+  /* Форма заявки: согласие обязательно, метка на месте, Esc закрывает */
+  await page.goto(F + '#/contacts');
+  await page.waitForTimeout(400);
+  const opener = await page.$('[data-modal], .btn-primary');
+  if (!opener) fail('на /contacts нет кнопки, открывающей форму');
+  else {
+    await opener.click();
+    await page.waitForTimeout(450);
+    const form = await page.evaluate(() => {
+      const fm = document.querySelector('form.form');
+      if (!fm || fm.offsetParent === null) return null;
+      fm.querySelectorAll('input[required]').forEach((i) => {
+        if (i.type !== 'checkbox') i.value = i.type === 'tel' ? '+79990000000' : 'тест';
+      });
+      const cb = fm.querySelector('#lead-consent');
+      if (!cb) return { noConsent: true };
+      cb.checked = false; const without = fm.checkValidity();
+      cb.checked = true; const with_ = fm.checkValidity();
+      return {
+        without, with_, required: cb.required,
+        label: !!document.querySelector('label[for=lead-consent]'),
+        policy: /политик/i.test(fm.innerText),
+      };
+    });
+    if (!form) fail('форма заявки не открылась');
+    else if (form.noConsent) fail('в форме нет чекбокса согласия на обработку ПД');
+    else {
+      if (!form.required) fail('согласие на обработку ПД не обязательно');
+      if (form.without) fail('форма отправляется без согласия на обработку ПД');
+      if (!form.with_) fail('форма не проходит валидацию даже с согласием');
+      if (!form.label) fail('у чекбокса согласия нет связанной метки');
+      if (!form.policy) fail('в форме нет ссылки на политику обработки данных');
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      const closed = await page.evaluate(() => {
+        const fm = document.querySelector('form.form');
+        return !fm || fm.offsetParent === null;
+      });
+      if (!closed) fail('Esc не закрывает форму заявки');
+      console.log('форма заявки: согласие обязательно, метка и политика на месте, Esc закрывает');
+    }
+  }
+
+  /* Интерактивная модель дома */
+  await page.goto(F);
+  await page.waitForTimeout(1000);
+  const house = await page.evaluate(() => ({
+    stage: !!document.getElementById('houseStage'),
+    scenes: document.querySelectorAll('.scen-btn').length,
+  }));
+  if (!house.stage) fail('интерактивная модель дома отсутствует');
+  if (house.scenes < 6) fail(`кнопок сценариев ${house.scenes}, ожидалось не меньше шести`);
+  const reacts = await page.evaluate(async () => {
+    const btns = [...document.querySelectorAll('.scen-btn')];
+    if (btns.length < 3) return false;
+    const snap = () => document.getElementById('houseStage').innerHTML.length;
+    const a = snap();
+    btns[2].click();
+    await new Promise((r) => setTimeout(r, 700));
+    return snap() !== a;
+  });
+  if (!reacts) fail('сценарий не меняет состояние модели дома');
+  console.log(`модель дома: сценариев ${house.scenes}, реагирует на переключение`);
+}
+
 await browser.close();
 
 if (problems.length) {
