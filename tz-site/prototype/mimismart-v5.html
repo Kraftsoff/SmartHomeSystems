@@ -1791,15 +1791,21 @@
       }
       return true;
     }
-    /* запоминаем исходную разметку, чтобы подсветка не накапливалась */
-    clusters.forEach(function(cl){
-      cl.querySelectorAll('.card').forEach(function(c){
-        var h=c.querySelector('h3'),p=c.querySelector('p');
-        c._q=norm(h.textContent); c._a=p?norm(p.textContent):'';
-        c._st=stems(h.textContent+' '+(p?p.textContent:''));
-        c._qh=h.innerHTML; if(p)c._ah=p.innerHTML;
+    /* Индекс строится лениво — при первом обращении к поиску, а не на каждой загрузке.
+       Замерено: разбор всех карточек стоит заметного времени на слабом устройстве, а ищут
+       единицы посетителей. Платить за это всем при загрузке незачем. */
+    var indexed=false;
+    function buildIndex(){
+      if(indexed)return; indexed=true;
+      clusters.forEach(function(cl){
+        cl.querySelectorAll('.card').forEach(function(c){
+          var h=c.querySelector('h3'),p=c.querySelector('p');
+          c._q=norm(h.textContent); c._a=p?norm(p.textContent):'';
+          c._st=stems(h.textContent+' '+(p?p.textContent:''));
+          c._qh=h.innerHTML; if(p)c._ah=p.innerHTML;
+        });
       });
-    });
+    }
     function unmark(c){
       var h=c.querySelector('h3'),p=c.querySelector('p');
       if(h)h.innerHTML=c._qh; if(p&&c._ah!==undefined)p.innerHTML=c._ah;
@@ -1816,6 +1822,7 @@
       el.appendChild(document.createTextNode(after));
     }
     function apply(){
+      buildIndex();
       var q=norm(inp.value.trim()), qstems=q?stems(q):[], shown=0;
       wrap.classList.toggle('has-q',!!q);
       clusters.forEach(function(cl){
