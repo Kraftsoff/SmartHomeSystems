@@ -1010,7 +1010,7 @@
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Статьи</p>
     <p class="eyebrow">Статьи</p><h1>База инженерных ответов</h1>
-    <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание») <span class="prov">⚠️</span>. Ниже — все 73 статьи-рычага по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы. Черновой проход завершён; часть цифр (пороги цен, условия партнёрского вознаграждения, гарантия) помечена <span class="prov">⚠️</span> и ждёт подтверждения фактами от клиента.</div>
+    <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание») <span class="prov">⚠️</span>. Ниже — все 75 статей-рычагов по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы. Черновой проход завершён; часть цифр (пороги цен, условия партнёрского вознаграждения, гарантия) помечена <span class="prov">⚠️</span> и ждёт подтверждения фактами от клиента.</div>
   </div></div>
   <div class="shell">
     <div class="qsearch" id="qsearch">
@@ -1020,7 +1020,7 @@
     </div>
     <p class="qcount" id="qcount" role="status" aria-live="polite"></p>
     <div class="qempty" id="qempty">Ничего не нашлось. Попробуйте другое слово — или
-      <a href="#" id="qreset">покажите все 73 ответа</a>.</div>
+      <a href="#" id="qreset">покажите все 75 ответов</a>.</div>
     <nav class="cluster-nav" aria-label="Разделы базы ответов"><a href="#c-trust">Доверие и выбор</a><a href="#c-price">Цена и экономика</a><a href="#c-segments">Сегменты</a><a href="#c-compare">Сравнения</a><a href="#c-subsystems">Подсистемы</a><a href="#c-tech">Технологии</a><a href="#c-process">Процесс</a><a href="#c-objections">Возражения</a><a href="#c-partners-b2b">Партнёрам</a><a href="#c-operation">Эксплуатация</a></nav>
     <section class="cluster" id="c-trust" aria-labelledby="h-trust">
       <h2 id="h-trust" class="cluster-h">Доверие и выбор <span class="cluster-n">6</span></h2>
@@ -1966,7 +1966,8 @@
      часть шаблона: реальные объекты клиента лягут в него же. */
   function caseCard(c){return el('<div class="case reveal"><h3>'+c.t+'</h3><div class="meta">'+c.stage+'</div>'+
     (c.pain?'<p class="case-pain">'+c.pain+'</p>':'')+
-    '<dl><dt>Что сделали</dt><dd>'+c.sys+'</dd><dt>Что изменилось</dt><dd>'+c.res+'</dd></dl>'+
+    '<dl>'+(c.task?'<dt>Задача</dt><dd>'+c.task+'</dd>':'')+
+    '<dt>Что сделали</dt><dd>'+c.sys+'</dd><dt>Что изменилось</dt><dd>'+c.res+'</dd></dl>'+
     '<div class="tags">'+c.tags.map(function(t){return '<span class="tag">'+t+'</span>'}).join('')+'</div></div>')}
   var hc=document.getElementById('homeCases'); CASES.forEach(function(c){hc.appendChild(caseCard(c))});
 
