@@ -6,16 +6,19 @@
 # ВАЖНО о структуре файла: бот исполняет ТОЛЬКО ту группу, которая адресована ему.
 # Правила из «User-agent: *» при этом не наследуются, а заменяются целиком. Поэтому
 # служебные Disallow повторены в каждой группе — иначе персональное разрешение
-# открывает боту /admin и /settings, закрытые для всех остальных.
+# открывает боту /admin, закрытый для всех остальных.
+#
+# Почему здесь НЕТ /favorites, /search, /settings, /vendors. Эти легаси-разделы решено
+# отдавать 410 Gone (redirects.md, раздел 10). Запрет обхода и удаление из индекса —
+# противоположные вещи: бот, которому путь запрещён, никогда его не запросит, значит
+# не увидит 410, и адрес останется в индексе записью без содержимого. Чтобы страница
+# исчезла из выдачи, её нужно РАЗРЕШИТЬ обходить и отдать по ней 410.
+# Закрывать обратно — только после того, как адреса выпадут из индекса.
 
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 # ─── ИИ-поиск: разрешено явно, служебное закрыто так же, как для всех ───
 
@@ -23,73 +26,41 @@ User-agent: GPTBot
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: anthropic-ai
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 User-agent: Applebot-Extended
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 # YandexBot — основной поисковый бот для нашего рынка. Закрывать нельзя ни в каком
 # виде: Алиса берёт кандидатов для ИИ-ответа из обычной выдачи Яндекса.
@@ -97,10 +68,6 @@ User-agent: YandexBot
 Allow: /
 Disallow: /admin
 Disallow: /api/
-Disallow: /favorites
-Disallow: /search
-Disallow: /settings
-Disallow: /vendors
 
 # ─── Training-only: закрыто ───
 # Эти краулеры собирают данные для обучения моделей и в поисковой выдаче не участвуют,

@@ -139,6 +139,23 @@ for (const [name, map] of [['title', titles], ['description', descs], ['canonica
   }
 }
 
+/* robots.txt и решение по 410 расходятся молча. Путь, закрытый в robots, бот не
+   запросит, значит не увидит 410, и адрес останется в индексе записью без содержимого.
+   Проверки ссылок в llms.txt и pricing.md — ниже, в разделе 7h. */
+{
+  const { readFileSync: readRb } = await import('node:fs');
+  const rb = existsSync(resolve('site-foundation/robots.txt')) ? readRb(resolve('site-foundation/robots.txt'), 'utf8') : '';
+  const rd = existsSync(resolve('site-foundation/redirects.md')) ? readRb(resolve('site-foundation/redirects.md'), 'utf8') : '';
+  if (rb && rd) {
+    const at = rd.indexOf('Служебное / e-commerce');
+    const gone = at < 0 ? [] : [...rd.slice(at, at + 400).matchAll(/`(\/[a-zA-Z][\w-]*)`/g)].map((m) => m[1]);
+    const disallowed = new Set([...rb.matchAll(/^Disallow: (\S+)/gm)].map((m) => m[1]));
+    const clash = gone.filter((g) => disallowed.has(g));
+    clash.forEach((g) => fail(`${g} отдаёт 410, но закрыт в robots.txt — бот не увидит 410 и адрес останется в индексе`));
+    console.log(`robots против 410: путей на удаление ${gone.length}, ошибочно закрыто ${clash.length}`);
+  }
+}
+
 console.log(`МАРШРУТЫ ${routes.size} | битых ${broken} | пропусков заголовков ${skips} | не-один-H1 ${badH1} | без крошек ${noCrumbs} | случайных 404 ${soft404} | сырых тегов ${rawTags}`);
 console.log(`МЕТА уникальных: title ${titles.size} · description ${descs.size} · canonical ${canons.size} — из ${routes.size} маршрутов`);
 if (errs.length) fail(`ошибок консоли: ${errs.length} — ${errs[0]}`);
