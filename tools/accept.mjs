@@ -591,6 +591,97 @@ await ctx.close();
   console.log(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
 }
 
+/* ---------- Повторы между страницами ответов ---------- */
+{
+  /* Проверка выше исключает #/answers/ и это обосновано: прямой ответ по построению
+     стоит и на странице списка, и на своей странице — так и задумано, он же уходит
+     в разметку FAQPage. Замерено: из 10–18 предложений страницы ответа в списке
+     присутствуют 3–5, остальное уникально.
+     Но отсюда следует пробел: дубль между двумя РАЗНЫМИ ответами не ловит никто,
+     а такие уже находились вручную дважды. Здесь сравниваем ответы между собой,
+     предварительно выбросив всё, что есть на странице списка. */
+  await page.goto(F + '#/answers');
+  await page.waitForTimeout(200);
+  const listing = await page.evaluate(() => {
+    const v = [...document.querySelectorAll('section.page')].find((x) => getComputedStyle(x).display !== 'none');
+    return v ? v.innerText.replace(/\s+/g, ' ') : '';
+  });
+  const byLine = new Map();
+  for (const h of [...routes].filter((x) => x.startsWith('#/answers/'))) {
+    await page.goto(F + h);
+    await page.waitForTimeout(35);
+    const sents = await page.evaluate(() => {
+      const v = [...document.querySelectorAll('section.page')].find((x) => getComputedStyle(x).display !== 'none');
+      if (!v) return [];
+      return [...v.querySelectorAll('p, li, td, th')]
+        .filter((e) => !e.closest('a[href]') && e.offsetParent !== null)
+        .flatMap((e) => e.innerText.split(/(?<=[.!?])\s+/))
+        .map((x) => x.trim().replace(/\s+/g, ' '))
+        .filter((x) => x.length > 80);
+    });
+    for (const x of sents) {
+      if (listing.includes(x)) continue;           /* прямой ответ — не дубль, а замысел */
+      if (!byLine.has(x)) byLine.set(x, new Set());
+      byLine.get(x).add(h);
+    }
+  }
+  const repeats = [...byLine.entries()].filter(([, hs]) => hs.size > 1);
+  repeats.slice(0, 5).forEach(([sent, hs]) =>
+    fail(`одно предложение на ${hs.size} страницах ответов (${[...hs].slice(0, 3).join(', ')}): «${sent.slice(0, 60)}…»`));
+  console.log(`повторы между ответами: сравнено ${[...routes].filter((x) => x.startsWith('#/answers/')).length}, повторов ${repeats.length}`);
+}
+
+/* ---------- Близкие копии страниц ---------- */
+{
+  /* Проверка выше ловит дословный повтор предложения. Она не видит страницу,
+     пересказанную своими словами, — а для ИИ-поиска это тот же отказ: вес делится,
+     и машине приходится выбирать между двумя версиями одного ответа.
+     Считаем пересечение по четырёхсловным окнам (мера Жаккара).
+     Порог 0.35 взят с запасом: измеренный максимум по сайту — 0.18, и это
+     тематически близкие разделы, а не копии. Клонировать узел при сборе текста
+     нельзя: у открепленной копии нет стилей, и innerText соберёт все страницы сразу. */
+  const texts = new Map();
+  for (const h of [...routes]) {
+    await page.goto(F + h);
+    await page.waitForTimeout(35);
+    const t = await page.evaluate(() => {
+      const v = [...document.querySelectorAll('section.page')].find((s) => getComputedStyle(s).display !== 'none');
+      if (!v) return '';
+      let txt = v.innerText;
+      for (const sel of ['.crumbs', '#a-related', '#a-rel-h']) {
+        const e = v.querySelector(sel);
+        if (e && e.innerText) txt = txt.split(e.innerText).join(' ');
+      }
+      return txt.replace(/\s+/g, ' ').trim();
+    });
+    if (t.length > 400) texts.set(h, t);
+  }
+  const shingle = (t) => {
+    const w = t.toLowerCase().replace(/[^а-яёa-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+    const set = new Set();
+    for (let i = 0; i + 4 <= w.length; i++) set.add(w.slice(i, i + 4).join(' '));
+    return set;
+  };
+  const sets = new Map([...texts].map(([k, v]) => [k, shingle(v)]));
+  const keys = [...sets.keys()];
+  let worst = 0, worstPair = '';
+  const near = [];
+  for (let i = 0; i < keys.length; i++) {
+    for (let j = i + 1; j < keys.length; j++) {
+      const a = sets.get(keys[i]), c = sets.get(keys[j]);
+      if (a.size < 25 || c.size < 25) continue;
+      let inter = 0;
+      for (const x of a) if (c.has(x)) inter++;
+      const jac = inter / (a.size + c.size - inter);
+      if (jac > worst) { worst = jac; worstPair = `${keys[i]} ↔ ${keys[j]}`; }
+      if (jac > 0.35) near.push([jac, keys[i], keys[j]]);
+    }
+  }
+  near.slice(0, 5).forEach(([jac, a, c]) =>
+    fail(`страницы совпадают на ${Math.round(jac * 100)}%: ${a} и ${c} — вес делится между копиями`));
+  console.log(`близкие копии: сравнено маршрутов ${keys.length}, максимум сходства ${Math.round(worst * 100)}% (${worstPair}), выше порога ${near.length}`);
+}
+
 /* ---------- 7f. Карта сайта против реализованных маршрутов ---------- */
 {
   /* Карта сайта — то, как поисковик узнаёт о страницах. Разъезд в любую сторону
