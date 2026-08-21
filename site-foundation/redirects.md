@@ -96,7 +96,7 @@ Google трактует это как soft-404 и вес не передаёт.
 | Старый | Новый |
 |---|---|
 | `/controller` | `/equipment/controllers` |
-| `/controller/1` | `/equipment/cuarm5m` ⚠️ слаг товара подтвердить |
+| `/controller/1` | `/equipment/controllers` ⚠️ переставить на карточку, когда слаг подтвердят |
 | `/app` | `/equipment/app` |
 | `/detector` | `/equipment/sensors` |
 | `/detector/moving` | `/equipment/sensors/motion` |
@@ -180,7 +180,7 @@ module.exports = {
       { source: '/detector/temperature', destination: '/equipment/sensors/temperature', permanent: true },
       { source: '/detector/wet', destination: '/equipment/sensors/humidity', permanent: true },
       { source: '/detector', destination: '/equipment/sensors', permanent: true },
-      { source: '/controller/1', destination: '/equipment/cuarm5m', permanent: true },
+      { source: '/controller/1', destination: '/equipment/controllers', permanent: true },  // ⚠️ переставить на карточку товара, когда слаг подтвердят
       { source: '/controller', destination: '/equipment/controllers', permanent: true },
       { source: '/app', destination: '/equipment/app', permanent: true },
       { source: '/catalog', destination: '/equipment', permanent: true },
@@ -553,13 +553,17 @@ module.exports = {
 Machine CDX (`web.archive.org/cdx/search/cdx?url=mmsmart.ru*`) — она покажет и то, что из индекса
 уже выпало, но на что ещё ведут внешние ссылки.
 
-## Известные расхождения (проверено сверкой с `sitemap.xml`)
-Прогнал все цели редиректов против `sitemap.xml` — одно расхождение, оставлено осознанно:
-- `/controller/1 → /equipment/cuarm5m` — целевой страницы нет в карте сайта, потому что слаги
-  карточек товаров не подтверждены. Подтвердить слаг и добавить страницу в `sitemap.xml`
-  одновременно с выкладкой редиректа, иначе он будет вести на страницу вне карты.
+## Цели проверены: страниц вне карты сайта нет
+Все цели редиректов прогнаны против `sitemap.xml` автоматически — проверка входит в
+`tools/accept.mjs` и падает, если появится цель без страницы. Сейчас **69 уникальных целей,
+расхождений ноль**.
 
-Остальные 49 правил указывают на страницы, присутствующие в `sitemap.xml`.
+Два расхождения были и устранены:
+- `/controller/1` вёл на `/equipment/cuarm5m` — страницы с таким слагом нет: слаги карточек
+  товаров не подтверждены. Переставлен на `/equipment/controllers`. Когда слаг подтвердят,
+  правило вернуть на карточку и одновременно добавить её в `sitemap.xml`.
+- `/news` вёл на `/blog` — раздел объявлен в архитектуре, но не построен. Переставлен на
+  `/answers`, куда уже ведут легаси-статьи. Нужен ли `/blog` вообще — решение A7 в `../tz-site/16`.
 
 ## Проверка после выката
 1. Прогнать список слева через curl/скрипт: каждый URL должен отдавать **301** и `Location`
