@@ -18,6 +18,11 @@ const PROTO = 'tz-site/prototype/mimismart-v5.html';
 const SKIP_DIRS = new Set(['node_modules', '.git', 'backups', 'site-snapshot']);
 
 const html = readFileSync(PROTO, 'utf8');
+/* Число рычагов берём по карточкам, а НЕ по разметке FAQPage: разметка —
+   осознанное подмножество, из неё исключены ответы с непроверенным в прямой
+   части. Считать по ней значит объявить устаревшими все документы разом. */
+const levers = [...html.matchAll(/<section class="cluster"[^>]*>([\s\S]*?)<\/section>/g)]
+  .reduce((n, m) => n + (m[1].match(/<div class="card reveal">/g) || []).length, 0);
 const faq = JSON.parse(html.match(/id="ldFaq">(.*?)<\/script>/s)[1]).mainEntity.length;
 const cards = (html.match(/<div class="card reveal">/g) || []).length;
 const templates = (html.match(/<template class="more">/g) || []).length;
@@ -35,7 +40,7 @@ const urls = (sitemap.match(/<loc>/g) || []).length;
 /* Что считаем истиной. Маршруты сюда не берём: их знает только браузер,
    их проверяет tools/accept.mjs. */
 const TRUTH = {
-  'рычаг(?:ов|а|)': faq,
+  'рычаг(?:ов|а|)': levers,
   'правил(?:а|о|) в конфиге': rules,
   'URL в sitemap': urls,
 };
@@ -70,7 +75,7 @@ function check(file) {
 walk('.');
 
 if (!problems.length) {
-  console.log(`✅ Документы сходятся с прототипом: ${faq} рычагов, ${rules} правил, ${urls} URL в sitemap.`);
+  console.log(`✅ Документы сходятся с прототипом: ${levers} рычагов (в разметке FAQPage ${faq}), ${rules} правил, ${urls} URL в sitemap.`);
   process.exit(0);
 }
 console.log(`❌ Расхождений документов с фактом: ${problems.length}\n`);

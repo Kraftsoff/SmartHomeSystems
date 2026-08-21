@@ -356,13 +356,21 @@ await page.setViewportSize({ width: 1400, height: 1000 });
 await page.goto(F);
 await page.waitForTimeout(600);
 const ld = await page.evaluate(() => {
-  const out = { types: [], faq: 0, cards: 0, invalid: [] };
+  const out = { types: [], faq: 0, cards: 0, cardsClean: 0, invalid: [], marked: [] };
   document.querySelectorAll('script[type="application/ld+json"]').forEach((e) => {
     try {
       const j = JSON.parse(e.textContent);
       out.types.push(e.id + ':' + (j['@type'] || '-'));
       if (j['@type'] === 'FAQPage') {
         out.faq = j.mainEntity.length;
+        /* Редакционная пометка не должна попасть в то, что забирает поисковик:
+           машина процитирует «от 2–3 млн ₽ ⚠️ порог уточняется» как наш ответ. */
+        j.mainEntity.forEach((q) => {
+          /* Только знак: слова «уточняется», «заполнить» встречаются в обычной речи
+             («уточняется на этапе проекта»), и по ним проверка краснела бы на
+             нормальном тексте. Редакционная пометка всегда несёт ⚠. */
+          if (/⚠/.test(q.acceptedAnswer.text)) out.marked.push(q.name);
+        });
         /* Прямой ответ обязан оставаться текстом: разметка внутри ответа означает,
            что развёрнутый блок утёк в то, что читает краулер. */
         j.mainEntity.forEach((q) => { if (/<[a-z]/i.test(q.acceptedAnswer.text)) out.invalid.push(q.name); });
@@ -370,6 +378,8 @@ const ld = await page.evaluate(() => {
     } catch (x) { out.invalid.push('невалидный JSON-LD: ' + e.id); }
   });
   out.cards = document.querySelectorAll('.cluster .card h3').length;
+  out.cardsClean = [...document.querySelectorAll('.cluster .card')]
+    .filter((c) => c.querySelector('h3') && c.querySelector('p') && !c.querySelector('p .prov')).length;
   return out;
 });
 if (ld.invalid.length) ld.invalid.forEach((x) => fail('разметка: ' + x));
@@ -409,8 +419,13 @@ if (ld.invalid.length) ld.invalid.forEach((x) => fail('разметка: ' + x))
     await page.waitForTimeout(200);
   }
 }
-if (ld.faq !== ld.cards) fail(`разметка FAQPage (${ld.faq}) разошлась с карточками в DOM (${ld.cards})`);
-console.log('JSON-LD:', ld.types.join(' '), `| FAQPage ${ld.faq} = карточек ${ld.cards}`);
+/* Разметка — подмножество карточек по замыслу: ответ, у которого в прямой части
+   стоит непроверенное, в FAQPage не идёт. Записи вернутся, когда факты подтвердят. */
+if (ld.faq !== ld.cardsClean)
+  fail(`разметка FAQPage (${ld.faq}) разошлась с карточками без пометок (${ld.cardsClean})`);
+ld.marked.slice(0, 3).forEach((n) => fail(`в разметке FAQPage осталась пометка: «${String(n).slice(0, 60)}»`));
+console.log('JSON-LD:', ld.types.join(' '),
+  `| FAQPage ${ld.faq} = карточек без пометок ${ld.cardsClean} из ${ld.cards}`);
 
 /* ---------- 7. Что видит краулер без JavaScript ---------- */
 const ctx = await browser.newContext({ javaScriptEnabled: false });
