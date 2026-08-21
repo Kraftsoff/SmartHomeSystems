@@ -881,7 +881,8 @@ await ctx.close();
     await page.waitForTimeout(300);
     const all = await page.evaluate(() =>
       [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
-    if (all !== 75) fail(`сброс поиска показывает ${all} ответов вместо 75`);
+    /* Число не зашиваем: ответы добавляются, и константа устареет молча. */
+    if (all !== ld.cards) fail(`сброс поиска показывает ${all} ответов вместо ${ld.cards}`);
     console.log(`поиск: «протечка» → ${found}, сброс → ${all}`);
   }
 
