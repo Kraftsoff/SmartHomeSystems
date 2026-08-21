@@ -278,6 +278,36 @@
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .a-hub a{color:var(--accent-ink);font-weight:600;font-size:14px}
+  /* ---------- печать ----------
+     Страницу проекта распечатывают, чтобы показать супругу, дизайнеру или прорабу.
+     На бумаге не нужны навигация, кнопки и интерактив, а тёмная тема выжигает тонер. */
+  @media print{
+    header.nav,footer,.cookie,.skip-link,.cluster-nav,.qsearch,.qcount,.qempty,
+    .scen-row,.house-stage,.a-side,.cta-row,.btn,.daynight,.draft,.filter,#calc{display:none!important}
+    .wrap{background:#fff!important;color:#000!important}
+    *{background:transparent!important;color:#000!important;box-shadow:none!important}
+    a{color:#000!important;text-decoration:underline}
+    .page{display:none!important}
+    .page.on{display:block!important}
+    .shell{max-width:none;padding:0}
+    .card,.case,.cluster,table.cmp{break-inside:avoid;page-break-inside:avoid;
+      border:1px solid #bbb!important}
+    h1,h2,h3{break-after:avoid;page-break-after:avoid}
+    .prov{border:1px solid #666!important;padding:0 4px}
+    .sub-hero{padding:0 0 12px}
+    section{padding:0 0 10px!important;margin:0!important}
+    .cluster{margin:0 0 14px}
+    main{padding:0!important}
+    h1{font-size:20pt;margin:0 0 8px}
+    h2{font-size:14pt;margin:14px 0 6px}
+    h3{font-size:11pt}
+    p,li,td,th{font-size:10pt;line-height:1.4}
+    .answer{padding:8px 12px;margin:0 0 10px}
+    /* печатаем адрес страницы, иначе распечатка теряет источник */
+    .print-url{display:block!important;font-family:var(--mono);font-size:10pt;
+      margin:0 0 14px;color:#000!important}
+  }
+  .print-url{display:none}
   .case-pain{margin:10px 0 14px;padding-left:12px;border-left:3px solid var(--crit);
     color:var(--ink);font-size:14.5px;line-height:1.5}
   .calc{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
@@ -616,6 +646,7 @@
 
 <!-- ===================== HOME ===================== -->
 <main id="main" tabindex="-1">
+<p class="print-url" id="printUrl"></p>
 <section class="page" id="p-home">
   <div class="hero" id="hero">
     <div class="aurora"><i class="a1"></i><i class="a2"></i></div>
@@ -2228,6 +2259,12 @@
     render();
   })();
 
+  /* адрес страницы для распечатки — без него бумага теряет источник */
+  function setPrintUrl(){
+    var e=document.getElementById('printUrl');
+    if(e)e.textContent='MiMiSmart · '+location.href.replace(/^file:\/\/.*?([^\/]+\.html)/,'$1');
+  }
+
   /* ---------- router ---------- */
   var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','solutions':'p-solutions-idx','functions':'p-functions-idx','showroom':'p-showroom','equipment':'p-equipment','portfolio':'p-cases','answers':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
@@ -2238,7 +2275,7 @@
       CMP[h]._k=h; renderCompare(CMP[h]);
       document.getElementById('p-compare').classList.add('on');
       document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/compare')});
-      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); return;
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); return;
     }
     if(h.indexOf('answers/')===0){
       var rec=BY_SLUG[h.slice(8)];
@@ -2246,14 +2283,14 @@
         renderAnswer(rec);
         document.getElementById('p-answer').classList.add('on');
         document.querySelectorAll('#topnav a').forEach(function(a){a.classList.remove('on')});
-        window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList();
+        window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl();
         return;
       }
       /* неизвестный слаг — честная 404, адрес не подменяем */
       var nfa=document.getElementById('nf-url'); if(nfa)nfa.textContent=location.hash;
       document.getElementById('p-404').classList.add('on');
       setMeta('Страница не найдена — MiMiSmart','Такой страницы нет. Ниже — основные разделы сайта.','');
-      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); return;
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); return;
     }
     setMeta(BASE_TITLE,BASE_DESC,h?'#/'+h:''); setAnswerLd(null);
     if(sub){
@@ -2279,7 +2316,7 @@
       }
     }
     document.querySelectorAll('#topnav a').forEach(function(a){var hr=a.getAttribute('href');a.classList.toggle('on',hr==='#/'+h)});
-    window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList();
+    window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl();
   }
   addEventListener('hashchange',route);
 
