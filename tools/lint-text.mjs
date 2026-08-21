@@ -84,11 +84,9 @@ const RULES = [
    данных». Совпадение внутри кавычек, рядом с отрицанием или словом «избегать»,
    разбором и запретом — это обсуждение приёма, а не его применение. */
 const QUOTED = /(«[^»]{0,120}$)|(^[^«]{0,120}»)/;
-function isDiscussed(win, word) {
-  const i = win.toLowerCase().indexOf(word.toLowerCase());
-  if (i < 0) return false;
-  const before = win.slice(Math.max(0, i - 60), i);
-  const after = win.slice(i + word.length, i + word.length + 60);
+/* Принимает позицию совпадения, а не ищет слово в окне: при повторе внутри окна
+   поиск нашёл бы чужое вхождение и судил бы по нему. */
+function isDiscussed(before, after) {
   /* Отрицание засчитываем, только если оно управляет самим словом: стоит вплотную
      перед ним. Раньше проверялись все 60 знаков, а в русской прозе «не» встречается
      почти в каждом предложении — правило глохло на большинстве текстов. */
@@ -112,7 +110,9 @@ const superHits = [];
     /* Отрицание — не заявление. «Чего мы не утверждаем: что мы лучшие» это
        ровно та страница, которая от превосходства и отказывается. */
     const denies = /не утвержда[ею]м|не заявля[ею]м|не значит|не означает|чего мы не|не претенду/i.test(win);
-    if (ABOUT_US.test(win) && !denies && !isDiscussed(win, m[0])) superHits.push(win.trim());
+    const sBefore = text.slice(Math.max(0, m.index - 60), m.index);
+    const sAfter = text.slice(m.index + m[0].length, m.index + m[0].length + 60);
+    if (ABOUT_US.test(win) && !denies && !isDiscussed(sBefore, sAfter)) superHits.push(win.trim());
   }
 }
 
@@ -129,18 +129,28 @@ for (const r of RULES) {
     const i = m.index;
     const win = text.slice(Math.max(0, i - 80), i + m[0].length + 80);
     if (r.skip && r.skip.test(win)) return false;
-    return !isDiscussed(win, m[0]);
-  }).map((m) => m[0]);
+    const before = text.slice(Math.max(0, i - 60), i);
+    const after = text.slice(i + m[0].length, i + m[0].length + 60);
+    return !isDiscussed(before, after);
+  });
   if (!found.length) continue;
-  const uniq = [...new Set(found.map((x) => x.toLowerCase()))];
-  hits.push({ why: r.why, soft: !!r.soft, count: found.length, examples: uniq.slice(0, 4) });
+  const seen = new Set();
+  const spots = [];
+  for (const m of found) {
+    const k = m[0].toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k); spots.push({ word: m[0], at: m.index });
+  }
+  hits.push({ why: r.why, soft: !!r.soft, count: found.length, spots: spots.slice(0, 4) });
 }
 
 /* Контекст вокруг каждого попадания — чтобы правку можно было сделать сразу. */
-function context(word) {
-  const i = text.toLowerCase().indexOf(word.toLowerCase());
-  if (i < 0) return '';
-  return '…' + text.slice(Math.max(0, i - 60), i + word.length + 60).trim() + '…';
+/* Контекст берём по позиции самого совпадения. Раньше здесь искалось первое
+   вхождение слова в документе — читателю показывался невиновный фрагмент, пока
+   нарушение стояло в другом месте, и претензия выглядела ошибочной. */
+function context(spot) {
+  const { word, at } = spot;
+  return '…' + text.slice(Math.max(0, at - 60), at + word.length + 60).trim() + '…';
 }
 
 let hard = superHits.length;
@@ -153,7 +163,7 @@ for (const h of hits) {
   const mark = h.soft ? '·' : '✗';
   if (!h.soft) hard += h.count;
   console.log(`${mark} ${h.why} — ${h.count}`);
-  h.examples.forEach((e) => console.log(`    ${context(e)}`));
+  h.spots.forEach((sp) => console.log(`    ${context(sp)}`));
 }
 
 console.log(`\nзнаков видимого текста: ${text.length}`);
