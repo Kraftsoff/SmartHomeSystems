@@ -275,6 +275,12 @@
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .a-hub a{color:var(--accent-ink);font-weight:600;font-size:14px}
+  .skip-link{position:absolute;left:-9999px;top:0;z-index:200;padding:12px 18px;
+    background:var(--panel);color:var(--ink);border:1px solid var(--glow);border-radius:0 0 10px 0}
+  .skip-link:focus{left:0}
+  #main:focus{outline:none}
+  #p-404 code{font-family:var(--mono);font-size:13px;background:var(--panel-2);
+    padding:2px 7px;border-radius:6px;border:1px solid var(--line);word-break:break-all}
   .navgrp{position:relative;display:inline-flex}
   .navbtn{font-family:var(--sans);font-size:inherit;color:var(--muted);background:none;border:none;
     cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:5px;
@@ -517,6 +523,7 @@
 </style>
 
 <div class="wrap">
+<a class="skip-link" href="#main">К содержимому</a>
 <div class="draft">Прототип v4 · тумблер День/Ночь = реальный сценарий объекта · данные-заглушки помечены ⚠️</div>
 
 <header class="nav"><div class="shell nav-in">
@@ -565,7 +572,7 @@
 </div></header>
 
 <!-- ===================== HOME ===================== -->
-<main>
+<main id="main" tabindex="-1">
 <section class="page" id="p-home">
   <div class="hero" id="hero">
     <div class="aurora"><i class="a1"></i><i class="a2"></i></div>
@@ -1180,6 +1187,55 @@
   </div></section>
 </section>
 
+<!-- ===================== 404 =====================
+     Раньше неизвестный адрес молча показывал главную: пользователь думает, что попал куда надо,
+     а поисковик видит дубль главной на десятках URL (soft-404). -->
+<section class="page" id="p-404">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Страница не найдена</p>
+    <p class="eyebrow">404</p><h1>Такой страницы нет</h1>
+    <div class="answer">Адрес <code id="nf-url"></code> не существует. Возможно, опечатка или
+      ссылка устарела. Ниже — то, что ищут чаще всего.</div>
+  </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Куда, скорее всего, вы шли</h2>
+    <div class="grid g3">
+      <a class="card card-link" href="#/news"><span class="kicker">Ответы</span><h3>База инженерных ответов</h3><p>60 вопросов с прямыми ответами и поиском.</p></a>
+      <a class="card card-link" href="#/pricing"><span class="kicker">Цены</span><h3>Сколько стоит инженерия</h3><p>Из чего складывается смета и что двигает цену.</p></a>
+      <a class="card card-link" href="#/solutions"><span class="kicker">Решения</span><h3>По типу объекта</h3><p>Квартира, дом, офис, ЖК, премиум.</p></a>
+      <a class="card card-link" href="#/functions"><span class="kicker">Направления</span><h3>Что входит в инженерию</h3><p>Климат, свет, шторы, безопасность, сети.</p></a>
+      <a class="card card-link" href="#/compare"><span class="kicker">Сравнения</span><h3>С чем сравнивают</h3><p>KNX, экосистемы, DIY — честные разборы.</p></a>
+      <a class="card card-link" href="#/contacts"><span class="kicker">Контакты</span><h3>Шоурум и связь</h3><p>Москва, Новоданиловская наб., 6к1.</p></a>
+    </div>
+  </div></section>
+</section>
+
+<!-- ===================== SHOWROOM ===================== -->
+<section class="page" id="p-showroom">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Шоурум</p>
+    <p class="eyebrow">Шоурум · Москва</p><h1>Систему лучше один раз потрогать</h1>
+    <div class="answer">Новоданиловская наб., 6к1, будни 09:00–18:00. Здесь вы сами включаете
+      сцены света, закрываете шторы, меняете климат и видите щит автоматизации изнутри — до того,
+      как заказывать проект. Записываться заранее не обязательно, но так мы освободим инженера
+      под ваш объект.</div>
+  </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Что можно посмотреть</h2>
+    <div class="grid g3">
+      <div class="card"><span class="kicker">Свет</span><h3>Сцены вместо выключателей</h3><p>Одна клавиша меняет весь свет в зоне. Диммирование без мерцания, DALI-треки в работе.</p></div>
+      <div class="card"><span class="kicker">Шторы</span><h3>Приводы вживую</h3><p>Слышно, насколько тихо работает привод — по каталогу это не оценить.</p></div>
+      <div class="card"><span class="kicker">Щит</span><h3>Как выглядит порядок</h3><p>Подписанные линии, резерв слотов, съёмные клеммы. Это то, что скрыто в стене на объекте.</p></div>
+      <div class="card"><span class="kicker">Климат</span><h3>Единый контур</h3><p>Кондиционирование, отопление и увлажнение на одной логике, без трёх пультов.</p></div>
+      <div class="card"><span class="kicker">Датчики</span><h3>Размер имеет значение</h3><p>Насколько заметны в интерьере — видно только вживую.</p></div>
+      <div class="card"><span class="kicker">Производство</span><h3>Сборка этажом выше</h3><p>Контроллеры собирают и прогоняют под нагрузкой здесь же <span class="prov">⚠️ формулировку подтвердить</span>.</p></div>
+    </div>
+    <div class="cta-row" style="margin-top:26px">
+      <button type="button" class="btn btn-primary" data-form data-goal="showroom">Записаться в шоурум</button>
+    </div>
+  </div></section>
+</section>
+
 <!-- ===================== FUNCTIONS INDEX ===================== -->
 <section class="page" id="p-functions-idx">
   <div class="sub-hero"><div class="shell">
@@ -1346,7 +1402,7 @@
     <div><h4>MiMiSmart</h4><p style="max-width:38ch;margin:0">Единый инженерный подрядчик для дорогих квартир и домов. Проектируем и реализуем инженерные системы в единой логике управления объектом.</p></div>
     <div><h4>Направления</h4><a href="#/functions/automation">Умный дом</a><a href="#/functions/climate">Климат и вентиляция</a><a href="#/functions/electric">Электрика и сети</a><a href="#/functions/curtains">Шторы</a>
     <a href="#/functions/lighting">Свет</a><a href="#/functions/multimedia">Мультимедиа</a><a href="#/functions/security">Безопасность</a></div>
-    <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/cases">Кейсы</a><a href="#/news">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a><a href="#/privacy">Политика ПД</a></div>
+    <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/cases">Кейсы</a><a href="#/news">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a><a href="#/showroom">Шоурум</a><a href="#/privacy">Политика ПД</a></div>
     <div><h4>Шоурум</h4><p style="margin:0">Москва, Новоданиловская наб., 6к1<br>09:00–18:00</p></div>
   </div>
   © 2026 MiMiSmart
@@ -1877,8 +1933,27 @@
       "itemListElement":items});
   }
 
+  /* ItemList на страницах-списках: движку проще процитировать перечень, если он размечен */
+  function setItemList(){
+    var page=document.querySelector('section.page.on');
+    var node=document.getElementById('ldItemList');
+    if(!node){node=document.createElement('script');node.type='application/ld+json';
+      node.id='ldItemList';document.head.appendChild(node)}
+    var links=page?page.querySelectorAll('.grid a.card-link, .cluster .card a, .card-link'):[];
+    if(!page||links.length<3){node.textContent='{}';return}
+    var items=[],pos=1,seen={};
+    [].slice.call(links).forEach(function(a){
+      var h=a.querySelector('h3'); if(!h)return;
+      var name=h.textContent.trim(); if(seen[name])return; seen[name]=1;
+      items.push({"@type":"ListItem","position":pos++,"name":name,
+        "url":location.href.split('#')[0]+a.getAttribute('href')});
+    });
+    node.textContent=items.length?JSON.stringify({"@context":"https://schema.org",
+      "@type":"ItemList","numberOfItems":items.length,"itemListElement":items}):'{}';
+  }
+
   /* ---------- router ---------- */
-  var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','solutions':'p-solutions-idx','functions':'p-functions-idx','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
+  var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','solutions':'p-solutions-idx','functions':'p-functions-idx','showroom':'p-showroom','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
     var h=location.hash.replace(/^#\//,'');
     var sub=SUB[h];
@@ -1887,7 +1962,7 @@
       CMP[h]._k=h; renderCompare(CMP[h]);
       document.getElementById('p-compare').classList.add('on');
       document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/compare')});
-      window.scrollTo(0,0); observeAll(); setBreadcrumb(); return;
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); return;
     }
     if(h.indexOf('a/')===0){
       var rec=BY_SLUG[h.slice(2)];
@@ -1895,11 +1970,14 @@
         renderAnswer(rec);
         document.getElementById('p-answer').classList.add('on');
         document.querySelectorAll('#topnav a').forEach(function(a){a.classList.remove('on')});
-        window.scrollTo(0,0); observeAll(); setBreadcrumb();
+        window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList();
         return;
       }
-      /* неизвестный слаг — не притворяемся, что страница есть: уводим на список */
-      location.hash='#/news'; return;
+      /* неизвестный слаг — честная 404, адрес не подменяем */
+      var nfa=document.getElementById('nf-url'); if(nfa)nfa.textContent=location.hash;
+      document.getElementById('p-404').classList.add('on');
+      setMeta('Страница не найдена — MiMiSmart','Такой страницы нет. Ниже — основные разделы сайта.','');
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); return;
     }
     setMeta(BASE_TITLE,BASE_DESC,h?'#/'+h:''); setAnswerLd(null);
     if(sub){
@@ -1915,10 +1993,17 @@
       var rk=document.getElementById('s-risks');rk.innerHTML='';sub.risks.forEach(function(x){rk.appendChild(el('<div class="risk"><span class="x">✕</span><p>'+x+'</p></div>'))});
       document.getElementById('p-sub').classList.add('on');
     } else {
-      document.getElementById(pages[h]||'p-home').classList.add('on');
+      var target=pages[h];
+      if(!target){   /* неизвестный адрес — честная 404, а не тихая подмена главной */
+        var nf=document.getElementById('nf-url'); if(nf)nf.textContent='#/'+h;
+        document.getElementById('p-404').classList.add('on');
+        setMeta('Страница не найдена — MiMiSmart','Такой страницы нет. Ниже — основные разделы сайта.','');
+      } else {
+        document.getElementById(target).classList.add('on');
+      }
     }
     document.querySelectorAll('#topnav a').forEach(function(a){var hr=a.getAttribute('href');a.classList.toggle('on',hr==='#/'+h)});
-    window.scrollTo(0,0); observeAll(); setBreadcrumb();
+    window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList();
   }
   addEventListener('hashchange',route);
 
