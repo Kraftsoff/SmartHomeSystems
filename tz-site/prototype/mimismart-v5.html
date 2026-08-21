@@ -426,15 +426,17 @@
   /* Узкий экран: строка таблицы становится блоком с подписями колонок.
      Прокрутка вбок на телефоне прячет половину содержимого и ничем себя не выдаёт. */
   @media (max-width:560px){
-    #a-a .tbl-wrap{border:none;overflow:visible}
-    #a-a table{display:block;min-width:0;width:100%}
-    #a-a thead{display:none}
-    #a-a tbody,#a-a tr,#a-a th,#a-a td{display:block;width:auto}
-    #a-a tbody tr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px}
-    #a-a tbody th[scope="row"],#a-a table th:first-child,#a-a table td:first-child{width:auto}
-    #a-a tbody th[scope="row"]{border:none;padding:0 0 6px;font-size:1rem;color:var(--ink)}
-    #a-a tbody td{border:none;padding:8px 0 0}
-    #a-a tbody td[data-label]::before{content:attr(data-label);display:block;
+    .tbl-wrap{border:none!important;overflow:visible}
+    /* .cmp объявлена ниже по файлу со своей min-width — поднимаем специфичность,
+       иначе таблица сравнения остаётся 640px и прокручивается вбок */
+    .tbl-wrap table,.tbl-wrap table.cmp{display:block;min-width:0;width:100%}
+    .tbl-wrap table.cmp tbody th,.tbl-wrap table.cmp tbody td{width:auto}
+    .tbl-wrap thead{display:none}
+    .tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap th,.tbl-wrap td{display:block;width:auto}
+    .tbl-wrap tbody tr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px}
+    .tbl-wrap tbody th[scope="row"]{border:none;padding:0 0 6px;font-size:1rem;color:var(--ink)}
+    .tbl-wrap tbody td{border:none;padding:8px 0 0}
+    .tbl-wrap tbody td[data-label]::before{content:attr(data-label);display:block;
       font-size:.76rem;letter-spacing:.02em;color:var(--muted);margin:0 0 2px}
   }
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px}
@@ -2169,6 +2171,17 @@
       свет про присутствие, безопасность про питание.</div>
   </div></div>
   <section><div class="shell">
+<h2 class="cluster-h">Почему подсистемы считают вместе, а не по отдельности</h2>
+<p class="lede" style="max-width:74ch">Разделённые по подрядчикам системы работают друг против друга. Ниже примеры, которые встречаются на каждом втором объекте.</p>
+<div class="tbl-wrap"><table><thead><tr><th scope="col">Что сталкивается</th><th scope="col">Что происходит</th><th scope="col">Что снимает конфликт</th></tr></thead><tbody>
+<tr><th scope="row">Отопление и кондиционирование</th><td>Пол греет, кондиционер охлаждает нагретое</td><td>Один контур регулирования на зону</td></tr>
+<tr><th scope="row">Вентиляция и увлажнение</th><td>Увлажнитель гонит влагу, приток выдувает её вместе с теплом</td><td>Общая логика с расчётом точки росы</td></tr>
+<tr><th scope="row">Свет и шторы</th><td>Сценарий «кино» гасит свет, шторы остаются открытыми</td><td>Сценарий, а не два отдельных пульта</td></tr>
+<tr><th scope="row">Протечка и электрика</th><td>Вода перекрыта, но линия под водой осталась под напряжением</td><td>Связка датчика, крана и отключения линии</td></tr>
+<tr><th scope="row">Резервное питание и нагрузки</th><td>Генератор берёт всё разом и уходит в защиту</td><td>Приоритеты нагрузок в расчёте щита</td></tr>
+</tbody></table></div>
+</div></section>
+<section><div class="shell">
     <h2 class="cluster-h">Направления работ</h2>
     <div class="grid g3" id="fnIdx"></div>
   </div></section>
@@ -2185,6 +2198,17 @@
       согласования.</div>
   </div></div>
   <section><div class="shell">
+<h2 class="cluster-h">Что меняется от типа объекта</h2>
+<p class="lede" style="max-width:74ch">Состав систем определяется не площадью, а тем, что на объекте вообще есть и кто им пользуется.</p>
+<div class="tbl-wrap"><table><thead><tr><th scope="col">Объект</th><th scope="col">Что появляется</th><th scope="col">Кто пользуется</th><th scope="col">Когда заходить</th></tr></thead><tbody>
+<tr><th scope="row">Квартира</th><td>Свет, климат, шторы, протечки, слаботочка</td><td>Семья — сценарии персональные</td><td>Черновая отделка, штробы открыты</td></tr>
+<tr><th scope="row">Дом</th><td>Плюс котельная, скважина, ДГУ, периметр, ландшафт, молниезащита</td><td>Семья и обслуживающий персонал</td><td>Стадия проекта дома: часть трасс в фундаменте</td></tr>
+<tr><th scope="row">Офис</th><td>Занятость помещений, переговорные, СКУД, учёт, пожарная автоматика</td><td>Сменяемый персонал — только режимы, без личных сценариев</td><td>До отделки, с согласованием управляющей компании</td></tr>
+<tr><th scope="row">Коммерческое помещение с посетителями</th><td>То же плюс режимы для зон, куда заходят чужие люди</td><td>Персонал и посетители, которых не обучить</td><td>До отделки; часть контуров выводится из-под сценариев по нормам</td></tr>
+<tr><th scope="row">Жилой комплекс</th><td>Магистраль, стояки, этажные шкафы, квартирные закладные, диспетчеризация</td><td>Застройщик, УК, жители</td><td>Стадия П: позже это конструктив</td></tr>
+</tbody></table></div>
+</div></section>
+<section><div class="shell">
     <h2 class="cluster-h">Типы объектов</h2>
     <div class="grid g3" id="solIdx"></div>
   </div></section>
@@ -2199,7 +2223,16 @@
       и что ломается на объекте, если выбирать без инженерного согласования.</div>
   </div></div>
   <section><div class="shell">
-    <h2 class="cluster-h">Разборы</h2>
+    <h2 class="cluster-h">По какой оси вообще идёт выбор</h2>
+<p class="lede" style="max-width:74ch">Все три альтернативы отличаются от инженерной системы одним и тем же: тем, кто отвечает за результат и что происходит через десять лет. Остальные различия — производные.</p>
+<div class="tbl-wrap"><table><thead><tr><th scope="col">Вопрос</th><th scope="col">Экосистема или гаджеты</th><th scope="col">KNX</th><th scope="col">Инженерная система производителя</th></tr></thead><tbody>
+<tr><th scope="row">Кто отвечает за то, что дом работает целиком</th><td>Никто: каждый производитель за свою коробку</td><td>Интегратор, в рамках стандарта</td><td>Один подрядчик от проекта до сервиса</td></tr>
+<tr><th scope="row">Что при уходе производителя</th><td>Устройства теряют часть функций или встают</td><td>Стандарт переживает вендора</td><td>Зависит от открытости протокола и переданных документов</td></tr>
+<tr><th scope="row">Кто может обслуживать через 10 лет</th><td>Вы сами</td><td>Любой сертифицированный инженер</td><td>Любой, если у вас есть документация и доступы</td></tr>
+<tr><th scope="row">Что решается до ремонта</th><td>Ничего: ставится в готовую квартиру</td><td>Трассы, щит, группы</td><td>Трассы, щит, группы</td></tr>
+<tr><th scope="row">Где дешевле на входе</th><td>Здесь</td><td>Дороже за счёт сертификации модулей и инженерии</td><td>Между ними</td></tr>
+</tbody></table></div>
+<h2 class="cluster-h">Разборы</h2>
     <div class="grid g3" id="cmpIdx"></div>
   </div></section>
 </section>
@@ -2599,6 +2632,23 @@
     'showroom':['Систему лучше один раз потрогать','Шоурум: сценарии, панели и щит в работе — посмотреть до того, как принимать решение по проекту.'],
     'privacy':['Политика обработки персональных данных','Кто обрабатывает данные из форм сайта, на каком основании, сколько хранит и как отозвать согласие.']
   };
+  /* На узком экране таблица из четырёх колонок показывает две, а прокрутку
+     внутри блока читатель не замечает — и не видит как раз то, ради чего таблица
+     нужна. Проставляем каждой ячейке подпись её колонки: по ней CSS разворачивает
+     строку в блок. Зовём на каждой смене маршрута — таблицы есть и на хабах. */
+  function labelTables(root){
+    if(!root)return;
+    [].forEach.call(root.querySelectorAll('.tbl-wrap table'),function(t){
+      var head=[].map.call(t.querySelectorAll('thead th'),function(th){return th.textContent.trim()});
+      if(!head.length)return;
+      [].forEach.call(t.querySelectorAll('tbody tr'),function(tr){
+        var cells=tr.children, off=cells[0]&&cells[0].tagName==='TH'?1:0;
+        for(var i=off;i<cells.length;i++){
+          if(head[i])cells[i].setAttribute('data-label',head[i]);
+        }
+      });
+    });
+  }
   function setMeta(title,desc,canonicalHash){
     document.title=title;
     if(DESC_EL)DESC_EL.setAttribute('content',desc);
@@ -2637,19 +2687,7 @@
        и без обёртки это голые текстовые узлы — к ним не применяется ограничение
        длины строки, и ответ растягивается во всю ширину */
     document.getElementById('a-a').innerHTML='<p>'+rec.html+'</p>'+(rec.more||'');
-    /* На узком экране таблица из четырёх колонок показывает две, а прокрутку
-       внутри блока читатель не замечает — и не видит как раз то, ради чего
-       таблица нужна. Проставляем каждой ячейке подпись её колонки, чтобы на
-       телефоне строка разворачивалась в блок с подписями. */
-    [].forEach.call(document.querySelectorAll('#a-a table'),function(t){
-      var head=[].map.call(t.querySelectorAll('thead th'),function(th){return th.textContent.trim()});
-      [].forEach.call(t.querySelectorAll('tbody tr'),function(tr){
-        var cells=tr.children, off=cells[0]&&cells[0].tagName==='TH'?1:0;
-        for(var i=off;i<cells.length;i++){
-          if(head[i])cells[i].setAttribute('data-label',head[i]);
-        }
-      });
-    });
+    labelTables(document.getElementById('a-a'));
     var rel=LEVERS.filter(function(x){return x.cluster===rec.cluster&&x.slug!==rec.slug}).slice(0,4);
     document.getElementById('a-rel-h').textContent=rel.length?('Ещё по теме «'+rec.cluster+'»'):'';
     var box=document.getElementById('a-related');box.innerHTML='';
@@ -3112,7 +3150,7 @@
       CMP[h]._k=h; renderCompare(CMP[h]);
       document.getElementById('p-compare').classList.add('on');
       document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/compare')});
-      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); return;
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); labelTables(document.querySelector("section.page.on")); return;
     }
     if(h.indexOf('answers/')===0){
       var rec=BY_SLUG[h.slice(8)];
@@ -3120,14 +3158,14 @@
         renderAnswer(rec);
         document.getElementById('p-answer').classList.add('on');
         document.querySelectorAll('#topnav a').forEach(function(a){a.classList.remove('on')});
-        window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl();
+        window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); labelTables(document.querySelector("section.page.on"));
         return;
       }
       /* неизвестный слаг — честная 404, адрес не подменяем */
       var nfa=document.getElementById('nf-url'); if(nfa)nfa.textContent=location.hash;
       document.getElementById('p-404').classList.add('on');
       setMeta('Страница не найдена — MiMiSmart','Такой страницы нет. Ниже — основные разделы сайта.','');
-      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); return;
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); labelTables(document.querySelector("section.page.on")); return;
     }
     var pm=PAGE_META[h];
     if(pm)setMeta(pm[0]+' — MiMiSmart',pm[1],'#/'+h);
@@ -3161,7 +3199,7 @@
       }
     }
     document.querySelectorAll('#topnav a').forEach(function(a){var hr=a.getAttribute('href');a.classList.toggle('on',hr==='#/'+h)});
-    window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl();
+    window.scrollTo(0,0); observeAll(); setBreadcrumb(); setItemList(); setPrintUrl(); labelTables(document.querySelector("section.page.on"));
   }
   addEventListener('hashchange',route);
 

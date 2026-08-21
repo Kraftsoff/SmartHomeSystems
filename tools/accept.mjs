@@ -247,28 +247,36 @@ await page.setViewportSize({ width: 1400, height: 1000 });
   await page.setViewportSize({ width: 360, height: 900 });
   await page.goto(F);
   await page.waitForTimeout(400);
-  const href = await page.evaluate(() => {
+  const first = await page.evaluate(() => {
     const a = document.querySelector('.cluster .card-link');
     return a && a.getAttribute('href');
   });
-  if (href) {
-    await page.goto(F + href);
-    await page.waitForTimeout(350);
+  /* Таблицы есть не только на страницах ответов: хабы и разборы сравнений тоже. */
+  const tableRoutes = [first, '#/compare', '#/solutions', '#/functions', '#/compare/knx'].filter(Boolean);
+  let checked = 0, labelled = 0, cells = 0;
+  for (const h of tableRoutes) {
+    if (!routes.has(h)) continue;
+    await page.goto(F + h);
+    await page.waitForTimeout(320);
     const r = await page.evaluate(() => {
-      const w = document.querySelector('#a-a .tbl-wrap');
-      if (!w) return null;
+      const v = [...document.querySelectorAll('section.page')]
+        .filter((s) => getComputedStyle(s).display !== 'none')[0];
+      const ws = [...v.querySelectorAll('.tbl-wrap')];
+      if (!ws.length) return null;
       /* Прокрутка вбок внутри блока прячет колонки и ничем себя не выдаёт:
          на узком экране строка должна разворачиваться в блок с подписями. */
-      const labelled = document.querySelectorAll('#a-a td[data-label]').length;
-      const cells = document.querySelectorAll('#a-a tbody td').length;
-      return { scrolls: w.scrollWidth > w.clientWidth + 1, labelled, cells };
+      return {
+        scrolls: ws.some((w) => w.scrollWidth > w.clientWidth + 1),
+        labelled: v.querySelectorAll('tbody td[data-label]').length,
+        cells: v.querySelectorAll('tbody td').length,
+      };
     });
-    if (r) {
-      if (r.scrolls) fail('на 360px таблица ответа прокручивается вбок — колонки не видны');
-      if (r.cells && r.labelled < r.cells) fail(`ячеек без подписи колонки: ${r.cells - r.labelled}`);
-      console.log(`таблицы на 360px: без боковой прокрутки, подписей у ячеек ${r.labelled}/${r.cells}`);
-    }
+    if (!r) continue;
+    checked++; labelled += r.labelled; cells += r.cells;
+    if (r.scrolls) fail(`на 360px таблица прокручивается вбок, колонки не видны: ${h}`);
+    if (r.cells && r.labelled < r.cells) fail(`${h}: ячеек без подписи колонки ${r.cells - r.labelled}`);
   }
+  console.log(`таблицы на 360px: маршрутов ${checked}, без боковой прокрутки, подписей ${labelled}/${cells}`);
   await page.setViewportSize({ width: 1400, height: 1000 });
 }
 
