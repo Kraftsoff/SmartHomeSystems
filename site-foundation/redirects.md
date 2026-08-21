@@ -1,19 +1,32 @@
-# Карта 301-редиректов: старый сайт → новая структура
+# Карта 301-редиректов
 
-Источник «слева» — реальные маршруты, восстановленные обходом ссылок текущего сайта
-(`../site-snapshot/SITEMAP.md`). Источник «справа» — целевая архитектура из
-`../tz-site/02 — Информационная архитектура.md`.
+**В документе две разные карты, и их нельзя смешивать.**
 
-**Зачем:** без редиректов при переезде теряется накопленный вес страниц и все внешние ссылки
-упираются в 404. Ставить **301** (постоянный), не 302 — иначе вес не передаётся.
+| | Часть A | Часть B |
+|---|---|---|
+| Слева | маршруты **превью нового сайта** (`mimi-ibrh.vercel.app`) | маршруты **легаси-доменов** (`mmsmart.ru` и зеркала) |
+| Источник | `../site-snapshot/SITEMAP.md` — обход ссылок превью | замер выдачи `../audit/08-serp-baseline.md` |
+| Что на кону | ничего: превью не индексируется, это внутренняя перекладка URL | **накопленный вес и внешние ссылки** |
+| Полнота | полная, ~60 маршрутов превью | **фрагмент: ~30 URL из индекса, реальный сайт больше** |
+
+⚠️ **Исправление к прежней версии этого файла.** Раньше часть A была озаглавлена «старый сайт →
+новая структура». Это неверно: снапшот снят с превью нового сайта, а не с легаси-домена.
+Схемы путей не пересекаются вообще — превью использует `/about`, `/partners`, `/solutions`,
+а проиндексированный `mmsmart.ru` живёт на транслитерации: `/o-kompanii/`, `/partneram/`,
+`/avtomatizacziya/`. То есть **вес старого сайта часть A не переносила ни на одну страницу.**
+Задачу переноса решает часть B, и она появилась только после замера выдачи.
 
 **Порядок применения:** более специфичные правила выше более общих (`/detector/moving` до
-`/detector`), иначе общее правило перехватит частные.
+`/detector`), иначе общее правило перехватит частные. Ставить **301**, не 302 — иначе вес
+не передаётся. Редирект на главную вместо конкретной страницы не ставить ни в одном случае:
+Google трактует это как soft-404 и вес не передаёт.
 
-⚠️ **Домены не подтверждены.** Легаси-доменов несколько (mmsmart.ru, mimismart.ru, mimismart.com,
-mmsmart-russia.ru, mimismart-home.ru), какой из них основной и какие реально в индексе — открытый
-вопрос (`../tz-site/99`). Правила ниже — путевые (path-level); на уровне доменов дополнительно
-нужен сквозной 301 со всех легаси-доменов на основной, **после** проверки реального индекса.
+---
+
+# Часть A. Превью → финальная архитектура
+
+Вес не на кону: превью в индексе нет. Это перекладка внутренних URL, чтобы ссылки, которые
+уже разошлись по переписке и документам, не упирались в 404.
 
 ---
 
@@ -172,12 +185,36 @@ module.exports = {
       { source: '/app', destination: '/equipment/app', permanent: true },
       { source: '/catalog', destination: '/equipment', permanent: true },
       { source: '/products', destination: '/equipment', permanent: true },
-      // ⚠️ РАНЖИРУЮЩИЕСЯ СЕЙЧАС — терять нельзя (замер 21.08.2026, audit/08)
-      { source: '/smart-home/gotovye-resheniya/premialnyy-segment', destination: '/solutions/premium', permanent: true },
-      { source: '/avtomatizacziya/kompleksnyie-resheniya/dacha', destination: '/solutions/house', permanent: true },
+      // ══ ЧАСТЬ B: легаси-домены. Порядок важен — частные выше общих ══
+      // /articles/ ведём адресно: склейка в раздел обнуляет ранжирующиеся страницы
+      { source: '/articles/detsentralizovannyy-umnyy-dom', destination: '/answers/chto-takoe-decentralizovannaya-arhitektura-umnogo-doma-i', permanent: true },
+      { source: '/articles/server-umnogo-doma', destination: '/equipment/controllers', permanent: true },
+      { source: '/articles/reyting-sistem-umnyy-dom', destination: '/compare', permanent: true },
+      { source: '/articles/vozmozhnosti-umnogo-doma', destination: '/functions', permanent: true },
+      { source: '/articles/umnyy-dom-kak-eto-rabotaet', destination: '/functions/automation', permanent: true },
+      { source: '/articles/skhemy-umnogo-doma', destination: '/functions/automation', permanent: true },
+      { source: '/articles/avtomatizatsiya-umnogo-doma', destination: '/functions/automation', permanent: true },
       { source: '/articles/umnyij-dom-dlya-ofisa', destination: '/solutions/office', permanent: true },
-      { source: '/czenyi/servis', destination: '/pricing', permanent: true },  // ⚠️ временно: страницы сервиса в архитектуре нет
+      // сегменты и цены
+      { source: '/smart-home/gotovye-resheniya/premialnyy-segment', destination: '/solutions/premium', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/provodnye-sistemy', destination: '/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/modulnye-resheniya', destination: '/equipment/controllers', permanent: true },
+      { source: '/smart-home/razrabotka-sistem/udalyennoe-upravlenie', destination: '/equipment/app', permanent: true },
+      { source: '/smart-home/bezopasnost/domofon', destination: '/functions/security/intercom', permanent: true },
+      { source: '/smart-home/multimedia', destination: '/functions/multimedia', permanent: true },
+      { source: '/smart-home', destination: '/solutions', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya/kvartira', destination: '/solutions/flat', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya/kottedzh', destination: '/solutions/house', permanent: true },
+      { source: '/avtomatizacziya/kompleksnyie-resheniya/dacha', destination: '/solutions/house', permanent: true },  // ⚠️ /solutions/country-house в архитектуре нет
+      { source: '/avtomatizacziya', destination: '/functions/automation', permanent: true },
+      { source: '/oborudovanie/kontrollery', destination: '/equipment/controllers', permanent: true },
+      { source: '/oborudovanie', destination: '/equipment', permanent: true },
+      { source: '/czenyi/servis', destination: '/pricing', permanent: true },  // ⚠️ временно: /service в архитектуре нет
       { source: '/czenyi', destination: '/pricing', permanent: true },
+      { source: '/o-kompanii', destination: '/about', permanent: true },
+      { source: '/partneram/dileram', destination: '/partners', permanent: true },
+      { source: '/partneram/designer', destination: '/partners', permanent: true },  // ⚠️ страницы для дизайнеров нет
+      { source: '/partneram', destination: '/partners', permanent: true },
       // инфо
       { source: '/news', destination: '/blog', permanent: true },
     ]
@@ -185,40 +222,96 @@ module.exports = {
 }
 ```
 
-## Страницы, которые ранжируются прямо сейчас — приоритет №1
+# Часть B. Легаси-домены → новый сайт
 
-Замер выдачи 21.08.2026 (`../audit/08-serp-baseline.md`) показал: **старый сайт стоит в топе по
-семи запросам из тридцати** — премиум-сегмент, дача, офис, протечки, электропитание, гарантия,
-сервис. Ни один из этих URL не был восстановлен обходом ссылок, потому что часть из них
-доступна только из поиска, а не из меню сайта.
+**Здесь на кону накопленный вес.** Источник — замер выдачи 21.08.2026 (`../audit/08-serp-baseline.md`):
+это URL, присутствие которых в индексе подтверждено. Обходом меню они не находятся: часть
+доступна только из поиска.
 
-| Старый URL | Запрос, по которому стоит | Новый |
+`mmsmart.ru` работает как основной домен, `mimismart.ru` держит зеркальные пути с той же
+структурой — значит одна и та же карта применяется к обоим доменам.
+
+## B1. Раздел `/articles/` — самый уязвимый
+Единственный источник органики по технологическому кластеру. `/articles/detsentralizovannyy-umnyy-dom/`
+стоит в органической выдаче третьим. **Каждый URL ведём адресно, склейка в раздел недопустима** —
+она обнуляет именно ту страницу, которая работает.
+
+| Старый | Новый |
+|---|---|
+| `/articles/detsentralizovannyy-umnyy-dom/` | `/answers/chto-takoe-decentralizovannaya-arhitektura-umnogo-doma-i` |
+| `/articles/server-umnogo-doma/` | `/equipment/controllers` |
+| `/articles/reyting-sistem-umnyy-dom/` | `/compare` |
+| `/articles/vozmozhnosti-umnogo-doma/` | `/functions` |
+| `/articles/umnyy-dom-kak-eto-rabotaet/` | `/functions/automation` |
+| `/articles/skhemy-umnogo-doma/` | `/functions/automation` |
+| `/articles/avtomatizatsiya-umnogo-doma/` | `/functions/automation` |
+| `/articles/umnyij-dom-dlya-ofisa/` | `/solutions/office` |
+
+## B2. Разделы, которые ранжируются по целевым запросам
+| Старый | Запрос из замера | Новый |
 |---|---|---|
 | `/smart-home/gotovye-resheniya/premialnyy-segment/` | умный дом премиум класса что входит | `/solutions/premium` |
 | `/avtomatizacziya/kompleksnyie-resheniya/dacha/` | умный дом на даче зимой присмотр | `/solutions/house` ⚠️ |
-| `/articles/umnyij-dom-dlya-ofisa/` | умный дом для офиса с чего начать | `/solutions/office` |
+| `/avtomatizacziya/kompleksnyie-resheniya/kvartira/` | умный дом в квартире | `/solutions/flat` |
+| `/avtomatizacziya/kompleksnyie-resheniya/kottedzh/` | умный дом в коттедже | `/solutions/house` |
 | `/czenyi/` | гарантия на умный дом сколько лет | `/pricing` |
 | `/czenyi/servis/` | сервисное обслуживание умного дома | `/pricing` ⚠️ |
 
-Ещё по двум запросам (защита от протечек, управление электропитанием) `mmsmart.ru` в выдаче
-есть, но **точный URL из замера не извлекается** — виден домен, не путь.
-`[ФАКТ: уточнить у клиента]` — выгрузить из Яндекс.Вебмастера отчёт «Страницы в поиске» по всем
-пяти легаси-доменам **до** переезда. Это единственный способ не потерять то, что уже работает:
-карта редиректов, построенная обходом меню, такие страницы не видит по определению.
+## B3. Остальные подтверждённые в индексе
+| Старый | Новый |
+|---|---|
+| `/smart-home/razrabotka-sistem/provodnye-sistemy/` | `/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat` |
+| `/smart-home/razrabotka-sistem/modulnye-resheniya/` | `/equipment/controllers` |
+| `/smart-home/razrabotka-sistem/udalyennoe-upravlenie/` | `/equipment/app` |
+| `/smart-home/bezopasnost/domofon/` | `/functions/security/intercom` |
+| `/smart-home/multimedia/` | `/functions/multimedia` |
+| `/smart-home/` | `/solutions` |
+| `/oborudovanie/kontrollery/` | `/equipment/controllers` |
+| `/oborudovanie/` | `/equipment` |
+| `/avtomatizacziya/` | `/functions/automation` |
+| `/o-kompanii/` | `/about` |
+| `/partneram/dileram/` | `/partners` |
+| `/partneram/designer/` | `/partners` ⚠️ |
+| `/partneram/` | `/partners` |
 
-**Две цели ведут не туда, куда следовало бы — и это вскрывает пробел в архитектуре.**
+## B4. Домены: что решить до выкатки
 
-- `/service` в `sitemap.xml` **нет вообще**, хотя замер показал: по запросу «сервисное
-  обслуживание умного дома» старая страница `/czenyi/servis/` ранжируется, а весь топ занят
-  прайсами интеграторов, которые отвечают одинаково успокаивающе. Это свободный запрос с
-  подтверждённым спросом и с нашей уже стоящей страницей. **Рекомендация: завести `/service`
-  в архитектуре** и переставить редирект на неё. Пока временно ведёт на `/pricing`.
-- `/solutions/country-house` нет; дача уходит на `/solutions/house`. Загородный дом и дача —
-  разные сценарии и разный чек, но отдельная страница дачи под наш сегмент спорна
-  (`../audit/07-buyer-voice.md`: спрос есть, чек не наш). Решение за клиентом.
+**Порядок операций критичен.** Сначала на каждом легаси-домене отрабатывают путевые правила
+части B, и только потом домен склеивается с основным. Если поставить сквозной 301 с домена на
+главную нового сайта первым, он съест путь — все страницы уедут на `/`, а Google засчитает это
+как soft-404 и вес не передаст. В Next.js это разводится через `has: [{ type: 'host', value: … }]`
+либо настраивается на обратном прокси до приложения.
 
-Редирект на главную вместо конкретной страницы ставить нельзя ни в одном случае: Google
-трактует это как soft-404 и вес не передаёт.
+- **Раздел «Партнёрам» разорван между доменами.** `/partneram/` и `/partneram/designer/` отдаются
+  с `mmsmart.ru`, а `/partneram/dileram/` — с `mimismart.ru`. Один логический раздел живёт на двух
+  сайтах. При склейке развести в одну ветку.
+- **Дубли заголовков.** Главные `mmsmart.ru` и `mimismart.com` индексируются с идентичным title.
+  Для поиска это два разных сайта с одинаковым заголовком.
+- **www.** `mimismart.com` показан с `www`, остальные без. Канонизацию www/non-www проверить
+  до настройки редиректов.
+- **`mmsmart-russia.ru` и `mimismart-home.ru`** подтверждены в индексе как минимум по корню;
+  внутренние URL поиском не вскрылись. Снимать из Вебмастера или логов.
+- **`mimismart.com`** в замере не подтверждён ни разу. Отсутствие в выдаче не доказывает, что
+  домена нет в индексе.
+- **Приложение в App Store** (`apps.apple.com/ru/app/mimismart/id6444528782`) — проверить, откуда
+  на него ведут ссылки со старых страниц.
+
+## B5. Чего в этой карте нет — и почему это блокирующий пункт
+Тридцать URL — это верхушка, которую показал поиск, а не карта сайта. Реальный `mmsmart.ru`
+больше: у него есть меню, каталог оборудования и статьи, которые в замер не попали.
+
+**Без выгрузки «Страницы в поиске» из Яндекс.Вебмастера по всем пяти доменам переезд делать
+нельзя.** Это единственный способ увидеть полный список проиндексированных URL. Всё, что в него
+не попало, уйдёт в 404 молча — без ошибки в логах и без сигнала в аналитике.
+
+## B6. Целей, которых нет в архитектуре
+- **`/service`** в `sitemap.xml` отсутствует, хотя `/czenyi/servis/` ранжируется, а запрос
+  «сервисное обслуживание умного дома» свободен — весь топ занят прайсами интеграторов, которые
+  отвечают одинаково успокаивающе. **Рекомендация: завести раздел** и переставить редирект на него.
+- **`/solutions/country-house`** нет; дача уходит на `/solutions/house`. Загородный дом и дача —
+  разные сценарии и разный чек (`../audit/07-buyer-voice.md`: спрос есть, чек не наш). Решение за клиентом.
+- **Страницы для дизайнеров** нет, хотя `/partneram/designer/` проиндексирована. Для премиум-сегмента
+  дизайнер — реальный канал рекомендаций. Либо заводим, либо осознанно теряем.
 
 ## Известные расхождения (проверено сверкой с `sitemap.xml`)
 Прогнал все цели редиректов против `sitemap.xml` — одно расхождение, оставлено осознанно:
