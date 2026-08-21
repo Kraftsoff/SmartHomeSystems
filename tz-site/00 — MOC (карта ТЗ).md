@@ -40,7 +40,7 @@ updated: 2026-06-29
 ## Связанные материалы (вне vault)
 - Стратегия AEO: `../strategy/00-strategy-aeo.md`
 - Контекст бренда: `../.agents/product-marketing.md`
-- Аудиты: `../audit/01-marketing-audit.md`, `../audit/02-aeo-audit-skill.md`, `../audit/03-prototype-audit.md`, `../audit/04-competitor-benchmark.md`, `../audit/05-aeo-evidence-2026.md` ⚠️ **меняет часть решений**, `../audit/06-legal-checklist.md` ⚠️ **юридические требования и санкции**, `../audit/07-buyer-voice.md` ⚠️ **что реально спрашивают покупатели**
+- Аудиты: `../audit/01-marketing-audit.md`, `../audit/02-aeo-audit-skill.md`, `../audit/03-prototype-audit.md`, `../audit/04-competitor-benchmark.md`, `../audit/05-aeo-evidence-2026.md` ⚠️ **меняет часть решений**, `../audit/06-legal-checklist.md` ⚠️ **юридические требования и санкции**, `../audit/07-buyer-voice.md` ⚠️ **что реально спрашивают покупатели**, `../audit/08-serp-baseline.md` ⚠️ **кто занимает наши запросы (замер до запуска)**
 - Снимок текущего сайта: `../site-snapshot/`
 
 ## Принято за основу (кратко)
