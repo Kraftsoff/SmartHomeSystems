@@ -277,6 +277,23 @@ if (noJsFaq !== ld.faq) fail(`без JS в разметке ${noJsFaq} отве�
 console.log('без JavaScript: ответов в разметке', noJsFaq);
 await ctx.close();
 
+/* ---------- 7b. Исходный HTML: то, что браузер молча чинит ---------- */
+{
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(resolve(FILE), 'utf8');
+  /* Ячейка, открытая как th и закрытая как td, парсером восстанавливается,
+     поэтому в DOM её не видно — а в исходнике это ошибка разметки. */
+  const mixed = src.match(/<th[^>]*>[^<]*<\/td>|<td[^>]*>[^<]*<\/th>/g);
+  if (mixed) mixed.forEach((m) => fail(`несогласованная ячейка таблицы: ${m.slice(0, 70)}`));
+  /* Незакрытые парные теги в блоках контента */
+  for (const tag of ['table', 'thead', 'tbody', 'tr', 'dl', 'ol', 'ul']) {
+    const open = (src.match(new RegExp(`<${tag}[\\s>]`, 'g')) || []).length;
+    const close = (src.match(new RegExp(`</${tag}>`, 'g')) || []).length;
+    if (open !== close) fail(`тег <${tag}>: открыт ${open} раз, закрыт ${close}`);
+  }
+  console.log('исходный HTML: парные теги сходятся, ячейки таблиц согласованы');
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
