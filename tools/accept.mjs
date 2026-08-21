@@ -121,6 +121,11 @@ for (const h of routes) {
   if (d.is404) { soft404++; fail(`маршрут отдаёт 404: ${h}`); }
   if (d.raw) { rawTags++; fail(`видимые сырые теги в тексте: ${h}`); }
   if (!d.desc) fail(`пустой description: ${h}`);
+  /* Длина меты по требованию из site-foundation/yandex-first.md. Исключение —
+     страницы ответов: там заголовок и есть вопрос пользователя, и укоротить его
+     значит потерять совпадение с запросом, ради которого страница существует. */
+  else if (d.desc.length < 120 || d.desc.length > 160) fail(`description ${d.desc.length} знаков вместо 120–160: ${h}`);
+  if (d.title.length > 60 && !h.startsWith('#/answers/')) fail(`title ${d.title.length} знаков вместо 60 и меньше: ${h}`);
   if (d.canon && !d.canon.endsWith(h) && h !== '#/') fail(`canonical не совпадает с адресом: ${h}`);
   for (const [map, val] of [[titles, d.title], [descs, d.desc], [canons, d.canon]]) {
     if (!map.has(val)) map.set(val, []);
