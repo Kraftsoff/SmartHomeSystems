@@ -274,7 +274,8 @@ await page.setViewportSize({ width: 1400, height: 1000 });
     return a && a.getAttribute('href');
   });
   /* Таблицы есть не только на страницах ответов: хабы и разборы сравнений тоже. */
-  const tableRoutes = [first, '#/compare', '#/solutions', '#/functions', '#/compare/knx'].filter(Boolean);
+  const tableRoutes = [first, '#/compare', '#/solutions', '#/functions', '#/compare/knx',
+    '#/about', '#/equipment', '#/partners', '#/showroom'].filter(Boolean);
   let checked = 0, labelled = 0, cells = 0;
   for (const h of tableRoutes) {
     if (!routes.has(h)) continue;
@@ -305,7 +306,7 @@ await page.setViewportSize({ width: 1400, height: 1000 });
 /* ---------- 5c. Оформление ячеек на широком экране ---------- */
 {
   await page.setViewportSize({ width: 1400, height: 1000 });
-  for (const h of ['#/about', '#/compare', '#/solutions', '#/functions']) {
+  for (const h of ['#/about', '#/compare', '#/solutions', '#/functions', '#/equipment', '#/partners', '#/showroom']) {
     if (!routes.has(h)) continue;
     await page.goto(F + h);
     await page.waitForTimeout(280);
