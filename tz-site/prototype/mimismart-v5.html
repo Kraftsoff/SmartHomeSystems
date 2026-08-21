@@ -278,6 +278,7 @@
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .a-hub a{color:var(--accent-ink);font-weight:600;font-size:14px}
+  .a-meta{font-size:12.5px;color:var(--muted);margin-top:14px}
   .req{color:var(--accent-ink);font-weight:700}
   .skip-link{position:absolute;left:-9999px;top:0;z-index:200;padding:12px 18px;
     background:var(--panel);color:var(--ink);border:1px solid var(--glow);border-radius:0 0 10px 0}
@@ -1308,6 +1309,7 @@
           Под ваш объект нужен расчёт: площадь, стадия ремонта, состав систем.</p>
         <button type="button" class="btn btn-primary" data-form>Получить расчёт по объекту</button>
         <p class="a-hub" id="a-hub" style="margin-top:16px"></p>
+        <p class="a-meta" id="a-updated"></p>
         <p style="margin-top:10px"><a href="#/answers" id="a-back">← Все ответы</a></p>
       </aside>
     </div>
@@ -1630,13 +1632,25 @@
     if(!c){c=document.createElement('link');c.rel='canonical';c.id='canonicalLink';document.head.appendChild(c)}
     c.href=location.href.split('#')[0]+(canonicalHash||'');
   }
+  /* Тип: Article, НЕ QAPage. По спецификации Google QAPage — только для страниц, где ответы
+     могут присылать пользователи («Don't use QAPage markup for content that has only one answer
+     … with no way for users to add alternative answers»). У нас один авторский ответ, поэтому
+     QAPage был применён неверно. Article заодно даёт поля author и dateModified, которых
+     требует критерий «Экспертность» у Яндекса. */
+  var CONTENT_UPDATED='2026-08-21';
   function setAnswerLd(rec){
     var n=document.getElementById('ldAnswer');
     if(!rec){if(n)n.textContent='{}';return}
     if(!n){n=document.createElement('script');n.type='application/ld+json';n.id='ldAnswer';document.head.appendChild(n)}
-    n.textContent=JSON.stringify({"@context":"https://schema.org","@type":"QAPage",
-      "mainEntity":{"@type":"Question","name":rec.q,"answerCount":1,
-        "acceptedAnswer":{"@type":"Answer","text":rec.text}}});
+    n.textContent=JSON.stringify({"@context":"https://schema.org","@type":"Article",
+      "headline":rec.q,
+      "description":rec.text.slice(0,155),
+      "articleBody":rec.text,
+      "inLanguage":"ru-RU",
+      "dateModified":CONTENT_UPDATED,
+      "publisher":{"@type":"Organization","name":"MiMiSmart"},
+      "author":{"@type":"Person","name":"⚠️ заполнить: автор с подтверждённым опытом"},
+      "mainEntityOfPage":{"@type":"WebPage","@id":location.href}});
   }
   function renderAnswer(rec){
     document.getElementById('a-cluster-crumb').textContent=rec.cluster;
@@ -1650,6 +1664,9 @@
       box.appendChild(el('<a class="card card-link reveal" href="#/answers/'+x.slug+'">'+
         '<span class="kicker">'+x.kicker+'</span><h3 style="margin-top:8px">'+x.q+'</h3></a>'));
     });
+    var up=document.getElementById('a-updated');
+    if(up)up.innerHTML='Обновлено: <time datetime="'+CONTENT_UPDATED+'">21.08.2026</time> · '+
+      '<span class="prov">⚠️ автор не указан</span>';
     var hub=CLUSTER_HUB[rec.cluster], hb=document.getElementById('a-hub');
     if(hub&&hb){hb.innerHTML='<a href="'+hub[0]+'">'+hub[1]+' →</a>'}
     setMeta(rec.q+' — MiMiSmart', rec.text.slice(0,155), '#/answers/'+rec.slug);

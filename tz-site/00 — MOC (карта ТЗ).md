@@ -38,7 +38,7 @@ updated: 2026-06-29
 ## Связанные материалы (вне vault)
 - Стратегия AEO: `../strategy/00-strategy-aeo.md`
 - Контекст бренда: `../.agents/product-marketing.md`
-- Аудиты: `../audit/01-marketing-audit.md`, `../audit/02-aeo-audit-skill.md`, `../audit/03-prototype-audit.md`, `../audit/04-competitor-benchmark.md`
+- Аудиты: `../audit/01-marketing-audit.md`, `../audit/02-aeo-audit-skill.md`, `../audit/03-prototype-audit.md`, `../audit/04-competitor-benchmark.md`, `../audit/05-aeo-evidence-2026.md` ⚠️ **меняет часть решений**
 - Снимок текущего сайта: `../site-snapshot/`
 
 ## Принято за основу (кратко)
