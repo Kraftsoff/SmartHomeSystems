@@ -618,6 +618,29 @@ await ctx.close();
   }
 }
 
+/* ---------- 7h. Ссылки в llms.txt и pricing.md ведут на существующие маршруты ---------- */
+{
+  /* Эти файлы читают агенты и краулеры, а проверить их обходом сайта нельзя:
+     они лежат в корне и на них ничто не ссылается. В llms.txt стояли пути
+     старого сайта — /smart-home, /climate, /curtains-light, — то есть каждая
+     ссылка вела в 404. */
+  const { readFileSync: readTxt } = await import('node:fs');
+  const FILES_OK = new Set(['/pricing.md', '/sitemap.xml', '/llms.txt', '/robots.txt']);
+  let smRaw = '';
+  try { smRaw = readTxt(resolve('site-foundation/sitemap.xml'), 'utf8'); } catch (e) {}
+  const known = new Set([...smRaw.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('BASE_URL', '')));
+  for (const name of ['llms.txt', 'pricing.md']) {
+    let body = '';
+    try { body = readTxt(resolve('site-foundation/' + name), 'utf8'); } catch (e) { continue; }
+    const links = [...new Set([...body.matchAll(/\]\((\/[^)]*)\)/g)].map((m) => m[1]))];
+    const bare = [...new Set((body.match(/(?<=\s)\/[a-z0-9/-]{2,}/g) || []))];
+    const all = [...new Set([...links, ...bare])];
+    const broken = all.filter((l) => !known.has(l) && !FILES_OK.has(l));
+    broken.forEach((l) => fail(`${name}: ссылка на несуществующий маршрут ${l}`));
+    console.log(`${name}: ссылок ${all.length}, вне карты сайта ${broken.length}`);
+  }
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
