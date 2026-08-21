@@ -242,6 +242,36 @@ for (const w of [360, 390, 768, 1024, 1440]) {
 }
 await page.setViewportSize({ width: 1400, height: 1000 });
 
+/* ---------- 5b. Таблицы ответов на телефоне ---------- */
+{
+  await page.setViewportSize({ width: 360, height: 900 });
+  await page.goto(F);
+  await page.waitForTimeout(400);
+  const href = await page.evaluate(() => {
+    const a = document.querySelector('.cluster .card-link');
+    return a && a.getAttribute('href');
+  });
+  if (href) {
+    await page.goto(F + href);
+    await page.waitForTimeout(350);
+    const r = await page.evaluate(() => {
+      const w = document.querySelector('#a-a .tbl-wrap');
+      if (!w) return null;
+      /* Прокрутка вбок внутри блока прячет колонки и ничем себя не выдаёт:
+         на узком экране строка должна разворачиваться в блок с подписями. */
+      const labelled = document.querySelectorAll('#a-a td[data-label]').length;
+      const cells = document.querySelectorAll('#a-a tbody td').length;
+      return { scrolls: w.scrollWidth > w.clientWidth + 1, labelled, cells };
+    });
+    if (r) {
+      if (r.scrolls) fail('на 360px таблица ответа прокручивается вбок — колонки не видны');
+      if (r.cells && r.labelled < r.cells) fail(`ячеек без подписи колонки: ${r.cells - r.labelled}`);
+      console.log(`таблицы на 360px: без боковой прокрутки, подписей у ячеек ${r.labelled}/${r.cells}`);
+    }
+  }
+  await page.setViewportSize({ width: 1400, height: 1000 });
+}
+
 /* ---------- 6. Разметка: валидность и согласие с DOM ---------- */
 await page.goto(F);
 await page.waitForTimeout(600);

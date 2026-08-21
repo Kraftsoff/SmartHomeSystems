@@ -290,8 +290,13 @@
     .page{display:none!important}
     .page.on{display:block!important}
     .shell{max-width:none;padding:0}
-    .card,.case,.cluster,table.cmp{break-inside:avoid;page-break-inside:avoid;
+    .card,.case,.cluster,table.cmp,#a-a table{break-inside:avoid;page-break-inside:avoid;
       border:1px solid #bbb!important}
+    /* развёрнутая часть ответа на печати: рамки ячеек и никакой прокрутки */
+    #a-a th,#a-a td{border:1px solid #bbb!important;padding:6px 8px!important}
+    #a-a .tbl-wrap{overflow:visible!important;border:none!important}
+    #a-a table{min-width:0!important;width:100%!important;font-size:9.5pt!important}
+    #a-a tr{break-inside:avoid;page-break-inside:avoid}
     h1,h2,h3{break-after:avoid;page-break-after:avoid}
     .prov{border:1px solid #666!important;padding:0 4px}
     .sub-hero{padding:0 0 12px}
@@ -418,6 +423,20 @@
   .more table thead th,#a-a table thead th{color:var(--muted);font-weight:600;font-size:.86rem}
   .more table tr:last-child td,.more table tr:last-child th,#a-a table tr:last-child td,#a-a table tr:last-child th{border-bottom:none}
   #a-a ol{margin:6px 0 0;padding-left:22px}#a-a ol li{margin:6px 0}
+  /* Узкий экран: строка таблицы становится блоком с подписями колонок.
+     Прокрутка вбок на телефоне прячет половину содержимого и ничем себя не выдаёт. */
+  @media (max-width:560px){
+    #a-a .tbl-wrap{border:none;overflow:visible}
+    #a-a table{display:block;min-width:0;width:100%}
+    #a-a thead{display:none}
+    #a-a tbody,#a-a tr,#a-a th,#a-a td{display:block;width:auto}
+    #a-a tbody tr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px}
+    #a-a tbody th[scope="row"],#a-a table th:first-child,#a-a table td:first-child{width:auto}
+    #a-a tbody th[scope="row"]{border:none;padding:0 0 6px;font-size:1rem;color:var(--ink)}
+    #a-a tbody td{border:none;padding:8px 0 0}
+    #a-a tbody td[data-label]::before{content:attr(data-label);display:block;
+      font-size:.76rem;letter-spacing:.02em;color:var(--muted);margin:0 0 2px}
+  }
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px}
   /* color/font заданы явно: файл — фрагмент без doctype, standalone открывается в quirks mode,
      где таблицы НЕ наследуют цвет и шрифт от предков (в Artifact-обёртке doctype есть, и дефект
@@ -2618,6 +2637,19 @@
        и без обёртки это голые текстовые узлы — к ним не применяется ограничение
        длины строки, и ответ растягивается во всю ширину */
     document.getElementById('a-a').innerHTML='<p>'+rec.html+'</p>'+(rec.more||'');
+    /* На узком экране таблица из четырёх колонок показывает две, а прокрутку
+       внутри блока читатель не замечает — и не видит как раз то, ради чего
+       таблица нужна. Проставляем каждой ячейке подпись её колонки, чтобы на
+       телефоне строка разворачивалась в блок с подписями. */
+    [].forEach.call(document.querySelectorAll('#a-a table'),function(t){
+      var head=[].map.call(t.querySelectorAll('thead th'),function(th){return th.textContent.trim()});
+      [].forEach.call(t.querySelectorAll('tbody tr'),function(tr){
+        var cells=tr.children, off=cells[0]&&cells[0].tagName==='TH'?1:0;
+        for(var i=off;i<cells.length;i++){
+          if(head[i])cells[i].setAttribute('data-label',head[i]);
+        }
+      });
+    });
     var rel=LEVERS.filter(function(x){return x.cluster===rec.cluster&&x.slug!==rec.slug}).slice(0,4);
     document.getElementById('a-rel-h').textContent=rel.length?('Ещё по теме «'+rec.cluster+'»'):'';
     var box=document.getElementById('a-related');box.innerHTML='';
