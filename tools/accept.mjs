@@ -348,6 +348,42 @@ const ld = await page.evaluate(() => {
   return out;
 });
 if (ld.invalid.length) ld.invalid.forEach((x) => fail('разметка: ' + x));
+/* Заглушка, опубликованная в структурированных данных, хуже отсутствующего поля:
+   на странице её видно как ⚠️, а машина прочтёт её как факт. */
+{
+  const org = await page.evaluate(() => {
+    try { return JSON.parse(document.getElementById('ldOrg').textContent); } catch (e) { return null; }
+  });
+  if (!org) fail('разметка Organization не парсится');
+  else {
+    for (const f of ['name', 'description', 'areaServed', 'knowsAbout']) {
+      if (!org[f]) fail(`в разметке Organization нет поля ${f}`);
+    }
+  }
+  const first = await page.evaluate(() => {
+    const a = document.querySelector('.cluster .card-link');
+    return a && a.getAttribute('href');
+  });
+  if (first) {
+    await page.goto(F + first);
+    await page.waitForTimeout(250);
+    const art = await page.evaluate(() => {
+      const e = document.getElementById('ldAnswer');
+      if (!e) return null;
+      try { return JSON.parse(e.textContent); } catch (x) { return 'bad'; }
+    });
+    if (art === 'bad') fail('разметка Article на странице ответа не парсится');
+    else if (art) {
+      if (art['@type'] !== 'Article') fail(`тип разметки ответа ${art['@type']}, ожидался Article`);
+      if (!art.dateModified) fail('в разметке Article нет dateModified');
+      const dump = JSON.stringify(art) + JSON.stringify(org || {});
+      if (/⚠️|заполнить|уточня/i.test(dump)) fail('в структурированных данных осталась заглушка');
+      console.log('структурированные данные: заглушек нет');
+    }
+    await page.goto(F);
+    await page.waitForTimeout(200);
+  }
+}
 if (ld.faq !== ld.cards) fail(`разметка FAQPage (${ld.faq}) разошлась с карточками в DOM (${ld.cards})`);
 console.log('JSON-LD:', ld.types.join(' '), `| FAQPage ${ld.faq} = карточек ${ld.cards}`);
 
