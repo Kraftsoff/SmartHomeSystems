@@ -379,6 +379,56 @@ await ctx.close();
   console.log('исходный HTML: парные теги сходятся, ячейки таблиц согласованы');
 }
 
+/* ---------- 7c. Клавиатура: фокус виден на каждом шаге ---------- */
+{
+  for (const h of ['#/', '#/answers']) {
+    if (!routes.has(h)) continue;
+    await page.goto(F + h);
+    await page.waitForTimeout(450);
+    const bad = [];
+    for (let i = 0; i < 30; i++) {
+      await page.keyboard.press('Tab');
+      /* Пауза обязательна: без неё вычисленные стили читаются в том же кадре,
+         что и нажатие, и отдают нули. Так однажды нашлись восемь несуществующих
+         нарушений, которые я чуть не «починил». */
+      await page.waitForTimeout(60);
+      const r = await page.evaluate(() => {
+        const e = document.activeElement;
+        if (!e || e === document.body) return null;
+        const st = getComputedStyle(e);
+        const visible = (parseFloat(st.outlineWidth) > 0 && st.outlineStyle !== 'none')
+          || (st.boxShadow && st.boxShadow !== 'none');
+        return visible ? null : `${e.tagName}.${(e.className || '-').toString().slice(0, 24)}`;
+      });
+      if (r) bad.push(r);
+    }
+    [...new Set(bad)].forEach((x) => fail(`нет видимого фокуса при обходе Tab на ${h}: ${x}`));
+  }
+  console.log('клавиатура: фокус виден на каждом шаге обхода');
+}
+
+/* ---------- 7d. Уважение к настройке «уменьшить движение» ---------- */
+{
+  const ctx = await browser.newContext({ reducedMotion: 'reduce' });
+  const q = await ctx.newPage();
+  await q.goto(F);
+  await q.waitForTimeout(700);
+  const rm = await q.evaluate(() => {
+    const el = document.querySelector('.reveal');
+    if (!el) return null;
+    const st = getComputedStyle(el);
+    /* Контент, который проявляется анимацией, при отключённом движении обязан
+       быть виден сразу, а не остаться прозрачным навсегда. */
+    return { dur: st.transitionDuration, opacity: parseFloat(st.opacity) };
+  });
+  if (rm) {
+    if (parseFloat(rm.dur) > 0.05) fail(`при reduced-motion переходы не отключены: ${rm.dur}`);
+    if (rm.opacity < 0.99) fail(`при reduced-motion контент остаётся полупрозрачным: ${rm.opacity}`);
+    console.log(`reduced-motion: переходы ${rm.dur}, контент виден`);
+  }
+  await ctx.close();
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
