@@ -273,6 +273,47 @@
   .cluster{margin:0 0 54px}
   .cluster-h{font-size:clamp(20px,2.4vw,27px);margin:0 0 18px;display:flex;align-items:baseline;gap:10px}
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .consent{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;
+    margin:14px 0 4px;padding:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px}
+  .consent-box{width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent-ink);cursor:pointer}
+  .consent-box:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
+  .consent-text{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
+  .consent-text label{cursor:pointer}
+  .consent-link{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
+  .consent-link:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px;border-radius:3px}
+  #p-privacy h2{font-size:clamp(18px,2vw,23px);margin:34px 0 12px}
+  #p-privacy p,#p-privacy li{color:var(--muted);max-width:74ch}
+  #p-privacy li{margin:4px 0}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px}
+  /* color/font заданы явно: файл — фрагмент без doctype, standalone открывается в quirks mode,
+     где таблицы НЕ наследуют цвет и шрифт от предков (в Artifact-обёртке doctype есть, и дефект
+     не виден — полагаться на это нельзя). */
+  table.cmp{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;
+    color:var(--ink);font-family:var(--sans)}
+  table.cmp td{color:var(--ink)}
+  table.cmp th,table.cmp td{padding:14px 16px;text-align:left;vertical-align:top;
+    border-bottom:1px solid var(--line-soft)}
+  table.cmp thead th{background:var(--panel-2);font-family:var(--sans);font-size:13px;
+    letter-spacing:.02em;color:var(--ink);position:sticky;top:0}
+  table.cmp tbody th{font-weight:600;color:var(--muted);width:26%}
+  table.cmp tr:last-child td,table.cmp tr:last-child th{border-bottom:none}
+  table.cmp tbody tr:hover{background:color-mix(in srgb,var(--accent-ink) 5%,transparent)}
+  .qsearch{position:relative;margin:0 0 22px;max-width:520px}
+  .qsearch input{width:100%;font-family:var(--sans);font-size:15px;padding:13px 40px 13px 16px;
+    border-radius:12px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink)}
+  .qsearch input::placeholder{color:var(--faint)}
+  .qsearch input:focus{outline:2px solid var(--accent-ink);outline-offset:1px}
+  .qsearch .qclear{position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;
+    width:34px;height:34px;border-radius:8px;display:none}
+  .qsearch.has-q .qclear{display:block}
+  .qcount{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 26px}
+  .qempty{display:none;padding:22px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+  .qempty.on{display:block}
+  .cluster[hidden],.card[hidden]{display:none!important}
+  mark{background:color-mix(in srgb,var(--accent-ink) 22%,transparent);color:inherit;
+    padding:0 2px;border-radius:3px}
   .cluster-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
   .cluster-nav a{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 15px;
     border-radius:999px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);
@@ -461,6 +502,7 @@
     <a href="#/functions/curtains">Шторы</a><a href="#/functions/lighting">Свет</a>
     <a href="#/functions/multimedia">Мультимедиа</a>
     <a href="#/functions/security">Безопасность</a>
+    <a href="#/compare">Сравнения</a>
     <a href="#/pricing">Цены</a>
     <a href="#/equipment">Оборудование</a>
     <a href="#/cases">Кейсы</a>
@@ -814,6 +856,14 @@
     <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание») <span class="prov">⚠️</span>. Ниже — все 60 статей-рычагов ядра ТЗ по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы. Черновой проход завершён; часть цифр (пороги цен, условия партнёрского вознаграждения, гарантия) помечена <span class="prov">⚠️</span> и ждёт подтверждения фактами от клиента.</div>
   </div></div>
   <div class="shell">
+    <div class="qsearch" id="qsearch">
+      <label for="qinput" class="sr-only">Поиск по вопросам</label>
+      <input type="search" id="qinput" autocomplete="off" placeholder="Поиск по вопросам — например «протечка» или «KNX»">
+      <button type="button" class="qclear" id="qclear" aria-label="Очистить поиск">×</button>
+    </div>
+    <p class="qcount" id="qcount" role="status" aria-live="polite"></p>
+    <div class="qempty" id="qempty">Ничего не нашлось. Попробуйте другое слово — или
+      <a href="#" id="qreset">покажите все 60 ответов</a>.</div>
     <nav class="cluster-nav" aria-label="Разделы базы ответов"><a href="#c-trust">Доверие и выбор</a><a href="#c-price">Цена и экономика</a><a href="#c-segments">Сегменты</a><a href="#c-compare">Сравнения</a><a href="#c-subsystems">Подсистемы</a><a href="#c-tech">Технологии</a><a href="#c-process">Процесс</a><a href="#c-objections">Возражения</a><a href="#c-partners-b2b">Партнёрам</a><a href="#c-operation">Эксплуатация</a></nav>
     <section class="cluster" id="c-trust" aria-labelledby="h-trust">
       <h2 id="h-trust" class="cluster-h">Доверие и выбор <span class="cluster-n">5</span></h2>
@@ -987,6 +1037,115 @@
   </div></section>
 </section>
 
+<!-- ===================== PRIVACY (152-ФЗ) =====================
+     Форма собирает персональные данные. По 152-ФЗ для этого нужны явное согласие и
+     опубликованная политика — не было ни того, ни другого. Это ЧЕРНОВИК: до публикации
+     обязательна проверка юристом клиента, все реквизиты помечены как незаполненные. -->
+<section class="page" id="p-privacy">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Политика обработки персональных данных</p>
+    <p class="eyebrow">Правовое</p>
+    <h1>Политика обработки персональных данных</h1>
+    <div class="answer"><b>Черновик, требующий проверки юристом.</b> Текст подготовлен как основа:
+      реквизиты компании не заполнены, ссылки на нормы и сроки хранения нужно подтвердить.
+      До проверки и заполнения форму заявки публиковать нельзя.</div>
+  </div></div>
+  <section><div class="shell">
+    <p>Редакция от <span class="prov">⚠️ заполнить: дата утверждения</span>. Документ описывает, какие данные о вас собирает сайт MiMiSmart, зачем и что вы можете с ними сделать.</p>
+
+    <h2>Кто обрабатывает ваши данные</h2>
+    <p>Оператор персональных данных — <span class="prov">⚠️ заполнить: наименование юрлица</span>, ИНН <span class="prov">⚠️ заполнить: ИНН</span>, ОГРН <span class="prov">⚠️ заполнить: ОГРН</span>, юридический адрес: <span class="prov">⚠️ заполнить: юр. адрес</span>. Компания работает под брендом MiMiSmart с 2004 года. Шоурум: Москва, Новоданиловская наб., 6к1, будни 09:00–18:00. За обработку отвечает <span class="prov">⚠️ заполнить: ФИО ответственного</span>.</p>
+
+    <h2>Какие данные мы собираем</h2>
+    <p>Только то, что вы сами вводите в форму заявки:</p>
+    <ul>
+      <li>имя и телефон;</li>
+      <li>предпочтительный способ связи;</li>
+      <li>данные об объекте: тип, площадь, локация, стадия работ, наличие дизайн-проекта;</li>
+      <li>какие системы вас интересуют;</li>
+      <li>срок начала работ и кто принимает решение;</li>
+      <li>готовность прислать планировку.</li>
+    </ul>
+    <p>Плюс технические данные, которые браузер передаёт сам: IP-адрес, тип устройства и браузера, cookie, метка источника перехода. Паспортные данные, адрес объекта, биометрию и специальные категории данных сайт не собирает. Файлы через сайт не загружаются — если вы согласились прислать планировку, мы запросим её отдельно.</p>
+
+    <h2>Зачем</h2>
+    <p>Две задачи: ответить на обращение и посчитать предварительную смету. Данные об объекте нужны именно для расчёта — по площади, стадии и составу систем инженер оценивает объём работ, без них цифра бессмысленна. Мы не используем эти данные для рассылок, не продаём их и не передаём в рекламные сети.</p>
+
+    <h2>На каком основании</h2>
+    <p>Основание — ваше согласие (п. 1 ч. 1 ст. 6 Федерального закона № 152-ФЗ). Вы даёте его отметкой в чекбоксе под формой. Без отметки форма не отправляется, и данных мы не получаем.</p>
+
+    <h2>Кому передаём</h2>
+    <p>Заявки попадают в CRM — внешний сервис, обрабатывающий данные по нашему поручению. Система пока не выбрана: <span class="prov">⚠️ заполнить: CRM и её оператор</span>. Сайт размещён на хостинге <span class="prov">⚠️ заполнить: хостинг и страна серверов</span>. Базы с персональными данными граждан РФ должны находиться в России (ч. 5 ст. 18 152-ФЗ) — проверить и по CRM, и по хостингу. Госорганам данные передаются только по официальному запросу.</p>
+
+    <h2>Сколько храним и как отозвать согласие</h2>
+    <p>Срок хранения — <span class="prov">⚠️ заполнить: срок хранения заявок</span> с момента получения. Затем данные удаляются или обезличиваются. Согласие можно отозвать в любой момент: напишите на <span class="prov">⚠️ заполнить: email для обращений</span>, укажите имя и телефон из заявки. Обработку прекратим в течение 30 дней (ч. 5 ст. 21 152-ФЗ), кроме случаев, когда хранить обязывает закон.</p>
+
+    <h2>Ваши права</h2>
+    <ul>
+      <li>узнать, обрабатываем ли мы ваши данные, и получить их состав и источник (ст. 14);</li>
+      <li>потребовать уточнить неточные или неполные данные;</li>
+      <li>потребовать заблокировать или удалить данные;</li>
+      <li>отозвать согласие без объяснения причин;</li>
+      <li>обжаловать наши действия в Роскомнадзоре или суде.</li>
+    </ul>
+
+    <h2>Куки и аналитика</h2>
+    <p>Технические cookie нужны, чтобы сайт помнил ваши настройки — например выбранную тему. Аналитику планируем подключить, на момент этой редакции её нет: Яндекс.Метрика и GA4 <span class="prov">⚠️ заполнить: подтвердить подключение счётчиков</span>. Аналитические cookie отключаются в настройках браузера, на работу форм это не влияет.</p>
+
+    <h2>Связь по вопросам персональных данных</h2>
+    <p>Пишите на <span class="prov">⚠️ заполнить: email для обращений</span> или на почтовый адрес <span class="prov">⚠️ заполнить: юр. адрес</span>. Запрос нужен письменный — чтобы мы могли зафиксировать его и ответить в срок.</p>
+
+    <div class="conclusion" style="margin-top:30px"><b>До запуска, помимо заполнения полей выше:</b>
+      подать уведомление об обработке ПД в Роскомнадзор (ст. 22 152-ФЗ) и заключить с оператором
+      CRM договор поручения на обработку (ч. 3 ст. 6). Сбор персональных данных без действующего
+      согласия и опубликованной политики влечёт ответственность по ст. 13.11 КоАП РФ.</div>
+  </div></section>
+</section>
+
+<!-- ===================== COMPARISON =====================
+     ИА называет сравнения «топ-форматом для ИИ»: человек спрашивает «чем X отличается от Y»,
+     и движку нужна страница, которая отвечает ровно на это таблицей, которую можно процитировать. -->
+<section class="page" id="p-compare">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / <a href="#/compare">Сравнения</a> / <span id="c-crumb"></span></p>
+    <p class="eyebrow" id="c-eyebrow"></p>
+    <h1 id="c-title"></h1>
+    <div class="answer" id="c-answer"></div>
+  </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Построчное сравнение</h2>
+    <div class="tbl-wrap"><table class="cmp" id="c-table"></table></div>
+  </div></section>
+  <section><div class="shell">
+    <h2 class="cluster-h">Когда что выбирать</h2>
+    <div class="grid g2">
+      <div class="card"><span class="kicker" id="c-when-a-k"></span><h3 id="c-when-a-h"></h3><p id="c-when-a"></p></div>
+      <div class="card"><span class="kicker" id="c-when-b-k"></span><h3 id="c-when-b-h"></h3><p id="c-when-b"></p></div>
+    </div>
+  </div></section>
+  <section><div class="shell">
+    <h2 class="cluster-h">Что ломается без согласования</h2>
+    <div class="grid g2" id="c-risks"></div>
+    <div class="cta-row" style="margin-top:26px">
+      <button type="button" class="btn btn-primary" data-form>Обсудить наш объект</button>
+    </div>
+  </div></section>
+</section>
+
+<!-- ===================== COMPARISON INDEX ===================== -->
+<section class="page" id="p-compare-idx">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Сравнения</p>
+    <p class="eyebrow">Сравнения</p><h1>С чем сравнивают инженерный умный дом</h1>
+    <div class="answer">Три честных разбора: где выигрывает альтернатива, где — наш подход,
+      и что ломается на объекте, если выбирать без инженерного согласования.</div>
+  </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Разборы</h2>
+    <div class="grid g3" id="cmpIdx"></div>
+  </div></section>
+</section>
+
 <!-- ===================== ONE ANSWER (per-lever page) =====================
      Каждый рычаг — свой URL, свой H1-вопрос, свой title/description и своя разметка.
      Ради этого весь проект и затевался: ИИ-поиску нужна страница под конкретный вопрос,
@@ -1078,7 +1237,7 @@
     <div><h4>MiMiSmart</h4><p style="max-width:38ch;margin:0">Единый инженерный подрядчик для дорогих квартир и домов. Проектируем и реализуем инженерные системы в единой логике управления объектом.</p></div>
     <div><h4>Направления</h4><a href="#/functions/automation">Умный дом</a><a href="#/functions/climate">Климат и вентиляция</a><a href="#/functions/electric">Электрика и сети</a><a href="#/functions/curtains">Шторы</a>
     <a href="#/functions/lighting">Свет</a><a href="#/functions/multimedia">Мультимедиа</a><a href="#/functions/security">Безопасность</a></div>
-    <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/cases">Кейсы</a><a href="#/news">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a></div>
+    <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/cases">Кейсы</a><a href="#/news">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a><a href="#/privacy">Политика ПД</a></div>
     <div><h4>Шоурум</h4><p style="margin:0">Москва, Новоданиловская наб., 6к1<br>09:00–18:00</p></div>
   </div>
   © 2026 MiMiSmart
@@ -1121,9 +1280,16 @@
       <label class="fl"><span>Кто принимает решение</span><select><option>Я</option><option>Совместно с семьёй</option><option>Заказчик (я представитель)</option></select></label>
     </div>
     <label class="fl"><span>Планировка или проект</span><select><option>Могу прислать</option><option>Пока нет</option></select></label>
-    <button type="button" class="btn btn-primary" style="width:100%;margin-top:6px">Отправить</button>
+    <div class="consent">
+      <input class="consent-box" type="checkbox" id="lead-consent" name="consent" required>
+      <p class="consent-text">
+        <label for="lead-consent">Даю согласие на обработку персональных данных, чтобы MiMiSmart ответил на обращение и сделал расчёт по объекту.</label>
+        <a class="consent-link" href="#/privacy">Политика обработки персональных данных</a>
+      </p>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:6px">Отправить</button>
     <p class="done" style="display:none;color:var(--good);font-size:14px;margin:12px 0 0">Заявка принята (прототип — отправка в CRM будет подключена на этапе 1).</p>
-    <p class="note">Нажимая «Отправить», вы соглашаетесь с политикой обработки персональных данных.</p>
+    <p class="note">Заявка уходит только после явного согласия — галочка выше обязательна.</p>
   </form>
 </div>
 
@@ -1168,6 +1334,26 @@
     ['Для смежного подрядчика','Передайте клиента на комплекс — сохраним ваши зоны ответственности и заплатим вознаграждение.']
   ];
   var SUB={
+    'solutions/flat':{crumb:'/ Квартира',eyebrow:'Зоны · стадия ремонта · соседи',title:'Умный дом в квартире ставят до штукатурки',
+      answer:'Собираем в квартире от 80 м² один проводной контур: свет, климат, шторы, защита от протечек, слаботочка. Заходим на стадии черновой отделки, когда штробы открыты и трассы кладутся вместе с электрикой. Бюджет такого проекта стартует от 2–3 млн ₽ <span class="prov">⚠️ порог уточняется</span>.',
+      items:['<b>Сценарное освещение</b> — группы, диммирование, панели вместо рядов выключателей','<b>Климат по комнатам</b> — кондиционирование, тёплые полы и приток на одной логике','<b>Защита от протечек</b> — датчики в мокрых зонах, электроприводные краны на вводе','<b>Электрокарнизы</b> — ниши, закладные и питание привода считаются до монтажа потолков','<b>Wi-Fi и слаботочка</b> — точки доступа по комнатам, витая пара до каждой рабочей точки','<b>Работа с дизайнером</b> — привязка групп света, панелей и датчиков к утверждённым планам'],
+      risks:['Штробы закрыты, кабель не заложен — трассы идут в коробах по стене','Краны на вводе не поставили: воду при протечке перекрывают вручную, соседи снизу уже вызвали мастера','Ниша под электрокарниз не предусмотрена — короб привода висит под потолком на виду','Кондиционер живёт на своём пульте, свет на своём — на стене три пульта и выключатель']},
+    'solutions/house':{crumb:'/ Дом',eyebrow:'Периметр · котельная · ДГУ · участок',title:'В доме от 300 м² инженерия выходит за стены',
+      answer:'Ведём дом от 300 м² как один объект: климат и свет внутри, ворота, охрана периметра, ландшафтный свет и полив снаружи, котельная и ДГУ в технических помещениях. Оболочка здания тоже становится системой — молниезащита и заземление закладываются вместе с кровлей и фундаментом.',
+      items:['<b>Охрана периметра</b> — камеры, извещатели на калитке и заборе, тревога на панель и в приложение','<b>Ворота и гараж</b> — приводы, считыватели, автозакрытие после выезда','<b>Котельная</b> — котёл, бойлер, коллекторы и насосы под контролем с журналом аварий','<b>ДГУ и АВР</b> — автозапуск, приоритетные группы нагрузок, контроль топлива','<b>Молниезащита</b> — контур по кровле, токоотводы, УЗИП в силовых щитах','<b>Участок</b> — ландшафтный свет по зонам, полив с отключением по осадкам'],
+      risks:['Генератор запускается и берёт весь дом сразу — на пуске скважинного насоса вылетает автомат','Кабель до ворот и калитки не проложили до благоустройства — вскрывают уложенную брусчатку','Авария котла обнаруживается по холодным радиаторам утром, а система об этом не сообщила','Молниезащиту вспомнили после кровли — токоотводы крепят поверх готового фасада']},
+    'solutions/office':{crumb:'/ Офис',eyebrow:'Занятость · переговорные · СКУД · пожарка',title:'В офисе автоматика работает по занятости помещений',
+      answer:'Автоматизируем коммерческие площади по факту занятости: датчики присутствия гасят свет и снимают климат в пустых кабинетах, переговорная готовится к брони из календаря. Контур связан со СКУД и пожарной сигнализацией, как того требуют нормы: по сигналу тревоги замки размыкаются, вентиляция останавливается.',
+      items:['<b>Датчики присутствия</b> — свет и климат по людям в кабинетах, коридорах и санузлах','<b>Переговорные</b> — бронь из календаря, дисплей у двери, климат и техника к началу встречи','<b>Связь со СКУД</b> — проход по карте поднимает рабочую зону, последний уходящий её снимает','<b>Пожарная автоматика</b> — остановка приточных установок и разблокировка путей эвакуации по сигналу','<b>Учёт энергии</b> — счётчики по этажам и арендаторам, выгрузка расхода по помещениям','<b>Дежурные режимы</b> — ночь, выходные и уборка по расписанию с ручным продлением'],
+      risks:['Пустой этаж всю ночь освещён и охлаждается — расход арендаторам объяснить нечем','Переговорная занята в календаре и пуста в реальности: сплит и приток работают вхолостую','СКУД поставил один подрядчик, автоматику другой — карта открывает дверь, свет включают со щита','Приёмку не подписывают: инспектор требует размыкания замков и остановки вентиляции по сигналу пожара']},
+    'solutions/developers':{crumb:'/ Застройщикам',eyebrow:'Стадия проекта · магистраль · спецификация',title:'Магистраль в ЖК кладут один раз — до штукатурки',
+      answer:'Входим в проект жилого комплекса на стадии П: считаем слаботочную магистраль, стояки, кроссовые и квартирные закладные, передаём генподрядчику спецификацию и монтажные схемы. Кабель уходит в конструктив вместе с остальными сетями, до штукатурки и стяжки. Ретрофит после отделки стоит дороже на каждой квартире.',
+      items:['<b>Разделы П и Р</b> — слаботочка и автоматика в общем комплекте проектной документации','<b>Магистраль</b> — стояки, этажные кроссовые, трассы до квартирных щитов','<b>Квартирные закладные</b> — гильзы, ниша под щит и панель, кабель до мокрых зон','<b>Спецификация генподрядчику</b> — кабель, лотки, узлы крепления, оборудование, шеф-надзор','<b>Базовый и расширенный пакет</b> — общий минимум в каждой квартире, апгрейд по заявке покупателя','<b>Диспетчеризация МОП</b> — свет лестниц, ИТП, насосные и ворота паркинга на одной панели'],
+      risks:['Слаботочку добавляют после сдачи — магистраль идёт в коробах по потолкам общих коридоров','Собственники заводят автоматику сами: в одном доме десять систем от десяти монтажников','Место под квартирный щит не предусмотрели — щит выносят в гардероб и съедают полезную площадь','Стяжка залита, трассы до мокрых зон не заложены — узел перекрытия воды ставить некуда']},
+    'solutions/premium':{crumb:'/ Премиум',eyebrow:'Десятки зон · DALI · бассейн · кинозал',title:'Объект от 40 млн ₽ измеряется числом независимых зон',
+      answer:'Ведём объекты от 40 млн ₽, где десятки зон живут по собственной логике: спальни, гостевой блок, бассейн и сауна, кинозал, несколько гаражей. Свет управляется на уровне отдельного светильника по DALI, климат считается по каждому помещению. Сложность здесь задаёт количество связей между системами.',
+      items:['<b>DALI</b> — адресация каждого светильника, новые сцены собираются без перекладки кабеля','<b>Зонирование климата</b> — своя уставка и свой график на спальню, гостевой блок, винную комнату','<b>Бассейн и сауна</b> — влажность, водоподготовка и вентиляция чаши в общем контуре','<b>Кинозал</b> — акустика, проекция, свет и шторы одним запуском, вынесенная стойка оборудования','<b>Гаражи</b> — приводы ворот, вентиляция, подогрев рампы, доступ по метке','<b>Серверная и резерв</b> — стойка, кроссовая, ИБП и ДГУ, охлаждение шкафов'],
+      risks:['Сцена в гостиной гасит свет в гостевой спальне — зоны не разделили при программировании','Кинозал собирал отдельный интегратор: фильм стартует, свет в зале продолжает гореть','В бассейне течёт конденсат по окнам — вентиляция чаши не завязана на датчик влажности','Светильники заведены группами по восемь штук: под новый световой сценарий тянут кабель заново']},
     'functions/automation':{crumb:'/ Умный дом',eyebrow:'Умный дом и автоматизация',title:'Автоматизация в единой логике объекта',
       answer:'Свет, климат, шторы, протечки и безопасность управляются одной системой на собственных контроллерах MiMiSmart. Проводная архитектура, работает локально — без интернета и облака. Сценарии, приложение, выключатели и датчики проектируются до начала электрики.',
       items:['<b>Свет</b> — DALI, диммирование, сцены','<b>Климат</b> — единый контур с вентиляцией и отоплением','<b>Шторы</b> — карнизы в сценариях','<b>Протечки</b> — автоматическое перекрытие воды','<b>Сценарии</b> — «Утро», «Ушёл», «Кино», «Авария»','<b>Приложение</b> — весь объект в смартфоне','<b>Выключатели</b> — привычные, сценарные','<b>Датчики</b> — присутствие, климат, открытие','<b>Интеграции</b> — оборудование любых брендов'],
@@ -1318,12 +1504,188 @@
     if(rec)a.setAttribute('href','#/a/'+rec.slug); else a.removeAttribute('data-lever');
   });
 
+  /* ---------- поиск по 60 ответам ----------
+     60 вопросов одним списком нечитаемы даже с навигацией по кластерам. Фильтр работает
+     по вопросу и по тексту ответа: человек ищет «протечка», а слово стоит в ответе. */
+  (function(){
+    var inp=document.getElementById('qinput');
+    if(!inp)return;
+    var wrap=document.getElementById('qsearch'),clear=document.getElementById('qclear'),
+        cnt=document.getElementById('qcount'),empty=document.getElementById('qempty'),
+        reset=document.getElementById('qreset'),
+        nav=document.querySelector('.cluster-nav'),
+        clusters=[].slice.call(document.querySelectorAll('#p-news .cluster')),
+        TOTAL=document.querySelectorAll('#p-news .card').length;
+
+    function norm(t){return t.toLowerCase().replace(/ё/g,'е')}
+    /* Лёгкий стеммер: без него «протечка» не находит «протечки» — русская морфология
+       ломает подстроку. Режем частые окончания, пока в основе остаётся >=4 знаков.
+       Это не полноценный Porter, а достаточный минимум для поиска по 60 вопросам. */
+    var ENDINGS=['ами','ями','ого','его','ому','ему','ыми','ими','ая','яя','ое','ее','ые','ие',
+                 'ую','юю','ах','ях','ов','ев','ий','ый','ой','ем','ом','ам','ям','ся','ть',
+                 'а','я','о','е','у','ю','ы','и','ь','й'];
+    function stem(w){
+      for(var i=0;i<ENDINGS.length;i++){
+        var e=ENDINGS[i];
+        if(w.length-e.length>=4&&w.slice(-e.length)===e)return w.slice(0,-e.length);
+      }
+      return w;
+    }
+    function stems(t){
+      var ws=norm(t).split(/[^a-zа-я0-9]+/),o=[],i;
+      for(i=0;i<ws.length;i++){if(ws[i])o.push(stem(ws[i]))}
+      return o;
+    }
+    /* совпадение: основа запроса — префикс основы любого слова текста */
+    function hits(qs,pool){
+      for(var i=0;i<qs.length;i++){
+        var found=false;
+        for(var j=0;j<pool.length;j++){if(pool[j].indexOf(qs[i])===0){found=true;break}}
+        if(!found)return false;               /* все слова запроса должны найтись */
+      }
+      return true;
+    }
+    /* запоминаем исходную разметку, чтобы подсветка не накапливалась */
+    clusters.forEach(function(cl){
+      cl.querySelectorAll('.card').forEach(function(c){
+        var h=c.querySelector('h3'),p=c.querySelector('p');
+        c._q=norm(h.textContent); c._a=p?norm(p.textContent):'';
+        c._st=stems(h.textContent+' '+(p?p.textContent:''));
+        c._qh=h.innerHTML; if(p)c._ah=p.innerHTML;
+      });
+    });
+    function unmark(c){
+      var h=c.querySelector('h3'),p=c.querySelector('p');
+      if(h)h.innerHTML=c._qh; if(p&&c._ah!==undefined)p.innerHTML=c._ah;
+    }
+    function mark(el,orig,q){
+      var i=norm(orig.replace(/<[^>]+>/g,'')).indexOf(q);
+      if(i<0||!q){el.innerHTML=orig;return}
+      var plain=orig.replace(/<[^>]+>/g,'');
+      el.textContent=plain;                       /* textContent — защита от инъекции */
+      var t=el.textContent, before=t.slice(0,i), hit=t.slice(i,i+q.length), after=t.slice(i+q.length);
+      el.innerHTML='';
+      el.appendChild(document.createTextNode(before));
+      var m=document.createElement('mark'); m.textContent=hit; el.appendChild(m);
+      el.appendChild(document.createTextNode(after));
+    }
+    function apply(){
+      var q=norm(inp.value.trim()), qstems=q?stems(q):[], shown=0;
+      wrap.classList.toggle('has-q',!!q);
+      clusters.forEach(function(cl){
+        var vis=0;
+        cl.querySelectorAll('.card').forEach(function(c){
+          unmark(c);
+          var hit=!q||c._q.indexOf(q)>-1||c._a.indexOf(q)>-1||hits(qstems,c._st);
+          c.hidden=!hit;
+          if(hit){vis++;shown++;
+            if(q){mark(c.querySelector('h3'),c._qh,q);
+                  if(c.querySelector('p'))mark(c.querySelector('p'),c._ah,q);}}
+        });
+        cl.hidden=vis===0;
+        var n=cl.querySelector('.cluster-n'); if(n)n.textContent=vis;
+      });
+      if(nav)nav.hidden=!!q;                      /* при поиске навигация по якорям бессмысленна */
+      empty.classList.toggle('on',shown===0);
+      cnt.textContent=q?(shown+' из '+TOTAL+' по запросу «'+inp.value.trim()+'»'):'';
+      if(!q)clusters.forEach(function(cl){
+        var n=cl.querySelector('.cluster-n');
+        if(n)n.textContent=cl.querySelectorAll('.card').length;
+      });
+    }
+    var t=null;
+    inp.addEventListener('input',function(){clearTimeout(t);t=setTimeout(apply,120)});
+    inp.addEventListener('keydown',function(e){if(e.key==='Escape'){inp.value='';apply();}});
+    clear.addEventListener('click',function(){inp.value='';apply();inp.focus()});
+    reset.addEventListener('click',function(e){e.preventDefault();inp.value='';apply();inp.focus()});
+  })();
+
+  var CMP={
+    'compare/knx':{crumb:'/ vs KNX',eyebrow:'KNX · ETS · Свой контроллер',title:'KNX даёт стандарт, свой контроллер — короткую цепочку',
+      answer:'KNX — открытый международный стандарт шины: устройства разных производителей программируются в ETS сертифицированным инженером. Наш контроллер — собственная разработка и собственное производство с 2004 года, с той же проводной децентрализованной логикой на объекте. Обе системы работают без интернета; расходятся они в цепочке поставки, в цене оборудования и в том, кто отвечает за результат целиком.',
+      rows:[['Критерий','KNX','Свой контроллер'],
+        ['Архитектура управления','Децентрализованная шина, логика в устройствах','Децентрализованная проводка, логика на объекте'],
+        ['Интернет и облако','Шина работает автономно, облако для удалённого доступа','Локальное управление, удалённый доступ по выбору'],
+        ['Кто монтирует','Сертифицированный интегратор с доступом к ETS','Инженеры производителя и обученные партнёры'],
+        ['Замена и расширение','Устройство любого производителя с логотипом KNX','Модули производителя и открытые протоколы'],
+        ['Уход вендора','Стандарт остаётся, устройство меняют на аналог','Схемы, прошивки и ремонт у производителя'],
+        ['Где оправдано','Задание требует открытого международного стандарта','Нужен один подрядчик за всю систему']],
+      whenA:'KNX — правильный выбор, когда объект ведёт иностранное бюро и в задании прописан открытый стандарт, или когда часть оборудования уже сидит на шине и её нужно расширять. Такой объект передают любому сертифицированному интегратору без переделки силовой части.',
+      whenB:'Свой контроллер выигрывает там, где заказчику нужен один ответственный за проект, монтаж, прошивки и ремонт. Платы, стек и сервис приходят из одних рук, а сроки поставки не зависят от импортных каналов.',
+      risks:['Кабель проложен под обычные проходные выключатели, и шинных линий до нужных точек попросту нет','Щит собран впритык по первой спецификации — места под дополнительные актуаторы не осталось','Файл проекта ETS остался у уехавшего интегратора, и новую группу без него не добавить','Приводы штор и фанкойлы куплены до согласования, часть заводится на шину только через дополнительные интерфейсы']},
+    'compare/ecosystems':{crumb:'/ vs экосистемы',eyebrow:'Яндекс · Apple · SberDevices · Инженерия',title:'Экосистема управляет устройствами, инженерная система — зданием',
+      answer:'Экосистемы Яндекса, Apple и SberDevices — облачные сервисы поверх каталога совместимых устройств; инженерный умный дом — проводная система, спроектированная под щиты и планировку конкретного объекта. Голос и сценарии экосистемы живут на серверах вендора. Инженерная логика считается на объекте и не ждёт ответа сервера.',
+      rows:[['Критерий','Экосистема','Инженерная система'],
+        ['Архитектура управления','Готовые устройства и мобильное приложение','Проводные линии и контроллеры в щите'],
+        ['Интернет и облако','Голос и сценарии через сервер вендора','Сценарии считаются внутри дома'],
+        ['Кто монтирует','Владелец или электрик по инструкции','Проектировщик, монтажная бригада, пусконаладчик'],
+        ['Замена и расширение','Покупка из списка совместимых моделей','Модуль по спецификации плюс правка логики'],
+        ['Если вендор уходит','Голосовые сценарии останавливаются, остаются кнопки','Система продолжает работать на объекте'],
+        ['Где оправдано','Съём, готовый ремонт, одна комната','Квартиры от 80 м², дома от 300 м²']],
+      whenA:'Экосистема — верное решение для съёмной квартиры или законченного ремонта: колонка, умные лампы и пара розеток ставятся за вечер, стены остаются целыми. При переезде всё уезжает вместе с вами.',
+      whenB:'Инженерная система оправдана, когда объект ещё строится и в нём сходятся климат, шторы, вода, охрана и свет под одной логикой. Проекты обычно стартуют от 2–3 млн ₽ <span class="prov">⚠️ порог уточняется</span>.',
+      risks:['В подрозетниках нет нуля, и половина умных выключателей из каталога туда не встаёт','Одна точка Wi-Fi на этаж не тянет десятки устройств — сцены срабатывают через раз','Климат живёт в одном приложении, шторы в другом, общий сценарий не собирается','Аккаунт оформлен на телефон дизайнера, и доступ к дому передают вручную после сдачи']},
+    'compare/diy':{crumb:'/ vs DIY',eyebrow:'AliExpress · Хабы · Инженерный проект',title:'DIY держится на том, кто его собрал',
+      answer:'DIY-сборка — независимые устройства, у каждого своё приложение и свой облачный сервис; инженерный проект — одна система с общей логикой, схемами щитов и гарантией на результат. Собранный набор живёт, пока жив каждый его сервис. Проект переживает смену телефона, электрика и владельца квартиры.',
+      rows:[['Критерий','DIY-сборка','Инженерный проект'],
+        ['Архитектура управления','Каждое устройство со своим приложением','Единый контроллер и общий сценарный слой'],
+        ['Интернет и облако','Устройства ходят в разные облака','Работа внутри дома без внешнего канала'],
+        ['Кто собирает','Владелец по видеоинструкциям','Инженер, бригада, сдача по акту'],
+        ['Замена и расширение','Каждое новое устройство — отдельная интеграция','Расширение заложено в проекте и щите'],
+        ['Если производитель пропал','Приложение перестаёт находить устройство','Производитель чинит и обновляет прошивку'],
+        ['Где оправдано','Одна комната, съём, эксперимент','Объекты от 40 млн ₽ с ремонтом']],
+      whenA:'DIY имеет смысл в одной комнате и в арендованном жилье: реле за пару тысяч, датчик движения, сцена в приложении. Вы тратите выходные вместо бюджета и в любой момент откатываете всё назад.',
+      whenB:'Инженерный проект нужен там, где систему принимают по акту и обслуживают годами: щиты по схеме, кабельный журнал, паспорт объекта. Через два года после сдачи по вызову приезжает та же компания.',
+      risks:['Реле не помещается в подрозетник, а коробки уже зашиты плиткой','Прошивка обновилась ночью, и утренний запуск отопления не сработал','Хаб привязан к почте прежнего владельца, сброс стирает всю настройку','Новая партия датчиков пришла на другом протоколе и к старому хабу не цепляется']}
+  };
+
+  /* сравнения: рендер таблицы и индекса */
+  function renderCompare(rec){
+    document.getElementById('c-crumb').textContent=rec.crumb.replace(/^\/\s*/,'');
+    document.getElementById('c-eyebrow').textContent=rec.eyebrow;
+    document.getElementById('c-title').textContent=rec.title;
+    document.getElementById('c-answer').innerHTML=rec.answer;
+    var t=document.getElementById('c-table'),head=rec.rows[0];
+    var html='<thead><tr>';
+    head.forEach(function(h){html+='<th scope="col">'+h+'</th>'});
+    html+='</tr></thead><tbody>';
+    rec.rows.slice(1).forEach(function(r){
+      html+='<tr><th scope="row">'+r[0]+'</th><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';
+    });
+    t.innerHTML=html+'</tbody>';
+    document.getElementById('c-when-a-k').textContent=head[1];
+    document.getElementById('c-when-a-h').textContent='Когда лучше '+head[1].toLowerCase();
+    document.getElementById('c-when-a').innerHTML=rec.whenA;
+    document.getElementById('c-when-b-k').textContent=head[2];
+    document.getElementById('c-when-b-h').textContent='Когда лучше '+head[2].toLowerCase();
+    document.getElementById('c-when-b').innerHTML=rec.whenB;
+    var rk=document.getElementById('c-risks');rk.innerHTML='';
+    rec.risks.forEach(function(x){rk.appendChild(el('<div class="risk"><span class="x">✕</span><p>'+x+'</p></div>'))});
+    setMeta(rec.title+' — MiMiSmart',rec.answer.replace(/<[^>]+>/g,'').slice(0,155),'#/'+rec._k);
+  }
+  (function(){
+    var box=document.getElementById('cmpIdx');if(!box)return;
+    Object.keys(CMP).forEach(function(k){
+      CMP[k]._k=k;
+      box.appendChild(el('<a class="card card-link reveal" href="#/'+k+'">'+
+        '<span class="kicker">'+CMP[k].eyebrow+'</span>'+
+        '<h3 style="margin-top:8px">'+CMP[k].title+'</h3>'+
+        '<div class="go">Открыть сравнение →</div></a>'));
+    });
+  })();
+
   /* ---------- router ---------- */
-  var pages={'':'p-home','pricing':'p-pricing','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
+  var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
     var h=location.hash.replace(/^#\//,'');
     var sub=SUB[h];
     document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+    if(CMP[h]){
+      CMP[h]._k=h; renderCompare(CMP[h]);
+      document.getElementById('p-compare').classList.add('on');
+      document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/compare')});
+      window.scrollTo(0,0); observeAll(); return;
+    }
     if(h.indexOf('a/')===0){
       var rec=BY_SLUG[h.slice(2)];
       if(rec){
