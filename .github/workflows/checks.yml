@@ -1,0 +1,55 @@
+name: Проверки прототипа
+
+on:
+  pull_request:
+    paths:
+      - 'tz-site/prototype/**'
+      - 'tools/**'
+      - '**/*.md'
+      - '.github/workflows/checks.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  language:
+    name: Стандарт языка
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Зависимостей нет: проверка языка работает на голом Node.
+      - name: Сайт и все документы проекта
+        run: |
+          status=0
+          shopt -s nullglob
+          files=(tz-site/prototype/mimismart-v5.html tz-site/*.md audit/*.md \
+                 site-foundation/*.md strategy/*.md strategy/levers/*.md CLAUDE.md)
+          for f in "${files[@]}"; do
+            if ! node tools/lint-text.mjs "$f" > /tmp/out.txt 2>&1; then
+              echo "::error file=$f::нарушения стандарта языка"
+              cat /tmp/out.txt
+              status=1
+            fi
+          done
+          exit $status
+
+  acceptance:
+    name: Приёмка прототипа
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Установка playwright и Chromium
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save playwright@latest
+          npx playwright install --with-deps chromium
+      # Маршруты, мета, контраст, доступность, разметка, отзывчивость,
+      # перелинковка и поведение — один прогон, ненулевой код при нарушении.
+      - name: Прогон
+        run: node tools/accept.mjs

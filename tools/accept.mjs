@@ -33,12 +33,15 @@ const chromium = await loadChromium();
 
 const FILE = process.argv[2] || 'tz-site/prototype/mimismart-v5.html';
 const F = pathToFileURL(resolve(FILE)).href;
-const EXEC = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium';
+/* В контейнере проекта Chromium лежит по фиксированному пути, в CI его ставит
+   сам playwright. Если пути нет — не навязываем его, пусть решает playwright. */
+const EXEC_CANDIDATE = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium';
+const LAUNCH = existsSync(EXEC_CANDIDATE) ? { executablePath: EXEC_CANDIDATE } : {};
 
 const problems = [];
 const fail = (m) => problems.push(m);
 
-const browser = await chromium.launch({ executablePath: EXEC });
+const browser = await chromium.launch(LAUNCH);
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 
 const errs = [];
