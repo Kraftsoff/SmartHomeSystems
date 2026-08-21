@@ -569,6 +569,26 @@ await ctx.close();
   console.log(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
 }
 
+/* ---------- 7f. Карта сайта против реализованных маршрутов ---------- */
+{
+  /* Карта сайта — то, как поисковик узнаёт о страницах. Разъезд в любую сторону
+     стоит дорого: маршрут не в карте не находят, строка без маршрута ведёт в 404.
+     Один раз 75 страниц ответов отсутствовали в карте целиком. */
+  const { readFileSync: readSm } = await import('node:fs');
+  let sm = '';
+  try { sm = readSm(resolve('site-foundation/sitemap.xml'), 'utf8'); } catch (e) {}
+  if (sm) {
+    const inSitemap = new Set([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('BASE_URL', '')));
+    const implemented = [...routes].map((h) => h.slice(1));
+    const PLANNED = new Set(['/blog']);   /* раздел объявлен, но ещё не построен */
+    const missingFromSitemap = implemented.filter((r) => !inSitemap.has(r));
+    const missingFromSite = [...inSitemap].filter((r) => !implemented.includes(r) && !PLANNED.has(r));
+    missingFromSitemap.slice(0, 6).forEach((r) => fail(`маршрут есть, в sitemap.xml его нет: ${r}`));
+    missingFromSite.slice(0, 6).forEach((r) => fail(`в sitemap.xml есть, маршрута нет: ${r}`));
+    console.log(`sitemap: строк ${inSitemap.size}, маршрутов ${implemented.length}, расхождений ${missingFromSitemap.length + missingFromSite.length}`);
+  }
+}
+
 /* ---------- 8. Интерактив: то, что не видно в разметке ---------- */
 {
   /* Поиск по ответам */
