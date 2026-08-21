@@ -274,6 +274,7 @@
   .cluster-h{font-size:clamp(20px,2.4vw,27px);margin:0 0 18px;display:flex;align-items:baseline;gap:10px}
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .a-hub a{color:var(--accent-ink);font-weight:600;font-size:14px}
   .navgrp{position:relative;display:inline-flex}
   .navbtn{font-family:var(--sans);font-size:inherit;color:var(--muted);background:none;border:none;
     cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:5px;
@@ -1179,6 +1180,37 @@
   </div></section>
 </section>
 
+<!-- ===================== FUNCTIONS INDEX ===================== -->
+<section class="page" id="p-functions-idx">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Направления</p>
+    <p class="eyebrow">Направления</p><h1>Что входит в инженерию объекта</h1>
+    <div class="answer">Семь направлений, которые проектируются в одном контуре управления.
+      Смысл единого подрядчика в том, что они согласованы между собой: климат знает про шторы,
+      свет про присутствие, безопасность про питание.</div>
+  </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Направления работ</h2>
+    <div class="grid g3" id="fnIdx"></div>
+  </div></section>
+</section>
+
+<!-- ===================== SOLUTIONS INDEX ===================== -->
+<section class="page" id="p-solutions-idx">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Решения</p>
+    <p class="eyebrow">Решения</p><h1>Кому и что мы проектируем</h1>
+    <div class="answer">Пять типов объектов с разной инженерией. Квартира и дом расходятся не
+      площадью, а составом систем: в доме появляются периметр, котельная, ДГУ и участок,
+      которых в квартире нет. Найдите свой — там состав работ и то, что ломается без
+      согласования.</div>
+  </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Типы объектов</h2>
+    <div class="grid g3" id="solIdx"></div>
+  </div></section>
+</section>
+
 <!-- ===================== COMPARISON INDEX ===================== -->
 <section class="page" id="p-compare-idx">
   <div class="sub-hero"><div class="shell">
@@ -1215,7 +1247,8 @@
         <p style="margin:8px 0 16px;color:var(--muted);font-size:14.5px">Ответ выше — короткий.
           Под ваш объект нужен расчёт: площадь, стадия ремонта, состав систем.</p>
         <button type="button" class="btn btn-primary" data-form>Получить расчёт по объекту</button>
-        <p style="margin-top:18px"><a href="#/news" id="a-back">← Все ответы</a></p>
+        <p class="a-hub" id="a-hub" style="margin-top:16px"></p>
+        <p style="margin-top:10px"><a href="#/news" id="a-back">← Все ответы</a></p>
       </aside>
     </div>
   </div></section>
@@ -1268,8 +1301,37 @@
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Контакты</p>
     <p class="eyebrow">Контакты</p><h1>Обсудим ваш объект</h1>
-    <div class="answer">Телефон и почта на текущем сайте — заглушки <span class="prov">⚠️ заменить на реальные</span>. Шоурум: г. Москва, Новоданиловская наб., 6к1 · 09:00–18:00.</div>
+    <div class="answer">Разговор начинается с объекта: площадь, стадия ремонта, какие системы
+      нужны. По этим данным инженер даёт предварительную оценку — без выезда и без обязательств.
+      Живьём систему можно потрогать в шоуруме на Новоданиловской.</div>
   </div></div>
+  <section><div class="shell">
+    <h2 class="cluster-h">Как связаться</h2>
+    <div class="grid g3">
+      <div class="card"><span class="kicker">Шоурум</span><h3>Москва, Новоданиловская наб., 6к1</h3>
+        <p>Будни 09:00–18:00. Здесь можно включить сцены света, шторы и климат руками и
+          посмотреть щит автоматизации — до того, как заказывать проект.</p></div>
+      <div class="card"><span class="kicker">Телефон</span><h3><span class="prov">⚠️ заполнить: телефон</span></h3>
+        <p>На текущем сайте указан номер с кодом другого региона — как заглушка. Реальный номер
+          проставляем перед публикацией, он же уходит в разметку LocalBusiness.</p></div>
+      <div class="card"><span class="kicker">Почта</span><h3><span class="prov">⚠️ заполнить: корп. почта</span></h3>
+        <p>Сейчас на сайте адрес на бесплатном домене. Нужна почта на корпоративном домене —
+          это влияет и на доверие, и на доставляемость писем.</p></div>
+    </div>
+  </div></section>
+  <section><div class="shell">
+    <h2 class="cluster-h">С чем приходят</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Объект на стадии ремонта</h3><p>Лучший момент: трассы ещё можно
+        заложить в черновую. Нужны планировка и стадия работ.</p></div>
+      <div class="card"><h3>Готовый дизайн-проект</h3><p>Работаем внутри утверждённых планов:
+        привязываем группы света, панели и датчики к тому, что уже нарисовано.</p></div>
+      <div class="card"><h3>Объект уже с отделкой</h3><p>Часть решений пойдёт поверх. Скажем
+        честно, что можно сделать без вскрытия стен, а что нет.</p></div>
+      <div class="card"><h3>Передача клиента</h3><p>Для дизайнеров, архитекторов и подрядчиков —
+        отдельный сценарий: <a href="#/partners" style="color:var(--accent-ink)">партнёрам →</a></p></div>
+    </div>
+  </div></section>
   <section><div class="shell">
     <div class="cta-row">
       <button type="button" class="btn btn-primary" data-form>Получить предварительный расчёт</button>
@@ -1528,6 +1590,8 @@
       box.appendChild(el('<a class="card card-link reveal" href="#/a/'+x.slug+'">'+
         '<span class="kicker">'+x.kicker+'</span><h3 style="margin-top:8px">'+x.q+'</h3></a>'));
     });
+    var hub=CLUSTER_HUB[rec.cluster], hb=document.getElementById('a-hub');
+    if(hub&&hb){hb.innerHTML='<a href="'+hub[0]+'">'+hub[1]+' →</a>'}
     setMeta(rec.q+' — MiMiSmart', rec.text.slice(0,155), '#/a/'+rec.slug);
     setAnswerLd(rec);
   }
@@ -1755,8 +1819,66 @@
     document.addEventListener('click',function(){closeAll()});
   })();
 
+  /* индекс решений строится из тех же данных SUB, что и сами страницы */
+  (function(){
+    var fb=document.getElementById('fnIdx');
+    if(fb)Object.keys(SUB).filter(function(k){return k.indexOf('functions/')===0}).forEach(function(k){
+      fb.appendChild(el('<a class="card card-link reveal" href="#/'+k+'">'+
+        '<span class="kicker">'+SUB[k].eyebrow+'</span>'+
+        '<h3 style="margin-top:8px">'+SUB[k].title+'</h3>'+
+        '<div class="go">Открыть →</div></a>'));
+    });
+    var box=document.getElementById('solIdx');if(!box)return;
+    Object.keys(SUB).filter(function(k){return k.indexOf('solutions/')===0}).forEach(function(k){
+      box.appendChild(el('<a class="card card-link reveal" href="#/'+k+'">'+
+        '<span class="kicker">'+SUB[k].eyebrow+'</span>'+
+        '<h3 style="margin-top:8px">'+SUB[k].title+'</h3>'+
+        '<div class="go">Открыть →</div></a>'));
+    });
+  })();
+
+  /* ---------- перелинковка хабов (требование ИА: рычаг ссылается на свой хаб) ----------
+     Кластер ответа → профильная страница. Без этого 60 ответов — тупики. */
+  var CLUSTER_HUB={
+    'Доверие и выбор':['#/compare','Сравнения с альтернативами'],
+    'Цена и экономика':['#/pricing','Как считается стоимость'],
+    'Сегменты':['#/solutions','Решения по типу объекта'],
+    'Сравнения':['#/compare','Все сравнения'],
+    'Подсистемы':['#/functions/automation','Направления работ'],
+    'Технологии':['#/functions/automation','Умный дом и автоматизация'],
+    'Процесс':['#/pricing','Этапы и стоимость'],
+    'Возражения':['#/about','О компании и гарантии'],
+    'Партнёрам':['#/partners','Партнёрская программа'],
+    'Эксплуатация':['#/functions/automation','Умный дом и автоматизация']
+  };
+
+  /* ---------- BreadcrumbList из реальных крошек страницы ----------
+     Строим из того же DOM, что видит человек — как FAQPage. Статичная разметка врала бы
+     на всех страницах, кроме одной. */
+  function setBreadcrumb(){
+    var page=document.querySelector('section.page.on');
+    var el0=page&&page.querySelector('.crumbs');
+    var node=document.getElementById('ldBreadcrumb');
+    if(!node)return;
+    if(!el0){   /* нет крошек (главная) — отдаём минимальную цепочку, а не прошлую страницы */
+      node.textContent=JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList",
+        "itemListElement":[{"@type":"ListItem","position":1,"name":"Главная"}]});
+      return;
+    }
+    /* разбираем по разделителю: крошки бывают вложенными (<span> с <a> внутри),
+       обход childNodes склеивал бы уровни в один элемент */
+    var items=[],pos=1;
+    (el0.textContent||'').split('/').forEach(function(part){
+      var t=part.replace(/\s+/g,' ').trim();
+      if(!t)return;
+      items.push({"@type":"ListItem","position":pos++,"name":t});
+    });
+    node.textContent=JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList",
+      "itemListElement":items});
+  }
+
   /* ---------- router ---------- */
-  var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
+  var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','solutions':'p-solutions-idx','functions':'p-functions-idx','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
     var h=location.hash.replace(/^#\//,'');
     var sub=SUB[h];
@@ -1765,7 +1887,7 @@
       CMP[h]._k=h; renderCompare(CMP[h]);
       document.getElementById('p-compare').classList.add('on');
       document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/compare')});
-      window.scrollTo(0,0); observeAll(); return;
+      window.scrollTo(0,0); observeAll(); setBreadcrumb(); return;
     }
     if(h.indexOf('a/')===0){
       var rec=BY_SLUG[h.slice(2)];
@@ -1773,7 +1895,7 @@
         renderAnswer(rec);
         document.getElementById('p-answer').classList.add('on');
         document.querySelectorAll('#topnav a').forEach(function(a){a.classList.remove('on')});
-        window.scrollTo(0,0); observeAll();
+        window.scrollTo(0,0); observeAll(); setBreadcrumb();
         return;
       }
       /* неизвестный слаг — не притворяемся, что страница есть: уводим на список */
@@ -1781,7 +1903,11 @@
     }
     setMeta(BASE_TITLE,BASE_DESC,h?'#/'+h:''); setAnswerLd(null);
     if(sub){
-      document.getElementById('s-crumb').textContent=' '+sub.crumb;
+      var mid=h.indexOf('solutions/')===0?['#/solutions','Решения']
+             :h.indexOf('functions/')===0?['#/functions','Направления']:null;
+      var sc=document.getElementById('s-crumb');
+      sc.innerHTML=mid?(' / <a href="'+mid[0]+'">'+mid[1]+'</a> '+sub.crumb)
+                      :(' '+sub.crumb);
       document.getElementById('s-eyebrow').textContent=sub.eyebrow;
       document.getElementById('s-title').textContent=sub.title;
       document.getElementById('s-answer').textContent=sub.answer;
@@ -1792,7 +1918,7 @@
       document.getElementById(pages[h]||'p-home').classList.add('on');
     }
     document.querySelectorAll('#topnav a').forEach(function(a){var hr=a.getAttribute('href');a.classList.toggle('on',hr==='#/'+h)});
-    window.scrollTo(0,0); observeAll();
+    window.scrollTo(0,0); observeAll(); setBreadcrumb();
   }
   addEventListener('hashchange',route);
 
