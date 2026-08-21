@@ -274,6 +274,31 @@
   .cluster-h{font-size:clamp(20px,2.4vw,27px);margin:0 0 18px;display:flex;align-items:baseline;gap:10px}
   .cluster-n{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .navgrp{position:relative;display:inline-flex}
+  .navbtn{font-family:var(--sans);font-size:inherit;color:var(--muted);background:none;border:none;
+    cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:5px;
+    border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+  .navbtn:hover,.navbtn[aria-expanded="true"]{color:var(--ink)}
+  .navbtn[aria-expanded="true"]{border-bottom-color:var(--glow)}
+  .navbtn .cav{font-size:9px;transition:transform .2s}
+  .navbtn[aria-expanded="true"] .cav{transform:rotate(180deg)}
+  .megamenu{position:absolute;top:calc(100% + 14px);left:-16px;z-index:60;
+    min-width:340px;padding:10px;border-radius:16px;background:var(--panel);
+    border:1px solid var(--line);box-shadow:0 24px 60px rgba(0,0,0,.42);
+    display:grid;gap:2px}
+  .megamenu.narrow{min-width:270px}
+  .megamenu[hidden]{display:none}
+  .megamenu a{display:block;padding:10px 12px;border-radius:10px;color:var(--ink);
+    border-bottom:none!important;transition:background .15s}
+  .megamenu a:hover,.megamenu a:focus-visible{background:var(--panel-2)}
+  .megamenu a b{display:block;font-size:14px;font-weight:600}
+  .megamenu a span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+  @media (max-width:940px){
+    .megamenu{position:static;min-width:0;box-shadow:none;background:transparent;
+      border:none;padding:4px 0 4px 12px}
+    .navgrp{display:block;width:100%}
+    .navbtn{min-height:44px}
+  }
   .consent{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;
     margin:14px 0 4px;padding:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px}
   .consent-box{width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent-ink);cursor:pointer}
@@ -495,20 +520,42 @@
 
 <header class="nav"><div class="shell nav-in">
   <a class="brand" href="#/"><span class="dot"></span>MiMiSmart</a>
-  <nav class="links" id="topnav">
-    <a href="#/functions/automation">Умный дом</a>
-    <a href="#/functions/climate">Климат</a>
-    <a href="#/functions/electric">Электрика и сети</a>
-    <a href="#/functions/curtains">Шторы</a><a href="#/functions/lighting">Свет</a>
-    <a href="#/functions/multimedia">Мультимедиа</a>
-    <a href="#/functions/security">Безопасность</a>
-    <a href="#/compare">Сравнения</a>
+  <nav class="links" id="topnav" aria-label="Основная навигация">
+    <div class="navgrp">
+      <button type="button" class="navbtn" aria-expanded="false" aria-controls="mm-solutions" id="mb-solutions">Решения<span class="cav" aria-hidden="true">▾</span></button>
+      <div class="megamenu" id="mm-solutions" role="group" aria-labelledby="mb-solutions" hidden>
+        <a href="#/solutions/flat"><b>Квартира</b><span>от 80 м², зоны и стадия ремонта</span></a>
+        <a href="#/solutions/house"><b>Дом и коттедж</b><span>от 300 м², периметр, котельная, ДГУ</span></a>
+        <a href="#/solutions/office"><b>Офис и коммерция</b><span>автоматика по занятости, СКУД</span></a>
+        <a href="#/solutions/developers"><b>Застройщикам и ЖК</b><span>магистраль на стадии проекта</span></a>
+        <a href="#/solutions/premium"><b>Премиум</b><span>от 40 млн ₽, десятки зон, DALI</span></a>
+      </div>
+    </div>
+    <div class="navgrp">
+      <button type="button" class="navbtn" aria-expanded="false" aria-controls="mm-functions" id="mb-functions">Направления<span class="cav" aria-hidden="true">▾</span></button>
+      <div class="megamenu" id="mm-functions" role="group" aria-labelledby="mb-functions" hidden>
+        <a href="#/functions/automation"><b>Умный дом</b><span>контроллеры, сценарии, приложение</span></a>
+        <a href="#/functions/climate"><b>Климат</b><span>кондиционирование, вентиляция, отопление</span></a>
+        <a href="#/functions/lighting"><b>Свет</b><span>DALI, сценарии, фурнитура</span></a>
+        <a href="#/functions/curtains"><b>Шторы</b><span>электрокарнизы, ниши, приводы</span></a>
+        <a href="#/functions/electric"><b>Электрика и сети</b><span>щиты, Wi-Fi, слаботочка</span></a>
+        <a href="#/functions/multimedia"><b>Мультимедиа</b><span>кинозал, мультирум, акустика</span></a>
+        <a href="#/functions/security"><b>Безопасность</b><span>протечки, камеры, ДГУ, молниезащита</span></a>
+      </div>
+    </div>
     <a href="#/pricing">Цены</a>
+    <a href="#/compare">Сравнения</a>
+    <a href="#/news">Ответы</a>
     <a href="#/equipment">Оборудование</a>
-    <a href="#/cases">Кейсы</a>
-    <a href="#/news">Статьи</a>
-    <a href="#/partners">Партнёрам</a>
-    <a href="#/about">О компании</a>
+    <div class="navgrp">
+      <button type="button" class="navbtn" aria-expanded="false" aria-controls="mm-more" id="mb-more">Ещё<span class="cav" aria-hidden="true">▾</span></button>
+      <div class="megamenu narrow" id="mm-more" role="group" aria-labelledby="mb-more" hidden>
+        <a href="#/cases"><b>Кейсы</b><span>объекты, состав, результат</span></a>
+        <a href="#/partners"><b>Партнёрам</b><span>дизайнерам, строителям, интеграторам</span></a>
+        <a href="#/about"><b>О компании</b><span>производство, гарантия</span></a>
+        <a href="#/contacts"><b>Контакты</b><span>шоурум в Москве</span></a>
+      </div>
+    </div>
   </nav>
   <button class="daynight" id="dnToggle" type="button" role="switch" aria-checked="false" aria-label="Переключить сценарий День/Ночь">
     <span class="dn-ico sun">☀</span><span class="dn-knob"></span><span class="dn-ico moon">☾</span>
@@ -1674,6 +1721,40 @@
     });
   })();
 
+  /* ---------- меню: раскрытие с клавиатуры ----------
+     ИА требует 5–7 пунктов в шапке; было 14 плоских, а 5 страниц сегментов вообще
+     не имели входящих ссылок. Группируем и делаем доступным: Escape закрывает,
+     клик вне закрывает, aria-expanded отражает состояние. */
+  (function(){
+    var groups=[].slice.call(document.querySelectorAll('.navgrp'));
+    if(!groups.length)return;
+    function closeAll(except){
+      groups.forEach(function(g){
+        var b=g.querySelector('.navbtn'),m=g.querySelector('.megamenu');
+        if(g===except)return;
+        b.setAttribute('aria-expanded','false'); m.hidden=true;
+      });
+    }
+    groups.forEach(function(g){
+      var b=g.querySelector('.navbtn'),m=g.querySelector('.megamenu');
+      b.addEventListener('click',function(e){
+        e.stopPropagation();
+        var open=b.getAttribute('aria-expanded')==='true';
+        closeAll(g);
+        b.setAttribute('aria-expanded',String(!open)); m.hidden=open;
+      });
+      m.addEventListener('click',function(e){e.stopPropagation()});
+      g.addEventListener('keydown',function(e){
+        if(e.key==='Escape'){closeAll();b.focus()}
+      });
+      /* переход по ссылке закрывает меню */
+      m.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click',function(){closeAll()});
+      });
+    });
+    document.addEventListener('click',function(){closeAll()});
+  })();
+
   /* ---------- router ---------- */
   var pages={'':'p-home','pricing':'p-pricing','compare':'p-compare-idx','privacy':'p-privacy','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
   function route(){
@@ -1710,7 +1791,7 @@
     } else {
       document.getElementById(pages[h]||'p-home').classList.add('on');
     }
-    document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/'+h)});
+    document.querySelectorAll('#topnav a').forEach(function(a){var hr=a.getAttribute('href');a.classList.toggle('on',hr==='#/'+h)});
     window.scrollTo(0,0); observeAll();
   }
   addEventListener('hashchange',route);
