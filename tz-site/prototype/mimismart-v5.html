@@ -400,7 +400,10 @@
      поэтому селекторы вида .more>… там не срабатывают. Стилизуем по классу и по
      контейнеру ответа. */
   .more-h{font-size:1.05rem;font-weight:650;margin:26px 0 8px;letter-spacing:0}
-  .more table,#a-a table{border-collapse:collapse;width:100%;min-width:min(520px,100%);margin:2px 0 4px}
+  /* Стили ячеек привязываем к обёртке, а не к контейнеру ответа: таблицы есть
+     и на хабах, и на странице «О компании». Раньше там не было ни отступов,
+     ни линеек — строки наезжали друг на друга. */
+  .tbl-wrap table{border-collapse:collapse;width:100%;min-width:min(520px,100%);margin:2px 0 4px}
   /* колонка ответа ограничена по ширине ради читаемости строки, но таблице это
      мешает: четыре колонки в 74ch не помещаются. Разрешаем таблицам выходить
      на всю ширину контейнера */
@@ -410,7 +413,7 @@
   #a-a{max-width:none}
   #a-a>p,#a-a>ol,#a-a>ul,#a-a>.more-h{max-width:74ch}
   #a-a .tbl-wrap{max-width:none;width:100%}
-  #a-a table th:first-child,#a-a table td:first-child{width:22%}
+  .tbl-wrap th:first-child,.tbl-wrap td:first-child{width:22%}
   /* пометка о непроверенных данных внутри ячейки: без этого рамка рвётся
      на отдельный прямоугольник в каждой строке переноса */
   /* пометка о непроверенных данных: без clone рамка рвётся на отдельный
@@ -419,9 +422,9 @@
      на две рамки посреди фразы */
   .prov{display:inline-block;max-width:100%;vertical-align:baseline}
   #a-a td .prov,.more td .prov{margin-top:4px}
-  .more table th,.more table td,#a-a table th,#a-a table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:.94rem;color:var(--ink)}
-  .more table thead th,#a-a table thead th{color:var(--muted);font-weight:600;font-size:.86rem}
-  .more table tr:last-child td,.more table tr:last-child th,#a-a table tr:last-child td,#a-a table tr:last-child th{border-bottom:none}
+  .tbl-wrap th,.tbl-wrap td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:.94rem;color:var(--ink)}
+  .tbl-wrap thead th{color:var(--muted);font-weight:600;font-size:.86rem}
+  .tbl-wrap tr:last-child td,.tbl-wrap tr:last-child th{border-bottom:none}
   #a-a ol{margin:6px 0 0;padding-left:22px}#a-a ol li{margin:6px 0}
   /* Узкий экран: строка таблицы становится блоком с подписями колонок.
      Прокрутка вбок на телефоне прячет половину содержимого и ничем себя не выдаёт. */
@@ -2307,6 +2310,22 @@
     </div>
     <div class="conclusion" style="margin-top:22px">Шоурум в Москве: Новоданиловская наб., 6к1 — приходите поуправлять системой вживую. <button type="button" class="btn btn-ghost btn-sm" data-form data-goal="showroom" style="margin-left:10px">Записаться</button></div>
   </div></section>
+<section><div class="shell">
+<h2 class="cluster-h">Как проверить каждое утверждение с этой страницы</h2>
+<p class="lede" style="max-width:74ch">Цифры о себе публикуют все, и проверить их обычно нечем. Ниже — что именно спрашивать, чтобы не верить на слово: нам или кому угодно другому.</p>
+<div class="tbl-wrap"><table><thead><tr><th scope="col">Утверждение</th><th scope="col">Чем подтверждается</th><th scope="col">Статус</th></tr></thead><tbody>
+<tr><th scope="row">Собственное производство контроллеров</th><td>Сборка и прогон под нагрузкой в шоуруме этажом выше — видно на месте</td><td>Проверяется визитом</td></tr>
+<tr><th scope="row">Работа с 2004 года</th><td>Дата регистрации юрлица в выписке ЕГРЮЛ, открытой и бесплатной</td><td><span class="prov">⚠️ реквизиты не заполнены</span></td></tr>
+<tr><th scope="row">5000+ объектов</th><td>Методика счёта: что считается объектом, за какой период</td><td><span class="prov">⚠️ подтвердить или снять</span></td></tr>
+<tr><th scope="row">20 представительств</th><td>Список городов с адресами и контактами</td><td><span class="prov">⚠️ подтвердить или снять</span></td></tr>
+<tr><th scope="row">Бессрочная гарантия</th><td>Пункт договора: на что распространяется — оборудование, монтаж, программирование</td><td><span class="prov">⚠️ формулировку уточнить</span></td></tr>
+<tr><th scope="row">Локальная работа без облака</th><td>Выдернуть кабель провайдера в шоуруме и нажать клавишу</td><td>Проверяется за десять секунд</td></tr>
+</tbody></table></div>
+<h2 class="cluster-h">Чего мы не утверждаем</h2>
+<p style="max-width:74ch">Что мы лучшие, первые или самые покупаемые. Такие формулировки без опубликованного критерия и источника не проверяются, а по российскому праву о защите конкуренции ещё и наказуемы. Если встретите их у нас в старых материалах — это то, что мы вычищаем.</p>
+<p style="max-width:74ch">И не утверждаем, что российское производство само по себе означает лучшее качество. Оно снимает логистические и валютные риски и сокращает путь от обнаруженной проблемы до исправления. Проверять нас нужно по тем же пунктам, что и любого импортного производителя: сколько лет выпускается линейка, что стало с объектами предыдущего поколения, открыт ли протокол шины.</p>
+</div></section>
+
 </section>
 
 <!-- ===================== CONTACTS ===================== -->

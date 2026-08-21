@@ -302,7 +302,31 @@ await page.setViewportSize({ width: 1400, height: 1000 });
   await page.setViewportSize({ width: 1400, height: 1000 });
 }
 
-/* ---------- 6. Разметка: валидность и согласие с DOM ---------- */
+/* ---------- 5c. Оформление ячеек на широком экране ---------- */
+{
+  await page.setViewportSize({ width: 1400, height: 1000 });
+  for (const h of ['#/about', '#/compare', '#/solutions', '#/functions']) {
+    if (!routes.has(h)) continue;
+    await page.goto(F + h);
+    await page.waitForTimeout(280);
+    const r = await page.evaluate(() => {
+      const t = document.querySelector('section.page.on .tbl-wrap table');
+      if (!t) return null;
+      const td = t.querySelector('tbody td');
+      if (!td) return null;
+      const st = getComputedStyle(td);
+      /* Правила ячеек были привязаны к контейнеру ответа, и таблицы на хабах
+         оставались без отступов и линеек — строки наезжали друг на друга. */
+      return { pad: parseFloat(st.paddingTop), line: parseFloat(st.borderBottomWidth) };
+    });
+    if (!r) continue;
+    if (r.pad < 4) fail(`ячейки таблицы без отступов: ${h}`);
+    if (!r.line) fail(`строки таблицы без разделителя: ${h}`);
+  }
+  console.log('оформление таблиц вне страниц ответов: отступы и линейки на месте');
+}
+
+/* ---------- 6. Разметка: валидность и согласие с DOM ---------- *//* ---------- 6. Разметка: валидность и согласие с DOM ---------- */
 await page.goto(F);
 await page.waitForTimeout(600);
 const ld = await page.evaluate(() => {
