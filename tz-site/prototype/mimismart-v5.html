@@ -340,7 +340,8 @@
   .req{color:var(--accent-ink);font-weight:700}
   .skip-link{position:absolute;left:-9999px;top:0;z-index:200;padding:12px 18px;
     background:var(--panel);color:var(--ink);border:1px solid var(--glow);border-radius:0 0 10px 0}
-  .skip-link:focus{left:0}
+  .skip-link:focus{left:0;position:fixed;top:0}  /* fixed, а не absolute: при абсолютном позиционировании ссылка уезжает к началу
+     документа, и на прокрученной странице фокус оказывается за верхним краем экрана */
   #main:focus{outline:none}
   #p-404 code{font-family:var(--mono);font-size:13px;background:var(--panel-2);
     padding:2px 7px;border-radius:6px;border:1px solid var(--line);word-break:break-all}
