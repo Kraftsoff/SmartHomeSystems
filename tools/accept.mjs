@@ -1144,8 +1144,12 @@ await ctx.close();
     const nestedP = box.querySelectorAll('p p').length;
     const nestedA = box.querySelectorAll('a a').length;
     box.remove();
+    const svgБезИмени = [...document.querySelectorAll('svg')].filter((g) =>
+      !g.closest('[aria-hidden="true"]') && !g.hasAttribute('aria-hidden')
+      && !g.hasAttribute('role') && !g.querySelector('title') && !g.getAttribute('aria-label')).length;
+    const imgБезAlt = [...document.querySelectorAll('img')].filter((i) => !i.hasAttribute('alt')).length;
     return { dupIds, dangling: [...dangling], blocks, broken, tablesNoTh, badListChild, wrongLevel, nestedP, nestedA,
-             lang: document.documentElement.lang || '' };
+             svgБезИмени, imgБезAlt, lang: document.documentElement.lang || '' };
   });
   if (v.dupIds.length) fail(`дубли id: ${v.dupIds.slice(0, 8).join(', ')}`);
   if (v.dangling.length) fail(`ссылка на несуществующий id: ${v.dangling.slice(0, 6).join(', ')}`);
@@ -1156,8 +1160,13 @@ await ctx.close();
   if (v.nestedP) fail(`<p> внутри <p> в развёрнутых блоках: ${v.nestedP}`);
   if (v.nestedA) fail(`<a> внутри <a> в развёрнутых блоках: ${v.nestedA}`);
   if (v.lang !== 'ru') fail(`язык документа «${v.lang}» вместо ru`);
+  /* Декоративная графика без имени: скринридер объявит её как безымянный объект
+     поверх текста, который то же самое уже говорит. Либо имя, либо aria-hidden. */
+  if (v.svgБезИмени) fail(`SVG без имени и без aria-hidden: ${v.svgБезИмени}`);
+  if (v.imgБезAlt) fail(`изображений без атрибута alt: ${v.imgБезAlt}`);
   const clean9 = !v.dupIds.length && !v.dangling.length && !v.broken.length && !v.tablesNoTh
-    && !v.badListChild && !v.wrongLevel && !v.nestedP && !v.nestedA && v.lang === 'ru';
+    && !v.badListChild && !v.wrongLevel && !v.nestedP && !v.nestedA && v.lang === 'ru'
+    && !v.svgБезИмени && !v.imgБезAlt;
   console.log(clean9
     ? `целостность разметки: ${v.blocks} развёрнутых блоков, id уникальны, ссылок в никуда нет`
     : `целостность разметки: проверено ${v.blocks} блоков, нарушения перечислены ниже`);
