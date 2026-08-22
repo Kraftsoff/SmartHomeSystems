@@ -1168,6 +1168,22 @@ await ctx.close();
       }));
       if (st.loaded) fail('аналитика стартовала после явного отказа');
       if (!st.stored) fail('отказ от аналитики не сохранён — баннер спросит снова и решение потеряется');
+      /* Наличие ключа с подходящим именем ничего не доказывает: запись под другим
+         ключом проверку переживала. Решение считается сохранённым тогда, когда
+         после перезагрузки баннер больше не спрашивает. */
+      await page.goto(F);
+      await page.waitForTimeout(350);
+      /* Именно видимость: узел баннера остаётся в дереве и после ответа, поэтому
+         поиск по тексту находит его всегда и проверка была бы всегда красной. */
+      const asksAgain = await page.evaluate(() => {
+        const el = [...document.querySelectorAll('*')]
+          .find((e) => /Только необходимые/.test(e.textContent || '') && !e.children.length);
+        const box = el ? el.closest('div,section,aside') : null;
+        if (!box) return false;
+        const cs = getComputedStyle(box);
+        return box.offsetParent !== null && cs.visibility !== 'hidden' && cs.opacity !== '0';
+      });
+      if (asksAgain) fail('после отказа баннер спрашивает снова — решение не восстановлено');
       console.log('согласие на аналитику: без ответа не стартует, отказ сохраняется и переживает переход');
     }
   }
