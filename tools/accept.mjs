@@ -1018,6 +1018,71 @@ await ctx.close();
   console.log(`модель дома: сценариев ${house.scenes}, реагирует на переключение`);
 }
 
+/* ---------- 9. Целостность разметки: то, что браузер молча чинит ----------
+   Дубли id и ссылки на несуществующие id браузер не показывает как ошибку — он
+   просто берёт первый элемент или игнорирует связь. В одностраничнике на 17 страниц
+   это ловится только проверкой. Отдельно проверяется содержимое <template>: в DOM
+   его нет, а на странице ответа оно становится живой разметкой. */
+{
+  const page9 = await browser.newPage();
+  await page9.goto(F, { waitUntil: 'load' });
+  await page9.waitForTimeout(400);
+  const v = await page9.evaluate(() => {
+    const counts = {};
+    document.querySelectorAll('[id]').forEach((e) => { counts[e.id] = (counts[e.id] || 0) + 1; });
+    const dupIds = Object.keys(counts).filter((k) => counts[k] > 1);
+
+    const dangling = new Set();
+    document.querySelectorAll('label[for]').forEach((e) => {
+      if (!document.getElementById(e.getAttribute('for'))) dangling.add('label for="' + e.getAttribute('for') + '"');
+    });
+    ['aria-labelledby', 'aria-describedby', 'aria-controls'].forEach((attr) => {
+      document.querySelectorAll('[' + attr + ']').forEach((e) => {
+        (e.getAttribute(attr) || '').split(/\s+/).forEach((id) => {
+          if (id && !document.getElementById(id)) dangling.add(attr + '="' + id + '"');
+        });
+      });
+    });
+
+    /* Разворачиваем каждый развёрнутый блок и проверяем его как настоящую разметку */
+    const box = document.createElement('div');
+    let blocks = 0;
+    document.querySelectorAll('template.more, .more').forEach((t) => {
+      blocks++;
+      box.insertAdjacentHTML('beforeend', t.innerHTML);
+    });
+    document.body.appendChild(box);
+    const routes = new Set([...document.querySelectorAll('.cluster .card-link')].map((a) => a.getAttribute('href')));
+    const broken = [...box.querySelectorAll('a[href^="#/answers/"]')]
+      .map((a) => a.getAttribute('href')).filter((h) => !routes.has(h));
+    const tablesNoTh = [...box.querySelectorAll('table')].filter((t) => !t.querySelector('th')).length;
+    const badListChild = [...box.querySelectorAll('ul,ol')]
+      .reduce((n, l) => n + [...l.children].filter((c) => c.tagName !== 'LI').length, 0);
+    /* Заголовок блока идёт под h1 вопроса, поэтому допустим только h2 */
+    const wrongLevel = [...box.querySelectorAll('h1,h3,h4,h5,h6')].length;
+    const nestedP = box.querySelectorAll('p p').length;
+    const nestedA = box.querySelectorAll('a a').length;
+    box.remove();
+    return { dupIds, dangling: [...dangling], blocks, broken, tablesNoTh, badListChild, wrongLevel, nestedP, nestedA,
+             lang: document.documentElement.lang || '' };
+  });
+  if (v.dupIds.length) fail(`дубли id: ${v.dupIds.slice(0, 8).join(', ')}`);
+  if (v.dangling.length) fail(`ссылка на несуществующий id: ${v.dangling.slice(0, 6).join(', ')}`);
+  if (v.broken.length) fail(`ссылка из развёрнутого блока ведёт в никуда: ${v.broken.slice(0, 5).join(', ')}`);
+  if (v.tablesNoTh) fail(`таблиц без подписи колонок в развёрнутых блоках: ${v.tablesNoTh}`);
+  if (v.badListChild) fail(`не-LI внутри списка в развёрнутых блоках: ${v.badListChild}`);
+  if (v.wrongLevel) fail(`заголовок не h2 в развёрнутом блоке: ${v.wrongLevel} — под h1 вопроса пропуск уровня`);
+  if (v.nestedP) fail(`<p> внутри <p> в развёрнутых блоках: ${v.nestedP}`);
+  if (v.nestedA) fail(`<a> внутри <a> в развёрнутых блоках: ${v.nestedA}`);
+  if (v.lang !== 'ru') fail(`язык документа «${v.lang}» вместо ru`);
+  const clean9 = !v.dupIds.length && !v.dangling.length && !v.broken.length && !v.tablesNoTh
+    && !v.badListChild && !v.wrongLevel && !v.nestedP && !v.nestedA && v.lang === 'ru';
+  console.log(clean9
+    ? `целостность разметки: ${v.blocks} развёрнутых блоков, id уникальны, ссылок в никуда нет`
+    : `целостность разметки: проверено ${v.blocks} блоков, нарушения перечислены ниже`);
+  await page9.close();
+}
+
 await browser.close();
 
 if (problems.length) {
