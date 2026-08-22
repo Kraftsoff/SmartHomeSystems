@@ -2526,8 +2526,8 @@
     <h3 id="formTitle">Предварительный расчёт по объекту</h3>
     <p class="sub">Обязательны только имя, телефон и согласие — остальное по желанию. Чем больше заполните, тем точнее будет предварительная оценка и тем меньше уточняющих звонков.</p>
     <div class="frow">
-      <label class="fl"><span>Имя <b class="req" aria-hidden="true">*</b></span><input required placeholder="Как к вам обращаться"></label>
-      <label class="fl"><span>Телефон <b class="req" aria-hidden="true">*</b></span><input required type="tel" placeholder="+7"></label>
+      <label class="fl"><span>Имя <b class="req" aria-hidden="true">*</b></span><input required autocomplete="name" placeholder="Как к вам обращаться"></label>
+      <label class="fl"><span>Телефон <b class="req" aria-hidden="true">*</b></span><input required type="tel" autocomplete="tel" placeholder="+7"></label>
     </div>
     <div class="frow">
       <label class="fl"><span>Мессенджер</span><select><option>Telegram</option><option>WhatsApp</option><option>Звонок</option></select></label>
@@ -2535,7 +2535,7 @@
     </div>
     <div class="frow">
       <label class="fl"><span>Площадь, м²</span><input inputmode="numeric" placeholder="например, 180"></label>
-      <label class="fl"><span>Локация</span><input placeholder="Город / посёлок"></label>
+      <label class="fl"><span>Локация</span><input autocomplete="address-level2" placeholder="Город / посёлок"></label>
     </div>
     <div class="frow">
       <label class="fl"><span>Стадия объекта</span><select><option>Проектирование</option><option>Строительство</option><option>Черновой ремонт</option><option>Инженерные работы</option><option>Чистовая отделка</option></select></label>

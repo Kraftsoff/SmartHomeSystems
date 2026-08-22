@@ -1145,7 +1145,25 @@ await ctx.close();
         return !fm || fm.offsetParent === null;
       });
       if (!closed) fail('Esc не закрывает форму заявки');
-      console.log('форма заявки: согласие обязательно, метка и политика на месте, Esc закрывает');
+      /* WCAG 1.3.5: у полей с личными данными должно быть объявлено назначение —
+     иначе браузер и вспомогательные технологии не могут подставить и распознать
+     имя и телефон. Уровень AA, тот же, что сайт держит по остальным критериям. */
+  const purpose = await page.evaluate(() => {
+    const form = document.querySelector('#leadForm') || document.querySelector('form');
+    if (!form) return null;
+    const need = { text: 'имя', tel: 'телефон', email: 'почта' };
+    const out = [];
+    [...form.querySelectorAll('input')].forEach((e) => {
+      if (!e.required) return;
+      if (e.type === 'checkbox') return;
+      if (!e.getAttribute('autocomplete')) out.push(need[e.type] || e.type);
+    });
+    return out;
+  });
+  if (purpose && purpose.length) {
+    fail(`у обязательных полей не объявлено назначение (WCAG 1.3.5): ${purpose.join(', ')}`);
+  }
+  console.log('форма заявки: согласие обязательно, метка и политика на месте, Esc закрывает, назначение полей объявлено');
     }
   }
 
