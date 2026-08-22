@@ -104,7 +104,13 @@ for (const h of routes) {
     try { crumbs = JSON.parse(document.getElementById('ldBreadcrumb').textContent).itemListElement.length; } catch (e) {}
     return {
       bad: (!vis.querySelector('h1') || vis.innerText.length < 150) ? 1 : 0,
+      /* Крошки нужны в двух видах: разметкой — поисковику, видимой строкой —
+         человеку. Проверка читала только разметку, поэтому исчезновение видимой
+         навигации проходило молча: переименование класса на всех шестнадцати
+         страницах не давало ни одного отказа. */
       sk, h1: vis.querySelectorAll('h1').length, crumbs,
+      crumbsVisible: [...vis.querySelectorAll('.crumbs')].filter((e) => e.offsetParent !== null
+        && (e.textContent || '').trim().length > 3).length,
       is404: vis.id === 'p-404' ? 1 : 0,
       title: document.title,
       desc: (document.querySelector('meta[name=description]') || {}).content || '',
@@ -117,7 +123,9 @@ for (const h of routes) {
   if (d.bad) { broken++; fail(`пустая или битая страница: ${h}`); continue; }
   skips += d.sk;
   if (d.h1 !== 1) { badH1++; fail(`H1 на странице ${h}: ${d.h1}`); }
-  if (!d.crumbs) { noCrumbs++; fail(`нет хлебных крошек: ${h}`); }
+  if (!d.crumbs) { noCrumbs++; fail(`нет хлебных крошек в разметке: ${h}`); }
+  /* На главной крошек нет и быть не должно: она сама корень пути. */
+  if (h !== '#/' && !d.crumbsVisible) { noCrumbs++; fail(`нет видимых хлебных крошек: ${h}`); }
   if (d.is404) { soft404++; fail(`маршрут отдаёт 404: ${h}`); }
   if (d.raw) { rawTags++; fail(`видимые сырые теги в тексте: ${h}`); }
   if (!d.desc) fail(`пустой description: ${h}`);
