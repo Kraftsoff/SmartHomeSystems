@@ -910,15 +910,42 @@ await ctx.close();
   const boxes = await page.$$('#calc input[type=checkbox]');
   if (!boxes.length) fail('калькулятор состава работ не найден');
   else {
-    for (const c of boxes.slice(0, 3)) await c.check();
-    await page.waitForTimeout(300);
-    const r = await page.evaluate(() => {
+    /* Одно состояние ничего не доказывает: цена могла бы появляться только при
+       большой площади или на конкретной стадии. Перебираем сочетания полей и
+       ищем не только «N ₽», но и «тыс», «млн», «от N» — вилку тоже называть нельзя. */
+    const r = await page.evaluate(async () => {
       const c = document.getElementById('calc');
-      return { len: c.innerText.trim().length, price: /\d[\d\s]{3,}\s*₽/.test(c.innerText) };
+      const sels = [...c.querySelectorAll('select')];
+      const chks = [...c.querySelectorAll('input[type=checkbox]')];
+      const area = c.querySelector('#cArea,[name=cArea]');
+      const money = /\d[\d\s\u00a0\u202f]{2,}\s*(₽|руб|тыс|млн)|₽\s*\d|\bот\s+\d[\d\s]*\s*(тыс|млн|₽)/i;
+      const patterns = [() => false, () => true, (i) => i % 2 === 0];
+      const tick = () => new Promise((res) => setTimeout(res, 0));
+      let tried = 0, minLen = Infinity;
+      const bad = [];
+      for (const a of ['0', '40', '150', '1200', '99999']) {
+        if (area) { area.value = a; area.dispatchEvent(new Event('input', { bubbles: true })); area.dispatchEvent(new Event('change', { bubbles: true })); }
+        for (let i0 = 0; i0 < (sels[0] ? sels[0].options.length : 1); i0++)
+          for (let i1 = 0; i1 < (sels[1] ? sels[1].options.length : 1); i1++)
+            for (let pi = 0; pi < patterns.length; pi++) {
+              if (sels[0]) sels[0].selectedIndex = i0;
+              if (sels[1]) sels[1].selectedIndex = i1;
+              sels.forEach((x) => x.dispatchEvent(new Event('change', { bubbles: true })));
+              chks.forEach((x, i) => { x.checked = patterns[pi](i); x.dispatchEvent(new Event('change', { bubbles: true })); });
+              await tick();
+              const t = c.innerText;
+              tried++;
+              minLen = Math.min(minLen, t.trim().length);
+              if (money.test(t)) bad.push(a + '/' + i0 + '/' + i1 + ': ' + t.replace(/\s+/g, ' ').slice(0, 110));
+            }
+      }
+      return { tried, minLen, bad: bad.slice(0, 3), badCount: bad.length };
     });
-    if (r.len < 200) fail('калькулятор не выдаёт состав работ');
-    if (r.price) fail('калькулятор называет цену — методика не подтверждена, цифры быть не должно');
-    console.log('калькулятор: состав выдан, цены нет');
+    if (r.minLen < 200) fail(`калькулятор не выдаёт состав работ хотя бы в одном состоянии (минимум ${r.minLen} знаков)`);
+    if (r.badCount) fail(`калькулятор называет цену в ${r.badCount} состояниях из ${r.tried}: ${r.bad[0]}`);
+    console.log(r.badCount || r.minLen < 200
+      ? `калькулятор: перебрано ${r.tried} состояний, нарушения перечислены ниже`
+      : `калькулятор: перебрано ${r.tried} состояний, состав выдан везде, цены нет ни в одном`);
   }
 
   /* Переключатель темы */
