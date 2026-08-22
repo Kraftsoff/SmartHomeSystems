@@ -486,7 +486,11 @@
   }
   .scen-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
   .scen-btn{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:999px;
-    border:1px solid var(--line);background:var(--panel-2);color:var(--muted);cursor:pointer;transition:.2s}
+    border:1px solid var(--line);background:var(--panel-2);color:var(--muted);cursor:pointer;
+    /* Перечисляем свойства вместо transition:.2s на всё: короткая запись анимировала
+       и толщину обводки фокуса, из-за чего кольцо у клавиатурного пользователя
+       проявлялось за 150 мс вместо мгновенного. Обратная связь не должна догонять. */
+    transition:background .2s,border-color .2s,color .2s}
   .scen-btn:hover{border-color:var(--glow);color:var(--ink)}
   .scen-btn.on{background:var(--accent-ink);border-color:var(--accent-ink);color:#fff}
 
