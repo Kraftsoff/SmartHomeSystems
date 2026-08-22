@@ -283,6 +283,10 @@
     #a-a table{min-width:0!important;width:100%!important;font-size:9.5pt!important}
     #a-a tr{break-inside:avoid;page-break-inside:avoid}
     h1,h2,h3{break-after:avoid;page-break-after:avoid}
+    /* Акцентные границы — единственное цветное пятно на листе: на ч/б принтере
+       это серая полоса, на цветном — расход цветного тонера ради украшения.
+       Цвет текста и фоны правило выше уже сбросило, границы — нет. */
+    .answer,.risk,.lede,blockquote{border-color:#999!important}
     .prov{border:1px solid #666!important;padding:0 4px}
     .sub-hero{padding:0 0 12px}
     section{padding:0 0 10px!important;margin:0!important}
