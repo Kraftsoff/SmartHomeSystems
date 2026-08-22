@@ -769,10 +769,6 @@ await ctx.close();
      предварительно выбросив всё, что есть на странице списка. */
   await page.goto(F + '#/answers');
   await page.waitForTimeout(200);
-  const listing = await page.evaluate(() => {
-    const v = [...document.querySelectorAll('section.page')].find((x) => getComputedStyle(x).display !== 'none');
-    return v ? v.innerText.replace(/\s+/g, ' ') : '';
-  });
   const byLine = new Map();
   for (const h of [...routes].filter((x) => x.startsWith('#/answers/'))) {
     await page.goto(F + h);
@@ -787,7 +783,11 @@ await ctx.close();
         .filter((x) => x.length > 80);
     });
     for (const x of sents) {
-      if (listing.includes(x)) continue;           /* прямой ответ — не дубль, а замысел */
+      /* Исключения по странице списка здесь не было нужно, а вреда оно давало
+         много: на списке лежит каждый прямой ответ, поэтому дословный дубль
+         прямого ответа между двумя страницами проверка не видела никогда.
+         Сам список в сравнение не входит — сравниваются только /answers/*, —
+         так что свой ответ встречается ровно один раз и без исключения. */
       if (!byLine.has(x)) byLine.set(x, new Set());
       byLine.get(x).add(h);
     }
