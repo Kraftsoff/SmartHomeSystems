@@ -510,6 +510,33 @@ await ctx.close();
     return out;
   });
   wide.forEach((w) => fail(`шире экрана телефона: ${w}`));
+
+  /* Подписи кнопок не должны обрезаться. У кнопки в шапке overflow:hidden ради
+     декоративного блика, поэтому обрезанный текст не создаёт переполнения и
+     выглядит просто как «ПРЕДВАРИТЕЛЬНЫЙ Р…». Меряем саму подпись, а не кнопку:
+     блики за край заходят намеренно. */
+  const cut = await t.evaluate(() => {
+    const out = [];
+    document.querySelectorAll('button, a.btn').forEach((btn) => {
+      if (btn.offsetParent === null) return;
+      const box = btn.getBoundingClientRect();
+      const cs = getComputedStyle(btn);
+      const padL = parseFloat(cs.paddingLeft) || 0;
+      const padR = parseFloat(cs.paddingRight) || 0;
+      [...btn.querySelectorAll('span, b')].forEach((sp) => {
+        if (!(sp.textContent || '').trim()) return;
+        if (getComputedStyle(sp).display === 'none') return;
+        const r = sp.getBoundingClientRect();
+        if (r.width < 1) return;
+        if (r.left < box.left + padL - 1 || r.right > box.right - padR + 1) {
+          out.push(`«${sp.textContent.trim().slice(0, 28)}»`);
+        }
+      });
+    });
+    return [...new Set(out)];
+  });
+  cut.forEach((c) => fail(`подпись кнопки обрезана на телефоне: ${c}`));
+
   console.log(wide.length ? 'ширина блоков на телефоне: нарушения ниже' : 'ширина блоков на телефоне: всё вписывается');
 
   for (const h of ['#/', '#/answers', '#/contacts', '#/pricing']) {

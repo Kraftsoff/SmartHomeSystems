@@ -158,7 +158,9 @@
      Из-за этого нераскрывающийся inline-flex внутри героя задавал колонке 444 px:
      на экране 390 px весь блок вместе с планом дома вылезал за край и обрезался,
      и правая треть квартиры оказывалась недоступной. Замерено на iPhone 13 и Pixel 7. */
-  .shell>*{min-width:0}
+  .shell:not(.nav-in)>*{min-width:0}
+  /* Не шапка: там та же обёртка используется флекс-строкой, и разрешение
+     сжиматься ниже содержимого обрезало подпись кнопки на 10 px. */
   .cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
   .hint{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:13px;margin-top:18px}
   .hint .pulse{width:8px;height:8px;border-radius:50%;background:var(--glow);animation:pulse 2.4s infinite}
@@ -483,6 +485,20 @@
     .scen-row{gap:10px}
     .cluster-nav a{min-height:44px}
     .brand{min-height:44px}
+  /* Подпись кнопки в шапке. На телефоне логотип, переключатель темы и кнопка не
+     помещаются в строку: кнопка сжимается флексом и обрезает текст — замерено,
+     тексту нужно 227 px при отведённых 146. Высота шапки фиксированная, поэтому
+     перенос на две строки не годится; на узких экранах ставим короткий вариант. */
+  .cta-short{display:none}
+  @media (max-width:460px){
+    .cta-long{display:none}
+    .cta-short{display:inline}
+    /* Кнопки в тексте страницы, в отличие от шапки, по высоте не зажаты —
+       длинной подписи разрешаем перенос вместо обрезки. Замерено: подписи
+       «Получить предварительный расчёт по объекту» нужно 399 px при 268. */
+    .cta-row .btn{white-space:normal;height:auto;min-height:44px;padding-top:12px;padding-bottom:12px}
+    .cta-row .btn>span:last-child{display:inline-block;max-width:100%}
+  }
     /* 60x32 -> 60x44: ширина та же, поэтому translateX(28px) у кнопки остаётся верным;
        кнопка 24px при top:9px центрируется (9 сверху / 9 снизу) */
     .daynight{height:44px}
@@ -695,7 +711,7 @@
   <button class="daynight" id="dnToggle" type="button" role="switch" aria-checked="false" aria-label="Переключить сценарий День/Ночь">
     <span class="dn-ico sun">☀</span><span class="dn-knob"></span><span class="dn-ico moon">☾</span>
   </button>
-  <button type="button" class="btn btn-primary btn-sm" data-form>Предварительный расчёт</button>
+  <button type="button" class="btn btn-primary btn-sm" data-form><span class="cta-long">Предварительный расчёт</span><span class="cta-short">Рассчитать</span></button>
 </div></header>
 
 <!-- ===================== HOME ===================== -->
