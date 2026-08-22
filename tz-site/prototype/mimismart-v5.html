@@ -152,8 +152,13 @@
   @media (max-width:940px){.hero-in{grid-template-columns:1fr;gap:16px;padding:28px 0 36px}}
   .hero h1{font-size:clamp(30px,4.4vw,52px);line-height:1.05}
   .lede{color:var(--muted);font-size:clamp(15px,1.5vw,18px);max-width:52ch;margin:18px 0 24px}
-  .qualify{display:inline-flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:13.5px;color:var(--muted);margin-top:22px}
+  .qualify{display:inline-flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:13.5px;color:var(--muted);margin-top:22px}
   .qualify b{color:var(--ink);font-weight:600}
+  /* Элемент грида по умолчанию не сжимается уже своего содержимого (min-width:auto).
+     Из-за этого нераскрывающийся inline-flex внутри героя задавал колонке 444 px:
+     на экране 390 px весь блок вместе с планом дома вылезал за край и обрезался,
+     и правая треть квартиры оказывалась недоступной. Замерено на iPhone 13 и Pixel 7. */
+  .shell>*{min-width:0}
   .cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
   .hint{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:13px;margin-top:18px}
   .hint .pulse{width:8px;height:8px;border-radius:50%;background:var(--glow);animation:pulse 2.4s infinite}

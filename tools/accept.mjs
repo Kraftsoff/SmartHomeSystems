@@ -489,6 +489,29 @@ await ctx.close();
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const t = await ctx.newPage();
+
+  /* Блок шире экрана. Проверка переполнения страницы это пропускала: вылет
+     прятался под overflow:hidden у предков, а на экране план дома молча терял
+     правую треть — кухню, гостиную и гараж. Причина была в том, что элемент
+     грида не сжимается уже своего содержимого, и нераскрывающийся inline-flex
+     задавал колонке 444 px при экране 390. Меряем ключевые блоки напрямую. */
+  await t.goto(F);
+  await t.waitForTimeout(400);
+  const wide = await t.evaluate(() => {
+    const vw = document.documentElement.clientWidth;
+    const out = [];
+    for (const sel of ['.house-stage', '.house-wrap', '.shell', '.qualify', '.scen-row']) {
+      document.querySelectorAll(sel).forEach((e) => {
+        if (e.offsetParent === null) return;
+        const w = e.getBoundingClientRect().width;
+        if (w > vw + 1) out.push(`${sel} ${Math.round(w)}px при экране ${vw}px`);
+      });
+    }
+    return out;
+  });
+  wide.forEach((w) => fail(`шире экрана телефона: ${w}`));
+  console.log(wide.length ? 'ширина блоков на телефоне: нарушения ниже' : 'ширина блоков на телефоне: всё вписывается');
+
   for (const h of ['#/', '#/answers', '#/contacts', '#/pricing']) {
     if (!routes.has(h)) continue;
     await t.goto(F + h);
