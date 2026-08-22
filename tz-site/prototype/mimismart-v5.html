@@ -433,6 +433,10 @@
     .tbl-wrap table.cmp tbody th,.tbl-wrap table.cmp tbody td{width:auto}
     .tbl-wrap thead{display:none}
     .tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap th,.tbl-wrap td{display:block;width:auto}
+    /* Ширина первой колонки задана правилом с большей специфичностью и переживала
+       разбор таблицы в блоки: заголовок строки оставался в 22% — 53 px на экране
+       360, пять строк текста в узкой колонке. Перебиваем адресно. */
+    .tbl-wrap th:first-child,.tbl-wrap td:first-child{width:auto}
     .tbl-wrap tbody tr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px}
     .tbl-wrap tbody th[scope="row"]{border:none;padding:0 0 6px;font-size:1rem;color:var(--ink)}
     .tbl-wrap tbody td{border:none;padding:8px 0 0}

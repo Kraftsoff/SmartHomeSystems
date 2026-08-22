@@ -547,6 +547,33 @@ await ctx.close();
       return [...new Set(out)];
     });
     cut.forEach((c) => fail(`подпись кнопки обрезана при ширине ${vw}: ${c}`));
+
+    /* Таблицы на узком экране разбираются в карточки: строка становится блоком,
+       ячейка получает подпись своей колонки. Ширина первой колонки задана
+       правилом с большей специфичностью и переживала этот разбор — заголовок
+       строки оставался в 22%, то есть 53 px, с текстом в пять строк. */
+    if (vw <= 560) {
+      const squeezed = await t2.evaluate(async () => {
+        const link = [...document.querySelectorAll('.cluster .card-link')]
+          .find((a) => a.parentElement.querySelector('.more, template.more'));
+        if (!link) return null;
+        location.hash = link.getAttribute('href');
+        await new Promise((r) => setTimeout(r, 350));
+        const row = document.querySelector('#a-a table tbody tr');
+        if (!row) return null;
+        const rw = row.getBoundingClientRect().width;
+        const narrow = [...row.children]
+          .filter((c) => c.getBoundingClientRect().width < rw * 0.6)
+          .map((c) => `${c.tagName.toLowerCase()} ${Math.round(c.getBoundingClientRect().width)}px из ${Math.round(rw)}`);
+        return { narrow, unlabelled: [...row.querySelectorAll('td')].filter((d) => !d.getAttribute('data-label')).length };
+      });
+      if (squeezed && squeezed.narrow.length) {
+        fail(`на узком экране ячейка таблицы не разложилась: ${squeezed.narrow[0]}`);
+      }
+      if (squeezed && squeezed.unlabelled) {
+        fail(`ячеек без подписи колонки на узком экране: ${squeezed.unlabelled} — в карточке не видно, что это за столбец`);
+      }
+    }
     await c2.close();
   }
 
