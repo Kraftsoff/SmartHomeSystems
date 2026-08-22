@@ -897,7 +897,17 @@ await ctx.close();
     /* YandexBot закрывать нельзя: Алиса берёт кандидатов из обычной выдачи Яндекса. */
     const yandex = groups.find(([, ua]) => ua === 'YandexBot');
     if (!yandex) fail('robots.txt: нет группы YandexBot');
-    else if (/Disallow:\s*\/\s*$/m.test(yandex[2]) && !/Allow:/.test(yandex[2])) fail('robots.txt: YandexBot закрыт');
+    /* Раньше проверка молчала, если в группе была любая строка Allow — а она там
+       есть всегда («Allow: /»). То есть закрыть бота строкой «Disallow: /» можно
+       было незаметно для гейта: мутационный прогон это и показал. Смотрим корневой
+       запрет и корневое разрешение отдельно; при обоих сразу правила равной длины,
+       и поведение краулеров расходится — это тоже повод сказать вслух. */
+    else {
+      const rootDisallow = /^\s*Disallow:\s*\/\s*$/m.test(yandex[2]);
+      const rootAllow = /^\s*Allow:\s*\/\s*$/m.test(yandex[2]);
+      if (rootDisallow && !rootAllow) fail('robots.txt: YandexBot закрыт — Алиса берёт кандидатов из обычной выдачи Яндекса');
+      if (rootDisallow && rootAllow) fail('robots.txt: у YandexBot одновременно Allow: / и Disallow: / — краулеры разрешают такой конфликт по-разному');
+    }
     console.log(`robots.txt: групп ${groups.length}, служебных путей ${need.length}, групп с утечкой ${open}`);
   }
 }
