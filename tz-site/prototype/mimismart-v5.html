@@ -706,7 +706,7 @@
           <button type="button" class="btn btn-primary" data-form>Получить предварительный расчёт</button>
           <button type="button" class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
         </div>
-        <div class="qualify">Работаем с квартирами <b>от 80 м²</b>, домами <b>от 300 м²</b> и объектами <b>от 40 млн ₽</b>&nbsp;<span class="prov">⚠️</span></div>
+        <div class="qualify">Работаем с квартирами <b>от 80 м²</b>, домами <b>от 300 м²</b> и объектами <b>от 40 млн ₽</b>&nbsp;<span class="prov">⚠️ пороги приёма объектов уточняются</span></div>
         <div class="hint"><span class="pulse"></span>Выберите сценарий ниже — дом отреагирует как настоящий</div>
         <div class="scen-row" id="scenRow"></div>
       </div>
@@ -904,7 +904,7 @@
   <section><div class="shell">
     <div class="price-band reveal">
       <p class="eyebrow" style="margin-bottom:12px">Стоимость</p>
-      <p class="big">Комплексные инженерные решения рассчитываются индивидуально. Для квартир и домов премиального уровня проекты обычно начинаются <span class="amber">от 2–3 млн ₽</span> <span class="prov">⚠️</span> — и зависят от площади, стадии объекта, состава систем и оборудования.</p>
+      <p class="big">Комплексные инженерные решения рассчитываются индивидуально. Для квартир и домов премиального уровня проекты обычно начинаются <span class="amber">от 2–3 млн ₽</span> <span class="prov">⚠️ порог уточняется</span> — и зависят от площади, стадии объекта, состава систем и оборудования.</p>
       <p class="cut"><b>Мы не работаем</b> с запросами на отдельные лампочки, розетки и бытовые гаджеты.</p>
       <div class="cta-row" style="margin-top:22px"><button type="button" class="btn btn-primary" data-form>Получить предварительный расчёт по объекту</button></div>
     </div>
@@ -920,7 +920,7 @@
   <section><div class="shell">
     <div class="sec-head reveal"><p class="eyebrow">Ответы</p>
       <h2>Инженерные ответы, а не блог о лампочках.</h2>
-      <p>На текущем сайте здесь тестовые заглушки <span class="prov">⚠️</span> — заменяем на статьи-рычаги: вопрос клиента → прямой ответ → как реализуется → почему мы. <a href="#/answers" style="color:var(--accent-ink)">Все ответы →</a></p></div>
+      <p>На текущем сайте здесь тестовые заглушки — заменяем на статьи-рычаги: вопрос клиента → прямой ответ → как реализуется → почему мы. <a href="#/answers" style="color:var(--accent-ink)">Все ответы →</a></p></div>
     <div class="grid g3">
       <a class="card card-link reveal" data-lever="Когда подключать умный дом при ремонте?"><span class="kicker">Процесс</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Раньше — дешевле: до чистовой отделки трассы закладывают без штробления.</p><div class="go">Читать ответ →</div></a>
       <a class="card card-link reveal" data-lever="Сколько стоит инженерия для квартиры 150 м²?"><span class="kicker">Цена</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Смета зависит от стадии объекта, состава систем и класса оборудования.</p><div class="go">Читать ответ →</div></a>
@@ -1069,7 +1069,7 @@
   <div class="sub-hero"><div class="shell">
     <p class="crumbs"><a href="#/">Главная</a> / Ответы</p>
     <p class="eyebrow">Ответы</p><h1>База инженерных ответов</h1>
-    <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание») <span class="prov">⚠️</span>. Ниже — все 75 статей-рычагов по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы. Черновой проход завершён; часть цифр (пороги цен, условия партнёрского вознаграждения, гарантия) помечена <span class="prov">⚠️</span> и ждёт подтверждения фактами от клиента.</div>
+    <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание»). Ниже — все <span id="leversCount">77</span> статей-рычагов по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы. Черновой проход завершён; часть цифр (пороги цен, условия партнёрского вознаграждения, гарантия) помечена значком ⚠️ и ждёт подтверждения фактами от клиента.</div>
   </div></div>
   <div class="shell">
     <div class="qsearch" id="qsearch">
@@ -3032,7 +3032,7 @@
        состоянии поиска — «75». Любая правка базы делала их ложью молча. */
     (function setCounts(){
       var n=document.querySelectorAll('#p-news .cluster .card').length;
-      ['answersCount','qresetCount'].forEach(function(id){
+      ['answersCount','qresetCount','leversCount'].forEach(function(id){
         var el=document.getElementById(id); if(el)el.textContent=n;
       });
     })();

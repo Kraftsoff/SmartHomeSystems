@@ -1215,14 +1215,68 @@ await ctx.close();
       вПустом: (document.getElementById('qresetCount') || {}).textContent || '',
       имена: [...names],
       крошка: crumb ? crumb.textContent.replace(/\s+/g, ' ').trim() : '',
-      осталосьСтатьи: /Стать[ияей]/.test(document.body.innerText),
+      осталосьСтатьи: /Стать[ияей]/.test([...document.querySelectorAll('section.page')].map((x) => x.textContent).join(' ')),
+      числаВТексте: (() => {
+        const out = [];
+        /* \w в JavaScript не покрывает кириллицу — нужен явный диапазон,
+           иначе «статей-рычагов» не совпадёт и число проедет мимо проверки. */
+        const re = /(\d{2,3})\s+(вопрос[а-яё]*|ответ[а-яё]*|стат[а-яё]*-рычаг[а-яё]*|рычаг[а-яё]*)/gi;
+        let m;
+        /* textContent всех страниц, а не innerText видимой: числа стоят на разных
+           маршрутах, и проверка на одной странице их просто не видит. */
+        const text = [...document.querySelectorAll('section.page')]
+          .map((x) => x.textContent).join(' ').replace(/\s+/g, ' ');
+        while ((m = re.exec(text))) out.push([m[0], m[1]]);
+        return out;
+      })(),
     };
   });
   if (String(t.cards) !== t.наГлавной) fail(`на главной «${t.наГлавной}» ответов вместо ${t.cards}`);
   if (String(t.cards) !== t.вПустом) fail(`в пустом состоянии поиска «${t.вПустом}» вместо ${t.cards}`);
+  /* Проверка по id ловит только те два числа, что мы сделали вычисляемыми. Любое
+     другое количество, вписанное строкой, устареет так же молча — ищем их в тексте. */
+  for (const [frag, num] of t.числаВТексте) {
+    if (Number(num) !== t.cards) fail(`в тексте «${frag}», а ответов ${t.cards}`);
+  }
   if (t.имена.length > 1) fail(`раздел ответов назван по-разному: ${t.имена.join(' / ')}`);
   if (t.осталосьСтатьи) fail('на странице осталось слово «Статьи» — раздел должен называться одинаково везде');
   console.log(`числа и имя раздела: ${t.cards} ответов везде, раздел «${t.имена[0] || '—'}», крошка «${t.крошка}»`);
+  await pg.close();
+}
+
+/* ---------- 12. Пометки о непроверенном ----------
+   Пустая пометка бесполезна дважды: читателю не сказано, чему не верить, а клиенту —
+   что заполнять. Отдельно следим, чтобы значок не ставили как типографский символ:
+   класс .prov исключает ответ из разметки FAQPage, и декоративное употребление
+   молча выкинуло бы верный ответ. */
+{
+  const pg = await browser.newPage();
+  await pg.goto(F, { waitUntil: 'load' });
+  await pg.waitForTimeout(500);
+  const pr = await pg.evaluate(() => {
+    const all = [...document.querySelectorAll('.prov')];
+    const clean = (e) => (e.textContent || '').replace(/[\u26a0\ufe0f\s]/g, '');
+    const empty = all.filter((e) => !clean(e)).length;
+    const short = all.filter((e) => clean(e) && clean(e).length < 6)
+      .map((e) => e.textContent.trim().slice(0, 40));
+    /* Пометка должна быть привязана к факту. Первая версия правила требовала, чтобы
+       она не была единственным содержимым родителя, — и поймала восемь законных
+       случаев: ячейки таблиц, где смысл задаёт заголовок строки, и абзацы после
+       подписи «Телефон». Правило сужено до настоящего сиротства: пометка одна
+       в родителе, слева ничего нет и это не ячейка таблицы. */
+    const alone = all.filter((e) => {
+      const p = e.parentElement;
+      if (!p || p.children.length !== 1) return false;
+      if ((p.textContent || '').trim() !== (e.textContent || '').trim()) return false;
+      if (/^(td|th)$/i.test(p.tagName)) return false;
+      return !p.previousElementSibling;
+    }).length;
+    return { всего: all.length, пустых: empty, слишкомКороткие: short, отдельноСтоящих: alone };
+  });
+  if (pr.пустых) fail(`пометок ⚠️ без пояснения: ${pr.пустых} — не сказано, что именно не подтверждено`);
+  if (pr.слишкомКороткие.length) fail(`пометки без внятного текста: ${pr.слишкомКороткие.join(', ')}`);
+  if (pr.отдельноСтоящих) fail(`пометок, стоящих отдельным абзацем: ${pr.отдельноСтоящих} — непонятно, к какому факту относятся`);
+  console.log(`пометки о непроверенном: ${pr.всего}, все с пояснением и при своём факте`);
   await pg.close();
 }
 
