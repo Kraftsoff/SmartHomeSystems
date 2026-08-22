@@ -877,13 +877,31 @@ await ctx.close();
         [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
       if (!n) fail(`поиск не находит «${term}» — развёрнутая часть выпала из индекса`);
     }
+    /* Совпадение внутри слова — не совпадение. Простой indexOf находил «елка»
+       внутри «переделка» и открывал ответ, не имеющий к запросу отношения.
+       Набор по мере ввода при этом обязан работать: «протеч» → «протечки». */
+    const midWord = {};
+    for (const term of ['елка', 'ереде', 'онтроллер']) {
+      await input.fill(term);
+      await page.waitForTimeout(260);
+      midWord[term] = await page.evaluate(() =>
+        [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
+      if (midWord[term]) fail(`поиск «${term}» находит ${midWord[term]} — совпадение внутри слова, а не с начала`);
+    }
+    for (const term of ['протеч', 'гарант', 'кабел']) {
+      await input.fill(term);
+      await page.waitForTimeout(260);
+      const n = await page.evaluate(() =>
+        [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
+      if (!n) fail(`поиск не находит по началу слова «${term}» — набор по мере ввода сломан`);
+    }
     await input.fill('');
     await page.waitForTimeout(300);
     const all = await page.evaluate(() =>
       [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
     /* Число не зашиваем: ответы добавляются, и константа устареет молча. */
     if (all !== ld.cards) fail(`сброс поиска показывает ${all} ответов вместо ${ld.cards}`);
-    console.log(`поиск: «протечка» → ${found}, сброс → ${all}`);
+    console.log(`поиск: «протечка» → ${found}, обрывки внутри слов → 0, сброс → ${all}`);
   }
 
   /* Калькулятор состава работ. Цену он называть не должен: методика не подтверждена. */

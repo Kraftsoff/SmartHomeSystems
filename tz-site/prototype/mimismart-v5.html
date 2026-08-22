@@ -3001,6 +3001,20 @@
       for(i=0;i<ws.length;i++){if(ws[i])o.push(stem(ws[i]))}
       return o;
     }
+    /* Подстрока, но только с начала слова. Простой indexOf>-1 давал совпадения
+       внутри слов: запрос «ёлка» открывал ответ про дешёвые решения, потому что
+       «елка» сидит внутри «передЕЛКА». Набор по мере ввода при этом нужен —
+       «протеч» должно находить «протечки», — поэтому режем не подстроку целиком,
+       а только совпадения, начинающиеся не на границе слова. */
+    function startsWord(hay,needle){
+      if(!needle)return false;
+      var i=hay.indexOf(needle);
+      while(i>-1){
+        if(i===0||!/[a-zа-я0-9]/.test(hay.charAt(i-1)))return true;
+        i=hay.indexOf(needle,i+1);
+      }
+      return false;
+    }
     /* совпадение: основа запроса — префикс основы любого слова текста */
     function hits(qs,pool){
       for(var i=0;i<qs.length;i++){
@@ -3054,7 +3068,7 @@
         var vis=0;
         cl.querySelectorAll('.card').forEach(function(c){
           unmark(c);
-          var hit=!q||c._q.indexOf(q)>-1||c._a.indexOf(q)>-1||hits(qstems,c._st);
+          var hit=!q||startsWord(c._q,q)||startsWord(c._a,q)||hits(qstems,c._st);
           c.hidden=!hit;
           if(hit){vis++;shown++;
             if(q){mark(c.querySelector('h3'),c._qh,q);
