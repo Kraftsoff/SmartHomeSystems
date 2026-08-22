@@ -1258,10 +1258,15 @@ await ctx.close();
   }));
   if (!house.stage) fail('интерактивная модель дома отсутствует');
   if (house.scenes < 6) fail(`кнопок сценариев ${house.scenes}, ожидалось не меньше шести`);
+  /* Дальше идут проверки, которым нужна сама модель. Без защиты пропавший
+     дом ронял прогон исключением на первом же обращении, и всё, что стоит
+     после него, не выполнялось вовсе: одно нарушение прятало остальные. */
   const reacts = await page.evaluate(async () => {
+    const st = document.getElementById('houseStage');
+    if (!st) return true;                     /* об отсутствии уже сказано выше */
     const btns = [...document.querySelectorAll('.scen-btn')];
     if (btns.length < 3) return false;
-    const snap = () => document.getElementById('houseStage').innerHTML.length;
+    const snap = () => st.innerHTML.length;
     const a = snap();
     btns[2].click();
     await new Promise((r) => setTimeout(r, 700));
@@ -1292,9 +1297,13 @@ await ctx.close();
      отсутствие следов, хотя элементы исправно создавались. */
   {
     const st2 = await page.$('.house-stage');
+    /* Если модели нет или она не отрисована, об этом уже сказано выше. Здесь
+       выходим молча: раньше ожидание видимости валило прогон целиком, и одно
+       нарушение прятало все остальные. */
+    const bb = st2 ? await st2.boundingBox().catch(() => null) : null;
+    if (bb) {
     await st2.scrollIntoViewIfNeeded();
     await page.waitForTimeout(400);
-    const bb = await st2.boundingBox();
     /* Что проверяем: следы появляются под курсором и свежий след виден полностью.
        После двух уменьшений подряд отпечаток стал пятном в 9 px и вдобавок гас с
        первого же кадра — на экране это читалось как их полное отсутствие, хотя
@@ -1341,6 +1350,7 @@ await ctx.close();
     if (fp.задержка < 0.15) fail(`след гаснет сразу (задержка ${fp.задержка}s): он виден только в середине перехода и читается как пятно`);
     if (fp.ширина < 7) fail(`след шириной ${fp.ширина}px — на плане его не различить`);
     console.log(`следы под курсором: лучшая полоса ${fp.всего} за 12 шагов, ширина ${fp.ширина}px, держится ${fp.задержка}s`);
+    }
   }
 
   console.log(`модель дома: сценариев ${house.scenes}, реагирует на переключение; состояние кнопок объявляемо (${scn.нажатых} из ${scn.всего})`);
