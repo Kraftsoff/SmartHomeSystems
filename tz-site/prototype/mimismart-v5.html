@@ -496,10 +496,13 @@
 
   /* следы жителя за курсором: план дома вид сверху, след — отпечаток подошвы ботинка (протектор) */
   .footprint{position:absolute;left:0;top:0;width:9px;height:15px;pointer-events:none;
-    transform:translate(-50%,-50%);opacity:1;transition:opacity 1.3s ease;z-index:6;will-change:opacity}
+    transform:translate(-50%,-50%);opacity:1;transition:opacity 1.1s ease .35s;z-index:6;will-change:opacity}
+  /* Задержка перед угасанием: класс .fade вешается на следующем кадре, и без неё
+     след всё время виден только в середине перехода — на 9 px это читается как
+     грязное пятно, а не как отпечаток. */
   .footprint.fade{opacity:0}
-  .footprint svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
-  .footprint svg rect{fill:var(--glow)}
+  .footprint svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45))}
+  .footprint svg rect{fill:var(--accent-ink);stroke:rgba(0,0,0,.28);stroke-width:1.2;paint-order:stroke}
 
   /* cards & grids */
   .grid{display:grid;gap:14px}
@@ -3615,12 +3618,17 @@ function caseCard(c){return el('<div class="case reveal"><h3>'+c.t+'</h3>'+
     }
     // след подошвы (вид сверху: два овала — носок + пятка, чёткий разрыв между ними, без
     // размытия), не силуэт ботинка сбоку и не сплошная «гантель» — проверено визуально через рендер
-    var FOOTPRINT='<svg viewBox="0 0 24 42"><rect x="4" y="2" width="16" height="26" rx="7"/><rect x="5" y="29" width="14" height="12" rx="5"/><g stroke="rgba(0,0,0,.4)" stroke-width="1.3" stroke-linecap="round"><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="14.5" x2="17" y2="14.5"/><line x1="7" y1="20" x2="17" y2="20"/><line x1="6.5" y1="34.5" x2="17.5" y2="34.5"/></g></svg>';
+    var FOOTPRINT='<svg viewBox="0 0 24 42"><rect x="4" y="2" width="16" height="26" rx="7"/><rect x="5.5" y="30" width="13" height="11" rx="5"/></svg>';
     // физические объекты, через которые след не может «пройти»: мебель/стены — уже в маске
     // фонового плана (isFloor), а новые накладные элементы (устройства, инженерные иконки,
     // датчики, камеры) в маску не входят — исключаем их отдельно по факту их реального положения на экране
     function obstacleRects(r){
-      var els=stage.querySelectorAll('.device,.eng,.sensor,.living-cctv,.garage-cctv,.corridor-led');
+      /* Только то, что реально стоит на полу. Мебель и стены уже сидят в маске плана,
+         а накладки .eng — это линии инженерии на потолке (лента DALI, трасса): они
+         рисуются поверх комнаты и перегораживали её насквозь, хотя обойти такую
+         «преграду» в жизни не нужно. Замерено: по полосе с лентой проходило 2 шага
+         из 40. Машина, приборы и камеры остаются непроходимыми. */
+      var els=stage.querySelectorAll('.device,.sensor,.living-cctv,.garage-cctv');
       var out=[];
       for(var i=0;i<els.length;i++){
         var b=els[i].getBoundingClientRect();
@@ -3635,40 +3643,67 @@ function caseCard(c){return el('<div class="case reveal"><h3>'+c.t+'</h3>'+
       }
       return false;
     }
-    /* Проходимость всего отрезка, а не только его конца. Точечная проверка пропускала
-       рывок мышью через перегородку: пол есть и там, и там, а стена между ними никем
-       не проверялась — житель «перепрыгивал». Шаг выборки 2 px мельче самой тонкой
-       перегородки на плане, поэтому проскочить её нельзя. */
-    function pathClear(x0,y0,x1,y1,r,rects){
+    /* Идём по отрезку и продвигаемся ровно настолько, насколько пускает план:
+       упёрлись в стену или предмет — встаём вплотную к нему и ждём, пока курсор
+       обведут через проём. Шаг выборки 2 px мельче самой тонкой перегородки, так
+       что проскочить её рывком мыши нельзя.
+       Возвращаем последнюю достижимую точку, а не «да/нет». Прежняя версия при
+       отказе не двигала жителя совсем, и одного заблокированного шага хватало,
+       чтобы он застрял навсегда: следующий отрезок мерился от той же старой точки
+       и пересекал стену тем более. Внешне это выглядело как полностью пропавшие следы. */
+    function advance(x0,y0,x1,y1,r,rects){
       var d=Math.hypot(x1-x0,y1-y0), n=Math.max(1,Math.ceil(d/2));
+      var px=x0, py=y0, moved=false;
       for(var i=1;i<=n;i++){
-        var t=i/n, px=x0+(x1-x0)*t, py=y0+(y1-y0)*t;
-        if(!isFloor(px/r.width,py/r.height))return false;
-        if(hitsObject(px,py,rects))return false;
+        var t=i/n, cx=x0+(x1-x0)*t, cy=y0+(y1-y0)*t;
+        if(!isFloor(cx/r.width,cy/r.height))break;
+        if(hitsObject(cx,cy,rects))break;
+        px=cx; py=cy; moved=true;
       }
-      return true;
+      return moved?{x:px,y:py}:null;
     }
     var lastX=null,lastY=null,lastT=0,side=1;
     stage.addEventListener('pointermove',function(e){
       var r=stage.getBoundingClientRect();
       var x=e.clientX-r.left, y=e.clientY-r.top;
       var now=performance.now();
-      if(lastX===null){lastX=x;lastY=y;lastT=now;return}
+      /* Позиция жителя обязана быть проходимой. Первое движение записывало её без
+         проверки: курсор вошёл на сцену над стеной — житель оказался внутри стены,
+         и дальше любой отрезок начинался с непроходимой точки, то есть следы
+         пропадали насовсем. Пока позиция недействительна, ставим жителя туда, где
+         курсор впервые оказался на полу. */
+      if(lastX===null||!isFloor(lastX/r.width,lastY/r.height)){
+        if(isFloor(x/r.width,y/r.height)){lastX=x;lastY=y;lastT=now}
+        return;
+      }
       var dx=x-lastX, dy=y-lastY, dist=Math.hypot(dx,dy);
       if(dist<8||now-lastT<80)return;
       var rects=obstacleRects(r);
-      /* Ключевое: при пересечении стены прошлая позиция НЕ обновляется. Житель стоит
-         там же, пока курсор не обведут через дверь или проём — иначе запрет
-         превращается в «след не нарисовался», а сам человек всё равно телепортируется. */
-      if(!pathClear(lastX,lastY,x,y,r,rects))return;
+      var adv=advance(lastX,lastY,x,y,r,rects);
+      /* Скольжение вдоль препятствия. Прямой ход упёрся — пробуем составляющие по
+         осям: так житель обходит угол и проходит в дверь, ведя рукой по стене,
+         вместо того чтобы намертво встать. Без этого он оставался у первой же
+         преграды, курсор уходил дальше, и каждый следующий отрезок упирался в ту
+         же стену — внешне следы пропадали совсем. */
+      if(!adv||Math.hypot(adv.x-x,adv.y-y)>2){
+        var from=adv||{x:lastX,y:lastY};
+        var slideX=advance(from.x,from.y,x,from.y,r,rects);
+        var s1=slideX||from;
+        var slideY=advance(s1.x,s1.y,s1.x,y,r,rects);
+        var cand=slideY||s1;
+        if(!adv||Math.hypot(cand.x-lastX,cand.y-lastY)>Math.hypot(adv.x-lastX,adv.y-lastY)) adv=cand;
+      }
+      if(!adv||(adv.x===lastX&&adv.y===lastY))return;   // вплотную к стене: ждём обхода
+      var step=Math.hypot(adv.x-lastX,adv.y-lastY);
+      lastX=adv.x; lastY=adv.y; lastT=now;  // продвинулись — позиция обновляется всегда
+      if(step<8)return;                     // придвинулись к стене, но на шаг не набрали
       var angle=Math.atan2(dy,dx)*180/Math.PI;
       var perp=(angle+90)*Math.PI/180, off=2*side;
-      var fx=x+Math.cos(perp)*off, fy=y+Math.sin(perp)*off;
+      var fx=adv.x+Math.cos(perp)*off, fy=adv.y+Math.sin(perp)*off;
       // проверяем именно точку, куда реально ставится след (со смещением в сторону), а не точку
       // курсора — иначе у края стены смещённый след может попасть на стену, а курсор — нет
       if(!isFloor(fx/r.width,fy/r.height))return;
       if(hitsObject(fx,fy,rects))return;
-      lastX=x; lastY=y; lastT=now;
       var el=document.createElement('div'); el.className='footprint'; el.innerHTML=FOOTPRINT;
       el.style.left=fx+'px'; el.style.top=fy+'px';
       // svg нарисован носком вверх (angle=-90°), поэтому к направлению шага прибавляем +90 —
