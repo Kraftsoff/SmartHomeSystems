@@ -392,6 +392,11 @@
   #p-privacy h2{font-size:clamp(18px,2vw,23px);margin:34px 0 12px}
   #p-privacy p,#p-privacy li{color:var(--muted);max-width:74ch}
   #p-privacy li{margin:4px 0}
+  /* У поля type="search" браузер рисует собственную кнопку очистки, и рядом с
+     нашей их оказывалось две. Браузерная не имеет подписи, не видна скринридеру
+     и не проходит через наш сброс фильтра. Оставляем одну — свою. */
+  .searchbar input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
   .cluster .card .more{display:none}
   /* На странице ответа разворачивается СОДЕРЖИМОЕ блока .more, без самой обёртки,
      поэтому селекторы вида .more>… там не срабатывают. Стилизуем по классу и по

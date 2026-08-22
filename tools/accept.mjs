@@ -991,7 +991,45 @@ await ctx.close();
       [...document.querySelectorAll('.cluster .card')].filter((c) => c.offsetParent !== null).length);
     /* Число не зашиваем: ответы добавляются, и константа устареет молча. */
     if (all !== ld.cards) fail(`сброс поиска показывает ${all} ответов вместо ${ld.cards}`);
-    console.log(`поиск: «протечка» → ${found}, обрывки внутри слов → 0, сброс → ${all}`);
+    /* Кнопка очистки должна быть одна. У поля type="search" браузер рисует свою,
+       и рядом с нашей их оказывалось две: браузерная без подписи, скринридеру не
+       видна и мимо нашего сброса фильтра. */
+    const clr = await page.evaluate(async () => {
+      const inp = document.querySelector('#q, input[type=search], .searchbar input');
+      if (!inp) return null;
+      /* Кнопка очистки появляется только при непустом запросе — вводим его здесь,
+         иначе проверка идёт после сброса и не находит ни одной. */
+      inp.value = 'протечка';
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 250));
+      const ib = inp.getBoundingClientRect();
+      const own = [...inp.parentElement.querySelectorAll('button')]
+        .filter((b) => b.offsetParent !== null && b.getBoundingClientRect().right <= ib.right + 2);
+      /* Браузерную кнопку из теневого дерева querySelectorAll не видит, поэтому
+         посчитать её нельзя — проверяем наличие правила, которое её убирает. */
+      let подавлена = false;
+      for (const sh of document.styleSheets) {
+        try {
+          for (const r of sh.cssRules) {
+            if (r.selectorText && /search-cancel-button/.test(r.selectorText)
+              && /none/.test(r.style.cssText)) подавлена = true;
+          }
+        } catch (e) { /* чужой лист */ }
+      }
+      const out = {
+        подавлена,
+        своих: own.length,
+        безПодписи: own.filter((b) => !(b.getAttribute('aria-label') || b.textContent.trim())).length,
+      };
+      inp.value = '';
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 150));
+      return out;
+    });
+    if (clr && clr.своих !== 1) fail(`кнопок очистки поиска: ${clr.своих} вместо одной`);
+    if (clr && clr.безПодписи) fail(`кнопка очистки поиска без подписи: ${clr.безПодписи}`);
+    if (clr && !clr.подавлена) fail('браузерная кнопка очистки не подавлена — в поле их будет две');
+    console.log(`поиск: «протечка» → ${found}, обрывки внутри слов → 0, сброс → ${all}, кнопка очистки одна и подписана`);
   }
 
   /* Калькулятор состава работ. Цену он называть не должен: методика не подтверждена. */
