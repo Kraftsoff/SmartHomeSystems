@@ -1165,6 +1165,40 @@ await ctx.close();
     : `тема: проверено четыре случая, нарушения перечислены ниже`);
 }
 
+/* ---------- 11. Числа в тексте и имя раздела ----------
+   На главной висело «60 вопросов», когда их было 77, а в пустом состоянии поиска — «75».
+   Числа теперь вычисляются, и проверка следит, что они не разъехались. Раздел
+   назывался то «Ответы», то «Статьи»: для читателя это два разных места, для
+   машины — два имени одной сущности. */
+{
+  const pg = await browser.newPage();
+  await pg.goto(F + '#/answers', { waitUntil: 'load' });
+  await pg.waitForTimeout(700);
+  const t = await pg.evaluate(() => {
+    const cards = document.querySelectorAll('#p-news .cluster .card').length;
+    const names = new Set();
+    document.querySelectorAll('a[href="#/answers"]').forEach((a) => {
+      const s = (a.textContent || '').replace(/[←→\s]+/g, ' ').trim();
+      if (s && s.length < 40) names.add(s.replace(/^Все /i, '').toLowerCase());
+    });
+    const crumb = document.querySelector('#p-news .crumbs');
+    return {
+      cards,
+      наГлавной: (document.getElementById('answersCount') || {}).textContent || '',
+      вПустом: (document.getElementById('qresetCount') || {}).textContent || '',
+      имена: [...names],
+      крошка: crumb ? crumb.textContent.replace(/\s+/g, ' ').trim() : '',
+      осталосьСтатьи: /Стать[ияей]/.test(document.body.innerText),
+    };
+  });
+  if (String(t.cards) !== t.наГлавной) fail(`на главной «${t.наГлавной}» ответов вместо ${t.cards}`);
+  if (String(t.cards) !== t.вПустом) fail(`в пустом состоянии поиска «${t.вПустом}» вместо ${t.cards}`);
+  if (t.имена.length > 1) fail(`раздел ответов назван по-разному: ${t.имена.join(' / ')}`);
+  if (t.осталосьСтатьи) fail('на странице осталось слово «Статьи» — раздел должен называться одинаково везде');
+  console.log(`числа и имя раздела: ${t.cards} ответов везде, раздел «${t.имена[0] || '—'}», крошка «${t.крошка}»`);
+  await pg.close();
+}
+
 await browser.close();
 
 if (problems.length) {
