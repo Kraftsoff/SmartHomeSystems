@@ -3501,14 +3501,23 @@
     sensor.style.setProperty('--pulse-speed', s.sensor==='alert' ? '.9s' : '2.4s');
   }
   var scenRow=document.getElementById('scenRow'), sceneBtns=[];
+  if(scenRow&&!scenRow.getAttribute('role')){
+    scenRow.setAttribute('role','group');
+    scenRow.setAttribute('aria-label','Сценарии умного дома: выберите, что показать на плане');
+  }
   SCENES.forEach(function(s){
     var b=document.createElement('button'); b.className='scen-btn'; b.type='button'; b.textContent=s.label;
+    /* Активный сценарий был отмечен только заливкой кнопки. Для скринридера это
+       не состояние, а просто цвет: пользователь не знает, какой сценарий идёт
+       и что выбор вообще произошёл. aria-pressed делает состояние объявляемым. */
+    b.setAttribute('aria-pressed','false');
     b.addEventListener('click',function(){ playScene(SCENES.indexOf(s)); pauseAutoThenResume(); });
     scenRow.appendChild(b); sceneBtns.push(b);
   });
   function playScene(i){
-    sceneBtns.forEach(function(x){x.classList.remove('on')});
-    sceneBtns[i].classList.add('on'); applyScene(SCENES[i]); autoIndex=i;
+    sceneBtns.forEach(function(x){x.classList.remove('on'); x.setAttribute('aria-pressed','false')});
+    sceneBtns[i].classList.add('on'); sceneBtns[i].setAttribute('aria-pressed','true');
+    applyScene(SCENES[i]); autoIndex=i;
   }
   /* ---------- автопроигрывание сценариев: демонстрация без участия пользователя ---------- */
   var autoIndex=0, autoTimer=null, resumeTimer=null;

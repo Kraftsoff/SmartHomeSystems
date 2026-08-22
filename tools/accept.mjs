@@ -1015,7 +1015,25 @@ await ctx.close();
     return snap() !== a;
   });
   if (!reacts) fail('сценарий не меняет состояние модели дома');
-  console.log(`модель дома: сценариев ${house.scenes}, реагирует на переключение`);
+  /* Активный сценарий отмечен заливкой кнопки. Для скринридера цвет — не состояние,
+     поэтому оно должно дублироваться в aria-pressed, и ровно на одной кнопке. */
+  const scn = await page.evaluate(() => {
+    const bs = [...document.querySelectorAll('.scen-btn')];
+    const row = bs[0] && bs[0].parentElement;
+    return {
+      всего: bs.length,
+      сPressed: bs.filter((b) => b.hasAttribute('aria-pressed')).length,
+      нажатых: bs.filter((b) => b.getAttribute('aria-pressed') === 'true').length,
+      сКлассом: bs.filter((b) => b.classList.contains('on')).length,
+      совпадает: bs.every((b) => (b.getAttribute('aria-pressed') === 'true') === b.classList.contains('on')),
+      подписьГруппы: row ? (row.getAttribute('aria-label') || '') : '',
+    };
+  });
+  if (scn.сPressed !== scn.всего) fail(`кнопки сценариев без aria-pressed: ${scn.всего - scn.сPressed} из ${scn.всего} — активный сценарий передаётся только цветом`);
+  if (scn.нажатых !== 1) fail(`нажатых кнопок сценария ${scn.нажатых}, должна быть ровно одна`);
+  if (!scn.совпадает) fail('aria-pressed разошёлся с классом .on — состояние в разметке не то, что видно глазом');
+  if (!scn.подписьГруппы) fail('ряд кнопок сценариев без подписи группы — читается как восемь несвязанных кнопок');
+  console.log(`модель дома: сценариев ${house.scenes}, реагирует на переключение; состояние кнопок объявляемо (${scn.нажатых} из ${scn.всего})`);
 }
 
 /* ---------- 9. Целостность разметки: то, что браузер молча чинит ----------
