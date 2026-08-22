@@ -485,25 +485,33 @@
     .scen-row{gap:10px}
     .cluster-nav a{min-height:44px}
     .brand{min-height:44px}
-  /* Подпись кнопки в шапке. На телефоне логотип, переключатель темы и кнопка не
-     помещаются в строку: кнопка сжимается флексом и обрезает текст — замерено,
-     тексту нужно 227 px при отведённых 146. Высота шапки фиксированная, поэтому
-     перенос на две строки не годится; на узких экранах ставим короткий вариант. */
-  .cta-short{display:none}
-  @media (max-width:460px){
-    .cta-long{display:none}
-    .cta-short{display:inline}
-    /* Кнопки в тексте страницы, в отличие от шапки, по высоте не зажаты —
-       длинной подписи разрешаем перенос вместо обрезки. Замерено: подписи
-       «Получить предварительный расчёт по объекту» нужно 399 px при 268. */
-    .cta-row .btn{white-space:normal;height:auto;min-height:44px;padding-top:12px;padding-bottom:12px}
-    .cta-row .btn>span:last-child{display:inline-block;max-width:100%}
-  }
     /* 60x32 -> 60x44: ширина та же, поэтому translateX(28px) у кнопки остаётся верным;
        кнопка 24px при top:9px центрируется (9 сверху / 9 снизу) */
     .daynight{height:44px}
     .dn-knob{top:9px}
     .xclose{min-width:44px;min-height:44px;line-height:1}
+  }
+
+  /* Подпись кнопки в шапке. На телефоне логотип, переключатель темы и кнопка не
+     помещаются в строку: кнопка сжимается флексом и режет текст — замерено, подписи
+     нужно 227 px при отведённых 146. Высота шапки фиксирована, перенос не годится,
+     поэтому на узких экранах ставим короткий вариант.
+     Правила стоят на верхнем уровне: вложенные в блок тач-мишеней, они действовали
+     только до 480 px, и выше кнопка показывала обе подписи сразу. */
+  .cta-short{display:none}
+  /* Кнопка в шапке не сжимается: флекс отбирал у неё 9 px на 360 и 15 px на 1024,
+     и подпись обрезалась. Уступать место должны логотип и меню, а не призыв. */
+  .nav-in .btn{flex:0 0 auto}
+  @media (max-width:520px){
+    .cta-long{display:none}
+    .cta-short{display:inline}
+    /* Кнопки в тексте страницы по высоте не зажаты — длинной подписи разрешаем
+       перенос вместо обрезки: ей нужно 399 px при отведённых 268. */
+    .cta-row .btn{white-space:normal;height:auto;min-height:44px;padding-top:12px;padding-bottom:12px}
+    .cta-row .btn>span:last-child{display:inline-block;max-width:100%}
+  }
+  @media (max-width:380px){
+    .nav-in .btn.btn-sm{padding:12px 10px;font-size:12.5px}
   }
   .scen-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
   .scen-btn{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:999px;

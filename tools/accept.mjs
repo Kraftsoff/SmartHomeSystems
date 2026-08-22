@@ -512,30 +512,43 @@ await ctx.close();
   wide.forEach((w) => fail(`шире экрана телефона: ${w}`));
 
   /* Подписи кнопок не должны обрезаться. У кнопки в шапке overflow:hidden ради
-     декоративного блика, поэтому обрезанный текст не создаёт переполнения и
-     выглядит просто как «ПРЕДВАРИТЕЛЬНЫЙ Р…». Меряем саму подпись, а не кнопку:
-     блики за край заходят намеренно. */
-  const cut = await t.evaluate(() => {
-    const out = [];
-    document.querySelectorAll('button, a.btn').forEach((btn) => {
-      if (btn.offsetParent === null) return;
-      const box = btn.getBoundingClientRect();
-      const cs = getComputedStyle(btn);
-      const padL = parseFloat(cs.paddingLeft) || 0;
-      const padR = parseFloat(cs.paddingRight) || 0;
-      [...btn.querySelectorAll('span, b')].forEach((sp) => {
-        if (!(sp.textContent || '').trim()) return;
-        if (getComputedStyle(sp).display === 'none') return;
-        const r = sp.getBoundingClientRect();
-        if (r.width < 1) return;
-        if (r.left < box.left + padL - 1 || r.right > box.right - padR + 1) {
-          out.push(`«${sp.textContent.trim().slice(0, 28)}»`);
-        }
+     декоративного блика, поэтому обрезанный текст не даёт переполнения и выглядит
+     просто как «ПРЕДВАРИТЕЛЬНЫЙ Р…». Меряем саму подпись, а не кнопку: блики за
+     край заходят намеренно.
+     Ширины взяты по месту поломки: на 360 не помещалась короткая подпись, на 1024
+     меню занимает строку и не помещалась длинная. На 390 обе проходили, поэтому
+     одной ширины для проверки мало. */
+  for (const vw of [360, 390, 1024]) {
+    const c2 = await browser.newContext({ viewport: { width: vw, height: 900 } });
+    const t2 = await c2.newPage();
+    await t2.goto(F);
+    await t2.waitForTimeout(380);
+    const cut = await t2.evaluate(() => {
+      const out = [];
+      document.querySelectorAll('button, a.btn').forEach((btn) => {
+        if (btn.offsetParent === null) return;
+        const box = btn.getBoundingClientRect();
+        const cs = getComputedStyle(btn);
+        const padL = parseFloat(cs.paddingLeft) || 0;
+        const padR = parseFloat(cs.paddingRight) || 0;
+        [...btn.querySelectorAll('span, b')].forEach((sp) => {
+          /* Обёртку декоратора пропускаем: она содержит обе подписи, включая
+             скрытую, и её прямоугольник охватывает обе. */
+          if (sp.querySelector('span, b')) return;
+          if (!(sp.textContent || '').trim()) return;
+          if (getComputedStyle(sp).display === 'none') return;
+          const r = sp.getBoundingClientRect();
+          if (r.width < 1) return;
+          if (r.left < box.left + padL - 1 || r.right > box.right - padR + 1) {
+            out.push(`«${sp.textContent.trim().slice(0, 26)}»`);
+          }
+        });
       });
+      return [...new Set(out)];
     });
-    return [...new Set(out)];
-  });
-  cut.forEach((c) => fail(`подпись кнопки обрезана на телефоне: ${c}`));
+    cut.forEach((c) => fail(`подпись кнопки обрезана при ширине ${vw}: ${c}`));
+    await c2.close();
+  }
 
   console.log(wide.length ? 'ширина блоков на телефоне: нарушения ниже' : 'ширина блоков на телефоне: всё вписывается');
 
