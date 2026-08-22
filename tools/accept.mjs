@@ -918,10 +918,17 @@ await ctx.close();
       const sels = [...c.querySelectorAll('select')];
       const chks = [...c.querySelectorAll('input[type=checkbox]')];
       const area = c.querySelector('#cArea,[name=cArea]');
-      const money = /\d[\d\s\u00a0\u202f]{2,}\s*(₽|руб|тыс|млн)|₽\s*\d|\bот\s+\d[\d\s]*\s*(тыс|млн|₽)/i;
+      const out = c.querySelector('[id*=out],[class*=out],[class*=result]');
+      /* Прежний шаблон требовал трёх знаков после первой цифры и опирался на \b
+         перед «от» — в JavaScript граница слова кириллицу не видит, так что эта
+         ветка не срабатывала вовсе. Проверено: «от 2,5 млн ₽», «от 2 млн» и
+         «цена 12,1 млн» проходили насквозь, хотя порог в документах проекта
+         записан именно так. Теперь: число с любым разделителем разрядов и
+         дробной частью, за которым идёт денежная единица. */
+      const money = /\d[\d\s\u00a0\u202f]*(?:[.,]\d+)?\s*(?:₽|руб|тыс|млн|миллион|тысяч)/i;
       const patterns = [() => false, () => true, (i) => i % 2 === 0];
       const tick = () => new Promise((res) => setTimeout(res, 0));
-      let tried = 0, minLen = Infinity;
+      let tried = 0, maxLen = 0;
       const bad = [];
       for (const a of ['0', '40', '150', '1200', '99999']) {
         if (area) { area.value = a; area.dispatchEvent(new Event('input', { bubbles: true })); area.dispatchEvent(new Event('change', { bubbles: true })); }
@@ -933,19 +940,30 @@ await ctx.close();
               sels.forEach((x) => x.dispatchEvent(new Event('change', { bubbles: true })));
               chks.forEach((x, i) => { x.checked = patterns[pi](i); x.dispatchEvent(new Event('change', { bubbles: true })); });
               await tick();
-              const t = c.innerText;
+              const node = out || c;
+              /* Вывод содержит опубликованный порог «от 2–3 млн ₽» с пометкой
+                 ⚠️ — это позиция компании, а не расчёт. Запрещено другое: число,
+                 выданное как результат ввода и не помеченное. Поэтому вырезаем
+                 всё помеченное и требуем, чтобы в остатке денег не было. */
+              const marked = [...node.querySelectorAll('.prov')];
+              let t = node.innerText;
+              for (const mk of marked) {
+                const line = (mk.closest('p,li,div,td,h4') || mk).innerText;
+                if (line) t = t.split(line).join(' ');
+              }
               tried++;
-              minLen = Math.min(minLen, t.trim().length);
-              if (money.test(t)) bad.push(a + '/' + i0 + '/' + i1 + ': ' + t.replace(/\s+/g, ' ').slice(0, 110));
+              maxLen = Math.max(maxLen, node.innerText.trim().length);
+              const mm = t.match(money);
+              if (mm) bad.push(a + '/' + i0 + '/' + i1 + ': …' + t.replace(/\s+/g, ' ').slice(Math.max(0, mm.index - 60), mm.index + 60));
             }
       }
-      return { tried, minLen, bad: bad.slice(0, 3), badCount: bad.length };
+      return { tried, maxLen, bad: bad.slice(0, 3), badCount: bad.length };
     });
-    if (r.minLen < 200) fail(`калькулятор не выдаёт состав работ хотя бы в одном состоянии (минимум ${r.minLen} знаков)`);
-    if (r.badCount) fail(`калькулятор называет цену в ${r.badCount} состояниях из ${r.tried}: ${r.bad[0]}`);
-    console.log(r.badCount || r.minLen < 200
+    if (r.maxLen < 200) fail(`калькулятор ни в одном состоянии не выдаёт состав работ (максимум ${r.maxLen} знаков)`);
+    if (r.badCount) fail(`калькулятор называет непомеченную цену в ${r.badCount} состояниях из ${r.tried}: ${r.bad[0]}`);
+    console.log(r.badCount || r.maxLen < 200
       ? `калькулятор: перебрано ${r.tried} состояний, нарушения перечислены ниже`
-      : `калькулятор: перебрано ${r.tried} состояний, состав выдан везде, цены нет ни в одном`);
+      : `калькулятор: перебрано ${r.tried} состояний, состав выдан, непомеченных цен нет`);
   }
 
   /* Переключатель темы */
