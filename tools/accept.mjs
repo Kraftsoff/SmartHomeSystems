@@ -1119,6 +1119,52 @@ await ctx.close();
   await page9.close();
 }
 
+/* ---------- 10. Тема: выбор пользователя и системная настройка ----------
+   Тумблер стартовал жёстко с ночи: выбор терялся при перезагрузке, а человек со
+   светлой темой в системе получал тёмный сайт. Проверяем оба пути и то, что при
+   запрещённом хранилище страница не падает — доступ к localStorage бросает
+   исключение в приватном окне, а не возвращает null. */
+{
+  const mode = async (ctxOpts, steps) => {
+    const c = await browser.newContext(ctxOpts);
+    const pg = await c.newPage();
+    const errs = [];
+    pg.on('pageerror', (e) => errs.push(String(e).slice(0, 80)));
+    if (steps && steps.blockStorage) {
+      await pg.addInitScript(() => {
+        Object.defineProperty(window, 'localStorage', { get() { throw new Error('заблокировано'); } });
+      });
+    }
+    await pg.goto(F, { waitUntil: 'load' });
+    await pg.waitForTimeout(500);
+    let out = { start: await pg.evaluate(() => document.documentElement.getAttribute('data-mode')), errs };
+    if (steps && steps.toggleAndReload) {
+      await pg.click('#dnToggle');
+      await pg.waitForTimeout(250);
+      out.afterClick = await pg.evaluate(() => document.documentElement.getAttribute('data-mode'));
+      await pg.reload({ waitUntil: 'load' });
+      await pg.waitForTimeout(500);
+      out.afterReload = await pg.evaluate(() => document.documentElement.getAttribute('data-mode'));
+    }
+    await c.close();
+    return out;
+  };
+  const light = await mode({ colorScheme: 'light' });
+  if (light.start !== 'day') fail(`при светлой теме системы сайт открывается в «${light.start}» — системная настройка игнорируется`);
+  const dark = await mode({ colorScheme: 'dark' });
+  if (dark.start !== 'night') fail(`при тёмной теме системы сайт открывается в «${dark.start}»`);
+  const kept = await mode({ colorScheme: 'dark' }, { toggleAndReload: true });
+  if (kept.afterReload !== kept.afterClick) fail(`выбор темы не переживает перезагрузку: выбрано «${kept.afterClick}», после перезагрузки «${kept.afterReload}»`);
+  const blocked = await mode({ colorScheme: 'light' }, { blockStorage: true });
+  if (blocked.errs.length) fail(`при запрещённом хранилище страница падает: ${blocked.errs[0]}`);
+  if (!blocked.start) fail('при запрещённом хранилище тема не выставлена');
+  const themeOk = light.start === 'day' && dark.start === 'night'
+    && kept.afterReload === kept.afterClick && !blocked.errs.length && !!blocked.start;
+  console.log(themeOk
+    ? `тема: система светлая → ${light.start}, тёмная → ${dark.start}; выбор переживает перезагрузку; при запрете хранилища ошибок нет`
+    : `тема: проверено четыре случая, нарушения перечислены ниже`);
+}
+
 await browser.close();
 
 if (problems.length) {

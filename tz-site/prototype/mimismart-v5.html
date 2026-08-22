@@ -3482,14 +3482,30 @@
 
   /* ---------- тумблер День/Ночь: только тема страницы ---------- */
   var root=document.documentElement, dn=document.getElementById('dnToggle');
+  var MODE_KEY='mm-theme';
+  /* Тема стартовала жёстко с ночи: выбор пользователя терялся при перезагрузке,
+     а человек со светлой темой в системе всё равно получал тёмный сайт.
+     Порядок теперь такой: сохранённый выбор → системная настройка → ночь.
+     Чтение и запись в try/catch: в приватном окне и при запрете хранилища
+     сам доступ бросает исключение, и без обёртки падала бы вся инициализация. */
+  function savedMode(){
+    try{ var v=localStorage.getItem(MODE_KEY); return v==='night'||v==='day'?v:null; }
+    catch(e){ return null; }
+  }
+  function systemPrefersDay(){
+    try{ return window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches; }
+    catch(e){ return false; }
+  }
   var isNight=true;
-  function setMode(night){
+  function setMode(night,remember){
     isNight=night;
     root.setAttribute('data-mode', night?'night':'day');
     if(dn)dn.setAttribute('aria-checked', night?'true':'false');
+    if(remember){ try{ localStorage.setItem(MODE_KEY, night?'night':'day'); }catch(e){} }
   }
-  if(dn){ dn.addEventListener('click', function(){ setMode(!isNight); }); }
-  setMode(true);
+  if(dn){ dn.addEventListener('click', function(){ setMode(!isNight,true); }); }
+  var saved=savedMode();
+  setMode(saved ? saved==='night' : !systemPrefersDay(), false);
 
   /* ---------- живой дом: 8 сценариев поверх реальных зон/устройств mmsmart.ru ---------- */
   var zBedroom=document.getElementById('zBedroom'), zKitchen=document.getElementById('zKitchen'),
