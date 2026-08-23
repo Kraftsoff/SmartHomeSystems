@@ -821,6 +821,31 @@ await ctx.close();
     });
     if (yn.плохих.length) fail(`вопрос «да/нет» без прямого ответа первым словом: ${yn.плохих[0]}`);
     console.log(`прямые ответы на «да/нет»: ${yn.всего} вопросов, уходов ${yn.плохих.length}`);
+    /* Число у кластера читатель видит рядом с его названием. Оно правится руками
+       при добавлении ответа и разъезжается молча: список обещает восемь, внутри
+       девять. Поиск подменяет это число на количество найденного и возвращает
+       обратно, поэтому меряем без активного запроса. */
+    await page.goto(F + '#/answers');
+    await page.waitForTimeout(400);
+    const clusters = await page.evaluate(() => {
+      const out = [];
+      document.querySelectorAll('.cluster').forEach((cl) => {
+        const n = cl.querySelector('.cluster-n');
+        const h = cl.querySelector('.cluster-h');
+        if (!n || !h) return;
+        out.push({
+          имя: h.firstChild.textContent.trim(),
+          заявлено: Number(n.textContent.trim()),
+          карточек: cl.querySelectorAll('.card').length,
+        });
+      });
+      return out;
+    });
+    const drift = clusters.filter((c) => c.заявлено !== c.карточек);
+    if (drift.length) {
+      fail(`число у кластера расходится с составом: «${drift[0].имя}» обещает ${drift[0].заявлено}, внутри ${drift[0].карточек}`);
+    }
+    console.log(`числа у кластеров: ${clusters.length} кластеров, расхождений ${drift.length}`);
   }
 
   console.log(`повторы между ответами: сравнено ${[...routes].filter((x) => x.startsWith('#/answers/')).length}, повторов ${repeats.length}`);
