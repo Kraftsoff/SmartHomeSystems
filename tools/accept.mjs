@@ -1292,6 +1292,53 @@ await ctx.close();
         return !fm || fm.offsetParent === null;
       });
       if (!closed) fail('Esc не закрывает форму заявки');
+      /* Ловушка фокуса и его возврат. Без первого клавиатурный пользователь
+         уходит табом за окно и заполняет форму вслепую; без второго теряет
+         место, откуда пришёл. Ломается от любой правки разметки окна. */
+      await page.goto(F + '#/contacts');
+      await page.waitForTimeout(400);
+      const op2 = await page.$('[data-form]');
+      if (op2) {
+        await op2.focus();
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(350);
+        const opened = await page.evaluate(() => {
+          const m = document.querySelector('.modal.open');
+          return m ? {
+            фокусВнутри: m.contains(document.activeElement),
+            диалог: m.getAttribute('role') === 'dialog',
+            подписан: !!(m.getAttribute('aria-label') || m.getAttribute('aria-labelledby')),
+          } : null;
+        });
+        if (opened) {
+          if (!opened.фокусВнутри) fail('при открытии формы фокус остаётся за окном');
+          if (!opened.диалог) fail('окно формы не объявлено диалогом');
+          if (!opened.подписан) fail('у окна формы нет подписи для скринридера');
+          /* Обойти надо все элементы окна и ещё несколько сверху: в форме два
+             десятка полей, и двадцати нажатий не хватало, чтобы дойти до края —
+             фокус оставался внутри сам по себе, и снятая ловушка не замечалась. */
+          const cnt = await page.evaluate(() => {
+            const m = document.querySelector('.modal.open');
+            return m ? m.querySelectorAll('a[href],button,input,select,textarea,[tabindex]').length : 0;
+          });
+          let escaped = 0;
+          for (let i = 0; i < cnt + 4; i += 1) {
+            await page.keyboard.press('Tab');
+            const out = await page.evaluate(() => {
+              const m = document.querySelector('.modal.open');
+              return m ? !m.contains(document.activeElement) : true;
+            });
+            if (out) escaped += 1;
+          }
+          if (escaped) fail(`фокус уходит за пределы формы: ${escaped} раз за полный обход`);
+          await page.keyboard.press('Escape');
+          await page.waitForTimeout(300);
+          const back = await page.evaluate(() => document.activeElement.hasAttribute
+            && document.activeElement.hasAttribute('data-form'));
+          if (!back) fail('после закрытия формы фокус не вернулся на кнопку, которая её открыла');
+          console.log('форма: фокус заперт в окне, при закрытии возвращается на кнопку');
+        }
+      }
       /* WCAG 1.3.5: у полей с личными данными должно быть объявлено назначение —
      иначе браузер и вспомогательные технологии не могут подставить и распознать
      имя и телефон. Уровень AA, тот же, что сайт держит по остальным критериям. */
