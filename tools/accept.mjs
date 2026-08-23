@@ -803,6 +803,26 @@ await ctx.close();
   const repeats = [...byLine.entries()].filter(([, hs]) => hs.size > 1);
   repeats.slice(0, 5).forEach(([sent, hs]) =>
     fail(`одно предложение на ${hs.size} страницах ответов (${[...hs].slice(0, 3).join(', ')}): «${sent.slice(0, 60)}…»`));
+  /* Вопрос «да/нет» должен получать «да» или «нет» первым словом. Уход в
+     обстоятельства читается как отказ отвечать — и человеком, и машиной,
+     которая ищет прямой ответ в начале. Два ответа разъехались после правок,
+     и без проверки это было незаметно. */
+  {
+    const yn = await page.evaluate(() => {
+      const d = JSON.parse(document.getElementById('ldFaq').textContent).mainEntity;
+      const re = /^(можно ли|нужно ли|стоит ли|есть ли|будет ли|придётся ли|смогу ли|смогут ли|обязательно ли|правда ли|реально ли|работает ли|нужен ли|остан[уе]тся ли|получится ли|возможно ли|окупается ли|проводится ли)/i;
+      const bad = [];
+      for (const e of d) {
+        if (!re.test(e.name.trim())) continue;
+        const first = e.acceptedAnswer.text.trim().split(/[\s,—:]/)[0].toLowerCase().replace(/[.,]/g, '');
+        if (first !== 'да' && first !== 'нет') bad.push(e.name);
+      }
+      return { всего: d.filter((e) => re.test(e.name.trim())).length, плохих: bad };
+    });
+    if (yn.плохих.length) fail(`вопрос «да/нет» без прямого ответа первым словом: ${yn.плохих[0]}`);
+    console.log(`прямые ответы на «да/нет»: ${yn.всего} вопросов, уходов ${yn.плохих.length}`);
+  }
+
   console.log(`повторы между ответами: сравнено ${[...routes].filter((x) => x.startsWith('#/answers/')).length}, повторов ${repeats.length}`);
 }
 
