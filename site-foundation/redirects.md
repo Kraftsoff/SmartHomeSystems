@@ -328,13 +328,13 @@ module.exports = {
       { source: '/partneram/integrator', destination: '/partners', permanent: true },
       { source: '/smart-home/elektrika', destination: '/functions/electric', permanent: true },
       { source: '/kontaktyi/tashkent', destination: '/contacts', permanent: true },
-      { source: '/partneram/designer', destination: '/partners', permanent: true },
+      { source: '/partneram/designer', destination: '/partners/designers', permanent: true },
       { source: '/partneram/dileram', destination: '/answers/kak-stat-partnerom-dilerom-mimismart', permanent: true },
       { source: '/kontaktyi/moskva', destination: '/contacts', permanent: true },
       { source: '/kontaktyi/kazan', destination: '/contacts', permanent: true },
       { source: '/kontaktyi/sochi', destination: '/contacts', permanent: true },
       { source: '/kontaktyi/baku', destination: '/contacts', permanent: true },
-      { source: '/czenyi/servis', destination: '/pricing', permanent: true },
+      { source: '/czenyi/servis', destination: '/service', permanent: true },
       { source: '/avtomatizacziya', destination: '/functions/automation', permanent: true },
       { source: '/oborudovanie', destination: '/equipment', permanent: true },
       { source: '/index.html', destination: '/', permanent: true },
@@ -447,11 +447,11 @@ module.exports = {
 | `/avtomatizacziya/` | `/functions/automation` |  |
 | `/czenyi/montazh-umnogo-doma/` | `/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma` |  |
 | `/czenyi/proektirovanie-umnogo-doma/` | `/answers/chto-vhodit-v-proektirovanie-umnogo-doma` |  |
-| `/czenyi/servis/` | `/pricing` | ⚠️ временно: раздела /service в архитектуре нет |
+| `/czenyi/servis/` | `/service` |  |
 | `/czenyi/` | `/pricing` |  |
 | `/o-kompanii/` | `/about` |  |
 | `/partneram/dileram/` | `/answers/kak-stat-partnerom-dilerom-mimismart` |  |
-| `/partneram/designer/` | `/partners` | ⚠️ страницы для дизайнеров нет |
+| `/partneram/designer/` | `/partners/designers` |  |
 | `/partneram/integrator/` | `/partners` |  |
 | `/partneram/` | `/partners` |  |
 | `/kontaktyi/moskva/` | `/contacts` |  |
@@ -604,7 +604,7 @@ module.exports = {
 | `/oborudovanie/upravlenie-domom/cherez-internet/` | `/answers/chto-znachit-umnyy-dom-bez-oblaka-i` |  |
 | `/oborudovanie/avtomatizatsiya-kvartir/oborudovanie-dlya-kvartir/` | `/equipment` |  |
 | `/czenyi/montazh-umnogo-doma/` | `/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma` |  |
-| `/czenyi/servis/` | `/pricing` | ⚠️ раздела /service нет |
+| `/czenyi/servis/` | `/service` |  |
 | `/partneram/` | `/partners` |  |
 | `/partneram/dileram/` | `/answers/kak-stat-partnerom-dilerom-mimismart` |  |
 | `/partneram/integrator/` | `/partners` | ⚠️ страница для агентств недвижимости |
