@@ -1387,7 +1387,11 @@ await ctx.close();
     let blocks = 0;
     document.querySelectorAll('template.more, .more').forEach((t) => {
       blocks++;
-      box.insertAdjacentHTML('beforeend', t.innerHTML);
+      /* Клонируем узлы, а не пересобираем из строки. insertAdjacentHTML разбирал
+         разметку заново, и разбор разносит вложенные <a> и <p> по соседним узлам —
+         проверка уничтожала ровно тот дефект, который ищет, и не могла упасть
+         никогда. Проверено: вложенность, созданная через DOM, до неё не доходила. */
+      box.appendChild(t.content ? t.content.cloneNode(true) : t.cloneNode(true));
     });
     document.body.appendChild(box);
     const routes = new Set([...document.querySelectorAll('.cluster .card-link')].map((a) => a.getAttribute('href')));
