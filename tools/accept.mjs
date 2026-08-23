@@ -663,6 +663,26 @@ await ctx.close();
   if (rm) {
     if (parseFloat(rm.dur) > 0.05) fail(`при reduced-motion переходы не отключены: ${rm.dur}`);
     if (rm.opacity < 0.99) fail(`при reduced-motion контент остаётся полупрозрачным: ${rm.opacity}`);
+    /* Модель дома сама пролистывает сценарии. Для человека с чувствительностью к
+       движению это худшее, что может делать страница: движение без его участия.
+       Отключение переходов этого не покрывает — автопрокрутка живёт на таймере. */
+    /* Страницу надо открыть сразу в этом режиме: прототип читает настройку один
+       раз при загрузке, и включение её после уже не останавливает запущенный
+       таймер — проверка тогда падала на исправном коде. */
+    const ctxRM = await browser.newContext({ viewport: { width: 1400, height: 1000 }, reducedMotion: 'reduce' });
+    const pRM = await ctxRM.newPage();
+    await pRM.goto(F, { waitUntil: 'load' });
+    await pRM.waitForTimeout(1200);
+    const auto = await pRM.evaluate(async () => {
+      const idx = () => [...document.querySelectorAll('.scen-btn')].findIndex((b) => b.classList.contains('on'));
+      const before = idx();
+      await new Promise((r) => setTimeout(r, 4500));
+      return { before, after: idx() };
+    });
+    await ctxRM.close();
+    if (auto.before !== auto.after) {
+      fail(`при reduced-motion модель дома сама меняет сценарии (${auto.before} → ${auto.after})`);
+    }
     console.log(`reduced-motion: переходы ${rm.dur}, контент виден`);
   }
   await ctx.close();
