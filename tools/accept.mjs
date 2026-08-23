@@ -1293,6 +1293,55 @@ await ctx.close();
     return snap() !== a;
   });
   if (!reacts) fail('сценарий не меняет состояние модели дома');
+  /* Текст называет, что делает сценарий. Проверяем по факту: «Жара за окном»
+     обещала включать увлажнение, а увлажнение в модели было включено и до неё —
+     сценарий его не трогает. Такое расхождение не видно ничем, кроме сверки
+     обещания с измеренным поведением. */
+  {
+    /* Перед замером возвращаем страницу в исходное состояние: проверки выше уже
+       кликали по сценариям, и «до» приходило с выключенным отоплением — тогда
+       условие сравнивало не то и срабатывало на исправном тексте. */
+    await page.goto(F);
+    await page.waitForTimeout(900);
+    const heat = await page.evaluate(async () => {
+      const st = document.getElementById('houseStage');
+      if (!st) return null;
+      const snap = () => [...st.querySelectorAll('*')].map((e) => (e.className || '').toString()).join('|');
+      const before = snap();
+      const btn = [...document.querySelectorAll('.scen-btn')].find((b) => /Жара/i.test(b.textContent));
+      if (!btn) return null;
+      btn.click();
+      await new Promise((r) => setTimeout(r, 700));
+      const after = snap();
+      return {
+        отоплениеСнято: /is-heating/.test(before) && !/is-heating/.test(after),
+        вентиляцияПоявилась: !/is-vent/.test(before) && /is-vent/.test(after),
+        увлажнениеПоявилось: !/is-mist/.test(before) && /is-mist/.test(after),
+        шторыЗакрылись: !/is-closed/.test(before) && /is-closed/.test(after),
+      };
+    });
+    if (heat) {
+      /* Фраза живёт в развёрнутых блоках, а они лежат в <template> и на главной
+         не отрисованы: чтение innerText давало пустую строку, и проверка молча
+         пропускала всё. Берём из разметки документа. */
+      const claim = await page.evaluate(() => {
+        const m = document.documentElement.innerHTML.match(/«Жара за окном»[^.<]{0,200}\./);
+        return m ? m[0] : '';
+      });
+      if (claim) {
+        if (/увлажнени/i.test(claim) && !heat.увлажнениеПоявилось) {
+          fail('текст обещает, что «Жара за окном» включает увлажнение, а сценарий его не меняет');
+        }
+        if (/вентиляц/i.test(claim) && !heat.вентиляцияПоявилась) {
+          fail('текст обещает вентиляцию в сценарии «Жара за окном», а она не включается');
+        }
+        if (/отоплени/i.test(claim) && !heat.отоплениеСнято) {
+          fail('текст обещает отключение отопления в сценарии «Жара за окном», а оно остаётся');
+        }
+      }
+      console.log('обещания о сценарии «Жара за окном» сверены с его поведением');
+    }
+  }
   /* Активный сценарий отмечен заливкой кнопки. Для скринридера цвет — не состояние,
      поэтому оно должно дублироваться в aria-pressed, и ровно на одной кнопке. */
   const scn = await page.evaluate(() => {
