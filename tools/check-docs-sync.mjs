@@ -39,6 +39,8 @@ const urls = (sitemap.match(/<loc>/g) || []).length;
 /* Уникальные тексты пометок в прототипе: дубли из подвала считаются один раз. */
 /* Часть пометок лежит не в разметке, а в конфиге маршрутов как поле prov —
    их подставляет скрипт. Считая только разметку, список занижался на четыре. */
+/* Версия из имени файла прототипа — с ней сверяется плашка на экране. */
+const protoVersion = Number((PROTO.match(/-v(\d+)\.html$/) || [])[1] || 0);
 const provUnique = new Set([
   ...[...html.matchAll(/class="prov"[^>]*>([^<]{3,})</g)].map((m) => m[1]),
   ...[...html.matchAll(/prov:'([^']{3,})'/g)].map((m) => m[1]),
@@ -70,6 +72,16 @@ const TRUTH = {
 };
 
 const problems = [];
+
+/* Плашка прототипа называет версию, и она расходилась с именем файла: на экране
+   стояло v4 при mimismart-v5.html. Документы тут ни при чём — проверяем сам файл. */
+{
+  const shown = (html.match(/Прототип v(\d+)/) || [])[1];
+  if (shown && Number(shown) !== protoVersion) {
+    problems.push({ file: PROTO, line: 0, claimed: Number(shown), actual: protoVersion,
+      word: 'версия в плашке', text: `плашка говорит v${shown}, файл — v${protoVersion}` });
+  }
+}
 function walk(dir) {
   for (const e of readdirSync(dir)) {
     if (SKIP_DIRS.has(e)) continue;
