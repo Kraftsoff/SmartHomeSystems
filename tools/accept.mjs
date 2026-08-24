@@ -1807,6 +1807,37 @@ await ctx.close();
   await pg.close();
 }
 
+/* ---------- 14. Безопасность и персональные данные ----------
+   Два свойства, которые легко потерять правкой и дорого потерять на продакшене:
+   страница ничего не запрашивает наружу (иначе появляется передача данных
+   третьей стороне, а с чужим доменом — и трансграничная), и адрес страницы
+   не становится разметкой. */
+{
+  const ctx2 = await browser.newContext();
+  const pg2 = await ctx2.newPage();
+  const external = [];
+  pg2.on('request', (r) => {
+    const u = r.url();
+    if (!u.startsWith('file:') && !u.startsWith('data:') && !u.startsWith('blob:')) external.push(u.slice(0, 80));
+  });
+  let dialog = false;
+  pg2.on('dialog', async (d) => { dialog = true; await d.dismiss(); });
+  await pg2.goto(F, { waitUntil: 'load' });
+  await pg2.waitForTimeout(900);
+  if (external.length) fail(`страница запрашивает внешние адреса: ${external[0]}`);
+  const stored = await pg2.evaluate(() => Object.keys(localStorage).length + document.cookie.length);
+  if (stored) fail('до ответа на баннер согласия уже что-то записано в хранилище или cookie');
+  for (const payload of ['#/<img src=x onerror=alert(1)>', '#/answers/<svg onload=alert(1)>']) {
+    await pg2.goto(F + payload, { waitUntil: 'load' });
+    await pg2.waitForTimeout(250);
+    const injected = await pg2.evaluate(() => document.querySelectorAll('img[src="x"],svg[onload]').length);
+    if (injected) fail(`адрес страницы попадает в разметку: ${payload}`);
+  }
+  if (dialog) fail('адрес страницы выполняет код');
+  console.log(`безопасность: внешних запросов ${external.length}, разметка из адреса не исполняется, до согласия хранилище пусто`);
+  await ctx2.close();
+}
+
 await browser.close();
 
 if (problems.length) {
