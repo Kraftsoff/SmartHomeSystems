@@ -107,7 +107,11 @@ const server = createServer((req, res) => {
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const ORIGIN = `http://127.0.0.1:${server.address().port}`;
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+/* Путь к Chromium зашивать нельзя: в этом контейнере он лежит в /opt, а в CI
+   playwright ставит свой и находит его сам. Прибитый путь роняет прогон там,
+   где всё исправно — это и случилось на первом же запуске конвейера. */
+const EXEC = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium';
+const browser = await chromium.launch(existsSync(EXEC) ? { executablePath: EXEC } : {});
 const ctx = await browser.newContext({ javaScriptEnabled: false });
 const page = await ctx.newPage();
 await page.goto(`${ORIGIN}/contacts/`);
