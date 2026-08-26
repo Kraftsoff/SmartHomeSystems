@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { sections, comparisons, pages, answers, pageTitle, pageDescription, SITE } from '@/lib/content';
 import LeadForm from '../components/LeadForm';
+import ScopeCalc from '../components/ScopeCalc';
 
 /* Разделы и сравнения приходят из выгрузки одним словарём «путь → содержимое»,
    поэтому им хватает одного шаблона: добавление раздела в прототипе появляется
@@ -64,6 +65,12 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         <div dangerouslySetInnerHTML={{ __html: hub.html }} />
         {/* Форма живёт только на контактах: одна точка приёма заявок, а не
             кнопка на каждой странице, ведущая в разные места. */}
+        {key === 'pricing' && (
+          <>
+            <h2>Состав работ по вашей стадии</h2>
+            <ScopeCalc />
+          </>
+        )}
         {key === 'contacts' && (
           <>
             <h2>Заявка на предварительный расчёт</h2>

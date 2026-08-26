@@ -210,6 +210,50 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Калькулятор. Правило одно и жёсткое: он показывает состав работ и не
+   называет цену, потому что методики нет. Опубликованный порог — позиция
+   компании, он помечен, и пометку из проверки вырезаем вместе со строкой. */
+{
+  const c = await browser.newContext();
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/pricing/`);
+  await pg.waitForTimeout(500);
+  const calc = await pg.$('#calc');
+  if (!calc) fail('на /pricing нет калькулятора состава работ');
+  else {
+    const money = /\d[\d\s\u00a0\u202f]*(?:[.,]\d+)?\s*(?:₽|руб|тыс|млн|миллион|тысяч)/i;
+    const stages = await pg.$$('#calc button[aria-pressed]');
+    const boxes = await pg.$$('#calc input[type=checkbox]');
+    let maxLen = 0; const bad = [];
+    for (let si = 0; si < stages.length; si += 1) {
+      await stages[si].click();
+      for (const pattern of [[], [0], [0, 3, 7], boxes.map((_, i) => i)]) {
+        for (let bi = 0; bi < boxes.length; bi += 1) {
+          const want = pattern.includes(bi);
+          if ((await boxes[bi].isChecked()) !== want) await boxes[bi].click();
+        }
+        await pg.waitForTimeout(60);
+        const seen = await pg.evaluate(() => {
+          const out = document.querySelector('.calc-out');
+          if (!out) return { text: '', len: 0 };
+          const clone = out.cloneNode(true);
+          clone.querySelectorAll('.prov').forEach((m) => {
+            const line = m.closest('p,li,div') || m;
+            line.remove();
+          });
+          return { text: clone.textContent || '', len: (out.textContent || '').trim().length };
+        });
+        maxLen = Math.max(maxLen, seen.len);
+        if (money.test(seen.text)) bad.push(seen.text.replace(/\s+/g, ' ').slice(0, 90));
+      }
+    }
+    if (maxLen < 200) fail(`калькулятор ни в одном состоянии не выдаёт состав работ (максимум ${maxLen} знаков)`);
+    if (bad.length) fail(`калькулятор называет непомеченную цену: ${bad[0]}`);
+    console.log(`калькулятор: состояний перебрано ${stages.length * 4}, состав выдан, непомеченных цен нет`);
+  }
+  await c.close();
+}
+
 await browser.close();
 server.close();
 
