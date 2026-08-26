@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import HousePlan from './components/HousePlan';
 import { answers, clusters, pageTitle, pageDescription, SITE } from '@/lib/content';
 
 const TITLE = 'Умный дом без облака — инженерия под ключ';
@@ -17,6 +18,9 @@ export default function Home() {
       <p className="eyebrow">Инженерный подрядчик · с 2004 года</p>
       <h1>{TITLE}</h1>
       <div className="lede"><p>{LEDE}</p></div>
+
+      <h2>Как это работает на плане</h2>
+      <HousePlan />
 
       <h2>С чего начинают</h2>
       <div className="grid g3">

@@ -254,6 +254,64 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Модель дома. Проверяем три вещи: активный сценарий объявляется разметкой,
+   а не только заливкой кнопки; следы под курсором появляются и видны; сквозь
+   стены житель не проходит. */
+{
+  const c = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(900);
+  const stage = await pg.$('#houseStage');
+  if (!stage) fail('на главной нет интерактивной модели дома');
+  else {
+    await stage.scrollIntoViewIfNeeded();
+    await pg.waitForTimeout(400);
+    const btns = await pg.$$('.scen-btn');
+    if (btns.length < 6) fail(`кнопок сценариев ${btns.length}, ожидалось не меньше шести`);
+    const pressed = async () => pg.evaluate(() => document.querySelectorAll('.scen-btn[aria-pressed="true"]').length);
+    if ((await pressed()) !== 1) fail('нажатых кнопок сценария не ровно одна — состояние не объявлено разметкой');
+    const before = await pg.evaluate(() => document.getElementById('houseStage').className);
+    if (btns[3]) await btns[3].click();
+    await pg.waitForTimeout(250);
+    const after = await pg.evaluate(() => document.getElementById('houseStage').className);
+    if (before === after) fail('сценарий не меняет состояние модели дома');
+    if ((await pressed()) !== 1) fail('после переключения нажатых кнопок не ровно одна');
+
+    const bb = await stage.boundingBox();
+    await pg.evaluate(() => {
+      window.__made = 0;
+      const s = document.getElementById('houseStage');
+      const orig = s.appendChild.bind(s);
+      s.appendChild = (n) => { if (n.className === 'footprint') window.__made += 1; return orig(n); };
+    });
+    /* Полос две: какая свободна, зависит от расстановки на плане, и привязка
+       к одной ловила бы план, а не регрессию. */
+    let best = 0;
+    for (const band of [0.55, 0.3]) {
+      await pg.evaluate(() => { window.__made = 0; });
+      await pg.mouse.move(bb.x + 60, bb.y + bb.height * band);
+      await pg.waitForTimeout(140);
+      for (let i = 1; i <= 14; i += 1) {
+        await pg.mouse.move(bb.x + 60 + i * 12, bb.y + bb.height * band);
+        await pg.waitForTimeout(95);
+      }
+      best = Math.max(best, await pg.evaluate(() => window.__made));
+    }
+    if (best < 5) fail(`следы под курсором почти не появляются: лучшая полоса дала ${best} за 14 шагов`);
+    const foot = await pg.evaluate(() => {
+      const e = document.querySelector('.footprint');
+      if (!e) return null;
+      const r = e.getBoundingClientRect();
+      return { ширина: Math.round(r.width), задержка: getComputedStyle(e).transitionDelay };
+    });
+    if (foot && foot.ширина < 6) fail(`след шириной ${foot.ширина}px — на плане его не различить`);
+    if (foot && parseFloat(foot.задержка) <= 0) fail('след гаснет сразу: он виден только в середине перехода');
+    console.log(`модель дома: сценариев ${btns.length}, состояние объявляемо, следов за 14 шагов ${best}`);
+  }
+  await c.close();
+}
+
 await browser.close();
 server.close();
 

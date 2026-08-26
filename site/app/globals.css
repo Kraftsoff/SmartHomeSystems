@@ -50,3 +50,16 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
 .skip:focus{left:8px;top:8px;background:var(--panel);padding:8px 12px;border-radius:8px;z-index:20}
 :focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* План дома. Фон — файл, а не встроенная строка: 337 КБ в base64 весили на
+   треть больше самих картинок и лежали в каждом документе. */
+.house-stage{position:relative;width:100%;aspect-ratio:720/410;border-radius:14px;
+  background:#eef0f3 center/contain no-repeat url('/plan/plan-day-f1aad96bf4.png');
+  border:1px solid var(--line);overflow:hidden;touch-action:pan-y}
+:root[data-mode="night"] .house-stage{background-color:#0a051a;
+  background-image:url('/plan/plan-night-2e13515c34.png')}
+.footprint{position:absolute;left:0;top:0;width:9px;height:15px;pointer-events:none;
+  transform:translate(-50%,-50%);opacity:1;transition:opacity 1.1s ease .35s;z-index:6}
+.footprint.fade{opacity:0}
+.footprint svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45))}
+.footprint svg rect{fill:var(--accent-ink);stroke:rgba(0,0,0,.28);stroke-width:1.2;paint-order:stroke}

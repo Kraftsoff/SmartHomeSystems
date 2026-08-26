@@ -1,0 +1,52 @@
+[
+ {
+  "file": "plan-night-2e13515c34.png",
+  "kind": "plan-night",
+  "bytes": 85110
+ },
+ {
+  "file": "plan-day-f1aad96bf4.png",
+  "kind": "plan-day",
+  "bytes": 130993
+ },
+ {
+  "file": "living-cctv-b078bde2a0.png",
+  "kind": "living-cctv",
+  "bytes": 2337
+ },
+ {
+  "file": "sensor-67dd010377.png",
+  "kind": "sensor",
+  "bytes": 1149
+ },
+ {
+  "file": "device-0be8e338c3.png",
+  "kind": "device",
+  "bytes": 8123
+ },
+ {
+  "file": "device-4f6b2173d4.png",
+  "kind": "device",
+  "bytes": 3561
+ },
+ {
+  "file": "device-afe27fa580.png",
+  "kind": "device",
+  "bytes": 2720
+ },
+ {
+  "file": "device-a9ef0c302f.png",
+  "kind": "device",
+  "bytes": 2016
+ },
+ {
+  "file": "device-5f36996021.png",
+  "kind": "device",
+  "bytes": 1376
+ },
+ {
+  "file": "device-4568c5b10d.png",
+  "kind": "device",
+  "bytes": 2678
+ }
+]
