@@ -117,15 +117,46 @@ function jsBlock(name) {
   }
   return out;
 }
+/* Страницы-хабы и текстовые разделы живут прямо в разметке прототипа, а не в
+   конфигах: без них выгрузка не покрывает десять адресов, на которые ведут
+   редиректы. Берём внутренность секции как есть — там уже готовая вёрстка. */
+const PAGE_URL = {
+  'p-equipment': '/equipment', 'p-cases': '/portfolio', 'p-pricing': '/pricing',
+  'p-privacy': '/privacy', 'p-showroom': '/showroom', 'p-functions-idx': '/functions',
+  'p-solutions-idx': '/solutions', 'p-compare-idx': '/compare', 'p-partners': '/partners',
+  'p-about': '/about', 'p-contacts': '/contacts',
+};
+const pages = {};
+for (const [id, url] of Object.entries(PAGE_URL)) {
+  const i = html.indexOf(`id="${id}"`);
+  if (i < 0) continue;
+  const open = html.lastIndexOf('<section', i);
+  const close = html.indexOf('</section>', i);
+  const seg = html.slice(html.indexOf('>', i) + 1, close);
+  const h1 = seg.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
+  const eyebrow = seg.match(/class="eyebrow"[^>]*>([\s\S]*?)</);
+  const lede = seg.match(/class="lede"[^>]*>([\s\S]*?)<\/(?:p|div)>/);
+  pages[url] = {
+    url, id,
+    title: h1 ? text(h1[1]) : '',
+    eyebrow: eyebrow ? text(eyebrow[1]) : '',
+    lede: lede ? text(lede[1]) : '',
+    html: seg.trim(),
+    textLength: text(seg).length,
+  };
+}
+
 const sections = jsBlock('SUB');
 const comparisons = jsBlock('CMP');
 
 const out = {
   source: SRC,
   generated: 'проставляется при выгрузке',
+  pages,
   sections,
   comparisons,
   counts: {
+    pages: Object.keys(pages).length,
     sections: Object.keys(sections).length,
     comparisons: Object.keys(comparisons).length,
     answers: answers.length,

@@ -22,19 +22,34 @@ export const clusters = data.clusters as string[];
 export const sections = data.sections as Record<string, Section>;
 export const comparisons = data.comparisons as Record<string, Section>;
 
+export type Page = {
+  url: string; id: string; title: string; eyebrow: string; lede: string;
+  html: string; textLength: number;
+};
+export const pages = data.pages as Record<string, Page>;
+
 export const BRAND = 'MiMiSmart';
 export const SITE = 'https://example.invalid'; // ⚠️ заполнить: боевой домен
 
-/** Заголовок страницы: вопрос как есть плюс бренд, без хвостов-описаний. */
+/** Заголовок страницы: вопрос как есть плюс бренд, без хвостов-описаний.
+ *  Считаем длину суффикса, а не вычитаем на глаз: прежняя формула давала 61
+ *  знак при пороге 60 — на всех длинных вопросах сразу. */
+const SUFFIX = ` — ${BRAND}`;
 export function pageTitle(t: string) {
-  const full = `${t} — ${BRAND}`;
-  return full.length <= 60 ? full : `${t.slice(0, 57 - BRAND.length)}… — ${BRAND}`;
+  const full = t + SUFFIX;
+  if (full.length <= 60) return full;
+  const room = 60 - SUFFIX.length - 1;           // −1 под многоточие
+  const cut = t.slice(0, room);
+  const at = cut.lastIndexOf(' ');
+  return `${(at > room * 0.6 ? cut.slice(0, at) : cut).trimEnd()}…${SUFFIX}`;
 }
 
 /** Описание строится из прямого ответа: это то, что извлекает поиск. */
 export function pageDescription(t: string) {
   const s = t.replace(/\s+/g, ' ').trim();
   if (s.length <= 160) return s;
+  /* Короче 60 знаков описание не несёт смысла для выдачи: зовущий его код
+     обязан передать текст подлиннее, а не подпирать пустотой. */
   const cut = s.slice(0, 157);
   return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
 }
