@@ -87,10 +87,30 @@ for (const [k, v] of canons) if (v.length > 1) fail(`один canonical на ${v
    Смотрим отрендеренную страницу — и намеренно без скриптов, чтобы убедиться,
    что форма остаётся рабочей у того, у кого JavaScript не выполнился. */
 const chromium = await loadChromium();
+
+/* Сайт отдаётся по HTTP, а не открывается файлом: при file:// пути к скриптам
+   ведут в корень файловой системы, гидратация не запускается, и проверка
+   поведения меряет несуществующую поломку. Это уже случилось однажды. */
+const { createServer } = await import('node:http');
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
+  '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.xml': 'application/xml',
+  '.txt': 'text/plain; charset=utf-8', '.woff2': 'font/woff2' };
+const server = createServer((req, res) => {
+  const clean = decodeURIComponent((req.url || '/').split('?')[0]);
+  let file = join(OUT, clean);
+  if (!existsSync(file) || statSync(file).isDirectory()) file = join(file, 'index.html');
+  if (!existsSync(file)) { res.statusCode = 404; res.end('not found'); return; }
+  const ext = file.slice(file.lastIndexOf('.'));
+  res.setHeader('content-type', MIME[ext] || 'application/octet-stream');
+  res.end(readFileSync(file));
+});
+await new Promise((r) => server.listen(0, '127.0.0.1', r));
+const ORIGIN = `http://127.0.0.1:${server.address().port}`;
+
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const ctx = await browser.newContext({ javaScriptEnabled: false });
 const page = await ctx.newPage();
-await page.goto(`file://${resolve(OUT)}/contacts/index.html`);
+await page.goto(`${ORIGIN}/contacts/`);
 const form = await page.evaluate(() => {
   const f = document.querySelector('#leadForm');
   if (!f) return null;
@@ -113,8 +133,45 @@ else {
   if (!form.ссылкаНаПолитику) fail('в форме нет ссылки на политику обработки данных');
   if (form.безНазначения.length) fail(`у обязательных полей не объявлено назначение (WCAG 1.3.5): ${form.безНазначения.join(', ')}`);
 }
-await browser.close();
+await ctx.close();
 console.log(form ? 'форма: согласие обязательно, метка и политика на месте, назначение полей объявлено' : '');
+
+/* Согласие и тема: то, что закреплено законом и замером, а не вкусом. */
+{
+  const c = await browser.newContext();
+  const pg = await c.newPage();
+  const foreign = [];
+  pg.on('request', (r) => { if (!r.url().startsWith(ORIGIN)) foreign.push(r.url().slice(0, 70)); });
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(600);
+  if (foreign.length) fail(`страница запрашивает чужие адреса: ${foreign[0]}`);
+  if (await pg.evaluate(() => !!window.__analyticsLoaded)) fail('аналитика стартовала без согласия');
+  const bar = () => pg.evaluate(() => !!document.querySelector('[aria-label*="аналитическ"]'));
+  if (!(await bar())) fail('баннер согласия не показан');
+  await pg.evaluate(() => {
+    const b = [...document.querySelectorAll('button')].find((x) => /Только необходимые/.test(x.textContent || ''));
+    b && b.click();
+  });
+  await pg.waitForTimeout(200);
+  if (await pg.evaluate(() => !!window.__analyticsLoaded)) fail('аналитика стартовала после явного отказа');
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(500);
+  if (await bar()) fail('после отказа баннер спрашивает снова — решение не восстановлено');
+  await c.close();
+}
+for (const [scheme, expect] of [['light', 'day'], ['dark', 'night']]) {
+  const c = await browser.newContext({ colorScheme: scheme });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(500);
+  const got = await pg.evaluate(() => document.documentElement.getAttribute('data-mode'));
+  if (got !== expect) fail(`при системной теме ${scheme} сайт открывается в «${got}» вместо «${expect}»`);
+  await c.close();
+}
+console.log('согласие и тема: аналитика ждёт ответа, отказ сохраняется, системная настройка учитывается');
+
+await browser.close();
+server.close();
 
 console.log(`страниц: ${files.length}`);
 console.log(`уникальных: title ${titles.size} · description ${descs.size} · canonical ${canons.size}`);

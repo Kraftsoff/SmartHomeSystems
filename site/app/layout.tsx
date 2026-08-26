@@ -1,6 +1,8 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { BRAND, SITE } from '@/lib/content';
+import ThemeToggle from './components/ThemeToggle';
+import CookieBar from './components/CookieBar';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -42,9 +44,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/about/">О компании</a>
               <a href="/contacts/">Контакты</a>
             </nav>
+            <ThemeToggle />
           </div>
         </header>
         <main id="main">{children}</main>
+        <CookieBar />
         <footer className="site">
           <div className="shell">
             <p>
