@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { answers, byCluster, pageTitle, pageDescription, SITE } from '@/lib/content';
+import AnswerSearch from '../components/AnswerSearch';
 
 const TITLE = 'База инженерных ответов';
 const LEDE = `Семьдесят семь вопросов, которые задают до подписания договора: что входит, сколько стоит, что ломается и кто чинит. Каждый ответ начинается с прямого ответа.`;
@@ -31,6 +32,12 @@ export default function AnswersIndex() {
       <p className="eyebrow">Ответы</p>
       <h1>{TITLE}</h1>
       <div className="lede"><p>{LEDE}</p></div>
+      {/* Поиск — надстройка: без скриптов ниже остаётся полный список по
+          кластерам, поэтому краулер и читатель без JS ничего не теряют. */}
+      <AnswerSearch items={answers.map((a) => ({
+        slug: a.slug, question: a.question, answer: a.answer, expanded: a.expandedText,
+        cluster: a.cluster, kicker: a.kicker,
+      }))} />
       {[...map.entries()].map(([cluster, list]) => (
         <section key={cluster}>
           <h2>{cluster} <span className="kicker">{list.length}</span></h2>

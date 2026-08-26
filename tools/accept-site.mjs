@@ -174,6 +174,42 @@ for (const [scheme, expect] of [['light', 'day'], ['dark', 'night']]) {
 }
 console.log('согласие и тема: аналитика ждёт ответа, отказ сохраняется, системная настройка учитывается');
 
+/* Поиск. Проверяем не «что-то нашлось», а три свойства: форма слова приводится
+   к основе, набор по мере ввода работает, и совпадение внутри слова не считается
+   находкой — «ёлка» не должна открывать ответ из-за слова «переделка». */
+{
+  const c = await browser.newContext();
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/answers/`);
+  await pg.waitForTimeout(500);
+  const box = await pg.$('#q');
+  if (!box) fail('на странице ответов нет поля поиска');
+  else {
+    const count = async (q) => {
+      await box.fill(q);
+      await pg.waitForTimeout(220);
+      return pg.evaluate(() => {
+        const g = document.querySelector('[data-search-results]');
+        return g ? g.querySelectorAll('a.card').length : 0;
+      });
+    };
+    if (!(await count('протечка'))) fail('поиск «протечка» не находит ответов — сломан стеммер');
+    if (!(await count('протечкам'))) fail('поиск «протечкам» не находит ничего — форма слова не приводится к основе');
+    if (!(await count('протеч'))) fail('поиск не находит по началу слова «протеч» — набор по мере ввода сломан');
+    if (!(await count('рекуператор'))) fail('поиск не находит «рекуператор» — развёрнутая часть выпала из индекса');
+    for (const mid of ['ёлка', 'ереде']) {
+      if (await count(mid)) fail(`поиск «${mid}» находит совпадение внутри слова, а не с начала`);
+    }
+    await box.fill('<img src=x onerror=alert(1)>');
+    await pg.waitForTimeout(220);
+    if (await pg.evaluate(() => document.querySelectorAll('img[src="x"]').length)) {
+      fail('ввод в поиск попадает в разметку');
+    }
+    console.log('поиск: основа слова, набор по мере ввода и развёрнутая часть — на месте; внутри слов не совпадает');
+  }
+  await c.close();
+}
+
 await browser.close();
 server.close();
 
