@@ -2,3 +2,8 @@
 .agents/*
 # но наш собственный контекст-файл маркетинга — версионируем
 !.agents/product-marketing.md
+
+# Next.js
+site/node_modules
+site/.next
+site/out

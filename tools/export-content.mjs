@@ -71,10 +71,63 @@ for (const sec of body.matchAll(/<section class="cluster"[^>]*>([\s\S]*?)<\/sect
   }
 }
 
+/* Разделы и сравнения живут в конфигах роутера, а не в разметке: без них
+   выгрузка описывает только ответы, и генератор пришлось бы дописывать руками. */
+function jsBlock(name) {
+  const i = html.indexOf(`var ${name}=`);
+  if (i < 0) return {};
+  let depth = 0, start = html.indexOf('{', i), j = start;
+  for (; j < html.length; j += 1) {
+    if (html[j] === '{') depth += 1;
+    else if (html[j] === '}') { depth -= 1; if (!depth) break; }
+  }
+  const src = html.slice(start, j + 1);
+  const out = {};
+  /* Разбираем ключи верхнего уровня по позиции скобок, а не регуляркой:
+     внутри значений есть и кавычки, и вложенные массивы. */
+  const keyRe = /'([a-z0-9/-]+)':\s*\{/gi;
+  let m;
+  while ((m = keyRe.exec(src))) {
+    let d = 1, k = keyRe.lastIndex;
+    for (; k < src.length; k += 1) {
+      if (src[k] === '{') d += 1;
+      else if (src[k] === '}') { d -= 1; if (!d) break; }
+    }
+    const bodySrc = src.slice(keyRe.lastIndex, k);
+    const field = (f) => {
+      const r = new RegExp(`${f}:'((?:[^'\\\\]|\\\\.)*)'`);
+      const mm = bodySrc.match(r);
+      return mm ? mm[1].replace(/\\'/g, "'") : '';
+    };
+    const list = (f) => {
+      const r = new RegExp(`${f}:\\[([\\s\\S]*?)\\]`);
+      const mm = bodySrc.match(r);
+      if (!mm) return [];
+      return [...mm[1].matchAll(/'((?:[^'\\\\]|\\\\.)*)'/g)].map((x) => x[1].replace(/\\'/g, "'"));
+    };
+    out[m[1]] = {
+      url: `/${m[1]}`,
+      crumb: field('crumb'), eyebrow: field('eyebrow'), title: field('title'),
+      label: field('label'),
+      answerHtml: field('answer'), answer: text(field('answer')),
+      items: list('items').map((x) => ({ html: x, text: text(x) })),
+      risks: list('risks').map((x) => ({ html: x, text: text(x) })),
+    };
+    keyRe.lastIndex = k;
+  }
+  return out;
+}
+const sections = jsBlock('SUB');
+const comparisons = jsBlock('CMP');
+
 const out = {
   source: SRC,
   generated: 'проставляется при выгрузке',
+  sections,
+  comparisons,
   counts: {
+    sections: Object.keys(sections).length,
+    comparisons: Object.keys(comparisons).length,
     answers: answers.length,
     withExpanded: answers.filter((a) => a.expandedHtml).length,
     unverifiedMarkers: answers.reduce((n, a) => n + a.unverified.length, 0),
