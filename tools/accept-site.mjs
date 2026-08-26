@@ -7,8 +7,22 @@
  * проверялось через hash-маршруты. Здесь у каждого адреса свой файл, и именно
  * это надо подтвердить — что содержимое лежит в HTML до исполнения скриптов.
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+/* ESM не читает NODE_PATH — та же оговорка, что в приёмке прототипа.
+   Ищем playwright рядом, потом в глобальной установке. */
+async function loadChromium() {
+  const candidates = ['playwright', ...(process.env.NODE_PATH || '').split(':')
+    .filter(Boolean).map((d) => `${d}/playwright/index.mjs`)
+    .filter((f) => existsSync(f) || existsSync(f.replace('/index.mjs', '')))];
+  for (const c of candidates) {
+    try { return (await import(c.startsWith('/') ? pathToFileURL(c).href : c)).chromium; } catch (e) { /* следующий */ }
+  }
+  console.error('playwright не найден. Установите его или укажите NODE_PATH к глобальным модулям.');
+  process.exit(2);
+}
 
 const OUT = resolve(process.argv[2] || 'site/out');
 const problems = [];
@@ -67,6 +81,40 @@ for (const f of files) {
 for (const [k, v] of titles) if (v.length > 1) fail(`один title на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);
 for (const [k, v] of descs) if (v.length > 1) fail(`одно description на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);
 for (const [k, v] of canons) if (v.length > 1) fail(`один canonical на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);
+
+/* Строковые проверки не годятся для формы: имена атрибутов в HTML
+   регистронезависимы, и поиск по исходнику однажды уже дал ложную тревогу.
+   Смотрим отрендеренную страницу — и намеренно без скриптов, чтобы убедиться,
+   что форма остаётся рабочей у того, у кого JavaScript не выполнился. */
+const chromium = await loadChromium();
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+const ctx = await browser.newContext({ javaScriptEnabled: false });
+const page = await ctx.newPage();
+await page.goto(`file://${resolve(OUT)}/contacts/index.html`);
+const form = await page.evaluate(() => {
+  const f = document.querySelector('#leadForm');
+  if (!f) return null;
+  const consent = f.querySelector('#lead-consent');
+  const inputs = [...f.querySelectorAll('input')];
+  return {
+    согласиеЕсть: !!consent,
+    согласиеОбязательно: !!consent && consent.required,
+    меткаСвязана: !!consent && !!consent.labels && consent.labels.length > 0,
+    ссылкаНаПолитику: !!f.querySelector('a[href*="privacy"]'),
+    безНазначения: inputs.filter((e) => e.required && e.type !== 'checkbox'
+      && !e.getAttribute('autocomplete')).map((e) => e.name),
+  };
+});
+if (!form) fail('на /contacts нет формы заявки');
+else {
+  if (!form.согласиеЕсть) fail('в форме нет чекбокса согласия на обработку ПД');
+  if (!form.согласиеОбязательно) fail('согласие на обработку ПД не обязательно');
+  if (!form.меткаСвязана) fail('у чекбокса согласия нет связанной метки');
+  if (!form.ссылкаНаПолитику) fail('в форме нет ссылки на политику обработки данных');
+  if (form.безНазначения.length) fail(`у обязательных полей не объявлено назначение (WCAG 1.3.5): ${form.безНазначения.join(', ')}`);
+}
+await browser.close();
+console.log(form ? 'форма: согласие обязательно, метка и политика на месте, назначение полей объявлено' : '');
 
 console.log(`страниц: ${files.length}`);
 console.log(`уникальных: title ${titles.size} · description ${descs.size} · canonical ${canons.size}`);

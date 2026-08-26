@@ -63,3 +63,6 @@ export function byCluster() {
   }
   return map;
 }
+
+/** Страница контактов рендерится не сырым HTML прототипа, а с живой формой. */
+export const contactsPage = pages['/contacts'];
