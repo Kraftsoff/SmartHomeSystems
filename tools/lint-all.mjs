@@ -12,7 +12,10 @@ import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const SKIP = new Set(['node_modules', '.git', 'backups', 'site-snapshot', 'tools']);
+/* Собранный сайт — не исходник: правки вносятся в шаблоны и выгрузку, а
+   артефакты пересобираются. Проверяя их, линтер дублирует каждое замечание
+   и ругается на цитаты вопросов, которые в исходнике стоят законно. */
+const SKIP = new Set(['node_modules', '.git', 'backups', 'site-snapshot', 'tools', '.next', 'out']);
 const files = [];
 (function walk(dir) {
   for (const e of readdirSync(dir)) {
