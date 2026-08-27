@@ -869,6 +869,11 @@ ok('согласие и тема: аналитика ждёт ответа, от
     const c3 = await browser.newContext({ viewport: { width: 390, height: 844 },
       isMobile: true, hasTouch: true });
     const p3 = await c3.newPage();
+    /* Пока баннер согласия спрашивает, липкая полоса намеренно спрятана —
+       и проверять на ней нечего. Решаем вопрос заранее: так сайт видит
+       всякий, кто зашёл во второй раз. */
+    await p3.goto(`${ORIGIN}/`);
+    await p3.evaluate(() => { try { localStorage.setItem('mm-analytics-consent', 'no'); } catch { /* хранилище запрещено */ } });
     for (const u of ['/', '/pricing/', '/contacts/', '/portfolio/']) {
       await p3.goto(`${ORIGIN}${u}`);
       await p3.evaluate(() => window.scrollTo(0, 1200));
@@ -876,6 +881,28 @@ ok('согласие и тема: аналитика ждёт ответа, от
       const to = await p3.evaluate(() => document.querySelector('.sticky-cta a')?.getAttribute('href'));
       if (to === u) fail(`${u}: липкое действие ведёт на ту же страницу — нажатие ничего не меняет`);
     }
+
+    /* И не ложится на кнопку отправки заявки. Полоса перекрывала «Отправить
+       заявку» ровно в тот момент, когда человек дошёл до конца формы. */
+    /* Ждём, пока страница оживёт: обработчик прокрутки навешивается при
+       гидратации, и до неё полоса остаётся скрытой независимо от положения —
+       проверка мерила бы состояние, в котором дефекта не бывает. */
+    await p3.goto(`${ORIGIN}/contacts/`, { waitUntil: 'networkidle' });
+    await p3.waitForTimeout(300);
+    /* Кнопку ставим к нижнему краю, а не в середину: посередине экрана
+       липкая полоса до неё не достаёт, и проверка мерила бы положение,
+       в котором дефект невозможен. Человек застаёт кнопку внизу. */
+    await p3.evaluate(() => document.querySelector('#leadForm button[type=submit]')
+      ?.scrollIntoView({ block: 'end' }));
+    await p3.waitForTimeout(500);
+    const clash = await p3.evaluate(() => {
+      const btn = document.querySelector('#leadForm button[type=submit]');
+      const bar = document.querySelector('.sticky-cta');
+      if (!btn || !bar || bar.getAttribute('data-shown') !== 'yes') return 0;
+      const a = btn.getBoundingClientRect(), b = bar.getBoundingClientRect();
+      return a.bottom > b.top && a.top < b.bottom ? Math.round(a.bottom - b.top) : 0;
+    });
+    if (clash) fail(`липкая полоса лежит на кнопке отправки заявки на ${clash} px`);
     await c3.close();
   }
   if (after.высота < 44) fail(`липкое действие высотой ${after.высота} px — меньше пальца`);
@@ -1484,12 +1511,27 @@ ok('согласие и тема: аналитика ждёт ответа, от
       const mob = await browser.newContext({ viewport: { width: 390, height: 844 },
         isMobile: true, hasTouch: true });
       const mp = await mob.newPage();
-      await mp.goto(`${ORIGIN}/`);
-      await mp.evaluate(() => document.querySelector('.house-stage')?.scrollIntoView({ block: 'center' }));
+      await mp.goto(`${ORIGIN}/`, { waitUntil: 'networkidle' });
+      /* Считаем появления накопительно, а не следы в моменте: след живёт
+         полторы секунды и гаснет, между двумя шагами на плане бывает пусто,
+         и мгновенный замер давал ложный ноль на занятой машине. */
+      await mp.evaluate(() => {
+        const stage = document.querySelector('.house-stage');
+        window.__steps = 0;
+        if (!stage) return;
+        new MutationObserver((rows) => {
+          for (const r of rows) {
+            for (const n of r.addedNodes) {
+              if (n.nodeType === 1 && n.classList.contains('footprint')) window.__steps += 1;
+            }
+          }
+        }).observe(stage, { childList: true });
+        stage.scrollIntoView({ block: 'center' });
+      });
       let walked = 0;
-      for (let i = 0; i < 10 && !walked; i += 1) {
+      for (let i = 0; i < 16 && !walked; i += 1) {
         await mp.waitForTimeout(400);
-        walked = await mp.evaluate(() => document.querySelectorAll('.footprint').length);
+        walked = await mp.evaluate(() => window.__steps || 0);
       }
       if (!walked) fail('на телефоне план стоит мёртвым: без касания ни одного следа');
       await mob.close();

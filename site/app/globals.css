@@ -483,3 +483,11 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
   content:"";position:absolute;top:0;right:0;bottom:0;width:12px;
   transform:translateX(100%);pointer-events:none;
   background:linear-gradient(to right,color-mix(in srgb,var(--ink) 12%,transparent),transparent)}
+
+/* Предупреждение над формой, пока заявку некуда принимать. Своё оформление,
+   не жёлтая пометка о непроверенном: та обращена к владельцу сайта, эта —
+   к человеку, который сейчас будет печатать. */
+.lead-warn{background:var(--panel-2);border:1px solid var(--line);
+  border-left:3px solid var(--accent-ink);border-radius:0 12px 12px 0;
+  padding:12px 16px;margin:0 0 14px;font-size:14.5px;max-width:none}
+.lead-warn a{font-weight:600;white-space:nowrap}

@@ -23,3 +23,8 @@ export const LINKS: Array<[href: string, label: string, primary: boolean]> = [
 export const PHONE = '8 800 505 20 53';
 export const PHONE_HREF = 'tel:+78005052053';
 export const PHONE_E164 = '+78005052053';
+
+/* Куда уходит заявка. Пока null: приёмник не выбран, договор поручения на
+   обработку не заключён. От этого зависит поведение формы — пускать человека
+   заполнять шесть полей, чтобы потом сказать «не отправлено», нельзя. */
+export const LEAD_ENDPOINT: string | null = null;

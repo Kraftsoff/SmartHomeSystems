@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { LEAD_ENDPOINT, PHONE, PHONE_HREF } from '@/lib/nav';
 
 /* Форма заявки. Обязательное здесь не оформление, а два свойства:
    без отметки согласия отправка невозможна (ст. 9 ФЗ-152), и у полей с
@@ -10,6 +11,15 @@ export default function LeadForm() {
 
   return (
     <div className="lead">
+      {!LEAD_ENDPOINT && (
+        /* Пока заявку некуда принимать, человек узнаёт об этом до того, как
+           заполнил шесть полей, а не после. Заставить его печатать и потом
+           сказать «не отправлено» — худшее, что может сделать эта страница. */
+        <p className="lead-warn" role="note">
+          Форма приёма заявок сейчас подключается. Напишите или позвоните:{' '}
+          <a href={PHONE_HREF}>{PHONE}</a> — ответим так же быстро.
+        </p>
+      )}
       <form
         id="leadForm"
         onSubmit={(e) => { e.preventDefault(); setSent(true); }}

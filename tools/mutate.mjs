@@ -151,6 +151,10 @@ const MUTATIONS = [
     from: "      if (e.key !== 'Tab') return;", to: "      if (e.key !== 'Tab') return;\n      return;",
     expect: 'уходит из открытого меню' },
 
+  { name: 'липкая полоса на кнопке отправки', file: 'site/app/components/StickyCta.tsx', rebuild: true,
+    from: "data-shown={past && !onForm ? 'yes' : 'no'}", to: "data-shown={past ? 'yes' : 'no'}",
+    expect: 'лежит на кнопке отправки заявки' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },
