@@ -143,6 +143,7 @@ export default function HousePlan() {
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let timer = 0;
     let seen: IntersectionObserver | null = null;
+    let offScroll: (() => void) | null = null;
 
     if (touch && !calm) {
       let tx = 0, ty = 0, stuck = 0;
@@ -158,7 +159,10 @@ export default function HousePlan() {
         if (!live) return;
         const r = stage.getBoundingClientRect();
         if (lastX === null) {
-          if (!pickTarget(r)) return;
+          /* Не нашли пола за шестьдесят проб — пробуем ещё раз, а не выходим
+             навсегда. Раньше здесь стоял выход без перезапуска: одна неудача
+             останавливала прогулку до конца жизни страницы. */
+          if (!pickTarget(r)) { timer = window.setTimeout(tick, 300); return; }
           lastX = tx; lastY = ty; lastT = performance.now();
           pickTarget(r);
           timer = window.setTimeout(tick, 420);
@@ -189,14 +193,28 @@ export default function HousePlan() {
         }
       }, { threshold: 0.05 });
       seen.observe(stage);
-      const box = stage.getBoundingClientRect();
-      if (live && !timer && box.bottom > 0 && box.top < window.innerHeight) tick();
+      const inView = () => {
+        const b = stage.getBoundingClientRect();
+        return b.bottom > 0 && b.top < window.innerHeight;
+      };
+      if (live && !timer && inView()) tick();
+      /* И на прокрутку тоже. Наблюдатель сообщает о пересечении один раз, и
+         если к этому моменту сцена ещё не на экране, второго события можно
+         ждать долго; в приёмке план оставался неподвижным при видимой сцене,
+         разрешённой анимации и без единой ошибки на странице. Прокрутка —
+         второй, независимый повод начать. */
+      const onScroll = () => {
+        if (live && !timer && inView()) tick();
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      offScroll = () => window.removeEventListener('scroll', onScroll);
     }
 
     return () => {
       live = false;
       clearTimeout(timer);
       seen?.disconnect();
+      offScroll?.();
       stage.removeEventListener('pointermove', onMove);
       stage.removeEventListener('pointerleave', onLeave);
     };
