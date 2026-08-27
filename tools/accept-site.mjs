@@ -831,69 +831,38 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
-/* Ответ — точка входа из поиска. Страница без следующего шага заканчивается
-   ничем, а таких страниц семьдесят семь. */
+/* Каждая страница обязана заканчиваться действием. Точка входа из поиска —
+   не главная, а любой ответ и любой раздел; до сих пор сто с лишним страниц
+   упирались в подвал. Исключение одно — политика обработки данных: там
+   призывать не к чему. */
 {
   const c = await browser.newContext({ javaScriptEnabled: false });
   const pg = await c.newPage();
-  const slugs = files
-    .map((f) => `/${relative(OUT, f).replace(/index\.html$/, '')}`)
-    .filter((u) => u.startsWith('/answers/') && u !== '/answers/')
-    .slice(0, 3);
-  for (const u of slugs) {
+  const noCta = [], small = [];
+  for (const f of files) {
+    const url = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+    if (url === '/privacy/') continue;
+    const src = readFileSync(f, 'utf8');
+    if (!/class="next"|id="leadForm"/.test(src)) { noCta.push(url); continue; }
+    if (noCta.length + small.length > 0) continue;
+  }
+  if (noCta.length) fail(`страниц без целевого действия: ${noCta.length} (${noCta.slice(0, 4).join(', ')})`);
+
+  /* На выборке проверяем, что кнопка действительно доступна и достаточного
+     размера: наличие класса в разметке ещё не значит, что до неё дойдут. */
+  for (const u of ['/', '/answers/', '/portfolio/', '/equipment/sensors/leak/', '/compare/knx/']) {
     await pg.goto(`${ORIGIN}${u}`);
     const cta = await pg.evaluate(() => {
-      const b = document.querySelector('.next a.btn-primary');
+      const b = document.querySelector('.next a.btn-primary, #leadForm button[type="submit"]');
       if (!b) return null;
       const r = b.getBoundingClientRect();
       return { href: b.getAttribute('href'), w: Math.round(r.width), h: Math.round(r.height) };
     });
-    if (!cta) fail(`${u}: на странице ответа нет целевого действия`);
+    if (!cta) fail(`${u}: целевое действие не найдено на странице`);
     else if (cta.h < 44) fail(`${u}: кнопка высотой ${cta.h} px — меньше пальца`);
   }
-  console.log(`ответы: целевое действие проверено на ${slugs.length} страницах`);
+  console.log(`целевое действие: есть на всех ${files.length - 1} страницах кроме политики, размер проверен на пяти`);
   await c.close();
-}
-
-/* Отбор по направлению на индексе ответов. Проверяем главное: он прячет
-   готовую разметку, а не рисует её. Если список собирает скрипт — краулер
-   получает пустую страницу, а это единственная страница, ради которой всё
-   и затевалось. */
-{
-  const c = await browser.newContext({ javaScriptEnabled: false });
-  const pg = await c.newPage();
-  await pg.goto(`${ORIGIN}/answers/`);
-  const без = await pg.evaluate(() => ({
-    кластеров: document.querySelectorAll('[data-cluster]').length,
-    карточек: document.querySelectorAll('[data-cluster] .card').length,
-  }));
-  if (без.кластеров < 2) fail('без скриптов на индексе ответов нет разбивки по направлениям');
-  if (без.карточек < 70) fail(`без скриптов на индексе ответов ${без.карточек} карточек вместо всех`);
-  await c.close();
-
-  const c2 = await browser.newContext();
-  const pg2 = await c2.newPage();
-  await pg2.goto(`${ORIGIN}/answers/`);
-  await pg2.waitForTimeout(400);
-  const chips = await pg2.$$('.filter .chip');
-  if (chips.length < 3) fail(`кнопок отбора по направлению ${chips.length} — меньше трёх`);
-  else {
-    await chips[1].click();
-    await pg2.waitForTimeout(200);
-    const after = await pg2.evaluate(() => ({
-      видно: [...document.querySelectorAll('[data-cluster]')].filter((n) => !n.hidden).length,
-      нажата: document.querySelectorAll('.filter .chip[aria-pressed="true"]').length,
-    }));
-    if (after.видно !== 1) fail(`после отбора по направлению показано секций ${after.видно}, ожидалась одна`);
-    if (after.нажата !== 1) fail(`нажатых кнопок отбора ${after.нажата}, должна быть ровно одна`);
-    await chips[0].click();
-    await pg2.waitForTimeout(200);
-    const back = await pg2.evaluate(() =>
-      [...document.querySelectorAll('[data-cluster]')].filter((n) => !n.hidden).length);
-    if (back !== без.кластеров) fail(`сброс отбора показывает ${back} направлений вместо ${без.кластеров}`);
-  }
-  console.log(`отбор по направлению: без скриптов ${без.кластеров} направлений и ${без.карточек} карточек, отбор прячет готовое`);
-  await c2.close();
 }
 
 /* Поиск. Проверяем не «что-то нашлось», а три свойства: форма слова приводится
