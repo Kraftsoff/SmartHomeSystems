@@ -891,6 +891,31 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Список того, что ждёт клиента, обязан совпадать с тем, что на сайте.
+   Он вёлся руками и устаревал молча: знал 76 пунктов, когда на сайте было 79.
+   Пункт, которого нет в списке, не попадёт ни в один разговор с клиентом —
+   то есть останется на сайте навсегда. */
+{
+  let list = '';
+  try { list = readFileSync(resolve('site-foundation/fill-list.md'), 'utf8'); } catch { /* нет файла */ }
+  if (!list) fail('нет site-foundation/fill-list.md — списка того, что ждёт данных клиента');
+  else {
+    const inList = new Set([...list.matchAll(/^\| (.+?) \|/gm)].map((m) => m[1].trim()));
+    const onSite = new Set();
+    for (const f of files) {
+      for (const m of readFileSync(f, 'utf8').matchAll(/class="prov">⚠️\s*([^<]+)</g)) {
+        onSite.add(m[1].replace(/\s+/g, ' ').trim());
+      }
+    }
+    const missing = [...onSite].filter((x) => !inList.has(x));
+    if (missing.length) {
+      fail(`пометок на сайте нет в списке к заполнению: ${missing.length} (${missing.slice(0, 2).join('; ')})`);
+    } else {
+      console.log(`список к заполнению: все ${onSite.size} пометок сайта в нём есть`);
+    }
+  }
+}
+
 /* Печать. Страницу цен распечатывают и несут на встречу: на бумаге не должно
    быть меню, липкой кнопки и вопроса о согласии, а у ссылок должен быть виден
    адрес — на бумаге по ним не нажать. */

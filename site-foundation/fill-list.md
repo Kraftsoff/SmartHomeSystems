@@ -1,0 +1,75 @@
+<!-- Файл собирается tools/gen-fill-list.mjs. Руками не править: пересборка затрёт. -->
+# Что заполнить — список из 66 пунктов
+
+Собран из `site-foundation/content-export.json`, то есть из того же источника, что и сайт.
+Пункт из этого списка на сайте выглядит как пометка ⚠️ и означает: данные не подтверждены и
+публиковаться не могут.
+
+| Что подтвердить или заполнить | Где стоит |
+|---|---|
+| время переключения уточнить по применяемому АВР | /answers/chto-prodolzhit-rabotat-v-dome-pri-otklyuchenii |
+| год и обстоятельства подтвердить перед публикацией | /answers/proizvoditel-zakryl-oblako-ustroystva-stali-kirpichom-chto |
+| зависит от схемы подключения, фиксируется в проекте | /answers/chto-takoe-otkazoustoychivost-v-umnom-dome-i |
+| заполнить: адрес и режим работы | компонент layout.tsx |
+| заполнить: вознаграждение по каждой модели, порог входа, состав и сроки обучения, требования к партнёру, наличие территориальной защиты | /answers/kak-stat-partnerom-dilerom-mimismart |
+| заполнить: вознаграждение по каждой модели, порог входа, состав и сроки обучения, требования к партнёру, территориальная защита | /partners |
+| заполнить: входит ли видеозапись обхода в наш регламент сдачи | /answers/provoditsya-li-obuchenie-pri-sdache-obekta-umnogo |
+| заполнить: дата утверждения | /privacy |
+| заполнить: ИНН | /privacy |
+| заполнить: как добраться, парковка, пропуск на территорию | /showroom |
+| заполнить: корп. почта | /contacts |
+| заполнить: наименование юрлица | /privacy |
+| заполнить: наш подменный фонд и срок реакции | /answers/modul-snimut-s-proizvodstva-chem-ego-zamenit |
+| заполнить: наш регламент передачи доступов и смены паролей при сдаче | /answers/mozhno-li-vzlomat-umnyy-dom-cherez-internet |
+| заполнить: наш складской запас и срок поставки замены | /equipment |
+| заполнить: наша вилка удорожания на DALI-драйверы в расчёте на светильник | /answers/dali-osveschenie-kogda-opravdano |
+| заполнить: наши случаи срабатывания защиты на объектах | /answers/okupaetsya-li-umnyy-dom-na-energosberezhenii |
+| заполнить: наши сроки по каждой из трёх строк и порядок диагностики | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |
+| заполнить: наши тарифы ТО и что входит в первый год после сдачи | /answers/skolko-stoit-vladenie-obsluzhivanie-abonentka-rashodniki |
+| заполнить: наши типовые сроки по каждому этапу для квартиры и для дома, с указанием площади | /answers/skolko-vremeni-zanimaet-montazh-umnogo-doma |
+| заполнить: ОГРН | /privacy |
+| заполнить: ОГРН и ИНН | компонент layout.tsx |
+| заполнить: подтвердить подключение счётчиков | /privacy |
+| заполнить: поимённый состав пакета в договоре | /answers/chto-vy-fizicheski-peredadite-mne-pri-sdache |
+| заполнить: полное наименование с ОПФ | компонент layout.tsx |
+| заполнить: предельный вес на один привод по применяемым моделям | /answers/kak-rabotayut-elektrokarnizy-i-stoit-li-ih |
+| заполнить: решение по GA4 и дата подачи уведомления, если он остаётся | /privacy |
+| заполнить: складской запас и срок поставки замены | /answers/modul-snimut-s-proizvodstva-chem-ego-zamenit |
+| заполнить: срок гарантии на монтаж и на программирование | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |
+| заполнить: срок реакции и наличие подменного фонда | /answers/chto-takoe-otkazoustoychivost-v-umnom-dome-i |
+| заполнить: срок реакции и порядок выезда | /answers/chto-to-perestalo-rabotat-kak-ponyat-chto |
+| заполнить: срок хранения заявок | /privacy |
+| заполнить: стоимость проектирования и порядок передачи прав | /answers/chto-vhodit-v-proektirovanie-umnogo-doma |
+| заполнить: тарифы обслуживания и состав регламента | /answers/skolko-stoit-vladenie-obsluzhivanie-abonentka-rashodniki |
+| заполнить: телефон | /contacts |
+| заполнить: условия и стоимость обследования чужого объекта | /answers/u-menya-uzhe-stoit-sistema-ot-drugogo |
+| заполнить: условия поставки интеграторам, уровни цен, порядок инженерной поддержки и гарантийной замены | /answers/rabotaete-li-vy-s-integratorami-i-postavlyaete |
+| заполнить: ФИО ответственного | /privacy |
+| заполнить: хостинг и страна серверов | /privacy |
+| заполнить: что входит в наш регламент по правкам и что тарифицируется отдельно | /answers/smogu-li-ya-sam-menyat-scenarii-ne |
+| заполнить: юр. адрес | /privacy |
+| заполнить: CRM и её оператор | /privacy |
+| заполнить: email для обращений | /privacy |
+| опровергнуто: наши сайты говорят 53, в индексе 6 городов | /about |
+| подтвердить или снять | /about |
+| подтвердить: методика счёта объектов | /about |
+| подтвердить: на что распространяется | /about |
+| подтвердить: распространяется ли бессрочный срок на всё собственное оборудование или на перечень линеек | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |
+| подтвердить: состав собственного производства, наличие складского запаса и типовой срок поставки замены | /answers/pochemu-stoit-vybirat-rossiyskogo-proizvoditelya-umnogo-doma |
+| подтвердить: срок ответа на заявку в рабочие часы | компонент LeadForm.tsx |
+| порог уточняется | /pricing, /solutions/flat и ещё 3 |
+| пороги уточняются | /pricing |
+| поставить наши доли по закрытым проектам: оборудование / монтаж / проектирование и программирование | /pricing |
+| приёмник заявки не подключён: нужен выбор CRM и договор поручения на обработку | компонент LeadForm.tsx |
+| проверить текущую ситуацию с поставками | /answers/chem-umnyy-dom-otlichaetsya-ot-knx-sistemy |
+| проверить у юриста: применимость к работам по автоматизации жилья и разграничение движимого и недвижимого в конкретном договоре | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |
+| проверить: пороги CO₂ и диапазон влажности привести к действующим нормам для жилых помещений | /answers/kto-otvechaet-za-ventilyaciyu-uvlazhnenie-i-kachestvo |
+| раздел ждёт данных: объекты, фото, разрешения на публикацию | /portfolio |
+| размер и условия — уточняются | /partners |
+| реквизиты не заполнены | /about |
+| сверить с нашим договором: какие из этих строк у нас входят в цену, а какие выносятся | /pricing |
+| состав производства подтвердить | /answers/pochemu-stoit-vybirat-rossiyskogo-proizvoditelya-umnogo-doma |
+| условия уточняются | /answers/kak-stat-partnerom-dilerom-mimismart, /answers/rabotaete-li-vy-s-integratorami-i-postavlyaete |
+| уточнить состав работ, требующих лицензии МЧС — п. 15 ч. 1 ст. 12 ФЗ-99 | /answers/chem-umnyy-dom-dlya-kommercheskogo-obekta-s |
+| формулировку подтвердить | /showroom |
+| шаблон, а не сданный объект: ждём данные из вашей базы | компонент CaseGrid.tsx |
