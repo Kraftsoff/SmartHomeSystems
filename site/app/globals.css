@@ -451,3 +451,17 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
 .card.risk{background:var(--risk-bg);border-color:color-mix(in srgb,var(--risk-line) 34%,var(--line));
   border-left:3px solid var(--risk-line);box-shadow:none}
 .card.risk p{color:var(--ink)}
+
+/* Меню на телефоне: плотнее, чтобы последний раздел не уходил за нижний край,
+   и с телефоном в конце — на экране 390 px «Контакты» оказывались ниже сгиба. */
+/* Пункты меню не наследуют отступ обычного списка: li{margin:6px 0} давал
+   по двенадцать лишних пикселей на строку — сто пятьдесят шесть на весь
+   список, из-за которых последний раздел не помещался на экран. */
+.nav-panel ul{gap:0}
+.nav-panel li{margin:0}
+.nav-panel a{padding:9px 12px;min-height:44px}
+.nav-call{max-width:1140px;margin:0 auto 6px;padding:0 20px 12px;
+  border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.nav-call a{font-size:19px;font-weight:700;color:var(--ink);text-decoration:none;
+  min-height:44px;display:inline-flex;align-items:center}
+.nav-call span{color:var(--muted);font-size:13px}

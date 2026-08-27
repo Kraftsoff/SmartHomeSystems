@@ -557,7 +557,34 @@ ok('согласие и тема: аналитика ждёт ответа, от
     if (clash === null) fail(`${u}: нет шапки или заголовка`);
     else if (clash > 0) fail(`${u}: шапка накрывает заголовок на ${clash} px`);
   }
-  ok('узкий экран: за край не выходит, шапка заголовок не накрывает');
+  /* Открытое меню обязано помещаться на экран целиком. Пункты наследовали
+     отступ обычного списка — по двенадцать пикселей на строку, сто пятьдесят
+     шесть на тринадцать разделов, — и «Контакты» оказывались за нижним краем:
+     раздел есть, а дотянуться можно только прокруткой внутри панели, о которой
+     ничто не сообщает. */
+  {
+    await pg.goto(`${ORIGIN}/`);
+    await pg.waitForTimeout(200);
+    const burger = await pg.$('.burger');
+    if (!burger) fail('на узком экране нет кнопки меню');
+    else {
+      await burger.click();
+      await pg.waitForTimeout(250);
+      const fit = await pg.evaluate(() => {
+        const items = [...document.querySelectorAll('.nav-panel a')];
+        if (!items.length) return null;
+        const last = items[items.length - 1].getBoundingClientRect();
+        return { имя: items[items.length - 1].textContent.trim(),
+          низ: Math.round(last.bottom), экран: window.innerHeight };
+      });
+      if (!fit) fail('меню открылось пустым');
+      else if (fit.низ > fit.экран) {
+        fail(`меню не помещается: «${fit.имя}» уходит на ${fit.низ - fit.экран} px за нижний край`);
+      }
+    }
+  }
+
+  ok('узкий экран: за край не выходит, шапка заголовок не накрывает, меню помещается');
   await c.close();
 }
 

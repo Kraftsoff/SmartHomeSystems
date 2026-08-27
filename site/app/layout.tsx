@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { BRAND, SITE } from '@/lib/content';
 import ThemeToggle from './components/ThemeToggle';
 import MainNav from './components/MainNav';
-import { LINKS } from '@/lib/nav';
+import { LINKS, PHONE, PHONE_HREF, PHONE_E164 } from '@/lib/nav';
 import CookieBar from './components/CookieBar';
 import StickyCta from './components/StickyCta';
 
@@ -30,7 +30,9 @@ const org = {
   '@context': 'https://schema.org', '@type': 'Organization', name: BRAND,
   description: 'Российский производитель и инженерный подрядчик: собственное производство контроллеров умного дома в Москве, проектирование и монтаж инженерных систем премиальных объектов.',
   foundingDate: '2004', areaServed: 'RU',
-  telephone: '+7 800 505 20 53',
+  /* Номер берётся из общего модуля: он же в подвале и в меню на телефоне.
+     Пока их было двое, разойтись они могли молча. */
+  telephone: PHONE_E164,
   email: 'msk@mmsmart.ru',
   address: {
     '@type': 'PostalAddress', addressCountry: 'RU', addressLocality: 'Москва',
@@ -71,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <p>
                 {BRAND} — производство и монтаж инженерных систем.
                 Москва, Новоданиловская набережная, 6к1.{' '}
-                <a href="tel:+78005052053">8 800 505 20 53</a>,{' '}
+                <a href={PHONE_HREF}>{PHONE}</a>,{' '}
                 <a href="mailto:msk@mmsmart.ru">msk@mmsmart.ru</a>{' '}
                 <span className="prov">⚠️ заполнить: полное наименование с ОПФ</span>{' '}
                 <span className="prov">⚠️ заполнить: ОГРН и ИНН</span>{' '}

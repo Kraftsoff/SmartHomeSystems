@@ -17,3 +17,9 @@ export const LINKS: Array<[href: string, label: string, primary: boolean]> = [
   ['/about/', 'О компании', false],
   ['/contacts/', 'Контакты', false],
 ];
+
+/* Номер лежит рядом со списком разделов: он нужен и подвалу, и разметке
+   организации, и меню на телефоне. Одна строка — один источник. */
+export const PHONE = '8 800 505 20 53';
+export const PHONE_HREF = 'tel:+78005052053';
+export const PHONE_E164 = '+78005052053';

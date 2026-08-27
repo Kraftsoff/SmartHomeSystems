@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { LINKS } from '@/lib/nav';
+import { LINKS, PHONE, PHONE_HREF } from '@/lib/nav';
 
 
 export default function MainNav() {
@@ -54,6 +54,14 @@ export default function MainNav() {
         {open ? 'Закрыть' : 'Меню'}
       </button>
       <div ref={panel} id="nav-all" className="nav-panel" hidden={!open}>
+        {/* Телефон первым, а не в конце: список из тринадцати разделов
+            выталкивал его за нижний край экрана, а на телефоне позвонить
+            быстрее, чем заполнить форму. Ссылка настоящая — набор одним
+            касанием. */}
+        <p className="nav-call">
+          <a href={PHONE_HREF} onClick={() => setOpen(false)}>{PHONE}</a>
+          <span>бесплатно по России</span>
+        </p>
         <ul>
           {LINKS.map(([href, label]) => (
             <li key={href}>
