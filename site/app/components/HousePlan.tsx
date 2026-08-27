@@ -80,10 +80,10 @@ export default function HousePlan() {
          он оказался бы внутри неё и не сдвинулся бы уже никогда. */
       if (lastX === null || !isFloor(lastX / r.width, lastY / r.height)) {
         if (isFloor(x / r.width, y / r.height)) { lastX = x; lastY = y; lastT = now; }
-        return;
+        return false;
       }
       const dx = x - lastX, dy = y - lastY;
-      if (Math.hypot(dx, dy) < 8 || now - lastT < 80) return;
+      if (Math.hypot(dx, dy) < 8 || now - lastT < 80) return false;
 
       let adv = advance(lastX, lastY, x, y, r);
       /* Скольжение вдоль препятствия: прямой ход упёрся — пробуем составляющие
@@ -97,15 +97,15 @@ export default function HousePlan() {
         const gain = (c: { x: number; y: number }) => Math.hypot(c.x - lastX!, c.y - lastY);
         if (!adv || gain(byY) > gain(adv)) adv = byY;
       }
-      if (!adv || (adv.x === lastX && adv.y === lastY)) return;
+      if (!adv || (adv.x === lastX && adv.y === lastY)) return false;
       const step = Math.hypot(adv.x - lastX, adv.y - lastY);
       lastX = adv.x; lastY = adv.y; lastT = now;
-      if (step < 8) return;
+      if (step < 8) return false;
 
       const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
       const perp = ((angle + 90) * Math.PI) / 180, off = 2 * side;
       const fx = adv.x + Math.cos(perp) * off, fy = adv.y + Math.sin(perp) * off;
-      if (!isFloor(fx / r.width, fy / r.height)) return;
+      if (!isFloor(fx / r.width, fy / r.height)) return false;
 
       const el = document.createElement('div');
       el.className = 'footprint';
@@ -119,6 +119,7 @@ export default function HousePlan() {
       requestAnimationFrame(() => el.classList.add('fade'));
       setTimeout(() => el.remove(), 1500);
       side *= -1;
+      return true;
     };
 
     let live = true;
@@ -144,7 +145,7 @@ export default function HousePlan() {
     let seen: IntersectionObserver | null = null;
 
     if (touch && !calm) {
-      let tx = 0, ty = 0;
+      let tx = 0, ty = 0, stuck = 0;
       const pickTarget = (r: DOMRect) => {
         for (let i = 0; i < 60; i += 1) {
           const x = r.width * (0.08 + Math.random() * 0.84);
@@ -168,16 +169,28 @@ export default function HousePlan() {
         /* Шаг ограничен: длинный отрезок целиком проглотил бы комнату за раз,
            и вместо ходьбы вышел бы прыжок. */
         const k = Math.min(1, 16 / Math.max(d, 1));
-        moveTo(lastX + (tx - lastX) * k, lastY + (ty - lastY) * k, performance.now());
+        const stepped = moveTo(lastX + (tx - lastX) * k, lastY + (ty - lastY) * k, performance.now());
+        /* Упёрся — берём другую цель. Между двумя случайными точками бывает
+           стена, и без этого житель толкался в неё, не оставляя следов:
+           на плане это выглядело как «ничего не происходит». */
+        stuck = stepped ? 0 : stuck + 1;
+        if (stuck >= 2) { pickTarget(r); stuck = 0; }
         timer = window.setTimeout(tick, 420);
       };
+      /* Порог низкий и наблюдатель дублируется прямой проверкой при запуске.
+         С порогом в треть площади прогулка не начиналась, если к моменту
+         подключения план стоял на границе экрана: наблюдатель сообщал
+         «не виден», второго события не приходило, и на телефоне план
+         оставался неподвижным через раз. */
       seen = new IntersectionObserver((rows) => {
         for (const row of rows) {
           if (row.isIntersecting && live && !timer) tick();
           else if (!row.isIntersecting) { clearTimeout(timer); timer = 0; }
         }
-      }, { threshold: 0.35 });
+      }, { threshold: 0.05 });
       seen.observe(stage);
+      const box = stage.getBoundingClientRect();
+      if (live && !timer && box.bottom > 0 && box.top < window.innerHeight) tick();
     }
 
     return () => {

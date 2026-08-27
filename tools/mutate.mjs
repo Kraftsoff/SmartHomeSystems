@@ -136,7 +136,7 @@ const MUTATIONS = [
     from: "    .filter((sentence) => !sentence.includes('⚠️'))\n", to: '',
     expect: 'ушла в описание страницы' },
   { name: 'маска расходится с планом', file: 'site/app/components/HousePlan.tsx', rebuild: true,
-    from: 'data-mask={PLAN_DAY}', to: 'data-mask="/plan/sensor-67dd010377.png"',
+    from: 'data-mask={PLAN_DAY}', to: 'data-mask="/og.png"',
     expect: 'не совпадает с нарисованным планом' },
 
   { name: 'липкая кнопка ведёт на ту же страницу', file: 'site/app/components/StickyCta.tsx', rebuild: true,

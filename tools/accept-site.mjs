@@ -383,6 +383,37 @@ ok(`хлебные крошки: на экране и в разметке сов
   if (!noImg.length && !miss.length) ok('карточка для пересылки: есть на всех страницах, файл на месте');
 }
 
+/* Файлы, на которые никто не ссылается, уезжают на хостинг вместе с сайтом.
+   Восемь значков устройств и две фотографии зала лежали мёртвым грузом. */
+{
+  const referenced = new Set();
+  for (const f of files) {
+    for (const m of readFileSync(f, 'utf8').matchAll(/["'(]([^"'()\s]*\.(?:png|jpg|jpeg|webp|svg))/g)) {
+      referenced.add(m[1].replace(/^https?:\/\/[^/]+/, ''));
+    }
+  }
+  for (const f of readdirSync(join(OUT, '_next/static'), { recursive: true })) {
+    const p = join(OUT, '_next/static', String(f));
+    if (!statSync(p).isFile() || !/\.(css|js)$/.test(String(f))) continue;
+    for (const m of readFileSync(p, 'utf8').matchAll(/["'(]([^"'()\s]*\.(?:png|jpg|jpeg|webp|svg))/g)) {
+      referenced.add(m[1]);
+    }
+  }
+  const dead = [];
+  (function walkImg(dir, base) {
+    for (const e of readdirSync(dir)) {
+      const p = join(dir, e);
+      if (statSync(p).isDirectory()) { if (e !== '_next') walkImg(p, `${base}${e}/`); continue; }
+      if (!/\.(png|jpg|jpeg|webp|svg)$/.test(e)) continue;
+      if (!referenced.has(`${base}${e}`)) dead.push([`${base}${e}`, statSync(p).size]);
+    }
+  })(OUT, '/');
+  if (dead.length) {
+    const kb = Math.round(dead.reduce((n, [, s]) => n + s, 0) / 1024);
+    fail(`картинки, на которые никто не ссылается: ${dead.length} на ${kb} КБ — ${dead.slice(0, 3).map(([p]) => p).join(', ')}`);
+  } else ok('лишних картинок в сборке нет');
+}
+
 /* Страница ошибки. Next отдавал английское «404: This page could not be
    found» на русском сайте и без единого следующего шага. Сюда попадают по
    старым ссылкам с пяти доменов — всё, чего нет в карте из 194 правил. */
@@ -1531,6 +1562,7 @@ ok('согласие и тема: аналитика ждёт ответа, от
       const mob = await browser.newContext({ viewport: { width: 390, height: 844 },
         isMobile: true, hasTouch: true });
       const mp = await mob.newPage();
+      mp.on('pageerror', (e) => { mp.evaluate((m) => { window.__err = m; }, String(e)).catch(() => {}); });
       await mp.goto(`${ORIGIN}/`, { waitUntil: 'networkidle' });
       /* Считаем появления накопительно, а не следы в моменте: след живёт
          полторы секунды и гаснет, между двумя шагами на плане бывает пусто,
@@ -1553,7 +1585,19 @@ ok('согласие и тема: аналитика ждёт ответа, от
         await mp.waitForTimeout(400);
         walked = await mp.evaluate(() => window.__steps || 0);
       }
-      if (!walked) fail('на телефоне план стоит мёртвым: без касания ни одного следа');
+      if (!walked) {
+        /* Диагностика на месте: без неё отказ раз в несколько прогонов
+           невозможно отличить от настоящего дефекта. */
+        const why = await mp.evaluate(() => {
+          const st = document.querySelector('.house-stage');
+          const r = st?.getBoundingClientRect();
+          return { сцена: !!st, наведения: matchMedia('(hover: none)').matches,
+            анимация: matchMedia('(prefers-reduced-motion: reduce)').matches,
+            верх: r ? Math.round(r.top) : null, низ: r ? Math.round(r.bottom) : null,
+            экран: window.innerHeight, ошибки: window.__err || null };
+        });
+        fail(`на телефоне план стоит мёртвым: без касания ни одного следа (${JSON.stringify(why)})`);
+      }
       await mob.close();
 
       const calm = await browser.newContext({ viewport: { width: 390, height: 844 },
