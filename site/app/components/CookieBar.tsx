@@ -31,19 +31,19 @@ export default function CookieBar() {
 
   if (!show) return null;
   return (
-    <div role="region" aria-label="Согласие на аналитические cookie"
-      style={{ position: 'fixed', left: 12, right: 12, bottom: 12, zIndex: 30,
-        background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 14, padding: 16 }}>
-      <p style={{ margin: '0 0 10px', fontSize: 14 }}>
+    <div className="consent" role="region" aria-label="Согласие на аналитические cookie">
+      <p>
         Технические cookie нужны, чтобы сайт помнил выбранную тему — они работают всегда.
         Аналитические запускаем только с вашего согласия.{' '}
         <a href="/privacy/">Политика обработки данных</a>
       </p>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <button type="button" onClick={() => decide('yes')}
-          style={{ padding: '9px 16px', borderRadius: 10, cursor: 'pointer' }}>Разрешить аналитику</button>
-        <button type="button" onClick={() => decide('no')}
-          style={{ padding: '9px 16px', borderRadius: 10, cursor: 'pointer' }}>Только необходимые</button>
+      <div className="consent-act">
+        <button type="button" className="btn btn-primary" onClick={() => decide('yes')}>
+          Разрешить аналитику
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={() => decide('no')}>
+          Только необходимые
+        </button>
       </div>
     </div>
   );

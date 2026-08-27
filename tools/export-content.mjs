@@ -82,7 +82,19 @@ function jsBlock(name) {
     else if (html[j] === '}') { depth -= 1; if (!depth) break; }
   }
   const src = html.slice(start, j + 1);
-  const out = {};
+  /* Адреса из хэш-роутера встречаются не только в страницах, но и в ответах,
+   разделах и сравнениях. Проходим по всему дереву один раз: пропустить ветку
+   значит оставить ссылку, которая на сайте никуда не ведёт. */
+function deepFixLinks(v) {
+  if (typeof v === 'string') return fixLinks(v);
+  if (Array.isArray(v)) return v.map(deepFixLinks);
+  if (v && typeof v === 'object') {
+    return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deepFixLinks(x)]));
+  }
+  return v;
+}
+
+const out = {};
   /* Разбираем ключи верхнего уровня по позиции скобок, а не регуляркой:
      внутри значений есть и кавычки, и вложенные массивы. */
   const keyRe = /'([a-z0-9/-]+)':\s*\{/gi;
@@ -120,6 +132,27 @@ function jsBlock(name) {
 /* Страницы-хабы и текстовые разделы живут прямо в разметке прототипа, а не в
    конфигах: без них выгрузка не покрывает десять адресов, на которые ведут
    редиректы. Берём внутренность секции как есть — там уже готовая вёрстка. */
+/* Прототип жил на хэш-роутере: внутри страниц адреса вида "#/service" и свои
+   хлебные крошки, обёрнутые ещё в один .shell. На настоящем сайте такой адрес
+   никуда не ведёт — тридцать две ссылки вели в пустоту, — крошки удваиваются с
+   теми, что рисует шаблон, а вложенная оболочка сдвигает всю страницу вправо.
+   Приводим здесь, в выгрузке: контент входит в сайт единственной дверью. */
+function fixLinks(s) {
+  return s
+    .replace(/href="#\/"/g, 'href="/"')
+    .replace(/href="#\/([^"]*?)\/?"/g, (_, path) => `href="/${path}/"`);
+}
+function forRealSite(seg) {
+  return fixLinks(seg)
+    .replace(/<p class="crumbs">[\s\S]*?<\/p>\s*/g, '')
+    /* Вложенную оболочку снимаем классом, а не тегом. Регулярка по <div
+       class="shell">…</div> закрывается на первом же </div> внутри — на
+       странице цен от этого карточки вложились одна в другую вместо ряда.
+       Тег остаётся на месте, уходит только отступ, который дублирует внешний. */
+    .replace(/(<div[^>]*)\sclass="(?:sub-hero|shell)"/g, '$1')
+    .trim();
+}
+
 const PAGE_URL = {
   'p-equipment': '/equipment', 'p-cases': '/portfolio', 'p-pricing': '/pricing',
   'p-privacy': '/privacy', 'p-showroom': '/showroom', 'p-functions-idx': '/functions',
@@ -141,13 +174,25 @@ for (const [id, url] of Object.entries(PAGE_URL)) {
     title: h1 ? text(h1[1]) : '',
     eyebrow: eyebrow ? text(eyebrow[1]) : '',
     lede: lede ? text(lede[1]) : '',
-    html: seg.trim(),
+    html: forRealSite(seg),
     textLength: text(seg).length,
   };
 }
 
 const sections = jsBlock('SUB');
 const comparisons = jsBlock('CMP');
+
+/* Адреса из хэш-роутера встречаются не только в страницах, но и в ответах,
+   разделах и сравнениях. Проходим по всему дереву один раз: пропустить ветку
+   значит оставить ссылку, которая на сайте никуда не ведёт. */
+function deepFixLinks(v) {
+  if (typeof v === 'string') return fixLinks(v);
+  if (Array.isArray(v)) return v.map(deepFixLinks);
+  if (v && typeof v === 'object') {
+    return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deepFixLinks(x)]));
+  }
+  return v;
+}
 
 const out = {
   source: SRC,
@@ -168,7 +213,7 @@ const out = {
   clusters: [...new Set(answers.map((a) => a.cluster))],
   answers,
 };
-writeFileSync(resolve(OUT), JSON.stringify(out, null, 2) + '\n', 'utf8');
+writeFileSync(resolve(OUT), JSON.stringify(deepFixLinks(out), null, 2) + '\n', 'utf8');
 console.log(`${OUT}: ответов ${out.counts.answers}, из них с развёрнутой частью ${out.counts.withExpanded}`);
 console.log(`кластеров ${out.clusters.length}, пометок ⚠️ ${out.counts.unverifiedMarkers}`);
 console.log(`знаков: прямые ответы ${out.counts.charsDirect}, развёрнутая часть ${out.counts.charsExpanded}`);

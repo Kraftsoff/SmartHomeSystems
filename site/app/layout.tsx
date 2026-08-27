@@ -2,6 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { BRAND, SITE } from '@/lib/content';
 import ThemeToggle from './components/ThemeToggle';
+import MainNav from './components/MainNav';
+import { LINKS } from '@/lib/nav';
 import CookieBar from './components/CookieBar';
 
 export const metadata: Metadata = {
@@ -32,18 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="site">
           <div className="shell">
             <a className="brand" href="/">● {BRAND}</a>
-            <nav className="main" aria-label="Основная навигация">
-              <a href="/solutions/">Решения</a>
-              <a href="/functions/">Направления</a>
-              <a href="/pricing/">Цены</a>
-              <a href="/compare/">Сравнения</a>
-              <a href="/answers/">Ответы</a>
-              <a href="/equipment/">Оборудование</a>
-              <a href="/service/">Сервис</a>
-              <a href="/portfolio/">Кейсы</a>
-              <a href="/about/">О компании</a>
-              <a href="/contacts/">Контакты</a>
-            </nav>
+            <MainNav />
             <ThemeToggle />
           </div>
         </header>
@@ -51,13 +42,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CookieBar />
         <footer className="site">
           <div className="shell">
-            <p>
-              {BRAND} — производство и монтаж инженерных систем.{' '}
-              <span className="prov">⚠️ заполнить: полное наименование с ОПФ</span>{' '}
-              <span className="prov">⚠️ заполнить: адрес и режим работы</span>{' '}
-              <span className="prov">⚠️ заполнить: ОГРН и ИНН</span>
-            </p>
-            <p><a href="/privacy/">Политика обработки персональных данных</a></p>
+            {/* Полная карта разделов: в шапке видны не все, а страница без
+                ссылки на неё существует только для того, кто знает адрес. */}
+            <nav className="foot-map" aria-label="Разделы сайта">
+              {LINKS.map(([href, label]) => (
+                <a key={href} href={href}>{label}</a>
+              ))}
+            </nav>
+            <div className="foot-legal">
+              <p>
+                {BRAND} — производство и монтаж инженерных систем.{' '}
+                <span className="prov">⚠️ заполнить: полное наименование с ОПФ</span>{' '}
+                <span className="prov">⚠️ заполнить: адрес и режим работы</span>{' '}
+                <span className="prov">⚠️ заполнить: ОГРН и ИНН</span>
+              </p>
+              <p><a href="/privacy/">Политика обработки персональных данных</a></p>
+            </div>
           </div>
         </footer>
       </body>

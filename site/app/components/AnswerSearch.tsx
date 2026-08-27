@@ -64,10 +64,9 @@ export default function AnswerSearch({ items }: { items: Item[] }) {
       {query && hits.length > 0 && (
         <div className="grid g3" data-search-results style={{ marginTop: 14 }}>
           {hits.map(({ it }) => (
-            <a className="card" key={it.slug} href={`/answers/${it.slug}/`}>
-              <span className="kicker">{it.kicker}</span>
-              <h3>{it.question}</h3>
-            </a>
+            <article className="card" key={it.slug}><span className="kicker">{it.kicker}</span>
+              <h3><a className="stretch" href={`/answers/${it.slug}/`}>{it.question}</a></h3>
+            </article>
           ))}
         </div>
       )}

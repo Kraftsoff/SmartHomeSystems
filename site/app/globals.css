@@ -3,10 +3,16 @@
 :root{
   --bg:#f4f5f7; --panel:#fff; --panel-2:#f7f8fa; --ink:#0b0d10; --muted:#4d5157;
   --line:#dfe3e8; --accent-ink:#1b52b8; --glow:#478beb; --radius:16px;
+  --on-accent:#fff; --shadow:0 1px 2px rgba(11,13,16,.04),0 8px 24px rgba(11,13,16,.06);
+  --shadow-lift:0 2px 6px rgba(11,13,16,.06),0 14px 40px rgba(11,13,16,.10);
+  --measure:68ch; --warn-bg:#fff8e6; --warn-line:#e8d9a8; --warn-ink:#6b5310;
 }
 :root[data-mode="night"]{
   --bg:#0a0c12; --panel:#141824; --panel-2:#10131c; --ink:#f4f4f4; --muted:#a5a3c2;
   --line:#242a3a; --accent-ink:#8fc0ff; --glow:#478beb;
+  --on-accent:#08111f; --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.45);
+  --shadow-lift:0 2px 6px rgba(0,0,0,.55),0 14px 40px rgba(0,0,0,.55);
+  --warn-bg:#241f0e; --warn-line:#4a3f1c; --warn-ink:#e8cf8a;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -16,11 +22,13 @@ a{color:var(--accent-ink)}
 .shell{max-width:1140px;margin:0 auto;padding:0 20px}
 header.site{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
   backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-header.site .shell{display:flex;align-items:center;gap:18px;height:60px}
+header.site .shell{display:flex;align-items:center;gap:18px;min-height:62px}
 .brand{font-weight:700;font-size:19px;text-decoration:none;color:var(--ink)}
-nav.main{display:flex;gap:16px;flex-wrap:wrap;font-size:14.5px}
-nav.main a{text-decoration:none;color:var(--muted)}
-nav.main a:hover{color:var(--ink)}
+nav.main{display:flex;gap:2px;font-size:14.5px;margin-right:auto;flex-wrap:nowrap}
+nav.main a{text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:9px;
+  white-space:nowrap;transition:color .15s,background .15s}
+nav.main a:hover{color:var(--ink);background:var(--panel-2)}
+nav.main a[aria-current="page"]{color:var(--ink);font-weight:600}
 .crumbs{color:var(--muted);font-size:13.5px;margin:26px 0 10px}
 .crumbs a{color:var(--muted)}
 .eyebrow{color:var(--muted);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
@@ -35,8 +43,12 @@ h3{font-size:17.5px;margin:0 0 6px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
 .card p{color:var(--muted);font-size:14px;margin:0}
 .kicker{color:var(--muted);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
-.prov{display:inline-block;border:1px solid var(--line);border-radius:8px;
-  padding:2px 7px;font-size:12.5px;color:var(--muted);font-family:ui-monospace,monospace}
+/* Пометка о непроверенном стоит внутри фразы, поэтому не должна её ломать:
+   моноширинный шрифт в рамке рвал строку сильнее, чем весит сама оговорка.
+   Цвет предупреждения, обычный шрифт, размер чуть меньше основного. */
+.prov{display:inline;border-radius:6px;padding:1px 6px;font-size:.92em;
+  background:var(--warn-bg);color:var(--warn-ink);
+  box-shadow:inset 0 0 0 1px var(--warn-line);white-space:nowrap}
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:14px 0}
 table{border-collapse:collapse;width:100%;min-width:520px}
 th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:14.5px}
@@ -52,14 +64,128 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
 /* План дома. Фон — файл, а не встроенная строка: 337 КБ в base64 весили на
-   треть больше самих картинок и лежали в каждом документе. */
+   треть больше самих картинок и лежали в каждом документе.
+   Подложка тёмная и в светлой теме: стены и мебель на картинке белые по
+   прозрачному фону, и на светлой подложке план исчезал — на снимке первого
+   экрана оставался пустой серый прямоугольник. */
 .house-stage{position:relative;width:100%;aspect-ratio:720/410;border-radius:14px;
-  background:#eef0f3 center/contain no-repeat url('/plan/plan-day-f1aad96bf4.png');
+  background:linear-gradient(160deg,#1a2130,#0e131d) center/cover;
   border:1px solid var(--line);overflow:hidden;touch-action:pan-y}
-:root[data-mode="night"] .house-stage{background-color:#0a051a;
-  background-image:url('/plan/plan-night-2e13515c34.png')}
+.house-stage::before{content:"";position:absolute;inset:0;
+  background:center/contain no-repeat url('/plan/plan-day-f1aad96bf4.png')}
+:root[data-mode="night"] .house-stage{background:linear-gradient(160deg,#10091f,#07040f)}
+:root[data-mode="night"] .house-stage::before{background-image:url('/plan/plan-night-2e13515c34.png')}
 .footprint{position:absolute;left:0;top:0;width:9px;height:15px;pointer-events:none;
   transform:translate(-50%,-50%);opacity:1;transition:opacity 1.1s ease .35s;z-index:6}
 .footprint.fade{opacity:0}
 .footprint svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45))}
-.footprint svg rect{fill:var(--accent-ink);stroke:rgba(0,0,0,.28);stroke-width:1.2;paint-order:stroke}
+.footprint svg rect{fill:#6aa8f5;stroke:rgba(0,0,0,.28);stroke-width:1.2;paint-order:stroke}
+
+/* ————— Раскрывающееся меню ————— */
+/* Все десять ссылок лежат в разметке один раз; узкий экран прячет часть из
+   строки и открывает их же списком. Второй копии нет — иначе краулер увидит
+   каждую ссылку дважды, а клавиатура пройдёт по невидимой. */
+.burger{display:none;align-items:center;gap:9px;background:var(--panel);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:9px 13px;font:inherit;font-size:14px;
+  min-height:44px;cursor:pointer}
+.burger:hover{border-color:var(--accent-ink)}
+.burger-bars{display:inline-flex;flex-direction:column;gap:3.5px;width:16px}
+.burger-bars i{display:block;height:2px;background:currentColor;border-radius:2px}
+.nav-panel{position:absolute;left:0;right:0;top:100%;background:var(--panel);
+  border-bottom:1px solid var(--line);box-shadow:var(--shadow-lift);padding:10px 0 16px}
+.nav-panel[hidden]{display:none}
+.nav-panel ul{list-style:none;margin:0;padding:0 20px;max-width:1140px;
+  margin-inline:auto;display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.nav-panel a{display:block;padding:12px 12px;border-radius:10px;text-decoration:none;
+  color:var(--ink);font-size:16px;min-height:44px}
+.nav-panel a:hover{background:var(--panel-2)}
+
+@media (max-width:1180px){ nav.main a.sec{display:none} }
+@media (max-width:860px){
+  nav.main{display:none}
+  .burger{display:inline-flex;margin-left:auto}
+  header.site .shell{gap:10px}
+}
+
+/* ————— Кнопки ————— */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:12px 22px;border-radius:12px;font-size:16px;font-weight:600;
+  text-decoration:none;border:1px solid transparent;cursor:pointer;
+  transition:transform .12s ease,box-shadow .15s ease,background .15s ease}
+.btn-primary{background:var(--accent-ink);color:var(--on-accent);box-shadow:var(--shadow)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-lift)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--accent-ink);background:var(--panel-2)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0 6px}
+
+/* ————— Карточка ————— */
+/* Ссылка обёрнута вокруг заголовка, а не вокруг всей карточки: обёртка красит
+   и подчёркивает каждый абзац внутри, и карточка превращается в стену
+   подчёркнутого текста. Кликабельность даёт растянутая область заголовка. */
+.card{position:relative;display:flex;flex-direction:column;gap:7px;
+  box-shadow:var(--shadow);transition:transform .14s ease,box-shadow .18s ease,border-color .18s}
+.card:has(.stretch:hover),.card:has(.stretch:focus-visible){
+  transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:var(--accent-ink)}
+.card h3{margin:0}
+.card .stretch{text-decoration:none;color:var(--ink)}
+.card .stretch::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.card:has(.stretch:hover) .stretch{color:var(--accent-ink)}
+.card .stretch:focus-visible{outline:none}
+.card:has(.stretch:focus-visible){outline:2px solid var(--accent-ink);outline-offset:2px}
+.card p a,.card ul a{position:relative;z-index:1}
+
+/* ————— Первый экран ————— */
+.hero{display:grid;grid-template-columns:minmax(0,46fr) minmax(0,54fr);
+  gap:40px;align-items:center;padding:34px 0 10px}
+.hero-say{min-width:0}
+.hero .eyebrow{margin:0}
+.hero-lede{font-size:clamp(17px,1.55vw,19.5px);line-height:1.55;color:var(--muted);
+  margin:0 0 4px;max-width:52ch}
+.hero-show{min-width:0}
+.show-h{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:600}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:26px;padding:22px 0 6px}
+  .hero-lede{max-width:none}
+}
+.proof{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:16px 26px;margin:34px 0 8px;padding:22px 0 0;border-top:1px solid var(--line)}
+.proof div{margin:0}
+.proof dt{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.proof dd{margin:3px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+
+/* ————— Подвал ————— */
+.foot-map{display:flex;flex-wrap:wrap;gap:6px 4px;margin:0 0 20px;
+  padding-bottom:20px;border-bottom:1px solid var(--line)}
+.foot-map a{text-decoration:none;color:var(--ink);font-size:14.5px;
+  padding:8px 12px;border-radius:9px;min-height:40px;display:inline-flex;align-items:center}
+.foot-map a:hover{background:var(--panel-2);color:var(--accent-ink)}
+.foot-legal p{margin:0 0 8px;max-width:var(--measure)}
+
+/* Текст читается на ограниченной строке: во всю ширину 1140 px строка уходит
+   за сто знаков, и глаз теряет начало следующей. */
+.lede,.crumbs{max-width:var(--measure)}
+
+/* ————— Согласие ————— */
+/* Полосой во всю ширину баннер перекрывал нижнюю треть первого экрана и был
+   самым заметным объектом страницы. Карточка в углу спрашивает то же самое,
+   не забирая экран: отказ здесь равноправен согласию — обе кнопки видны
+   и одинаково доступны, разного веса им придаёт только порядок. */
+.consent{position:fixed;left:16px;bottom:16px;z-index:30;width:min(420px,calc(100vw - 32px));
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:18px;box-shadow:var(--shadow-lift)}
+.consent p{margin:0 0 14px;font-size:14px;line-height:1.5}
+.consent-act{display:flex;gap:10px;flex-wrap:wrap}
+.consent .btn{min-height:44px;padding:10px 16px;font-size:14.5px;flex:1 1 auto}
+
+/* Прямой ответ в карточке остаётся в разметке целиком — его читает машина, —
+   но показывается четырьмя строками: полотно на двадцать строк в сетке из
+   трёх колонок невозможно просматривать глазами, а полный текст в шаге
+   отсюда. Обрезка визуальная, из документа ничего не пропадает. */
+.card p.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;
+  overflow:hidden}
+.card .more-hint{font-size:13px;color:var(--accent-ink);margin-top:auto;padding-top:4px}
+
+h2 .kicker{display:inline-block;vertical-align:middle;margin-left:8px;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:20px;
+  padding:2px 9px;font-size:12px;letter-spacing:.04em}

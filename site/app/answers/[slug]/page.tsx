@@ -56,10 +56,9 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
           <h2>Ещё по теме «{a.cluster}»</h2>
           <div className="grid g2">
             {related.map((r) => (
-              <a className="card" key={r.slug} href={`/answers/${r.slug}/`}>
-                <span className="kicker">{r.kicker}</span>
-                <h3>{r.question}</h3>
-              </a>
+              <article className="card" key={r.slug}><span className="kicker">{r.kicker}</span>
+                <h3><a className="stretch" href={`/answers/${r.slug}/`}>{r.question}</a></h3>
+              </article>
             ))}
           </div>
         </>

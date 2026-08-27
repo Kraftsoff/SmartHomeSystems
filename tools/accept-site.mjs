@@ -76,6 +76,17 @@ for (const f of files) {
   if (plain.length < minText) { minText = plain.length; minTextPage = url; }
 
   if (!/"@type":\s*"Organization"/.test(s)) fail(`${url}: нет разметки Organization`);
+
+  /* Прототип жил на хэш-роутере, и его адреса переехали в контент вместе с
+     текстом: на собранном сайте "#/service" не ведёт никуда. Тридцать две
+     такие ссылки пролежали в сборке, пока их никто не открыл глазами. */
+  const dead = s.match(/href="#\/[^"]*"/g);
+  if (dead) fail(`${url}: ссылки в никуда из хэш-роутера: ${[...new Set(dead)].slice(0, 3).join(', ')}`);
+
+  /* Хлебные крошки страница рисует сама; вторые приезжают внутри
+     перенесённого содержимого, и адрес получает две разные цепочки. */
+  const crumbs = (s.match(/class="crumbs"/g) || []).length;
+  if (crumbs > 1) fail(`${url}: хлебных крошек ${crumbs} вместо одной цепочки`);
 }
 
 for (const [k, v] of titles) if (v.length > 1) fail(`один title на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);
@@ -190,7 +201,11 @@ console.log('согласие и тема: аналитика ждёт отве�
       await pg.waitForTimeout(220);
       return pg.evaluate(() => {
         const g = document.querySelector('[data-search-results]');
-        return g ? g.querySelectorAll('a.card').length : 0;
+        /* Считаем карточки, а не ссылки-карточки: обёртка вокруг всего
+           содержимого красила каждый абзац в цвет ссылки, и её убрали.
+           Селектор по 'a.card' после этого возвращал ноль всегда — и три
+           встречные проверки «совпадение внутри слова» сравнивали ноль с нулём. */
+        return g ? g.querySelectorAll('.card').length : 0;
       });
     };
     if (!(await count('протечка'))) fail('поиск «протечка» не находит ответов — сломан стеммер');

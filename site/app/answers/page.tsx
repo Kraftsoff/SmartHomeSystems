@@ -43,11 +43,12 @@ export default function AnswersIndex() {
           <h2>{cluster} <span className="kicker">{list.length}</span></h2>
           <div className="grid g3">
             {list.map((a) => (
-              <a className="card" key={a.slug} href={`/answers/${a.slug}/`}>
+              <article className="card" key={a.slug}>
                 <span className="kicker">{a.kicker}</span>
-                <h3>{a.question}</h3>
-                <p dangerouslySetInnerHTML={{ __html: a.answerHtml }} />
-              </a>
+                <h3><a className="stretch" href={`/answers/${a.slug}/`}>{a.question}</a></h3>
+                <p className="clamp" dangerouslySetInnerHTML={{ __html: a.answerHtml }} />
+                <p className="more-hint">Читать ответ →</p>
+              </article>
             ))}
           </div>
         </section>

@@ -118,9 +118,8 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
       <h2>Ответы по теме</h2>
       <div className="grid g3">
         {related.map((a) => (
-          <a className="card" key={a.slug} href={`/answers/${a.slug}/`}>
-            <span className="kicker">{a.kicker}</span><h3>{a.question}</h3>
-          </a>
+          <article className="card" key={a.slug}><span className="kicker">{a.kicker}</span><h3><a className="stretch" href={`/answers/${a.slug}/`}>{a.question}</a></h3>
+          </article>
         ))}
       </div>
     </div>
