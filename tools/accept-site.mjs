@@ -108,18 +108,24 @@ for (const f of files) {
      приехал своей копией: восемь карточек датчиков читались стеной
      подчёркнутого текста. Граница после имени тега обязательна — без неё
      «<a» совпадает с началом «<article», на чём я уже один раз ошибся. */
-  for (const [url, page] of Object.entries(content.pages)) {
-    const wrapped = (page.html.match(/<a[\s>][^>]*class="[^"]*\bcard\b/g) || []).length;
+  /* Проверяем всё перенесённое, а не только страницы-хабы: разделы и
+     сравнения приезжают из того же прототипа теми же шаблонами, и дефект,
+     который ищем, приходит одной дорогой. */
+  const imported = [
+    ...Object.entries(content.pages).map(([k, v]) => [k, v.html]),
+    ...Object.entries(content.sections).map(([k, v]) => [`/${k}`, JSON.stringify(v)]),
+    ...Object.entries(content.comparisons).map(([k, v]) => [`/${k}`, JSON.stringify(v)]),
+  ];
+  for (const [url, html] of imported) {
+    const wrapped = (html.match(/<a[\s>][^>]*class=\\?"[^"\\]*\bcard\b/g) || []).length;
     if (wrapped) fail(`${url}: карточек, обёрнутых в ссылку целиком: ${wrapped} — внутри подчёркнут весь текст`);
+    const dead = (html.match(/<button[\s>]/g) || []).length;
+    if (dead) fail(`${url}: в перенесённом содержимом ${dead} кнопок без обработчика — на сайте они не делают ничего`);
   }
 
   /* Кнопка без обработчика — это кнопка, которая ничего не делает. В
      прототипе форму открывал скрипт; на сайте таких кнопок оказалось
      двенадцать, и каждая выглядела рабочей. */
-  for (const [url, page] of Object.entries(content.pages)) {
-    const dead = (page.html.match(/<button/g) || []).length;
-    if (dead) fail(`${url}: в перенесённом содержимом ${dead} кнопок без обработчика — на сайте они не делают ничего`);
-  }
   console.log(`перенесённые страницы: разметка сбалансирована, кнопок без действия нет (${Object.keys(content.pages).length})`);
 }
 
