@@ -759,6 +759,34 @@ ok('согласие и тема: аналитика ждёт ответа, от
   }
   if (bad.length) fail(`таблицы прокручиваются вбок, но клавиатурой недостижимы: ${bad.join('; ')}`);
   else ok('таблицы: прокрутка вбок достижима клавиатурой');
+
+  /* Подпись строки держится на месте при прокрутке вбок. На экране 390 px за
+     краем оставалось 172 px таблицы: читаешь пояснение — и уже не помнишь,
+     к чему оно, а обрыв текста ничем не отличался от конца фразы. */
+  {
+    const c2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const pg2 = await c2.newPage();
+    await pg2.goto(`${ORIGIN}/portfolio/`);
+    await pg2.waitForTimeout(300);
+    const stuck = await pg2.evaluate(() => {
+      const w = document.querySelector('.tbl-wrap');
+      if (!w) return null;
+      const t = w.querySelector('table');
+      const over = t.scrollWidth - w.clientWidth;
+      if (over <= 0) return { узкая: true };
+      w.scrollLeft = over;
+      const cell = w.querySelector('tbody th, tbody td');
+      const gap = Math.round(cell.getBoundingClientRect().left - w.getBoundingClientRect().left);
+      return { сдвиг: gap, скрыто: over };
+    });
+    if (!stuck) fail('на кейсах нет таблицы с прокруткой');
+    else if (!stuck.узкая && stuck.сдвиг > 2) {
+      fail(`подпись строки уезжает при прокрутке таблицы на ${stuck.сдвиг} px — строка теряет, о чём она`);
+    } else if (!stuck.узкая) {
+      ok(`таблицы: подпись строки держится при прокрутке (за краем ${stuck.скрыто} px)`);
+    }
+    await c2.close();
+  }
   await c.close();
 }
 

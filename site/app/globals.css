@@ -470,3 +470,16 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
    «К содержанию» уводила ровно туда, где первые 63 пикселя закрыты шапкой:
    человек с клавиатуры прыгал к содержанию и не видел его начала. */
 :where(h1, h2, h3, #main, [id]) { scroll-margin-top: 74px }
+
+/* Первый столбец таблицы держится на месте при прокрутке вбок. На экране
+   390 px за краем оставалось 172 px таблицы, а градиент-подсказка в фоне
+   перекрывалась самой таблицей и не читалась: текст просто обрывался, и
+   ничто не сообщало, что есть продолжение. Липкая подпись со своей тенью
+   и есть этот сигнал, и заодно строка не теряет, о чём она. */
+.tbl-wrap th:first-child, .tbl-wrap td:first-child{
+  position:sticky;left:0;background:var(--panel);z-index:1}
+.tbl-wrap tbody th:first-child::after, .tbl-wrap tbody td:first-child::after,
+.tbl-wrap thead th:first-child::after{
+  content:"";position:absolute;top:0;right:0;bottom:0;width:12px;
+  transform:translateX(100%);pointer-events:none;
+  background:linear-gradient(to right,color-mix(in srgb,var(--ink) 12%,transparent),transparent)}
