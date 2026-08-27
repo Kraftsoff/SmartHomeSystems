@@ -17,6 +17,7 @@
   --on-accent:#fff; --shadow:0 1px 2px rgba(11,13,16,.04),0 8px 24px rgba(11,13,16,.06);
   --shadow-lift:0 2px 6px rgba(11,13,16,.06),0 14px 40px rgba(11,13,16,.10);
   --measure:68ch; --warn-bg:#fff8e6; --warn-line:#e8d9a8; --warn-ink:#6b5310;
+  --risk-line:#b04a2e; --risk-bg:#fdf5f2;
 }
 :root[data-mode="night"]{
   --bg:#0a0c12; --panel:#141824; --panel-2:#10131c; --ink:#f4f4f4; --muted:#a5a3c2;
@@ -24,6 +25,7 @@
   --on-accent:#08111f; --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.45);
   --shadow-lift:0 2px 6px rgba(0,0,0,.55),0 14px 40px rgba(0,0,0,.55);
   --warn-bg:#241f0e; --warn-line:#4a3f1c; --warn-ink:#e8cf8a;
+  --risk-line:#e08a6c; --risk-bg:#241612;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -440,3 +442,10 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
    тридцати шести подозрений — остальные оказались растянутыми ссылками
    карточек и ссылками внутри абзацев, где цель задаёт строка. */
 .check a, .lead-form a { display:inline-block; padding:4px 0; min-height:24px }
+
+/* Карточка риска. Своя пара цветов, а не жёлтая пометка о непроверенном:
+   это разные вещи — там факт ждёт подтверждения, здесь известно, что
+   ломается. Одинаковое оформление стёрло бы разницу. */
+.card.risk{background:var(--risk-bg);border-color:color-mix(in srgb,var(--risk-line) 34%,var(--line));
+  border-left:3px solid var(--risk-line);box-shadow:none}
+.card.risk p{color:var(--ink)}

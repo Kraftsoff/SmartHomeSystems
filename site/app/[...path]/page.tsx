@@ -282,12 +282,16 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         </>
       )}
 
+      {/* Риски отличаются от состава оформлением, а не только заголовком над
+          ними: два одинаковых ряда белых карточек читаются как один список,
+          и при просмотре глазами не видно, где то, что получаешь, а где то,
+          что ломается. */}
       {rec.risks.length > 0 && (
         <>
           <h2>Что ломается без согласования</h2>
           <div className="grid g2">
             {rec.risks.map((r, i) => (
-              <div className="card" key={i}><p dangerouslySetInnerHTML={{ __html: r.html }} /></div>
+              <div className="card risk" key={i}><p dangerouslySetInnerHTML={{ __html: r.html }} /></div>
             ))}
           </div>
         </>
