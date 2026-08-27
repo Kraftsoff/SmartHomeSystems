@@ -113,6 +113,26 @@ for (const f of files) {
   console.log(`перенесённые страницы: разметка сбалансирована, кнопок без действия нет (${Object.keys(content.pages).length})`);
 }
 
+/* Карта сайта обязана знать каждую собранную страницу и ни одной лишней.
+   Строится она из данных, а страницы — из тех же данных, но списки разные:
+   одиннадцать хабов не попадали в карту, потому что не лежат ни в разделах,
+   ни в сравнениях. */
+{
+  let sm = '';
+  try { sm = readFileSync(join(OUT, 'sitemap.xml'), 'utf8'); } catch { /* нет файла */ }
+  if (!sm) fail('нет sitemap.xml');
+  else {
+    const inMap = new Set([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)]
+      .map((m) => m[1].replace(/^https?:\/\/[^/]+/, '')));
+    const built = files.map((f) => `/${relative(OUT, f).replace(/index\.html$/, '')}`);
+    const missing = built.filter((u) => !inMap.has(u));
+    const extra = [...inMap].filter((u) => !built.includes(u));
+    if (missing.length) fail(`страниц нет в карте сайта: ${missing.length} (${missing.slice(0, 4).join(', ')})`);
+    if (extra.length) fail(`в карте сайта адреса без страниц: ${extra.slice(0, 4).join(', ')}`);
+    if (!missing.length && !extra.length) console.log(`карта сайта: ${inMap.size} адресов, ровно столько же страниц`);
+  }
+}
+
 /* Видимая цепочка и её разметка обязаны совпадать. Они делаются из одного
    списка, но проверка нужна встречная: при переезде с прототипа крошки
    остались на 136 страницах, а BreadcrumbList не переехал ни на одну —
@@ -489,6 +509,115 @@ console.log('согласие и тема: аналитика ждёт отве�
   if (!after.видно) fail('липкое действие не появляется после первого экрана');
   if (after.высота < 44) fail(`липкое действие высотой ${after.высота} px — меньше пальца`);
   console.log('липкое действие: ждёт ответа о согласии, появляется после первого экрана');
+  await c.close();
+}
+
+/* Свойства, которые проверялись на прототипе и при переезде остались без
+   присмотра. Разметку с тех пор писали заново — шапка, подвал, карточки,
+   форма, — и ни одно из этих условий её не касалось. */
+{
+  const PAGES = ['/', '/answers/', '/pricing/', '/portfolio/', '/contacts/', '/about/', '/service/'];
+  const c = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const pg = await c.newPage();
+  const errors = [];
+  pg.on('pageerror', (e) => errors.push(String(e).slice(0, 120)));
+  pg.on('console', (m) => { if (m.type() === 'error') errors.push(m.text().slice(0, 120)); });
+
+  for (const u of PAGES) {
+    await pg.goto(`${ORIGIN}${u}`);
+    await pg.waitForTimeout(250);
+    const r = await pg.evaluate(() => {
+      const ids = [...document.querySelectorAll('[id]')].map((n) => n.id);
+      const dupes = ids.filter((x, i) => ids.indexOf(x) !== i);
+      const noAlt = [...document.querySelectorAll('img')]
+        .filter((n) => !n.hasAttribute('alt')).map((n) => n.getAttribute('src') || '(без src)');
+      /* Пропуск уровня заголовка — это когда за h2 сразу идёт h4:
+         читающий с экрана теряет, к чему относится раздел. */
+      const levels = [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')]
+        .map((n) => Number(n.tagName[1]));
+      const skips = levels.filter((l, i) => i > 0 && l > levels[i - 1] + 1).length;
+      const svgNoName = [...document.querySelectorAll('svg')]
+        .filter((n) => !n.hasAttribute('aria-hidden') && !n.getAttribute('aria-label')
+          && !n.querySelector('title')).length;
+      return { dupes: [...new Set(dupes)], noAlt, skips, svgNoName, headings: levels.length };
+    });
+    if (r.dupes.length) fail(`${u}: одинаковые id: ${r.dupes.slice(0, 3).join(', ')}`);
+    if (r.noAlt.length) fail(`${u}: изображений без alt: ${r.noAlt.length} (${r.noAlt[0]})`);
+    if (r.skips) fail(`${u}: пропусков уровня заголовка: ${r.skips}`);
+    if (r.svgNoName) fail(`${u}: SVG без имени и без aria-hidden: ${r.svgNoName}`);
+  }
+  if (errors.length) fail(`ошибки в консоли: ${[...new Set(errors)].slice(0, 2).join(' | ')}`);
+
+  /* Видимый фокус при обходе с клавиатуры: без него человек, идущий Tab,
+     не знает, где он находится. */
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(200);
+  const noFocus = [];
+  for (let i = 0; i < 14; i += 1) {
+    await pg.keyboard.press('Tab');
+    const bad = await pg.evaluate(() => {
+      const n = document.activeElement;
+      if (!n || n === document.body) return null;
+      const cs = getComputedStyle(n);
+      const visible = (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0)
+        || cs.boxShadow !== 'none' || n.className.toString().includes('skip');
+      return visible ? null : `${n.tagName.toLowerCase()}.${(n.className || '').toString().slice(0, 24)}`;
+    });
+    if (bad) noFocus.push(bad);
+  }
+  if (noFocus.length) fail(`нет видимого фокуса при обходе Tab: ${[...new Set(noFocus)].slice(0, 3).join(', ')}`);
+
+  /* Масштаб 200%: текст увеличивают, а не отдаляют — прокрутки вбок быть
+     не должно (WCAG 1.4.10). */
+  await pg.setViewportSize({ width: 640, height: 900 });
+  await pg.goto(`${ORIGIN}/pricing/`);
+  await pg.waitForTimeout(200);
+  const zoomOver = await pg.evaluate(() =>
+    document.documentElement.scrollWidth - window.innerWidth);
+  if (zoomOver > 1) fail(`при масштабе 200% появляется прокрутка вбок: +${zoomOver} px`);
+  await c.close();
+  console.log('доступность: id, alt, уровни заголовков, фокус, консоль, масштаб 200% — чисто');
+}
+
+/* Страница обязана открываться, когда хранилище запрещено: приватное окно и
+   строгие настройки — обычное дело, а тема и согласие пишут в localStorage. */
+{
+  const c = await browser.newContext();
+  await c.addInitScript(() => {
+    const boom = () => { throw new Error('хранилище запрещено'); };
+    Object.defineProperty(window, 'localStorage', { get: boom, configurable: true });
+  });
+  const pg = await c.newPage();
+  const errs = [];
+  pg.on('pageerror', (e) => errs.push(String(e).slice(0, 90)));
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(400);
+  const alive = await pg.evaluate(() => !!document.querySelector('h1') && !!document.querySelector('.house-stage'));
+  if (!alive) fail('при запрещённом хранилище страница не собирается');
+  if (errs.length) fail(`при запрещённом хранилище страница падает: ${errs[0]}`);
+  else console.log('запрещённое хранилище: страница живёт');
+  await c.close();
+}
+
+/* При запрете анимации переходы обязаны выключаться, а модель дома — не
+   двигаться сама: движение, которого человек не просил, для части людей
+   означает тошноту, а не оживление. */
+{
+  const c = await browser.newContext({ reducedMotion: 'reduce' });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(300);
+  const moving = await pg.evaluate(() => {
+    const names = ['.btn', '.card', '.chip', '.sticky-cta', '.footprint'];
+    return names.filter((sel) => {
+      const n = document.querySelector(sel);
+      if (!n) return false;
+      const d = getComputedStyle(n).transitionDuration;
+      return d && d !== '0s' && !/^0s(, 0s)*$/.test(d);
+    });
+  });
+  if (moving.length) fail(`при reduced-motion переходы не отключены: ${moving.join(', ')}`);
+  else console.log('reduced-motion: переходы отключены');
   await c.close();
 }
 
