@@ -227,7 +227,11 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   box-shadow:inset 0 0 0 1px var(--accent-ink)}
 .case h3{font-size:18px;margin:0}
 .case-stage{color:var(--accent-ink);font-size:13px;font-weight:600;margin:0}
-.case-pain{font-size:14px;color:var(--ink);margin:0}
+/* Специфичность выше, чем у «.card p»: иначе правило не действует вовсе, и
+   первая фраза кейса — та, ради которой его читают, — идёт приглушённой
+   наравне со служебными строками. Проверялось замером: цвет приходил
+   не тот, что здесь написан. */
+.card p.case-pain{font-size:14px;color:var(--ink);margin:0}
 .case-dl{margin:6px 0 0;font-size:14px}
 .case-dl dt{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
 .case-dl dd{margin:2px 0 0}
