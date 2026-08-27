@@ -133,6 +133,37 @@ for (const f of files) {
   }
 }
 
+/* Близкие дубли размывают вес между копиями: машина, выбирая, какую страницу
+   показать, не имеет оснований предпочесть одну другой. У прототипа этой
+   опасности не было — страница была одна; у ста тридцати семи страниц,
+   собранных из шаблонов, она настоящая. */
+{
+  const norm = (s) => s.replace(/<script[\s\S]*?<\/script>/g, ' ')
+    .replace(/<style[\s\S]*?<\/style>/g, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  const docs = files.map((f) => ({
+    url: `/${relative(OUT, f).replace(/index\.html$/, '')}`,
+    words: new Set(norm(readFileSync(f, 'utf8')).split(' ').filter((x) => x.length > 3)),
+  }));
+  const close = [];
+  for (let i = 0; i < docs.length; i += 1) {
+    for (let j = i + 1; j < docs.length; j += 1) {
+      const a = docs[i].words, b = docs[j].words;
+      let inter = 0;
+      for (const x of a) if (b.has(x)) inter += 1;
+      const ratio = inter / (a.size + b.size - inter);
+      if (ratio > 0.6) close.push([ratio, docs[i].url, docs[j].url]);
+    }
+  }
+  close.sort((x, y) => y[0] - x[0]);
+  if (close.length) {
+    const [r, a, b] = close[0];
+    fail(`страницы совпадают на ${(r * 100).toFixed(0)}%: ${a} и ${b} — вес делится между копиями (всего пар ${close.length})`);
+  } else {
+    console.log(`совпадение страниц: ни одной пары выше 60% (сравнено ${docs.length * (docs.length - 1) / 2} пар)`);
+  }
+}
+
 /* Редиректы со старых адресов: каждое назначение обязано существовать и
    вести туда одним переходом. Сайт собран со слэшем в конце, и назначение
    без слэша даёт цепочку из двух редиректов на каждом старом адресе. */
