@@ -10,6 +10,9 @@ export type Answer = {
   question: string; answer: string; answerHtml: string;
   expandedHtml: string; expandedText: string; unverified: string[];
 };
+export type Comparison = Section & {
+  rows: string[][]; myths: string[][]; whenA: string; whenB: string;
+};
 export type Section = {
   url: string; crumb: string; eyebrow: string; title: string; label: string;
   answerHtml: string; answer: string;
@@ -20,7 +23,7 @@ export type Section = {
 export const answers = data.answers as Answer[];
 export const clusters = data.clusters as string[];
 export const sections = data.sections as Record<string, Section>;
-export const comparisons = data.comparisons as Record<string, Section>;
+export const comparisons = data.comparisons as unknown as Record<string, Comparison>;
 
 export type Case = {
   title: string; stage: string; pain: string;

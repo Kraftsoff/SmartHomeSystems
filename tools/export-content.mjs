@@ -110,6 +110,23 @@ function jsBlock(name) {
          экранированного знака. */
       return [...mm[1].matchAll(/'((?:[^'\\]|\\.)*)'/g)].map((x) => x[1].replace(/\\'/g, "'"));
     };
+    /* Массив массивов: таблица сравнения и мифы лежат так. Разбираем по
+       вложенным скобкам, а не одной регуляркой — внутри строк есть и запятые,
+       и кавычки. Без этого три страницы сравнений выходили без самого
+       сравнения: заголовок «vs KNX» и ни одной строки таблицы. */
+    const pairs = (f) => {
+      const at = bodySrc.indexOf(`${f}:[`);
+      if (at < 0) return [];
+      let d = 0, k = at + f.length + 1;
+      for (; k < bodySrc.length; k += 1) {
+        if (bodySrc[k] === '[') d += 1;
+        else if (bodySrc[k] === ']') { d -= 1; if (!d) break; }
+      }
+      const inner = bodySrc.slice(at + f.length + 2, k);
+      return [...inner.matchAll(/\[([\s\S]*?)\]/g)]
+        .map((row) => [...row[1].matchAll(/(['"])((?:[^\\]|\\.)*?)\1/g)]
+          .map((c) => c[2].replace(/\\(['"])/g, '$1')));
+    };
     out[m[1]] = {
       url: `/${m[1]}`,
       crumb: field('crumb'), eyebrow: field('eyebrow'), title: field('title'),
@@ -117,6 +134,9 @@ function jsBlock(name) {
       answerHtml: field('answer'), answer: text(field('answer')),
       items: list('items').map((x) => ({ html: x, text: text(x) })),
       risks: list('risks').map((x) => ({ html: x, text: text(x) })),
+      rows: pairs('rows'),
+      myths: pairs('myths'),
+      whenA: field('whenA'), whenB: field('whenB'),
     };
     keyRe.lastIndex = k;
   }

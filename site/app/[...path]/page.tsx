@@ -211,6 +211,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
   }
   const rec = all[key];
   if (!rec) notFound();
+  const cmp = comparisons[key];
 
   /* Короткие имена для цепочки берём из поля crumb — они там уже есть:
      «/ Датчики / Протечки». Я подставил вместо них полные заголовки, и
@@ -272,6 +273,57 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
       <div className="lede" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />
 
       <ChildList items={childrenOf(key)} heading="Внутри направления" />
+
+      {/* Сама таблица сравнения, «когда выигрывает каждый» и мифы жили в
+          конфиге прототипа и в выгрузку не попадали: страница «vs KNX»
+          выходила без единой строки сравнения — заголовок, оговорка и риски.
+          Для запроса, по которому человек выбирает между двумя системами,
+          это ровно то, за чем он пришёл. */}
+      {cmp && cmp.rows.length > 1 && (
+        <>
+          <h2>Чем различаются</h2>
+          <div className="tbl-wrap"><table>
+            <thead><tr>{cmp.rows[0].map((h, i) => <th scope="col" key={i}>{h}</th>)}</tr></thead>
+            <tbody>
+              {cmp.rows.slice(1).map((row, i) => (
+                <tr key={i}>
+                  <th scope="row" dangerouslySetInnerHTML={{ __html: row[0] }} />
+                  {row.slice(1).map((cell, j) => <td key={j} dangerouslySetInnerHTML={{ __html: cell }} />)}
+                </tr>
+              ))}
+            </tbody>
+          </table></div>
+        </>
+      )}
+
+      {cmp && (cmp.whenA || cmp.whenB) && (
+        <>
+          <h2>Когда выигрывает каждый</h2>
+          <div className="grid g2">
+            {/* Разметкой, а не текстом: внутри стоят пометки о непроверенном,
+                и простым текстом от них остаётся значок без выделения —
+                пометка перестаёт быть пометкой. Приёмка это и поймала. */}
+            {cmp.whenA && <div className="card"><h3>{cmp.rows[0]?.[1] || 'Первый вариант'}</h3>
+              <p dangerouslySetInnerHTML={{ __html: cmp.whenA }} /></div>}
+            {cmp.whenB && <div className="card"><h3>{cmp.rows[0]?.[2] || 'Второй вариант'}</h3>
+              <p dangerouslySetInnerHTML={{ __html: cmp.whenB }} /></div>}
+          </div>
+        </>
+      )}
+
+      {cmp && cmp.myths.length > 0 && (
+        <>
+          <h2>Что об этом говорят и как на самом деле</h2>
+          <div className="grid g2">
+            {cmp.myths.map(([claim, real], i) => (
+              <div className="card myth" key={i}>
+                <p className="myth-claim">«<span dangerouslySetInnerHTML={{ __html: claim }} />»</p>
+                <p dangerouslySetInnerHTML={{ __html: real }} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {rec.items.length > 0 && (
         <>

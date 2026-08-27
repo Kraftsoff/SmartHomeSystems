@@ -538,3 +538,10 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
 .nojs .scen-btn{background:var(--panel-2);border-style:dashed;cursor:default;
   font-weight:400;box-shadow:none}
 .nojs .scen-btn[aria-pressed="true"]{border-color:var(--line);font-weight:400;box-shadow:none}
+
+/* Миф и его разбор — карточка с двумя голосами: сначала чужое утверждение,
+   потом что за ним стоит. Кавычки визуально гасим цветом, чтобы чужой голос
+   не читался как наше обещание. */
+.card.myth .myth-claim{color:var(--muted);font-style:italic;margin:0 0 8px;
+  padding-left:10px;border-left:2px solid var(--line)}
+.card.myth p:last-child{color:var(--ink);margin:0}

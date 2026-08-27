@@ -1384,6 +1384,36 @@ ok('согласие и тема: аналитика ждёт ответа, от
   await c.close();
 }
 
+/* Сравнение без таблицы сравнения — это не страница сравнения. Данные лежали
+   в конфиге прототипа, выгрузка читала семь полей из десяти, и три страницы
+   выходили с заголовком «vs KNX» и без единой строки. Проверка смотрит на
+   собранный файл, а не на выгрузку: между ними шаблон, и он тоже умеет
+   потерять данные. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  const cmpUrls = files
+    .map((f) => `/${relative(OUT, f).replace(/index\.html$/, '')}`)
+    .filter((u) => /^\/compare\/.+/.test(u));
+  if (!cmpUrls.length) fail('страниц сравнения нет вовсе');
+  for (const u of cmpUrls) {
+    await pg.goto(`${ORIGIN}${u}`);
+    const got = await pg.evaluate(() => {
+      const t = document.querySelector('main table');
+      return {
+        строк: t ? t.querySelectorAll('tbody tr').length : 0,
+        колонок: t ? t.querySelectorAll('thead th').length : 0,
+        когда: document.body.textContent.includes('Когда выигрывает'),
+      };
+    });
+    if (got.строк < 3) fail(`${u}: в таблице сравнения ${got.строк} строк — сравнивать нечего`);
+    if (got.колонок < 3) fail(`${u}: в таблице сравнения ${got.колонок} колонки вместо критерия и двух сторон`);
+    if (!got.когда) fail(`${u}: не сказано, когда выигрывает каждый вариант`);
+  }
+  console.log(`сравнения: таблица и разбор по сторонам на всех ${cmpUrls.length} страницах`);
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {
