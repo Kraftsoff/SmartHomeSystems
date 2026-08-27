@@ -10,14 +10,12 @@
 | время переключения уточнить по применяемому АВР | /answers/chto-prodolzhit-rabotat-v-dome-pri-otklyuchenii |
 | год и обстоятельства подтвердить перед публикацией | /answers/proizvoditel-zakryl-oblako-ustroystva-stali-kirpichom-chto |
 | зависит от схемы подключения, фиксируется в проекте | /answers/chto-takoe-otkazoustoychivost-v-umnom-dome-i |
-| заполнить: адрес и режим работы | компонент layout.tsx |
 | заполнить: вознаграждение по каждой модели, порог входа, состав и сроки обучения, требования к партнёру, наличие территориальной защиты | /answers/kak-stat-partnerom-dilerom-mimismart |
 | заполнить: вознаграждение по каждой модели, порог входа, состав и сроки обучения, требования к партнёру, территориальная защита | /partners |
 | заполнить: входит ли видеозапись обхода в наш регламент сдачи | /answers/provoditsya-li-obuchenie-pri-sdache-obekta-umnogo |
 | заполнить: дата утверждения | /privacy |
 | заполнить: ИНН | /privacy |
 | заполнить: как добраться, парковка, пропуск на территорию | /showroom |
-| заполнить: корп. почта | /contacts |
 | заполнить: наименование юрлица | /privacy |
 | заполнить: наш подменный фонд и срок реакции | /answers/modul-snimut-s-proizvodstva-chem-ego-zamenit |
 | заполнить: наш регламент передачи доступов и смены паролей при сдаче | /answers/mozhno-li-vzlomat-umnyy-dom-cherez-internet |
@@ -33,6 +31,7 @@
 | заполнить: поимённый состав пакета в договоре | /answers/chto-vy-fizicheski-peredadite-mne-pri-sdache |
 | заполнить: полное наименование с ОПФ | компонент layout.tsx |
 | заполнить: предельный вес на один привод по применяемым моделям | /answers/kak-rabotayut-elektrokarnizy-i-stoit-li-ih |
+| заполнить: режим работы | компонент layout.tsx |
 | заполнить: решение по GA4 и дата подачи уведомления, если он остаётся | /privacy |
 | заполнить: складской запас и срок поставки замены | /answers/modul-snimut-s-proizvodstva-chem-ego-zamenit |
 | заполнить: срок гарантии на монтаж и на программирование | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |
@@ -41,7 +40,6 @@
 | заполнить: срок хранения заявок | /privacy |
 | заполнить: стоимость проектирования и порядок передачи прав | /answers/chto-vhodit-v-proektirovanie-umnogo-doma |
 | заполнить: тарифы обслуживания и состав регламента | /answers/skolko-stoit-vladenie-obsluzhivanie-abonentka-rashodniki |
-| заполнить: телефон | /contacts |
 | заполнить: условия и стоимость обследования чужого объекта | /answers/u-menya-uzhe-stoit-sistema-ot-drugogo |
 | заполнить: условия поставки интеграторам, уровни цен, порядок инженерной поддержки и гарантийной замены | /answers/rabotaete-li-vy-s-integratorami-i-postavlyaete |
 | заполнить: ФИО ответственного | /privacy |
@@ -52,6 +50,8 @@
 | заполнить: email для обращений | /privacy |
 | опровергнуто: наши сайты говорят 53, в индексе 6 городов | /about |
 | подтвердить или снять | /about |
+| подтвердить: адрес после переезда на новый домен | /contacts |
+| подтвердить: какие из филиалов принимают клиентов без записи и где есть демонстрационное оборудование | /contacts |
 | подтвердить: методика счёта объектов | /about |
 | подтвердить: на что распространяется | /about |
 | подтвердить: распространяется ли бессрочный срок на всё собственное оборудование или на перечень линеек | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |

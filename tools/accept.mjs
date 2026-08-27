@@ -1850,7 +1850,10 @@ await browser.close();
 
 if (problems.length) {
   console.log(`\n❌ НАРУШЕНИЙ: ${problems.length}`);
-  problems.forEach((x) => ok('  ·', x));
+  /* Печатаем напрямую: перевод отчётных строк на ok() зацепил и эту, а ok
+     принимает один довод — список нарушений выходил пустыми маркерами, и
+     приёмка сообщала, что упало два условия, не говоря какие. */
+  problems.forEach((x) => console.log(`  · ${x}`));
   process.exit(1);
 }
 console.log('\n✅ Нарушений нет.');

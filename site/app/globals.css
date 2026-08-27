@@ -400,3 +400,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   font-size:13px;align-items:baseline}
 .passport dt{color:var(--muted)}
 .passport dd{margin:0;font-weight:600}
+
+/* Телефон и почта — цели нажатия, а не просто текст: ссылка внутри заголовка
+   даёт коробку в 20 px по высоте, и палец в неё не попадает (WCAG 2.5.8). */
+a[href^="tel:"], a[href^="mailto:"]{display:inline-block;padding:4px 2px;min-height:24px}

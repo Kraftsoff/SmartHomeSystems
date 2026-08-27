@@ -89,7 +89,10 @@
   .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--faint)}
   .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
   .amber{color:var(--glow)}
-  .prov{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  /* Телефон и почта — цели нажатия, а не просто текст: ссылка внутри заголовка
+   даёт коробку в 20 px по высоте, и палец в неё не попадает (WCAG 2.5.8). */
+a[href^="tel:"],a[href^="mailto:"]{display:inline-block;padding:4px 2px;min-height:24px}
+.prov{display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone;
     font-family:var(--mono);font-size:11px;line-height:1.4;padding:1px 6px;margin:0 1px;
     border-radius:5px;border:1px solid var(--prov-line);background:var(--prov-bg);
     color:var(--prov-ink);white-space:normal}
@@ -2479,15 +2482,30 @@
       <div class="card"><span class="kicker">Шоурум</span><h3>Москва, Новоданиловская наб., 6к1</h3>
         <p>Будни 09:00–18:00. Здесь можно включить сцены света, шторы и климат руками и
           посмотреть щит автоматизации — до того, как заказывать проект.</p></div>
-      <div class="card"><span class="kicker">Телефон</span><h3><span class="prov">⚠️ заполнить: телефон</span></h3>
-        <p>На текущем сайте указан номер с кодом другого региона — как заглушка. Реальный номер
-          проставляем перед публикацией, он же уходит в разметку LocalBusiness.</p></div>
-      <div class="card"><span class="kicker">Почта</span><h3><span class="prov">⚠️ заполнить: корп. почта</span></h3>
-        <p>Сейчас на сайте адрес на бесплатном домене. Нужна почта на корпоративном домене —
-          это влияет и на доверие, и на доставляемость писем.</p></div>
+      <div class="card"><span class="kicker">Телефон</span><h3><a href="tel:+78005052053">8 800 505 20 53</a></h3>
+        <p>Бесплатно по России. Тот же номер уходит в разметку организации — машина берёт его оттуда, а не со страницы.</p></div>
+      <div class="card"><span class="kicker">Почта</span><h3><a href="mailto:msk@mmsmart.ru">msk@mmsmart.ru</a></h3>
+        <p>Почта на корпоративном домене. <span class="prov">⚠️ подтвердить: адрес после переезда на новый домен</span></p></div>
     </div>
   </div></section>
   <section><div class="shell">
+    <h2 class="cluster-h">Где мы есть</h2>
+    <p>Девять адресов: семь в России и два за её пределами. Шоурум, где систему включают руками, пока один — в Москве; в Петербурге и Сочи показывают у партнёров. <span class="prov">⚠️ подтвердить: какие из филиалов принимают клиентов без записи и где есть демонстрационное оборудование</span></p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th scope="col">Город</th><th scope="col">Адрес</th></tr></thead>
+      <tbody>
+      <tr><th scope="row">Москва</th><td>Новоданиловская набережная, 6к1 — здесь же шоурум и производство</td></tr>
+      <tr><th scope="row">Санкт-Петербург</th><td>улица Седова, 11, корпус 2</td></tr>
+      <tr><th scope="row">Владимир</th><td>улица Северная, 2А</td></tr>
+      <tr><th scope="row">Сочи</th><td>улица Транспортная, 65</td></tr>
+      <tr><th scope="row">Красноярск</th><td>улица Партизана Железняка, 46а, офис 2-17</td></tr>
+      <tr><th scope="row">Казань</th><td>улица Олега Кошевого, 14</td></tr>
+      <tr><th scope="row">Саранск</th><td>улица Строительная, 16Б, БЦ «Премьер», 3 этаж</td></tr>
+      <tr><th scope="row">Ташкент</th><td>улица Паркент, 241 — Узбекистан</td></tr>
+      <tr><th scope="row">Ашхабад</th><td>Мир 3, улица Юнус Эмре, 29 — Туркменистан</td></tr>
+      </tbody></table></div>
+    <p>Почему это важнее списка городов на карте: сервис после сдачи едет из ближайшего филиала, а не из Москвы. От этого зависит срок выезда и то, лежит ли запасной модуль в вашем городе или его везут.</p>
+
     <h2 class="cluster-h">С чем приходят</h2>
     <div class="grid g2">
       <div class="card"><h3>Объект на стадии ремонта</h3><p>Лучший момент: трассы ещё можно
