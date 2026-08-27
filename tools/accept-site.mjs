@@ -567,10 +567,22 @@ console.log('согласие и тема: аналитика ждёт отве�
     const c = await browser.newContext({ colorScheme: scheme });
     const pg = await c.newPage();
     const bad = [];
-    for (const u of ['/', '/answers/', '/pricing/', '/portfolio/', '/contacts/', '/about/', '/service/']) {
-      await pg.goto(`${ORIGIN}${u}`);
-      await pg.waitForFunction(() => document.documentElement.dataset.mode).catch(() => {});
-      await pg.waitForTimeout(200);
+    /* По одной странице на каждый шаблон отрисовки, а не случайная выборка:
+       контраст задаётся стилями и шаблоном, а не содержимым, и семь случайных
+       страниц оставляли шаблоны без представителя. Полный обход всех 137 в
+       обеих темах прогонялся отдельно и дал ноль — держать его в приёмке
+       значит добавлять к каждому прогону минуты ради того же ответа. */
+    for (const u of ['/', '/answers/', '/answers/chto-delat-esli-topyat-sosedi/',
+      '/pricing/', '/portfolio/', '/contacts/', '/privacy/',
+      '/equipment/sensors/leak/', '/compare/knx/', '/service/']) {
+      /* Ждём не время, а признак: тема проставлена и стили применены. Замер
+         сразу после появления data-mode ловит ещё браузерный белый фон — на
+         полном обходе это дало 501 мнимое нарушение. */
+      await pg.goto(`${ORIGIN}${u}`, { waitUntil: 'networkidle' });
+      await pg.waitForFunction(() => document.documentElement.dataset.mode
+        && !['rgba(0, 0, 0, 0)', 'rgb(255, 255, 255)']
+          .includes(getComputedStyle(document.body).backgroundColor)).catch(() => {});
+      await pg.waitForTimeout(120);
       const found = await pg.evaluate(() => {
         /* Цвет приходит в двух записях: rgb(0…255) и color(srgb 0…1).
            Разбор «взять три числа» на второй давал доли единицы вместо
