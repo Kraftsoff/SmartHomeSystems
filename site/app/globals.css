@@ -519,3 +519,9 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
   .tbl-wrap tbody tr>*:first-child::before{display:none}
   .tbl-wrap th:first-child::after,.tbl-wrap td:first-child::after{display:none}
 }
+
+/* Скрыто от глаз, но не от разбора: пометка о недостающем в разметке нужна
+   тому, кто заполняет сайт, а не читателю страницы. Из потока чтения не
+   выпадает — программы чтения с экрана её читают. */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}

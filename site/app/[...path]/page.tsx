@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, ogFor, SITE, BRAND } from '@/lib/content';
-import { LINKS } from '@/lib/nav';
+import { LINKS, PHONE_E164 } from '@/lib/nav';
 import LeadForm from '../components/LeadForm';
 import NextSteps from '../components/NextSteps';
 import CaseGrid from '../components/CaseGrid';
@@ -137,16 +137,17 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         {/* Кейсы вставлял скрипт прототипа, и в выгрузку попадал пустой
             контейнер: раздел открывался одним заголовком. Теперь объекты
             приходят из того же файла контента, что и весь остальной текст. */}
-        {/* Шоурум — единственный адрес, который на сайте подтверждён: телефон
-            и почта помечены как заглушки и в разметку не идут. Место с адресом
-            и часами — это вход в локальный поиск, и отдавать его машине
-            строкой текста вместо разметки значит не отдавать вовсе. */}
+        {/* Место с адресом, часами и телефоном — вход в локальный поиск, и
+            отдавать его машине строкой текста вместо разметки значит не
+            отдавать вовсе. Номер здесь настоящий: он пришёл из материалов
+            компании и стоит на странице тем же, что в разметке. */}
         {key === 'showroom' && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org', '@type': 'LocalBusiness',
             '@id': `${SITE}/showroom/#showroom`, name: `Шоурум ${BRAND}`,
             description: 'Действующая система умного дома: сцены света, шторы, климат и щит автоматизации можно включить руками до заказа проекта.',
             url: `${SITE}/showroom/`,
+            telephone: PHONE_E164,
             address: {
               '@type': 'PostalAddress', addressCountry: 'RU', addressLocality: 'Москва',
               streetAddress: 'Новоданиловская набережная, 6к1',
@@ -156,7 +157,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
               dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
               opens: '09:00', closes: '18:00',
             }],
-            parentOrganization: { '@type': 'Organization', name: BRAND },
+            parentOrganization: { '@type': 'Organization', name: BRAND, url: SITE },
           }) }} />
         )}
         {/* Снимки зала живут в слое представления, а не в прототипе: тот
