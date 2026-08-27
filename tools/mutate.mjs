@@ -117,6 +117,28 @@ const MUTATIONS = [
     from: '.check a, .lead-form a { display:inline-block; padding:4px 0; min-height:24px }',
     to: '.check a, .lead-form a { display:inline }',
     expect: 'цели нажатия ниже 24 px' },
+  { name: 'план на телефоне стоит мёртвым', file: 'site/app/components/HousePlan.tsx', rebuild: true,
+    from: "matchMedia('(hover: none)')", to: "matchMedia('(hover: hover)')",
+    expect: 'план стоит мёртвым' },
+  { name: 'житель ходит при запрете анимации', file: 'site/app/components/HousePlan.tsx', rebuild: true,
+    from: 'if (touch && !calm) {', to: 'if (touch) {',
+    expect: 'всё равно ходит' },
+  { name: 'подпись строки уезжает', file: 'site/app/globals.css', rebuild: true,
+    from: '  position:sticky;left:0;background:var(--panel);z-index:1}', to: '  background:var(--panel)}',
+    expect: 'подпись строки уезжает' },
+  { name: 'якорь уходит под шапку', file: 'site/app/globals.css', rebuild: true,
+    from: ':where(h1, h2, h3, #main, [id]) { scroll-margin-top: 74px }', to: '',
+    expect: 'прячет цель под шапкой' },
+  { name: 'меню не помещается на экран', file: 'site/app/globals.css', rebuild: true,
+    from: '.nav-panel li{margin:0}', to: '.nav-panel li{margin:8px 0}',
+    expect: 'меню не помещается' },
+  { name: 'пометка о непроверенном в описании', file: 'site/lib/content.ts', rebuild: true,
+    from: "    .filter((sentence) => !sentence.includes('⚠️'))\n", to: '',
+    expect: 'ушла в описание страницы' },
+  { name: 'маска расходится с планом', file: 'site/app/components/HousePlan.tsx', rebuild: true,
+    from: 'data-mask={PLAN_DAY}', to: 'data-mask="/plan/sensor-67dd010377.png"',
+    expect: 'не совпадает с нарисованным планом' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },
@@ -168,7 +190,20 @@ for (const m of MUTATIONS) {
     /* Сборка запускается В каталоге сайта. С «--prefix» npx меняет каталог
        пакетов, а не рабочий, и сборка молча не происходит — три гейта из-за
        этого выглядели слепыми, хотя проверялись на несобранном сайте. */
-    run('npx', ['next', 'build'], join(ROOT, 'site'));
+    const build = run('npx', ['next', 'build'], join(ROOT, 'site'));
+    /* Упавшая сборка оставляет прежний site/out на месте, и приёмка проверяет
+       НЕПОДСАЖЕННЫЙ сайт. Так гейт про автопрогулку трижды выглядел слепым:
+       мутация ломала типы, сборка падала, а вывод её был заглушен. Молчать об
+       этом нельзя — иначе «доказано» означает «проверено не то». */
+    if (/Failed to compile|Failed to type check|error TS\d/.test(build)) {
+      undo();
+      const line = (build.match(/.*error TS\d+.*/) || build.match(/.*Failed.*/) || [''])[0].trim();
+      console.log(`⚠️  ${m.name}: сборка с подсадкой упала, проверять нечего — ${line.slice(0, 120)}`);
+      broken += 1;
+      run('npx', ['next', 'build'], join(ROOT, 'site'));
+      run('node', [join(ROOT, 'tools/prune-build.mjs')]);
+      continue;
+    }
     run('node', [join(ROOT, 'tools/prune-build.mjs')]);
   }
   const out = run('node', [join(ROOT, 'tools/accept-site.mjs')]);

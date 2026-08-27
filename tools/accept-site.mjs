@@ -1424,6 +1424,37 @@ ok('согласие и тема: аналитика ждёт ответа, от
     else if (plan.маска !== plan.рисуется) {
       fail(`маска проходимости ${plan.маска} не совпадает с нарисованным планом ${plan.рисуется}`);
     }
+    /* На экране, куда нельзя навести, план обязан показывать себя сам.
+       На телефоне следы шли только за намеренной протяжкой пальцем, о которой
+       нигде не сказано: касание не давало ничего, и главный элемент страницы
+       выглядел тёмным прямоугольником. И обратное: при запрете анимации
+       житель не ходит — движение без спроса не украшение. */
+    {
+      const mob = await browser.newContext({ viewport: { width: 390, height: 844 },
+        isMobile: true, hasTouch: true });
+      const mp = await mob.newPage();
+      await mp.goto(`${ORIGIN}/`);
+      await mp.evaluate(() => document.querySelector('.house-stage')?.scrollIntoView({ block: 'center' }));
+      let walked = 0;
+      for (let i = 0; i < 10 && !walked; i += 1) {
+        await mp.waitForTimeout(400);
+        walked = await mp.evaluate(() => document.querySelectorAll('.footprint').length);
+      }
+      if (!walked) fail('на телефоне план стоит мёртвым: без касания ни одного следа');
+      await mob.close();
+
+      const calm = await browser.newContext({ viewport: { width: 390, height: 844 },
+        isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+      const cp = await calm.newPage();
+      await cp.goto(`${ORIGIN}/`);
+      await cp.evaluate(() => document.querySelector('.house-stage')?.scrollIntoView({ block: 'center' }));
+      await cp.waitForTimeout(2200);
+      const moved = await cp.evaluate(() => document.querySelectorAll('.footprint').length);
+      if (moved) fail(`при запрете анимации житель всё равно ходит: следов ${moved}`);
+      await calm.close();
+      ok('план на телефоне: ходит сам, при запрете анимации стоит');
+    }
+
     ok(`модель дома: сценариев ${btns.length}, состояние объявляемо, следов за 14 шагов ${best}; маска совпадает с планом`);
   }
   await c.close();

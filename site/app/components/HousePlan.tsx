@@ -72,10 +72,10 @@ export default function HousePlan() {
       return moved ? { x: px, y: py } : null;
     };
 
-    const onMove = (e: PointerEvent) => {
+    /* Шаг вынесен из обработчика: тем же кодом ходит житель, когда его ведёт
+       палец, курсор или автопрогулка. Две копии логики разошлись бы молча. */
+    const moveTo = (x: number, y: number, now: number) => {
       const r = stage.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      const now = performance.now();
       /* Позиция жителя обязана быть проходимой: если курсор вошёл над стеной,
          он оказался бы внутри неё и не сдвинулся бы уже никогда. */
       if (lastX === null || !isFloor(lastX / r.width, lastY / r.height)) {
@@ -121,10 +121,69 @@ export default function HousePlan() {
       side *= -1;
     };
 
+    let live = true;
+    const onMove = (e: PointerEvent) => {
+      /* Настоящее прикосновение отменяет автопрогулку навсегда: вести жителя
+         и одновременно водить его самим — значит драться за одну фигуру. */
+      live = false;
+      const r = stage.getBoundingClientRect();
+      moveTo(e.clientX - r.left, e.clientY - r.top, performance.now());
+    };
     const onLeave = () => { lastX = null; };
     stage.addEventListener('pointermove', onMove);
     stage.addEventListener('pointerleave', onLeave);
+
+    /* Автопрогулка — для экранов, на которые нельзя навести. На телефоне
+       следы шли только за намеренной протяжкой пальцем, о которой нигде не
+       сказано: касание не давало ничего, и главный элемент страницы выглядел
+       тёмным прямоугольником. Показываем, что он делает, вместо объяснения.
+       При запрете анимации не запускается: движение без спроса — не украшение. */
+    const touch = matchMedia('(hover: none)').matches;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let timer = 0;
+    let seen: IntersectionObserver | null = null;
+
+    if (touch && !calm) {
+      let tx = 0, ty = 0;
+      const pickTarget = (r: DOMRect) => {
+        for (let i = 0; i < 60; i += 1) {
+          const x = r.width * (0.08 + Math.random() * 0.84);
+          const y = r.height * (0.12 + Math.random() * 0.76);
+          if (isFloor(x / r.width, y / r.height)) { tx = x; ty = y; return true; }
+        }
+        return false;
+      };
+      const tick = () => {
+        if (!live) return;
+        const r = stage.getBoundingClientRect();
+        if (lastX === null) {
+          if (!pickTarget(r)) return;
+          lastX = tx; lastY = ty; lastT = performance.now();
+          pickTarget(r);
+          timer = window.setTimeout(tick, 420);
+          return;
+        }
+        const d = Math.hypot(tx - lastX, ty - lastY);
+        if (d < 14 && !pickTarget(r)) { timer = window.setTimeout(tick, 360); return; }
+        /* Шаг ограничен: длинный отрезок целиком проглотил бы комнату за раз,
+           и вместо ходьбы вышел бы прыжок. */
+        const k = Math.min(1, 16 / Math.max(d, 1));
+        moveTo(lastX + (tx - lastX) * k, lastY + (ty - lastY) * k, performance.now());
+        timer = window.setTimeout(tick, 420);
+      };
+      seen = new IntersectionObserver((rows) => {
+        for (const row of rows) {
+          if (row.isIntersecting && live && !timer) tick();
+          else if (!row.isIntersecting) { clearTimeout(timer); timer = 0; }
+        }
+      }, { threshold: 0.35 });
+      seen.observe(stage);
+    }
+
     return () => {
+      live = false;
+      clearTimeout(timer);
+      seen?.disconnect();
       stage.removeEventListener('pointermove', onMove);
       stage.removeEventListener('pointerleave', onLeave);
     };
