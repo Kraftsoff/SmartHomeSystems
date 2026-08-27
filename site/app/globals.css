@@ -1,3 +1,8 @@
+/* Шкалы, а не подбор на глаз. Замер по всем 137 страницам дал 12 радиусов и
+   17 значений отступа — разница в один-два пикселя не видна, но именно она
+   не даёт странице держать ритм.
+   Радиусы: 6 · 10 · 14 · пилюля. Отступы: 4 · 8 · 12 · 16 · 24 · 32 · 40. */
+
 /* Типографическая шкала: 12 · 13 · 14.5 · 16 · 18 · 21 · 27 · 42.
    Замер по всем 137 страницам нашёл двадцать четыре разных размера — это не
    шкала, а континуум: 15, 16.5, 17 и 17.5 стояли рядом и не различались на
@@ -8,7 +13,7 @@
    WCAG AA в обеих темах. Менять их здесь — значит расходиться с замером. */
 :root{
   --bg:#f4f5f7; --panel:#fff; --panel-2:#f7f8fa; --ink:#0b0d10; --muted:#4d5157;
-  --line:#dfe3e8; --accent-ink:#1b52b8; --glow:#478beb; --radius:16px;
+  --line:#dfe3e8; --accent-ink:#1b52b8; --glow:#478beb; --radius:14px;
   --on-accent:#fff; --shadow:0 1px 2px rgba(11,13,16,.04),0 8px 24px rgba(11,13,16,.06);
   --shadow-lift:0 2px 6px rgba(11,13,16,.06),0 14px 40px rgba(11,13,16,.10);
   --measure:68ch; --warn-bg:#fff8e6; --warn-line:#e8d9a8; --warn-ink:#6b5310;
@@ -28,11 +33,11 @@ a{color:var(--accent-ink)}
 .shell{max-width:1140px;margin:0 auto;padding:0 20px}
 header.site{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
   backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-header.site .shell{display:flex;align-items:center;gap:18px;min-height:62px}
+header.site .shell{display:flex;align-items:center;gap:16px;min-height:62px}
 .brand{font-weight:700;font-size:18px;text-decoration:none;color:var(--ink);
   flex:none;white-space:nowrap}
-nav.main{display:flex;gap:2px;font-size:14.5px;margin-right:auto;flex-wrap:nowrap}
-nav.main a{text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:9px;
+nav.main{display:flex;gap:4px;font-size:14.5px;margin-right:auto;flex-wrap:nowrap}
+nav.main a{text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:10px;
   white-space:nowrap;transition:color .15s,background .15s}
 nav.main a:hover{color:var(--ink);background:var(--panel-2)}
 nav.main a[aria-current="page"]{color:var(--ink);font-weight:600}
@@ -43,7 +48,7 @@ h1{font-size:clamp(27px,4vw,42px);line-height:1.15;margin:8px 0 18px;letter-spac
 h2{font-size:clamp(21px,2.4vw,27px);margin:34px 0 12px}
 h3{font-size:18px;margin:0 0 6px}
 .lede{background:var(--panel-2);border-left:3px solid var(--accent-ink);
-  border-radius:0 12px 12px 0;padding:16px 18px;margin:0 0 22px}
+  border-radius:0 14px 14px 0;padding:16px 18px;margin:0 0 22px}
 .grid{display:grid;gap:16px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
@@ -70,7 +75,7 @@ li{margin:6px 0}
 footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px;
   color:var(--muted);font-size:13px}
 .skip{position:absolute;left:-9999px;top:0}
-.skip:focus{left:8px;top:8px;background:var(--panel);padding:8px 12px;border-radius:8px;z-index:20}
+.skip:focus{left:8px;top:8px;background:var(--panel);padding:8px 12px;border-radius:6px;z-index:20}
 :focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
@@ -96,17 +101,17 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
 /* Все десять ссылок лежат в разметке один раз; узкий экран прячет часть из
    строки и открывает их же списком. Второй копии нет — иначе краулер увидит
    каждую ссылку дважды, а клавиатура пройдёт по невидимой. */
-.burger{display:none;align-items:center;gap:9px;background:var(--panel);color:var(--ink);
-  border:1px solid var(--line);border-radius:11px;padding:9px 13px;font:inherit;font-size:14.5px;
+.burger{display:none;align-items:center;gap:8px;background:var(--panel);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:9px 13px;font:inherit;font-size:14.5px;
   min-height:44px;cursor:pointer}
 .burger:hover{border-color:var(--accent-ink)}
-.burger-bars{display:inline-flex;flex-direction:column;gap:3.5px;width:16px}
-.burger-bars i{display:block;height:2px;background:currentColor;border-radius:2px}
+.burger-bars{display:inline-flex;flex-direction:column;gap:4px;width:16px}
+.burger-bars i{display:block;height:2px;background:currentColor;border-radius:6px}
 .nav-panel{position:absolute;left:0;right:0;top:100%;background:var(--panel);
   border-bottom:1px solid var(--line);box-shadow:var(--shadow-lift);padding:10px 0 16px}
 .nav-panel[hidden]{display:none}
 .nav-panel ul{list-style:none;margin:0;padding:0 20px;max-width:1140px;
-  margin-inline:auto;display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  margin-inline:auto;display:grid;gap:4px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .nav-panel a{display:block;padding:12px 12px;border-radius:10px;text-decoration:none;
   color:var(--ink);font-size:16px;min-height:44px}
 .nav-panel a:hover{background:var(--panel-2)}
@@ -120,12 +125,12 @@ nav.main a.sec{display:none}
 @media (max-width:860px){
   nav.main{display:none}
   .burger{margin-left:auto}
-  header.site .shell{gap:10px}
+  header.site .shell{gap:8px}
 }
 
 /* ————— Кнопки ————— */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  min-height:48px;padding:12px 22px;border-radius:12px;font-size:16px;font-weight:600;
+  min-height:48px;padding:12px 22px;border-radius:14px;font-size:16px;font-weight:600;
   text-decoration:none;border:1px solid transparent;cursor:pointer;
   transition:transform .12s ease,box-shadow .15s ease,background .15s ease}
 .btn-primary{background:var(--accent-ink);color:var(--on-accent);box-shadow:var(--shadow)}
@@ -138,7 +143,7 @@ nav.main a.sec{display:none}
 /* Ссылка обёрнута вокруг заголовка, а не вокруг всей карточки: обёртка красит
    и подчёркивает каждый абзац внутри, и карточка превращается в стену
    подчёркнутого текста. Кликабельность даёт растянутая область заголовка. */
-.card{position:relative;display:flex;flex-direction:column;gap:7px;
+.card{position:relative;display:flex;flex-direction:column;gap:8px;
   box-shadow:var(--shadow);transition:transform .14s ease,box-shadow .18s ease,border-color .18s}
 .card:has(.stretch:hover),.card:has(.stretch:focus-visible){
   transform:translateY(-2px);box-shadow:var(--shadow-lift);border-color:var(--accent-ink)}
@@ -161,20 +166,20 @@ nav.main a.sec{display:none}
 .show-h{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted);font-weight:600}
 @media (max-width:900px){
-  .hero{grid-template-columns:1fr;gap:26px;padding:22px 0 6px}
+  .hero{grid-template-columns:1fr;gap:24px;padding:22px 0 6px}
   .hero-lede{max-width:none}
 }
 .proof{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:16px 26px;margin:34px 0 8px;padding:22px 0 0;border-top:1px solid var(--line)}
+  gap:16px 24px;margin:34px 0 8px;padding:22px 0 0;border-top:1px solid var(--line)}
 .proof div{margin:0}
 .proof dt{font-size:18px;font-weight:700;letter-spacing:-.01em}
 .proof dd{margin:3px 0 0;color:var(--muted);font-size:14.5px;line-height:1.45}
 
 /* ————— Подвал ————— */
-.foot-map{display:flex;flex-wrap:wrap;gap:6px 4px;margin:0 0 20px;
+.foot-map{display:flex;flex-wrap:wrap;gap:8px 4px;margin:0 0 20px;
   padding-bottom:20px;border-bottom:1px solid var(--line)}
 .foot-map a{text-decoration:none;color:var(--ink);font-size:14.5px;
-  padding:8px 12px;border-radius:9px;min-height:40px;display:inline-flex;align-items:center}
+  padding:8px 12px;border-radius:10px;min-height:40px;display:inline-flex;align-items:center}
 .foot-map a:hover{background:var(--panel-2);color:var(--accent-ink)}
 .foot-legal p{margin:0 0 8px;max-width:var(--measure)}
 
@@ -188,10 +193,10 @@ nav.main a.sec{display:none}
    не забирая экран: отказ здесь равноправен согласию — обе кнопки видны
    и одинаково доступны, разного веса им придаёт только порядок. */
 .consent{position:fixed;left:16px;bottom:16px;z-index:30;width:min(420px,calc(100vw - 32px));
-  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
   padding:18px;box-shadow:var(--shadow-lift)}
 .consent p{margin:0 0 14px;font-size:14.5px;line-height:1.5}
-.consent-act{display:flex;gap:10px;flex-wrap:wrap}
+.consent-act{display:flex;gap:8px;flex-wrap:wrap}
 .consent .btn{min-height:44px;padding:10px 16px;font-size:14.5px;flex:1 1 auto}
 
 /* Прямой ответ в карточке остаётся в разметке целиком — его читает машина, —
@@ -203,7 +208,7 @@ nav.main a.sec{display:none}
 .card .more-hint{font-size:13px;color:var(--accent-ink);margin-top:auto;padding-top:4px}
 
 h2 .kicker{display:inline-block;vertical-align:middle;margin-left:8px;
-  background:var(--panel-2);border:1px solid var(--line);border-radius:20px;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:14px;
   padding:2px 9px;font-size:12px;letter-spacing:.04em}
 
 /* Ширина строки. Во всю ширину оболочки строка уходит за сто знаков — глаз
@@ -242,8 +247,8 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .case-dl{margin:6px 0 0;font-size:14.5px}
 .case-dl dt{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
 .case-dl dd{margin:2px 0 0}
-.tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
-.tag{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.tag{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;
   padding:3px 9px;font-size:12px;color:var(--muted)}
 
 /* Карточки маршрута читаются как вопрос к читателю, поэтому заголовок в них
@@ -254,7 +259,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 /* Поля ввода. Без своего фона поле остаётся белым и в тёмной теме — рамка от
    темы, подложка от браузера. */
 .field,input[type="text"],input[type="tel"],input[type="email"],input[type="search"],textarea,select{
-  width:100%;padding:12px 14px;border-radius:12px;font:inherit;font-size:16px;
+  width:100%;padding:12px 14px;border-radius:14px;font:inherit;font-size:16px;
   background:var(--panel);color:var(--ink);border:1px solid var(--line)}
 .field::placeholder,textarea::placeholder{color:var(--muted)}
 .field:focus-visible,textarea:focus-visible,select:focus-visible{border-color:var(--accent-ink)}
@@ -269,14 +274,14 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 
 
 /* ————— Форма заявки ————— */
-.lead{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;
+.lead{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;
   align-items:start;margin:6px 0 8px}
 .lead-form{display:grid;gap:16px;background:var(--panel);border:1px solid var(--line);
   border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
 .lead-form label{display:block;font-size:14.5px;color:var(--muted)}
 .lead-form .field{margin-top:6px}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.check{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;color:var(--ink)}
 .check input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--accent-ink)}
 .lead-form .actions{margin:2px 0 0}
 .lead-form .btn{width:100%}
@@ -287,25 +292,25 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .lead-after li{margin:9px 0}
 .lead-after .prov{margin-top:14px;display:inline-block}
 @media (max-width:860px){
-  .lead{grid-template-columns:1fr;gap:18px}
+  .lead{grid-template-columns:1fr;gap:16px}
   .pair{grid-template-columns:1fr}
 }
 
 /* Набор систем в калькуляторе: строки-отметки в несколько колонок, каждая
    с областью нажатия во всю строку, а не в один квадратик. */
-.picks{display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:10px}
+.picks{display:grid;gap:4px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:10px}
 .picks .check{padding:9px 10px;border-radius:10px;cursor:pointer;min-height:44px;align-items:center}
 .picks .check:hover{background:var(--panel-2)}
 
 /* ————— Что остаётся у вас ————— */
-.handover{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:30px;
+.handover{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;
   background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
   padding:26px 28px;box-shadow:var(--shadow)}
 .handover-list{margin:0;padding-left:22px}
 .handover-list li{margin:10px 0;font-size:14.5px;max-width:none}
 .handover-say p{color:var(--muted);font-size:14.5px;margin:0 0 12px;max-width:none}
 .handover-say p:last-child{margin:16px 0 0}
-@media (max-width:860px){ .handover{grid-template-columns:1fr;gap:18px} }
+@media (max-width:860px){ .handover{grid-template-columns:1fr;gap:16px} }
 
 /* ————— Калькулятор состава ————— */
 .calc{margin:26px 0 8px}
@@ -322,7 +327,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   margin:16px 0 6px}
 .calc-out ul{margin:0;padding-left:20px;font-size:14.5px}
 .calc-risk{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line);
-  border-radius:12px;padding:12px 14px;margin:14px 0 0;font-size:14.5px}
+  border-radius:14px;padding:12px 14px;margin:14px 0 0;font-size:14.5px}
 @media (max-width:860px){ .calc-in{grid-template-columns:1fr} }
 
 /* Четвёртая раскладка сетки приезжает из перенесённого контента. Без правила
@@ -403,7 +408,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 
 /* Паспорт объекта в карточке кейса: пары «поле — значение» в две колонки,
    чтобы объект сравнивался со своим с одного взгляда. */
-.passport{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:4px 0 2px;
+.passport{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;margin:4px 0 2px;
   font-size:13px;align-items:baseline}
 .passport dt{color:var(--muted)}
 .passport dd{margin:0;font-weight:600}
@@ -424,3 +429,9 @@ a[href^="tel:"], a[href^="mailto:"]{display:inline-block;padding:4px 2px;min-hei
    на них уходила за 130 знаков — замер по всем 137 страницам нашёл семнадцать
    таких мест. */
 main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(--measure) }
+
+/* Ссылка внутри текста согласия — тоже цель нажатия: 16 px по высоте, палец
+   мимо. Замер по восьми страницам нашёл её единственной настоящей среди
+   тридцати шести подозрений — остальные оказались растянутыми ссылками
+   карточек и ссылками внутри абзацев, где цель задаёт строка. */
+.check a, .lead-form a { display:inline-block; padding:4px 0; min-height:24px }

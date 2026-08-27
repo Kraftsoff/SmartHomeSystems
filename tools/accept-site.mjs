@@ -1062,6 +1062,34 @@ ok('согласие и тема: аналитика ждёт ответа, от
   await c.close();
 }
 
+/* Цели нажатия. У прототипа такая проверка есть, у сайта не было — а разметку
+   с тех пор писали заново. Растянутые ссылки карточек и ссылки внутри абзацев
+   исключаем: у первых цель — вся карточка, у вторых её задаёт строка текста. */
+{
+  const c = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const pg = await c.newPage();
+  const small = [];
+  for (const u of ['/', '/answers/', '/pricing/', '/about/', '/partners/',
+    '/scenarios/', '/contacts/', '/equipment/', '/portfolio/', '/showroom/']) {
+    await pg.goto(`${ORIGIN}${u}`);
+    await pg.waitForTimeout(150);
+    const found = await pg.evaluate(() => [...document.querySelectorAll('a,button')]
+      .filter((n) => n.offsetParent !== null)
+      .filter((n) => !n.classList.contains('stretch'))
+      .filter((n) => !n.closest('p,li,td,th,.crumbs,.foot-legal,.answer,.conclusion'))
+      .filter((n) => {
+        const b = n.getBoundingClientRect();
+        return b.width > 0 && b.height > 0 && b.height < 24;
+      })
+      .map((n) => `${n.tagName.toLowerCase()}.${(n.className || '').toString().slice(0, 20)} ${
+        Math.round(n.getBoundingClientRect().height)}px «${(n.textContent || '').trim().slice(0, 30)}»`));
+    for (const f of found) small.push(`${u} ${f}`);
+  }
+  if (small.length) fail(`цели нажатия ниже 24 px: ${[...new Set(small)].slice(0, 3).join('; ')}`);
+  else ok('цели нажатия: ниже 24 px нет ни одной вне текста');
+  await c.close();
+}
+
 /* Печать. Страницу цен распечатывают и несут на встречу: на бумаге не должно
    быть меню, липкой кнопки и вопроса о согласии, а у ссылок должен быть виден
    адрес — на бумаге по ним не нажать. */
