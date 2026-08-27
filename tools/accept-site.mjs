@@ -776,6 +776,47 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Отбор по направлению на индексе ответов. Проверяем главное: он прячет
+   готовую разметку, а не рисует её. Если список собирает скрипт — краулер
+   получает пустую страницу, а это единственная страница, ради которой всё
+   и затевалось. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/answers/`);
+  const без = await pg.evaluate(() => ({
+    кластеров: document.querySelectorAll('[data-cluster]').length,
+    карточек: document.querySelectorAll('[data-cluster] .card').length,
+  }));
+  if (без.кластеров < 2) fail('без скриптов на индексе ответов нет разбивки по направлениям');
+  if (без.карточек < 70) fail(`без скриптов на индексе ответов ${без.карточек} карточек вместо всех`);
+  await c.close();
+
+  const c2 = await browser.newContext();
+  const pg2 = await c2.newPage();
+  await pg2.goto(`${ORIGIN}/answers/`);
+  await pg2.waitForTimeout(400);
+  const chips = await pg2.$$('.filter .chip');
+  if (chips.length < 3) fail(`кнопок отбора по направлению ${chips.length} — меньше трёх`);
+  else {
+    await chips[1].click();
+    await pg2.waitForTimeout(200);
+    const after = await pg2.evaluate(() => ({
+      видно: [...document.querySelectorAll('[data-cluster]')].filter((n) => !n.hidden).length,
+      нажата: document.querySelectorAll('.filter .chip[aria-pressed="true"]').length,
+    }));
+    if (after.видно !== 1) fail(`после отбора по направлению показано секций ${after.видно}, ожидалась одна`);
+    if (after.нажата !== 1) fail(`нажатых кнопок отбора ${after.нажата}, должна быть ровно одна`);
+    await chips[0].click();
+    await pg2.waitForTimeout(200);
+    const back = await pg2.evaluate(() =>
+      [...document.querySelectorAll('[data-cluster]')].filter((n) => !n.hidden).length);
+    if (back !== без.кластеров) fail(`сброс отбора показывает ${back} направлений вместо ${без.кластеров}`);
+  }
+  console.log(`отбор по направлению: без скриптов ${без.кластеров} направлений и ${без.карточек} карточек, отбор прячет готовое`);
+  await c2.close();
+}
+
 /* Поиск. Проверяем не «что-то нашлось», а три свойства: форма слова приводится
    к основе, набор по мере ввода работает, и совпадение внутри слова не считается
    находкой — «ёлка» не должна открывать ответ из-за слова «переделка». */

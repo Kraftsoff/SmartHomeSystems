@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { answers, byCluster, pageTitle, pageDescription, SITE } from '@/lib/content';
 import AnswerSearch from '../components/AnswerSearch';
 import Crumbs from '../components/Crumbs';
+import ClusterFilter from '../components/ClusterFilter';
 
 const TITLE = 'База инженерных ответов';
 const LEDE = `Семьдесят семь вопросов, которые задают до подписания договора: что входит, сколько стоит, что ломается и кто чинит. Каждый ответ начинается с прямого ответа.`;
@@ -39,8 +40,12 @@ export default function AnswersIndex() {
         slug: a.slug, question: a.question, answer: a.answer, expanded: a.expandedText,
         cluster: a.cluster, kicker: a.kicker,
       }))} />
+      {/* Отбор стоит после поиска: поиск отвечает на «мне нужно про
+          протечку», отбор — на «покажи всё про сервис». Разные вопросы. */}
+      <ClusterFilter clusters={[...map.entries()].map(([c, l]) => [c, l.length])} />
+
       {[...map.entries()].map(([cluster, list]) => (
-        <section key={cluster}>
+        <section key={cluster} data-cluster={cluster}>
           <h2>{cluster} <span className="kicker">{list.length}</span></h2>
           <div className="grid g3">
             {list.map((a) => (
