@@ -404,3 +404,10 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 /* Телефон и почта — цели нажатия, а не просто текст: ссылка внутри заголовка
    даёт коробку в 20 px по высоте, и палец в неё не попадает (WCAG 2.5.8). */
 a[href^="tel:"], a[href^="mailto:"]{display:inline-block;padding:4px 2px;min-height:24px}
+
+/* Снимки зала. Соотношение фиксируем, чтобы карточки не прыгали при загрузке:
+   сдвиг макета на сайте ровно ноль, и терять его из-за картинок незачем. */
+.shots figure{margin:0}
+.shots img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3;
+  border-radius:var(--radius);border:1px solid var(--line);display:block;
+  background:var(--panel-2)}
