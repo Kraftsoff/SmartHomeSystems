@@ -251,6 +251,37 @@ for (const [heading, label] of [['Ответы по теме', 'разделах
 
 console.log(`хлебные крошки: на экране и в разметке совпадают (${files.filter((f) => /class="crumbs"/.test(readFileSync(f, 'utf8'))).length})`);
 
+/* Бюджет веса. Меряем со сжатием, потому что по проводу уезжает сжатое:
+   без него локальный сервер показывает 548 КБ там, где реально 128.
+   Пороги взяты с запасом к измеренному, чтобы ловить не колебания, а рост
+   в разы — страница, которая незаметно набрала вдвое, ловится, а +10 % нет. */
+{
+  const { gzipSync } = await import('node:zlib');
+  const gz = (f) => gzipSync(readFileSync(f), { level: 9 }).length;
+  const LIMIT = { '/answers/': 200 * 1024, '*': 60 * 1024 };
+  const heavy = [];
+  for (const f of files) {
+    const url = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+    const size = gz(f);
+    const cap = LIMIT[url] || LIMIT['*'];
+    if (size > cap) heavy.push(`${url}: ${(size / 1024).toFixed(0)} КБ при пороге ${(cap / 1024).toFixed(0)}`);
+  }
+  if (heavy.length) fail(`страницы тяжелее бюджета: ${heavy.slice(0, 3).join('; ')}`);
+
+  const chunks = [];
+  (function walk(dir) {
+    for (const e of readdirSync(dir)) {
+      const p = join(dir, e);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (e.endsWith('.js')) chunks.push(p);
+    }
+  })(join(OUT, '_next/static'));
+  const jsGz = chunks.reduce((n, f) => n + gz(f), 0);
+  if (jsGz > 260 * 1024) fail(`скриптов ${(jsGz / 1024).toFixed(0)} КБ со сжатием при пороге 260`);
+  console.log(`вес со сжатием: скрипты ${(jsGz / 1024).toFixed(0)} КБ, самая тяжёлая страница ${
+    (Math.max(...files.map(gz)) / 1024).toFixed(0)} КБ`);
+}
+
 /* Карточка для пересылки. Ссылку на инженерный проект пересылают дизайнеру
    и архитектору, и без картинки она приходит голой строкой. Проверяем, что
    мета указывает на файл, который действительно собран, и что заголовок с
