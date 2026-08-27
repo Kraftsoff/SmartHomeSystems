@@ -106,6 +106,13 @@ const MUTATIONS = [
   { name: 'страница уехала за край экрана', file: 'site/app/globals.css', rebuild: true,
     from: '.shell{max-width:1140px', to: '.shell{min-width:1400px;max-width:1140px',
     expect: 'шире экрана' },
+  /* Ставка вознаграждения, вынесенная заказчику. Правило дал клиент: узнав
+     процент, заказчик считает, что переплачивает через дизайнера, и идёт
+     мимо партнёра — публикация ломает тот самый канал. */
+  { name: 'размер вознаграждения виден заказчику', file: 'site/out/partners/index.html',
+    rebuild: false, from: '<h2 class="cluster-h">Как устроено вознаграждение</h2>',
+    to: '<h2 class="cluster-h">Как устроено вознаграждение</h2><p>Вознаграждение до 20% от итоговой стоимости.</p>',
+    expect: 'размер вознаграждения виден заказчику' },
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },

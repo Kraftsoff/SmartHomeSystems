@@ -68,8 +68,8 @@
 | проверить у юриста: применимость к работам по автоматизации жилья и разграничение движимого и недвижимого в конкретном договоре | /answers/kakaya-garantiya-deystvuet-na-umnyy-dom |
 | проверить: пороги CO₂ и диапазон влажности привести к действующим нормам для жилых помещений | /answers/kto-otvechaet-za-ventilyaciyu-uvlazhnenie-i-kachestvo |
 | раздел ждёт данных: объекты, фото, разрешения на публикацию | /portfolio |
-| размер и условия — уточняются | /partners |
 | реквизиты не заполнены | /about |
+| решить: какая из трёх схем в присланных материалах действующая — они расходятся между собой | /partners |
 | сверить с нашим договором: какие из этих строк у нас входят в цену, а какие выносятся | /pricing |
 | состав производства подтвердить | /answers/pochemu-stoit-vybirat-rossiyskogo-proizvoditelya-umnogo-doma |
 | условия уточняются | /answers/kak-stat-partnerom-dilerom-mimismart, /answers/rabotaete-li-vy-s-integratorami-i-postavlyaete |
