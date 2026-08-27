@@ -155,6 +155,10 @@ const MUTATIONS = [
     from: "data-shown={past && !onForm ? 'yes' : 'no'}", to: "data-shown={past ? 'yes' : 'no'}",
     expect: 'лежит на кнопке отправки заявки' },
 
+  { name: 'страница 404 по умолчанию', file: 'site/app/not-found.tsx', rebuild: true,
+    from: 'title: \'Страница не найдена — MiMiSmart\',', to: "title: 'MiMiSmart',",
+    expect: 'не про ошибку' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },
