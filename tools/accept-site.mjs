@@ -206,6 +206,49 @@ for (const f of files) {
     fail(`${url}: цепочка расходится — на экране «${seen.join(' / ')}», в разметке «${names.join(' / ')}»`);
   }
 }
+/* Шаг цепочки — это имя, а не предложение. Заголовок раздела на листе
+   третьего уровня разворачивал крошки на три строки, и путь переставал
+   читаться с одного взгляда. */
+{
+  const long = [];
+  for (const f of files) {
+    const url = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+    const m = readFileSync(f, 'utf8').match(/class="crumbs"[^>]*>([\s\S]*?)<\/nav>/);
+    if (!m) continue;
+    for (const step of m[1].replace(/<[^>]+>/g, '\u0001').split('\u0001')
+      .map((x) => x.replace(/\s+/g, ' ').trim()).filter((x) => x && x !== '/')) {
+      if (step.length > 46) long.push(`${url}: «${step.slice(0, 50)}…»`);
+    }
+  }
+  if (long.length) fail(`шаг цепочки длиннее имени: ${long.slice(0, 2).join('; ')} (всего ${long.length})`);
+}
+
+/* Ответы по теме обязаны быть разными на разных страницах. Разделы и сами
+   ответы считаем ПОРОЗНЬ: у ответов подборка идёт по кластеру и разнообразна
+   сама по себе, и вместе с ними сорок четыре одинаковых списка на разделах
+   тонули в общей статистике — проверка их не увидела. */
+for (const [heading, label] of [['Ответы по теме', 'разделах'], ['Ещё по теме', 'страницах ответов']]) {
+  const used = new Map();
+  let pagesWith = 0;
+  for (const f of files) {
+    const src = readFileSync(f, 'utf8');
+    if (!src.includes(heading)) continue;
+    pagesWith += 1;
+    const links = [...src.matchAll(/class="stretch" href="(\/answers\/[^"]+)"/g)].map((m) => m[1]);
+    for (const l of new Set(links.slice(-3))) used.set(l, (used.get(l) || 0) + 1);
+  }
+  if (pagesWith <= 5) continue;
+  const distinct = used.size;
+  const worst = [...used.entries()].sort((a, b) => b[1] - a[1])[0];
+  if (distinct < Math.min(20, pagesWith)) {
+    fail(`ответов по теме всего ${distinct} разных на ${pagesWith} ${label} — подборка не зависит от темы`);
+  }
+  if (worst && worst[1] > pagesWith * 0.5) {
+    fail(`один ответ предлагается на ${worst[1]} ${label} из ${pagesWith}: ${worst[0]}`);
+  }
+  console.log(`ответы по теме на ${label}: ${distinct} разных на ${pagesWith}, чаще всего один встречается ${worst ? worst[1] : 0} раз`);
+}
+
 console.log(`хлебные крошки: на экране и в разметке совпадают (${files.filter((f) => /class="crumbs"/.test(readFileSync(f, 'utf8'))).length})`);
 
 /* Каждая внутренняя ссылка обязана вести в существующий файл. Мёртвые адреса

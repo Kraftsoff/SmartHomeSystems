@@ -46,8 +46,10 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="shell">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      {/* Цепочка кончается направлением, а не вопросом: вопрос стоит
+          заголовком сразу под ней, и повторять его — шум на строку. */}
       <Crumbs items={[{ name: 'Главная', href: '/' }, { name: 'Ответы', href: '/answers/' },
-        { name: a.cluster }, { name: a.question }]} />
+        { name: a.cluster }]} />
       <p className="eyebrow">{a.kicker}</p>
       <h1>{a.question}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: a.answerHtml }} />
