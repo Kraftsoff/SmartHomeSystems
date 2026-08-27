@@ -37,4 +37,17 @@ for (const f of files) {
   }
 }
 console.log(`\nпроверено файлов: ${files.length}, с нарушениями: ${bad}`);
-process.exit(bad ? 1 : 0);
+
+/* Сверка чисел в документах идёт следом, а не отдельной командой. Конвейер
+   запускает обе в одном шаге, а я гонял только эту — и сорок один коммит
+   подряд уехал с красной проверкой, потому что локально «зелено» означало
+   половину шага. */
+let sync = 0;
+try {
+  console.log(execFileSync('node', ['tools/check-docs-sync.mjs'], { encoding: 'utf8' }).trim());
+} catch (e) {
+  sync = 1;
+  console.log(String(e.stdout || e.message).trim());
+}
+
+process.exit(bad || sync ? 1 : 0);
