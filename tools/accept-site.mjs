@@ -89,6 +89,23 @@ for (const f of files) {
   if (crumbs > 1) fail(`${url}: хлебных крошек ${crumbs} вместо одной цепочки`);
 }
 
+/* Разметка перенесённых страниц обязана быть сбалансированной. Незакрытый тег
+   — подпись обрезки: выгрузка заканчивала страницу на первом </section>, то
+   есть на закрытии ВЛОЖЕННОЙ секции, и до сайта доезжала половина материала.
+   Страницы при этом продолжали открываться, поэтому дефект жил незамеченным. */
+{
+  const content = JSON.parse(readFileSync(resolve('site/lib/content.json'), 'utf8'));
+  for (const [url, page] of Object.entries(content.pages)) {
+    const h = page.html;
+    for (const tag of ['div', 'section', 'table', 'ul', 'ol']) {
+      const open = (h.match(new RegExp(`<${tag}[\\s>]`, 'g')) || []).length;
+      const close = (h.match(new RegExp(`</${tag}>`, 'g')) || []).length;
+      if (open !== close) fail(`${url}: разметка не сбалансирована — <${tag}> ${open}, </${tag}> ${close}`);
+    }
+  }
+  console.log(`перенесённые страницы: разметка сбалансирована (${Object.keys(content.pages).length})`);
+}
+
 /* Каждая внутренняя ссылка обязана вести в существующий файл. Мёртвые адреса
    из хэш-роутера пролежали в сборке, пока их не открыли глазами; проверка по
    одному шаблону ловит только известную породу, а эта — любую. */
