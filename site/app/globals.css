@@ -389,3 +389,10 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
    различие для того, кто видит, и ноль для того, кто слушает. */
 .nav-panel a[aria-current="page"]{background:var(--panel-2);font-weight:600;
   box-shadow:inset 2px 0 0 var(--accent-ink)}
+
+/* Паспорт объекта в карточке кейса: пары «поле — значение» в две колонки,
+   чтобы объект сравнивался со своим с одного взгляда. */
+.passport{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:4px 0 2px;
+  font-size:13px;align-items:baseline}
+.passport dt{color:var(--muted)}
+.passport dd{margin:0;font-weight:600}

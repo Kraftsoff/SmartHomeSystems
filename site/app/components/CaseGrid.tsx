@@ -30,12 +30,26 @@ export default function CaseGrid({ items }: { items: Case[] }) {
                 на скриншот отдельно от страницы, и тогда подробная история
                 читается как сданный объект. */}
             <p><span className="prov">⚠️ шаблон, а не сданный объект: ждём данные из вашей базы</span></p>
+            {/* Паспорт объекта: тип, площадь, город, год. Так подают кейсы
+                лидеры сегмента — по этим строкам объект сравнивают со своим,
+                а не любуются им. Пустых строк не показываем. */}
+            <dl className="passport">
+              {c.type && (<><dt>Объект</dt><dd>{c.type}</dd></>)}
+              {c.area > 0 && (<><dt>Площадь</dt><dd>{c.area} м²</dd></>)}
+              {c.city && (<><dt>Где</dt><dd>{c.city}</dd></>)}
+              {c.year && (<><dt>Сдан</dt><dd>{c.year}</dd></>)}
+            </dl>
             <p className="case-stage">{c.stage}</p>
             {c.pain && <p className="case-pain">{c.pain}</p>}
             <dl className="case-dl">
               {c.task && (<><dt>Задача</dt><dd>{c.task}</dd></>)}
               <dt>Что сделали</dt><dd>{c.systems}</dd>
               <dt>Что изменилось</dt><dd>{c.result}</dd>
+              {/* Измеримый результат и честная строка о том, что не вышло.
+                  Прицельный поиск по рынку не нашёл ни того, ни другого ни у
+                  одного игрока: показывают масштаб объекта, но не итог. */}
+              {c.metric && (<><dt>В цифрах</dt><dd>{c.metric}</dd></>)}
+              {c.hard && (<><dt>Что не получилось</dt><dd>{c.hard}</dd></>)}
             </dl>
             <p className="tags">{c.tags.map((t) => <span className="tag" key={t}>{t}</span>)}</p>
           </article>

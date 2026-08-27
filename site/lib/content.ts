@@ -25,6 +25,10 @@ export const comparisons = data.comparisons as Record<string, Section>;
 export type Case = {
   title: string; stage: string; pain: string;
   task: string; systems: string; result: string; tags: string[];
+  /* Паспорт объекта и два поля, которых нет ни у одного игрока рынка:
+     измеримый результат и то, что не получилось. Пустые не показываются. */
+  type: string; area: number; city: string; year: string;
+  metric: string; hard: string;
 };
 export const cases = data.cases as Case[];
 

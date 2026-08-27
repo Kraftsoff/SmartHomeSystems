@@ -226,6 +226,12 @@ function caseList() {
   return rows.map((c) => ({
     title: c.t, stage: c.stage, pain: c.pain || '',
     task: c.task || '', systems: c.sys, result: c.res, tags: c.tags,
+    /* Паспорт объекта: тип, площадь, город, год. Пустые поля не выдумываем —
+       карточка просто не покажет строку, которой нет. */
+    type: c.type || '', area: c.area || 0, city: c.city || '', year: c.year || '',
+    /* Измеримый результат и то, что не получилось. Ни того, ни другого нет ни
+       у одного игрока рынка — искали прицельно. */
+    metric: c.metric || '', hard: c.hard || '',
   }));
 }
 const cases = caseList();
