@@ -737,6 +737,42 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Адрес шоурума в разметке и адрес на странице обязаны совпадать. В разметке
+   он записан руками, на странице живёт внутри фразы — разойтись они могут
+   молча, и тогда машина отправит человека не туда. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/showroom/`);
+  const r = await pg.evaluate(() => {
+    const ld = [...document.querySelectorAll('script[type="application/ld+json"]')]
+      .map((n) => JSON.parse(n.textContent || '{}'))
+      .find((x) => x['@type'] === 'LocalBusiness');
+    return { ld, text: (document.querySelector('main')?.innerText || '') };
+  });
+  if (!r.ld) fail('на странице шоурума нет разметки места (LocalBusiness)');
+  else {
+    const street = r.ld.address?.streetAddress || '';
+    /* Сравниваем по опорным частям: «набережная» и «наб.» — одно и то же
+       место, записанное по-разному, и требовать дословного совпадения
+       значит запретить писать на странице по-человечески. */
+    const key = street.split(/[\s,]+/).filter((w) => w.length > 3).slice(0, 1)
+      .concat(street.match(/\d+[а-яё]?\d*/gi) || []);
+    const missing = key.filter((k) => !r.text.toLowerCase().includes(k.toLowerCase().slice(0, 8)));
+    if (missing.length) fail(`адрес в разметке расходится со страницей: в разметке «${street}», на странице этого нет: ${missing.join(', ')}`);
+    const hours = r.ld.openingHoursSpecification?.[0];
+    if (!hours?.opens || !hours?.closes) fail('в разметке места не указаны часы работы');
+    else if (!r.text.includes(hours.opens) || !r.text.includes(hours.closes)) {
+      fail(`часы в разметке (${hours.opens}–${hours.closes}) не совпадают с указанными на странице`);
+    }
+    /* Телефон и почта на сайте — заглушки; попасть в разметку они не должны:
+       непроверенное в структурированных данных цитируется как факт. */
+    if (r.ld.telephone || r.ld.email) fail('в разметке места есть телефон или почта, а на сайте это заглушки');
+    if (!missing.length) console.log('шоурум: адрес и часы в разметке совпадают со страницей, заглушки в разметку не попали');
+  }
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {
