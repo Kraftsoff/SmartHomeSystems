@@ -13,8 +13,8 @@
  * Выход: 0 — всё чисто, 1 — есть нарушения. Годится для CI.
  */
 import { pathToFileURL } from 'node:url';
-import { resolve } from 'node:path';
-import { existsSync, readFileSync } from 'node:fs';
+import { resolve, join as joinPath } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 
 /* playwright ищем сначала обычным способом, потом в глобальной установке.
    ESM не читает NODE_PATH, поэтому без этого скрипт работает только там,
@@ -943,9 +943,22 @@ await ctx.close();
   if (sm) {
     const inSitemap = new Set([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('BASE_URL', '')));
     const implemented = [...routes].map((h) => h.slice(1));
-    /* Исключений быть не должно: карта содержит только то, что отдаёт 200.
-       /blog был здесь, пока карта его рекламировала; строку из карты убрали. */
-    const PLANNED = new Set();
+    /* Карта собирается из site/out, то есть описывает собранный сайт, а
+       прототип за ним уже не поспевает: /scenarios появился на сайте и в
+       прототипе его нет. Такие адреса не расхождение, а разница возрастов —
+       исключаем ровно те, которые сайт действительно отдаёт. */
+    const BUILT = new Set();
+    try {
+      const walkOut = (dir, base) => {
+        for (const e of readdirSync(dir)) {
+          const p = joinPath(dir, e);
+          if (statSync(p).isDirectory()) { if (e !== '_next') walkOut(p, `${base}${e}/`); continue; }
+          if (e === 'index.html') BUILT.add(base.replace(/\/$/, '') || '/');
+        }
+      };
+      walkOut(resolve('site/out'), '/');
+    } catch { /* сайт не собран — тогда сравниваем как раньше */ }
+    const PLANNED = BUILT;
     const missingFromSitemap = implemented.filter((r) => !inSitemap.has(r));
     const missingFromSite = [...inSitemap].filter((r) => !implemented.includes(r) && !PLANNED.has(r));
     missingFromSitemap.slice(0, 6).forEach((r) => fail(`маршрут есть, в sitemap.xml его нет: ${r}`));
