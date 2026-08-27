@@ -871,6 +871,26 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Текущий раздел объявляется разметкой. Правило для aria-current в стилях
+   стояло с самого начала, а ставить атрибут было некому: тот, кто слушает
+   страницу, не знал, в каком разделе находится. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  for (const [u, want] of [['/pricing/', 'Цены'], ['/answers/', 'Ответы'],
+    ['/equipment/sensors/leak/', 'Оборудование'], ['/portfolio/', 'Кейсы']]) {
+    await pg.goto(`${ORIGIN}${u}`);
+    const got = await pg.evaluate(() => [...document.querySelectorAll(
+      'header [aria-current="page"], .nav-panel [aria-current="page"]')]
+      .map((n) => (n.textContent || '').trim()));
+    if (!got.length) fail(`${u}: в меню не объявлен текущий раздел`);
+    else if (!got.every((x) => x === got[0])) fail(`${u}: в меню объявлено несколько разделов: ${got.join(', ')}`);
+    else if (got[0] !== want) fail(`${u}: текущим объявлен «${got[0]}» вместо «${want}»`);
+  }
+  console.log('меню: текущий раздел объявлен разметкой на всех проверенных');
+  await c.close();
+}
+
 /* Печать. Страницу цен распечатывают и несут на встречу: на бумаге не должно
    быть меню, липкой кнопки и вопроса о согласии, а у ссылок должен быть виден
    адрес — на бумаге по ним не нажать. */

@@ -384,3 +384,8 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   footer.site::after { content:"MiMiSmart · распечатано с сайта"; display:block;
     margin-top:6pt; font-size:9pt; color:#555 }
 }
+
+/* Текущий раздел в раскрытом меню — не только жирным: начертание одно
+   различие для того, кто видит, и ноль для того, кто слушает. */
+.nav-panel a[aria-current="page"]{background:var(--panel-2);font-weight:600;
+  box-shadow:inset 2px 0 0 var(--accent-ink)}
