@@ -104,7 +104,13 @@ function ChildList({ items, heading }: { items: ReturnType<typeof childrenOf>; h
           <article className="card" key={k}>
             <span className="kicker">{rec.eyebrow}</span>
             <h3><a className="stretch" href={`/${k}/`}>{rec.title}</a></h3>
-            {rec.answer ? <p className="clamp">{rec.answer}</p> : null}
+            {/* Разметка, а не голый текст: в прямом ответе стоят пометки о
+                непроверенном, и в текстовом поле они теряют оформление —
+                значок остаётся, выделение пропадает, и такую строку легко
+                опубликовать не заметив. */}
+            {rec.answerHtml
+              ? <p className="clamp" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />
+              : null}
           </article>
         ))}
       </div>
