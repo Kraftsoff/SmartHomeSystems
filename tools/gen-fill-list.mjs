@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Список того, что ждёт данных клиента — собирается из выгрузки контента.
+ * Список того, что ждёт данных клиента — собирается из выгрузки и исходников.
  *
  * Раньше файл велся руками и устаревал молча: он знал 76 пометок, когда на
  * сайте их было 79. Пометка, которой нет в списке, не попадёт ни в один
  * разговор с клиентом, то есть останется на сайте навсегда.
+
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
@@ -12,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const data = JSON.parse(readFileSync(join(ROOT, 'site-foundation/content-export.json'), 'utf8'));
+
 
 /* Пометки лежат внутри разметки в разных местах дерева: в ответах, в разделах,
    в страницах. Обходим всё одинаково и берём текст пометки вместе с тем, где

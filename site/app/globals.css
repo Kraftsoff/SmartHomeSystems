@@ -545,3 +545,10 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
 .card.myth .myth-claim{color:var(--muted);font-style:italic;margin:0 0 8px;
   padding-left:10px;border-left:2px solid var(--line)}
 .card.myth p:last-child{color:var(--ink);margin:0}
+
+/* Раскрытие сведений об исполнителе. Заголовок тише обычного h2: это
+   обязательный блок, а не раздел, за которым идут в подвал. */
+.foot-h{font-size:14px;margin:0 0 8px;color:var(--ink)}
+.legal-list{margin:0 0 12px;padding-left:18px}
+.legal-list li{margin:5px 0}
+.legal-note{color:var(--muted);font-size:12.5px}

@@ -134,6 +134,7 @@ function jsBlock(name) {
       answerHtml: field('answer'), answer: text(field('answer')),
       items: list('items').map((x) => ({ html: x, text: text(x) })),
       risks: list('risks').map((x) => ({ html: x, text: text(x) })),
+      prov: field('prov'),
       rows: pairs('rows'),
       myths: pairs('myths'),
       whenA: field('whenA'), whenB: field('whenB'),
@@ -360,6 +361,23 @@ const out = {
   clusters: [...new Set(answers.map((a) => a.cluster))],
   answers,
 };
+/* Ни одна пометка о непроверенном не имеет права потеряться по дороге.
+   Шесть таких пометок жили в поле, которого выгрузка не читала, и на сайт
+   уезжали утверждения о пожарной безопасности, лицензии МЧС, порогах CO₂
+   и времени переключения АВР — без оговорки, что данные не подтверждены.
+   Сравниваем прототип с выгрузкой по самим текстам, а не по счётчику. */
+{
+  const inProto = new Set([...html.matchAll(/⚠️\s*([^'"<]{6,90})/g)].map((m) => m[1].trim()));
+  const inOut = JSON.stringify(out);
+  const lost = [...inProto].filter((t) => !inOut.includes(t));
+  if (lost.length) {
+    console.error(`выгрузка потеряла пометки о непроверенном: ${lost.length}`);
+    lost.slice(0, 5).forEach((t) => console.error(`  · ${t}`));
+    process.exit(1);
+  }
+  console.log(`пометок в прототипе ${inProto.size}, все дошли до выгрузки`);
+}
+
 writeFileSync(resolve(OUT), JSON.stringify(deepFixLinks(out), null, 2) + '\n', 'utf8');
 console.log(`${OUT}: ответов ${out.counts.answers}, из них с развёрнутой частью ${out.counts.withExpanded}`);
 console.log(`кластеров ${out.clusters.length}, пометок ⚠️ ${out.counts.unverifiedMarkers}`);
