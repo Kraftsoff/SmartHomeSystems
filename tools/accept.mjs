@@ -13,8 +13,8 @@
  * Выход: 0 — всё чисто, 1 — есть нарушения. Годится для CI.
  */
 import { pathToFileURL } from 'node:url';
-import { resolve, join as joinPath } from 'node:path';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
 
 /* playwright ищем сначала обычным способом, потом в глобальной установке.
    ESM не читает NODE_PATH, поэтому без этого скрипт работает только там,
@@ -937,34 +937,13 @@ await ctx.close();
      Один раз 75 страниц ответов отсутствовали в карте целиком. */
   const { readFileSync: readSm } = await import('node:fs');
   let sm = '';
-  /* Комментарии вырезаем: в них лежат примеры разметки для ещё не построенных
-     разделов, и без этого в подсчёт попадают несуществующие URL. */
-  try { sm = readSm(resolve('site-foundation/sitemap.xml'), 'utf8').replace(/<!--[\s\S]*?-->/g, ''); } catch (e) {}
-  if (sm) {
-    const inSitemap = new Set([...sm.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace('BASE_URL', '')));
-    const implemented = [...routes].map((h) => h.slice(1));
-    /* Карта собирается из site/out, то есть описывает собранный сайт, а
-       прототип за ним уже не поспевает: /scenarios появился на сайте и в
-       прототипе его нет. Такие адреса не расхождение, а разница возрастов —
-       исключаем ровно те, которые сайт действительно отдаёт. */
-    const BUILT = new Set();
-    try {
-      const walkOut = (dir, base) => {
-        for (const e of readdirSync(dir)) {
-          const p = joinPath(dir, e);
-          if (statSync(p).isDirectory()) { if (e !== '_next') walkOut(p, `${base}${e}/`); continue; }
-          if (e === 'index.html') BUILT.add(base.replace(/\/$/, '') || '/');
-        }
-      };
-      walkOut(resolve('site/out'), '/');
-    } catch { /* сайт не собран — тогда сравниваем как раньше */ }
-    const PLANNED = BUILT;
-    const missingFromSitemap = implemented.filter((r) => !inSitemap.has(r));
-    const missingFromSite = [...inSitemap].filter((r) => !implemented.includes(r) && !PLANNED.has(r));
-    missingFromSitemap.slice(0, 6).forEach((r) => fail(`маршрут есть, в sitemap.xml его нет: ${r}`));
-    missingFromSite.slice(0, 6).forEach((r) => fail(`в sitemap.xml есть, маршрута нет: ${r}`));
-    ok(`sitemap: строк ${inSitemap.size}, маршрутов ${implemented.length}, расхождений ${missingFromSitemap.length + missingFromSite.length}`);
-  }
+  /* Карта сайта здесь больше не сверяется. Она описывает собранный сайт, а
+     прототип за ним не поспевает: /scenarios появился на сайте и в прототипе
+     его нет. Попытка исключить такие адреса чтением site/out сделала результат
+     зависимым от того, лежит ли рядом сборка: локально каталог был, в
+     конвейере приёмка идёт до сборки — и та же проверка дала разный ответ.
+     Сверка карты с реальными страницами живёт в accept-site.mjs, где обе
+     стороны настоящие. */
 }
 
 /* ---------- 7g. robots.txt: персональные группы не открывают служебное ---------- */
