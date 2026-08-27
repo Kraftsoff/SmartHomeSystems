@@ -313,3 +313,8 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .calc-risk{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line);
   border-radius:12px;padding:12px 14px;margin:14px 0 0;font-size:14.5px}
 @media (max-width:860px){ .calc-in{grid-template-columns:1fr} }
+
+/* Четвёртая раскладка сетки приезжает из перенесённого контента. Без правила
+   .grid давал одну колонку, и карточки «чем мы отличаемся» встали лентой во
+   всю ширину вместо ряда. */
+.g4{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
