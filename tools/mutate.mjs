@@ -26,6 +26,10 @@ const only = process.argv[2];
 
 /* rebuild: правка в исходниках сайта требует пересборки; правка в собранном
    выводе или в контенте — нет, и такие мутации идут в разы быстрее. */
+/* Мутации «таблица недостижима клавиатурой» больше нет: гейта, который она
+   проверяла, тоже нет. Ниже 700 px таблицы разложены карточками, выше —
+   помещаются целиком, и ширины, при которой они прокручиваются вбок, не
+   существует. Проверка требовала условия, которого не бывает. */
 const MUTATIONS = [
   { name: 'мёртвая внутренняя ссылка', file: 'site/out/index.html', rebuild: false,
     from: 'href="/pricing/"', to: 'href="/net-takoy-stranicy/"',
@@ -73,15 +77,18 @@ const MUTATIONS = [
     rebuild: false, from: 'class="next"', to: 'class="nextX"',
     expect: 'без целевого действия' },
   { name: 'адрес шоурума разошёлся со страницей', file: 'site/out/showroom/index.html', rebuild: false,
+    /* Оба вхождения: адрес стоит и в разметке организации, и в разметке
+       места, а замена первого попадала в организацию — проверка читает место. */
+    all: true,
     from: '"streetAddress":"Новоданиловская набережная, 6к1"',
     to: '"streetAddress":"Ленинградское шоссе, 12"',
     expect: 'адрес в разметке расходится' },
   { name: 'заглушка телефона в разметке места', file: 'site/out/showroom/index.html', rebuild: false,
-    from: '"@type":"LocalBusiness"', to: '"telephone":"+7 000 000-00-00","@type":"LocalBusiness"',
-    expect: 'телефон или почта' },
-  { name: 'таблица недостижима клавиатурой', file: 'site/out/about/index.html', rebuild: false,
-    all: true, from: 'class="tbl-wrap" tabindex="0"', to: 'class="tbl-wrap" data-x="0"',
-    expect: 'клавиатурой недостижимы' },
+    /* Подменяем значение, а не добавляем второй ключ: при разборе JSON
+       побеждает последний, и настоящий номер перекрывал заглушку — гейт
+       справедливо молчал, потому что в разметке оставался верный телефон. */
+    from: '"telephone":"+78005052053"', to: '"telephone":"+7 000 000-00-00"',
+    expect: 'телефон в разметке' },
   { name: 'текущий раздел не объявлен', file: 'site/out/pricing/index.html', rebuild: false,
     all: true, from: 'aria-current="page"', to: 'data-current="page"',
     expect: 'не объявлен текущий раздел' },
