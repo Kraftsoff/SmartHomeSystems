@@ -49,6 +49,16 @@ const APP = join(ROOT, 'site/app');
     if (statSync(f).isDirectory()) { scan(f); continue; }
     if (!/\.tsx?$/.test(e)) continue;
     const src = readFileSync(f, 'utf8');
+    /* Пункт, который ждёт клиента, но не должен печататься на странице,
+       пишется в комментарии исходника: спрятанная в разметке пометка звучит
+       в программах чтения с экрана на каждой странице, а адресована она
+       владельцу сайта, а не читателю. */
+    for (const m of src.matchAll(/⚠️ ЖДЁТ КЛИЕНТА:\s*([^*\n]+)/g)) {
+      const text = m[1].replace(/\s+/g, ' ').trim();
+      if (!text) continue;
+      if (!found.has(text)) found.set(text, new Set());
+      found.get(text).add(`исходник ${e}`);
+    }
     for (const m of src.matchAll(/className="prov">\s*⚠️\s*([^<{]+)/g)) {
       const text = m[1].replace(/\s+/g, ' ').replace(/\{'\s*'\}/g, ' ').trim();
       if (!text) continue;

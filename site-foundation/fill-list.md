@@ -43,7 +43,6 @@
 | заполнить: тарифы обслуживания и состав регламента | /answers/skolko-stoit-vladenie-obsluzhivanie-abonentka-rashodniki |
 | заполнить: условия и стоимость обследования чужого объекта | /answers/u-menya-uzhe-stoit-sistema-ot-drugogo |
 | заполнить: условия поставки интеграторам, уровни цен, порядок инженерной поддержки и гарантийной замены | /answers/rabotaete-li-vy-s-integratorami-i-postavlyaete |
-| заполнить: файл логотипа и адреса профилей компании (Яндекс Карты, соцсети) для разметки организации | компонент layout.tsx |
 | заполнить: ФИО ответственного | /privacy |
 | заполнить: хостинг и страна серверов | /privacy |
 | заполнить: что входит в наш регламент по правкам и что тарифицируется отдельно | /answers/smogu-li-ya-sam-menyat-scenarii-ne |
@@ -79,5 +78,6 @@
 | состав производства подтвердить | /answers/pochemu-stoit-vybirat-rossiyskogo-proizvoditelya-umnogo-doma |
 | условия уточняются | /answers/kak-stat-partnerom-dilerom-mimismart, /answers/rabotaete-li-vy-s-integratorami-i-postavlyaete |
 | уточнить состав работ, требующих лицензии МЧС — п. 15 ч. 1 ст. 12 ФЗ-99 | /answers/chem-umnyy-dom-dlya-kommercheskogo-obekta-s |
+| файл логотипа и адреса профилей компании (Яндекс Карты, соцсети) для разметки организации | исходник layout.tsx |
 | формулировку подтвердить | /showroom |
 | шаблон, а не сданный объект: ждём данные из вашей базы | компонент CaseGrid.tsx |
