@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 
-const PLAN_NIGHT = '/plan/plan-night-2e13515c34.png';
+/* Тот же файл, что рисует CSS. Маска обязана читаться с нарисованного плана:
+   пока их было два, они расходились на 3,64% площади. */
 const PLAN_DAY = '/plan/plan-day-f1aad96bf4.png';
 
 const SCENES = [
@@ -39,7 +40,7 @@ export default function HousePlan() {
       cx.drawImage(img, 0, 0, w, h);
       mask.current = { data: cx.getImageData(0, 0, w, h).data, w, h };
     };
-    img.src = PLAN_NIGHT;
+    img.src = PLAN_DAY;
   }, []);
 
   useEffect(() => {
@@ -145,7 +146,11 @@ export default function HousePlan() {
         ))}
       </div>
 
-      <div ref={stageRef} id="houseStage" className={`house-stage is-${scene}`}
+      {/* Файл маски объявлен в разметке, чтобы приёмка могла сверить его
+          с картинкой, которую рисует CSS. Пока планов было два, они
+          расходились на 3,64% площади, и никто этого не видел. */}
+      <div ref={stageRef} id="houseStage" data-mask={PLAN_DAY}
+        className={`house-stage is-${scene}`}
         role="img" aria-label={`План дома, сценарий «${active?.label}». ${active?.note}`} />
 
       <p style={{ color: 'var(--muted)', fontSize: 14.5 }} aria-live="polite">{active?.note}</p>

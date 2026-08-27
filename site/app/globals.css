@@ -79,7 +79,13 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
 :focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
-/* План дома. Фон — файл, а не встроенная строка: 337 КБ в base64 весили на
+/* План один на обе темы. Раньше их было два, и это давало две ошибки сразу:
+   ночная картинка на тёмной подложке давала контраст 1,36 : 1 против 15,2 : 1
+   у дневной — стены просто не читались, — а проходимость всё это время
+   проверялась по альфе ночного файла независимо от того, какой нарисован.
+   Маски расходились на 3,64%: житель проходил сквозь нарисованную стену
+   и упирался в пустое место.
+   План дома. Фон — файл, а не встроенная строка: 337 КБ в base64 весили на
    треть больше самих картинок и лежали в каждом документе.
    Подложка тёмная и в светлой теме: стены и мебель на картинке белые по
    прозрачному фону, и на светлой подложке план исчезал — на снимке первого
@@ -90,7 +96,6 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
 .house-stage::before{content:"";position:absolute;inset:0;
   background:center/contain no-repeat url('/plan/plan-day-f1aad96bf4.png')}
 :root[data-mode="night"] .house-stage{background:linear-gradient(160deg,#1d1633,#120c22)}
-:root[data-mode="night"] .house-stage::before{background-image:url('/plan/plan-night-2e13515c34.png')}
 .footprint{position:absolute;left:0;top:0;width:9px;height:15px;pointer-events:none;
   transform:translate(-50%,-50%);opacity:1;transition:opacity 1.1s ease .35s;z-index:6}
 .footprint.fade{opacity:0}
