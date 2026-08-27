@@ -198,7 +198,7 @@ function forRealSite(seg) {
 }
 
 const PAGE_URL = {
-  'p-equipment': '/equipment', 'p-cases': '/portfolio', 'p-pricing': '/pricing',
+  'p-scenarios': '/scenarios', 'p-equipment': '/equipment', 'p-cases': '/portfolio', 'p-pricing': '/pricing',
   'p-privacy': '/privacy', 'p-showroom': '/showroom', 'p-functions-idx': '/functions',
   'p-solutions-idx': '/solutions', 'p-compare-idx': '/compare', 'p-partners': '/partners',
   'p-about': '/about', 'p-contacts': '/contacts',

@@ -7,6 +7,7 @@ export const LINKS: Array<[href: string, label: string, primary: boolean]> = [
   ['/pricing/', 'Цены', true],
   ['/answers/', 'Ответы', true],
   ['/portfolio/', 'Кейсы', true],
+  ['/scenarios/', 'Сценарии', false],
   ['/functions/', 'Направления', false],
   ['/compare/', 'Сравнения', false],
   ['/equipment/', 'Оборудование', false],
