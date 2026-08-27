@@ -23,6 +23,13 @@ export default function CookieBar() {
     else if (v !== 'no') setShow(true);
   }, []);
 
+  /* Пока висит карточка согласия, липкая кнопка внизу не показывается:
+     два прижатых к низу блока накрывают друг друга, и вопрос о согласии
+     оказывается под рекламой действия. */
+  useEffect(() => {
+    document.documentElement.dataset.consentAsking = show ? 'yes' : 'no';
+  }, [show]);
+
   function decide(v: 'yes' | 'no') {
     try { localStorage.setItem(KEY, v); } catch { /* хранилище запрещено */ }
     setShow(false);

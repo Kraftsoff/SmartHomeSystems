@@ -431,6 +431,45 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Липкое действие на телефоне: появляется после первого экрана, не
+   перекрывает вопрос о согласии и не накрывает подвал. Проверяем все три
+   свойства — два прижатых к низу блока иначе спорят за одно место. */
+{
+  const c = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(400);
+  const hidden = await pg.evaluate(() => {
+    const b = document.querySelector('.sticky-cta');
+    return b ? b.getBoundingClientRect().top >= window.innerHeight - 1 : null;
+  });
+  if (hidden === null) fail('на телефоне нет липкого целевого действия');
+  else if (!hidden) fail('липкое действие показано поверх вопроса о согласии');
+
+  await pg.evaluate(() => {
+    try { localStorage.setItem('mm-analytics-consent', 'no'); } catch { /* нет хранилища */ }
+  });
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(300);
+  const beforeScroll = await pg.evaluate(() =>
+    document.querySelector('.sticky-cta').getBoundingClientRect().top >= window.innerHeight - 1);
+  if (!beforeScroll) fail('липкое действие показано на первом экране, где кнопка и так видна');
+
+  await pg.evaluate(() => window.scrollTo(0, 900));
+  await pg.waitForTimeout(400);
+  const after = await pg.evaluate(() => {
+    const b = document.querySelector('.sticky-cta');
+    const r = b.getBoundingClientRect();
+    const f = document.querySelector('footer.site').getBoundingClientRect();
+    return { видно: r.top < window.innerHeight - 20, высота: Math.round(r.height),
+      подвалНиже: f.bottom > r.top ? Math.round(f.bottom - r.top) : 0 };
+  });
+  if (!after.видно) fail('липкое действие не появляется после первого экрана');
+  if (after.высота < 44) fail(`липкое действие высотой ${after.высота} px — меньше пальца`);
+  console.log('липкое действие: ждёт ответа о согласии, появляется после первого экрана');
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {

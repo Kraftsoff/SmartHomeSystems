@@ -5,6 +5,7 @@ import ThemeToggle from './components/ThemeToggle';
 import MainNav from './components/MainNav';
 import { LINKS } from '@/lib/nav';
 import CookieBar from './components/CookieBar';
+import StickyCta from './components/StickyCta';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main id="main">{children}</main>
+        <StickyCta />
         <CookieBar />
         <footer className="site">
           <div className="shell">
