@@ -19,13 +19,32 @@ export default function MainNav() {
     if (!open) return;
     /* Меню закрывается клавишей и щелчком мимо: открытая панель на весь экран
        без выхода — ловушка, особенно на телефоне, где Escape нажать нечем. */
+    const focusables = () => [...(panel.current?.querySelectorAll<HTMLElement>('a[href]') ?? [])];
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setOpen(false); btn.current?.focus(); }
+      if (e.key === 'Escape') { setOpen(false); btn.current?.focus(); return; }
+      if (e.key !== 'Tab') return;
+      /* Обход замкнут на панели. Без этого четырнадцать пунктов меню
+         заканчивались провалом на страницу за ним: панель закрывает экран,
+         а фокус уходил в содержимое, которого не видно. */
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      const here = document.activeElement;
+      if (e.shiftKey && (here === first || here === btn.current)) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && here === last) {
+        e.preventDefault(); first.focus();
+      } else if (here && !panel.current?.contains(here) && here !== btn.current) {
+        e.preventDefault(); first.focus();
+      }
     };
     const onDown = (e: PointerEvent) => {
       const t = e.target as Node;
       if (!panel.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
     };
+    /* Открыли — фокус в панель: иначе с клавиатуры меню открывается,
+       а пройти по нему нельзя, не протабив через всю шапку. */
+    focusables()[0]?.focus();
     document.addEventListener('keydown', onKey);
     document.addEventListener('pointerdown', onDown);
     return () => {

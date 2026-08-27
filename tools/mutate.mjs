@@ -147,6 +147,10 @@ const MUTATIONS = [
     from: "const scope = here !== '/pricing/';", to: 'const scope = true;',
     expect: 'ведёт на ту же страницу' },
 
+  { name: 'обход клавиатурой уходит из меню', file: 'site/app/components/MainNav.tsx', rebuild: true,
+    from: "      if (e.key !== 'Tab') return;", to: "      if (e.key !== 'Tab') return;\n      return;",
+    expect: 'уходит из открытого меню' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },
