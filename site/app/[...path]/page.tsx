@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { sections, comparisons, pages, answers, pageTitle, pageDescription, SITE } from '@/lib/content';
+import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, SITE } from '@/lib/content';
 import LeadForm from '../components/LeadForm';
+import CaseGrid from '../components/CaseGrid';
 import ScopeCalc from '../components/ScopeCalc';
 
 /* Разделы и сравнения приходят из выгрузки одним словарём «путь → содержимое»,
@@ -65,6 +66,10 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         <div dangerouslySetInnerHTML={{ __html: hub.html }} />
         {/* Форма живёт только на контактах: одна точка приёма заявок, а не
             кнопка на каждой странице, ведущая в разные места. */}
+        {/* Кейсы вставлял скрипт прототипа, и в выгрузку попадал пустой
+            контейнер: раздел открывался одним заголовком. Теперь объекты
+            приходят из того же файла контента, что и весь остальной текст. */}
+        {key === 'portfolio' && <CaseGrid items={cases} />}
         {key === 'pricing' && (
           <>
             <h2>Состав работ по вашей стадии</h2>

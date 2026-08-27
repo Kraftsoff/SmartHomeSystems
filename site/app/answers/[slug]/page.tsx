@@ -51,6 +51,20 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
       <div className="lede" dangerouslySetInnerHTML={{ __html: a.answerHtml }} />
       {a.expandedHtml ? <div dangerouslySetInnerHTML={{ __html: a.expandedHtml }} /> : null}
 
+      {/* Ответ — точка входа: из поиска человек попадает сюда, а не на главную.
+          Без следующего шага семьдесят семь страниц заканчиваются ничем.
+          Действия ровно два, и оба ведут туда, где на вопрос отвечают
+          цифрой по объекту, а не ещё одним текстом. */}
+      <div className="next">
+        <h2>Что дальше</h2>
+        <p>Расчёт по вашему объекту считается по площади, стадии и составу систем —
+          вопрос закрывается сметой, а не следующей статьёй.</p>
+        <div className="actions">
+          <a className="btn btn-primary" href="/contacts/">Рассчитать проект</a>
+          <a className="btn btn-ghost" href="/pricing/">Из чего складывается смета</a>
+        </div>
+      </div>
+
       {related.length > 0 && (
         <>
           <h2>Ещё по теме «{a.cluster}»</h2>

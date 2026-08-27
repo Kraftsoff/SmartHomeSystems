@@ -22,6 +22,12 @@ export const clusters = data.clusters as string[];
 export const sections = data.sections as Record<string, Section>;
 export const comparisons = data.comparisons as Record<string, Section>;
 
+export type Case = {
+  title: string; stage: string; pain: string;
+  task: string; systems: string; result: string; tags: string[];
+};
+export const cases = data.cases as Case[];
+
 export type Page = {
   url: string; id: string; title: string; eyebrow: string; lede: string;
   html: string; textLength: number;

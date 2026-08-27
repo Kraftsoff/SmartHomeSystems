@@ -82,19 +82,7 @@ function jsBlock(name) {
     else if (html[j] === '}') { depth -= 1; if (!depth) break; }
   }
   const src = html.slice(start, j + 1);
-  /* Адреса из хэш-роутера встречаются не только в страницах, но и в ответах,
-   разделах и сравнениях. Проходим по всему дереву один раз: пропустить ветку
-   значит оставить ссылку, которая на сайте никуда не ведёт. */
-function deepFixLinks(v) {
-  if (typeof v === 'string') return fixLinks(v);
-  if (Array.isArray(v)) return v.map(deepFixLinks);
-  if (v && typeof v === 'object') {
-    return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deepFixLinks(x)]));
-  }
-  return v;
-}
-
-const out = {};
+  const out = {};
   /* Разбираем ключи верхнего уровня по позиции скобок, а не регуляркой:
      внутри значений есть и кавычки, и вложенные массивы. */
   const keyRe = /'([a-z0-9/-]+)':\s*\{/gi;
@@ -179,6 +167,27 @@ for (const [id, url] of Object.entries(PAGE_URL)) {
   };
 }
 
+/* Кейсы лежат в скрипте прототипа и вставляются на страницу уже в браузере,
+   поэтому выгрузка страницы забирала пустой контейнер: на собранном сайте
+   раздел «Реализованные объекты» открывался без единого объекта. Разбираем
+   массив отдельно — читаем как данные, а не как разметку. */
+function caseList() {
+  const i = html.indexOf('var CASES=[');
+  if (i < 0) return [];
+  let depth = 0, start = html.indexOf('[', i), j = start;
+  for (; j < html.length; j += 1) {
+    if (html[j] === '[') depth += 1;
+    else if (html[j] === ']') { depth -= 1; if (!depth) break; }
+  }
+  const src = html.slice(start, j + 1);
+  const rows = Function(`"use strict";return ${src}`)();
+  return rows.map((c) => ({
+    title: c.t, stage: c.stage, pain: c.pain || '',
+    task: c.task || '', systems: c.sys, result: c.res, tags: c.tags,
+  }));
+}
+const cases = caseList();
+
 const sections = jsBlock('SUB');
 const comparisons = jsBlock('CMP');
 
@@ -198,10 +207,12 @@ const out = {
   source: SRC,
   generated: 'проставляется при выгрузке',
   pages,
+  cases,
   sections,
   comparisons,
   counts: {
     pages: Object.keys(pages).length,
+    cases: cases.length,
     sections: Object.keys(sections).length,
     comparisons: Object.keys(comparisons).length,
     answers: answers.length,

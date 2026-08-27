@@ -185,6 +185,83 @@ for (const [scheme, expect] of [['light', 'day'], ['dark', 'night']]) {
 }
 console.log('согласие и тема: аналитика ждёт ответа, отказ сохраняется, системная настройка учитывается');
 
+/* Ширина. Ничто не должно вылезать за край экрана: горизонтальная прокрутка
+   на телефоне — это когда до половины строки не дотянуться. Проверяем на
+   узком экране, где запас кончается первым. Отдельно смотрим, что шапка не
+   печатается поверх заголовка: десять ссылок переносились внутри шапки
+   фиксированной высоты и накрывали первый экран, а ни одна проверка этого
+   не видела — они читали разметку, а не положение на экране. */
+{
+  const c = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const pg = await c.newPage();
+  for (const u of ['/', '/answers/', '/pricing/', '/portfolio/', '/contacts/']) {
+    await pg.goto(`${ORIGIN}${u}`);
+    await pg.waitForTimeout(300);
+    const over = await pg.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (over > 1) fail(`${u} на экране 390 px шире экрана на ${over} px — появляется прокрутка вбок`);
+    const clash = await pg.evaluate(() => {
+      const h = document.querySelector('header.site'), t = document.querySelector('#main');
+      if (!h || !t) return null;
+      /* По коробке шапки судить нельзя: ссылки переносились ВНУТРИ неё и
+         вылезали за нижний край, а сама коробка оставалась ровно 60 px —
+         проверка видела чистое поле там, где на снимке текст лежал поверх
+         заголовка. Берём самый нижний край среди шапки и всего, что в ней. */
+      const bottom = [h, ...h.querySelectorAll('*')]
+        .map((n) => n.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.height > 0)
+        .reduce((m, r) => Math.max(m, r.bottom), 0);
+      /* Сравниваем с началом содержимого, а не с h1: над заголовком стоит
+         надстрочник, и накрывало сперва его. По h1 замер давал ровно ноль
+         разницы — низ переносящейся навигации совпадал с его верхом. */
+      const b = t.getBoundingClientRect();
+      return b.top < bottom ? Math.round(bottom - b.top) : 0;
+    });
+    if (clash === null) fail(`${u}: нет шапки или заголовка`);
+    else if (clash > 0) fail(`${u}: шапка накрывает заголовок на ${clash} px`);
+  }
+  console.log('узкий экран: за край не выходит, шапка заголовок не накрывает');
+  await c.close();
+}
+
+/* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
+   и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/portfolio/`);
+  const n = await pg.evaluate(() => document.querySelectorAll('[data-cases] .case').length);
+  if (n < 1) fail('на странице кейсов нет ни одного объекта до исполнения скриптов');
+  const marked = await pg.evaluate(() =>
+    [...document.querySelectorAll('[data-cases] .case')].every((c) => c.querySelector('.prov')));
+  if (!marked) fail('не в каждой карточке кейса стоит пометка о шаблоне');
+  console.log(`кейсы: объектов без скриптов ${n}, пометка в каждой карточке`);
+  await c.close();
+}
+
+/* Ответ — точка входа из поиска. Страница без следующего шага заканчивается
+   ничем, а таких страниц семьдесят семь. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  const slugs = files
+    .map((f) => `/${relative(OUT, f).replace(/index\.html$/, '')}`)
+    .filter((u) => u.startsWith('/answers/') && u !== '/answers/')
+    .slice(0, 3);
+  for (const u of slugs) {
+    await pg.goto(`${ORIGIN}${u}`);
+    const cta = await pg.evaluate(() => {
+      const b = document.querySelector('.next a.btn-primary');
+      if (!b) return null;
+      const r = b.getBoundingClientRect();
+      return { href: b.getAttribute('href'), w: Math.round(r.width), h: Math.round(r.height) };
+    });
+    if (!cta) fail(`${u}: на странице ответа нет целевого действия`);
+    else if (cta.h < 44) fail(`${u}: кнопка высотой ${cta.h} px — меньше пальца`);
+  }
+  console.log(`ответы: целевое действие проверено на ${slugs.length} страницах`);
+  await c.close();
+}
+
 /* Поиск. Проверяем не «что-то нашлось», а три свойства: форма слова приводится
    к основе, набор по мере ввода работает, и совпадение внутри слова не считается
    находкой — «ёлка» не должна открывать ответ из-за слова «переделка». */
