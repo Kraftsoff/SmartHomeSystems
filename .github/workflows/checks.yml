@@ -10,6 +10,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    # Проверка проверок идёт по ночам: она гоняет приёмку по разу на каждый
+    # подсаженный дефект, и на каждом коммите это было бы дороже пользы.
+    - cron: '0 2 * * *'
 
 jobs:
   language:
@@ -60,8 +64,38 @@ jobs:
       - name: Приёмка собранного сайта
         run: node tools/accept-site.mjs
 
+
       # Полезная нагрузка для клиентской навигации: 7,1 МБ из 12,2, и при
       # обычных ссылках её никто не запрашивает. Шаг сам отменяется, если
       # в исходниках появится next/link.
       - name: Убрать неиспользуемое из сборки
         run: node tools/prune-build.mjs
+
+  mutation:
+    name: Гейты умеют падать
+    # Приёмка, которая ничего не ловит, зелёная так же, как приёмка, которой
+    # нечего ловить, — по выводу их не различить. Здесь в собранный сайт
+    # подсаживаются известные дефекты, и каждый обязан быть назван.
+    #
+    # Не на каждом коммите: прогон запускает приёмку по разу на мутацию, а она
+    # обходит все 137 страниц. По расписанию и по кнопке — там эта цена уместна.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Установка playwright и Chromium
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save playwright@latest
+          npx playwright install --with-deps chromium
+      - name: Сборка сайта
+        working-directory: site
+        run: |
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npx next build
+      - name: Подсадка дефектов
+        run: FAST=1 node tools/mutate.mjs
