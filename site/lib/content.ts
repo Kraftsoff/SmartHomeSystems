@@ -39,7 +39,12 @@ export type Page = {
 export const pages = data.pages as Record<string, Page>;
 
 export const BRAND = 'MiMiSmart';
-export const SITE = 'https://example.invalid'; // ⚠️ заполнить: боевой домен
+/* Боевой адрес пока не назначен, поэтому здесь заглушка — и она намеренно
+   невалидна: подставь сюда что-то правдоподобное, и canonical на 137 страницах
+   начнёт указывать на чужой домен молча.
+   Для превью адрес задаётся переменной окружения при сборке:
+   SITE_URL=https://имя.netlify.app npx next build */
+export const SITE = process.env.SITE_URL || 'https://example.invalid'; // ⚠️ заполнить: боевой домен
 
 /** Заголовок страницы: вопрос как есть плюс бренд, без хвостов-описаний.
  *  Считаем длину суффикса, а не вычитаем на глаз: прежняя формула давала 61
