@@ -27,6 +27,21 @@ async function loadChromium() {
 const OUT = resolve(process.argv[2] || 'site/out');
 const problems = [];
 const fail = (m) => problems.push(m);
+
+/* Вывод итога вынесен в функцию: его же зовёт общий перехват, когда прогон
+   падает на полпути. Иначе крушение обрывало вывод на середине и наружу
+   уходила тишина, неотличимая от «чисто». */
+let summaryPrinted = false;
+function report() {
+  if (summaryPrinted) return;
+  summaryPrinted = true;
+  if (problems.length) {
+    console.log(`\n❌ НАРУШЕНИЙ: ${problems.length}`);
+    problems.slice(0, 15).forEach((p) => console.log(`  · ${p}`));
+    process.exit(1);
+  }
+  console.log('\n✅ Нарушений нет.');
+}
 /* Отчёт об успехе печатается, только если с прошлого отчёта нарушений не
    прибавилось. Раньше строки успеха стояли за циклами безусловно, и приёмка
    рапортовала «обе темы держат AA» одновременно с записью нарушения — я сам
@@ -534,6 +549,20 @@ const ORIGIN = `http://127.0.0.1:${server.address().port}`;
    где всё исправно — это и случилось на первом же запуске конвейера. */
 const EXEC = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium';
 const browser = await chromium.launch(existsSync(EXEC) ? { executablePath: EXEC } : {});
+/* Общий перехват на браузерную часть. Одно исключение — не нажалась кнопка,
+   исчез элемент — уносило весь прогон, и всё, что шло ниже, не выполнялось.
+   Стенд показывал шесть слепых гейтов подряд, хотя слеп был один. Крушение
+   обязано быть громким нарушением, а не тишиной: тишина читается как «чисто».
+   Проверки выше него при этом уже записаны и попадут в отчёт. */
+process.on('uncaughtException', (e) => {
+  fail(`приёмка упала на полпути: ${String(e && e.message || e).split('\n')[0].slice(0, 120)}`);
+  report();
+});
+process.on('unhandledRejection', (e) => {
+  fail(`приёмка упала на полпути: ${String(e && e.message || e).split('\n')[0].slice(0, 120)}`);
+  report();
+});
+
 const ctx = await browser.newContext({ javaScriptEnabled: false });
 const page = await ctx.newPage();
 await page.goto(`${ORIGIN}/contacts/`);
@@ -641,7 +670,16 @@ ok('согласие и тема: аналитика ждёт ответа, от
     const burger = await pg.$('.burger');
     if (!burger) fail('на узком экране нет кнопки меню');
     else {
-      await burger.click();
+      /* Клик в try: исключение здесь убивало весь прогон, и всё, что идёт
+         ниже — вес страницы, разметка места, доступность таблиц, список к
+         заполнению, превосходства — не выполнялось вовсе. Стенд показывал
+         шесть слепых гейтов подряд, хотя слеп был один: этот. Не открылось —
+         это нарушение, а не крушение. */
+      try {
+        await burger.click({ timeout: 4000 });
+      } catch {
+        fail('кнопка меню не нажимается на узком экране');
+      }
       await pg.waitForTimeout(250);
       const fit = await pg.evaluate(() => {
         const items = [...document.querySelectorAll('.nav-panel a')];
@@ -1747,9 +1785,4 @@ console.log(`страниц: ${files.length}`);
 console.log(`уникальных: title ${titles.size} · description ${descs.size} · canonical ${canons.size}`);
 console.log(`минимум текста в HTML: ${minText} знаков (${minTextPage})`);
 
-if (problems.length) {
-  console.log(`\n❌ НАРУШЕНИЙ: ${problems.length}`);
-  problems.slice(0, 15).forEach((p) => console.log(`  · ${p}`));
-  process.exit(1);
-}
-console.log('\n✅ Нарушений нет.');
+report();
