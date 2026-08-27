@@ -356,3 +356,31 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   /* Подвал не должен уходить под полосу. */
   footer.site{padding-bottom:88px}
 }
+
+/* ————— Печать ————— */
+/* Страницу цен и состава работ распечатывают и несут на встречу. По умолчанию
+   на бумагу уходят меню, липкая кнопка, баннер согласия и подложка карточек —
+   то есть половина листа тратится на то, что на бумаге не работает. */
+@media print {
+  header.site, .burger, .nav-panel, .theme-toggle, .sticky-cta, .consent,
+  .foot-map, .filter, .next, .skip { display: none !important }
+  :root{ --bg:#fff; --panel:#fff; --panel-2:#fff; --ink:#000; --muted:#333; --line:#bbb }
+  body { background:#fff; color:#000; font-size:11pt }
+  .shell { max-width:none; padding:0 }
+  .card, .lede, .handover, .calc-fs, .lead-after, .tbl-wrap {
+    box-shadow:none !important; border:1px solid #bbb; break-inside:avoid }
+  .grid { display:block }
+  .grid > * { margin-bottom:8pt }
+  h1 { font-size:20pt } h2 { font-size:14pt; break-after:avoid } h3 { font-size:12pt }
+  h2, h3 { break-after:avoid }
+  /* Адрес ссылки на бумаге не виден — дописываем его к тексту. Домен не
+     подставляем: боевой пока не назначен, а выдуманный на бумаге хуже, чем
+     его отсутствие — по нему пойдут и не дойдут. */
+  main a[href^="/"]::after { content:" (" attr(href) ")"; font-size:9pt; color:#555 }
+  main a[href^="http"]::after { content:" (" attr(href) ")"; font-size:9pt; color:#555 }
+  .house-stage { break-inside:avoid }
+  .prov { box-shadow:none; border:1px solid #999 }
+  /* Подпись листа: без неё распечатка теряет источник. */
+  footer.site::after { content:"MiMiSmart · распечатано с сайта"; display:block;
+    margin-top:6pt; font-size:9pt; color:#555 }
+}

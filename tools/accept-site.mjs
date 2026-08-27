@@ -871,6 +871,34 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Печать. Страницу цен распечатывают и несут на встречу: на бумаге не должно
+   быть меню, липкой кнопки и вопроса о согласии, а у ссылок должен быть виден
+   адрес — на бумаге по ним не нажать. */
+{
+  const c = await browser.newContext();
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/pricing/`);
+  await pg.emulateMedia({ media: 'print' });
+  await pg.waitForTimeout(300);
+  const r = await pg.evaluate(() => {
+    const shown = (sel) => {
+      const n = document.querySelector(sel);
+      return n ? getComputedStyle(n).display !== 'none' : false;
+    };
+    const link = document.querySelector('main a[href^="/"]');
+    return {
+      лишнее: ['header.site', '.sticky-cta', '.consent', '.foot-map', '.next'].filter(shown),
+      фон: getComputedStyle(document.body).backgroundColor,
+      адресУСсылки: link ? getComputedStyle(link, '::after').content : '',
+    };
+  });
+  if (r.лишнее.length) fail(`на печать уходит экранное: ${r.лишнее.join(', ')}`);
+  if (!/255,\s*255,\s*255/.test(r.фон)) fail(`фон при печати ${r.фон} — на бумагу уйдёт заливка`);
+  if (!/attr|\//.test(r.адресУСсылки)) fail('у ссылок при печати не виден адрес');
+  console.log('печать: экранное убрано, фон белый, адреса ссылок видны');
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {
