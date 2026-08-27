@@ -318,3 +318,25 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
    .grid давал одну колонку, и карточки «чем мы отличаемся» встали лентой во
    всю ширину вместо ряда. */
 .g4{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+
+/* Тень у края таблицы показывает, что она прокручивается вбок: на узком
+   экране обрезанный столбец выглядит как конец таблицы, а не как её середина.
+   Накладки движутся с содержимым (local) и закрывают тень, когда прокрутка
+   в крайнем положении; сами тени привязаны к рамке (scroll). */
+.tbl-wrap{
+  background:
+    linear-gradient(to right, var(--panel) 40%, transparent) left center / 34px 100% no-repeat local,
+    linear-gradient(to left, var(--panel) 40%, transparent) right center / 34px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(11,13,16,.18), transparent) left center / 13px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(11,13,16,.18), transparent) right center / 13px 100% no-repeat scroll,
+    var(--panel);
+}
+:root[data-mode="night"] .tbl-wrap{
+  background:
+    linear-gradient(to right, var(--panel) 40%, transparent) left center / 34px 100% no-repeat local,
+    linear-gradient(to left, var(--panel) 40%, transparent) right center / 34px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.6), transparent) left center / 13px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.6), transparent) right center / 13px 100% no-repeat scroll,
+    var(--panel);
+}
+.tbl-wrap:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}

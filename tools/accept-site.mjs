@@ -332,6 +332,30 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Область с горизонтальной прокруткой обязана быть достижима клавиатурой:
+   без tabindex до правой половины широкой таблицы не добраться без мыши. */
+{
+  const c = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const pg = await c.newPage();
+  const bad = [];
+  for (const u of ['/about/', '/compare/', '/functions/', '/partners/']) {
+    await pg.goto(`${ORIGIN}${u}`);
+    const r = await pg.evaluate(() => {
+      const wraps = [...document.querySelectorAll('.tbl-wrap')];
+      return {
+        всего: wraps.length,
+        прокручиваются: wraps.filter((w) => w.scrollWidth > w.clientWidth + 1).length,
+        безКлавиатуры: wraps.filter((w) => w.scrollWidth > w.clientWidth + 1
+          && !w.hasAttribute('tabindex')).length,
+      };
+    });
+    if (r.безКлавиатуры) bad.push(`${u}: ${r.безКлавиатуры} из ${r.прокручиваются}`);
+  }
+  if (bad.length) fail(`таблицы прокручиваются вбок, но клавиатурой недостижимы: ${bad.join('; ')}`);
+  else console.log('таблицы: прокрутка вбок достижима клавиатурой');
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {
