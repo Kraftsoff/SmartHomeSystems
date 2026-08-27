@@ -621,6 +621,69 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Содержательный стандарт на самом сайте. Приёмка контента читает прототип,
+   а текст, написанный прямо в компонентах — первый экран, маршруты, блок про
+   передачу объекта, подписи в форме, — через неё не проходил вовсе.
+
+   Превосходство без критерия запрещено ст. 14.2 и 14.3 ФЗ-135, и запрет
+   касается любой строки на странице, а не только той, что приехала из
+   прототипа. */
+{
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  const supHits = [], provHits = [];
+  for (const u of ['/', '/answers/', '/pricing/', '/portfolio/', '/contacts/', '/about/', '/service/']) {
+    await pg.goto(`${ORIGIN}${u}`);
+    const r = await pg.evaluate(() => {
+      const text = (document.querySelector('main')?.innerText || '')
+        + ' ' + (document.querySelector('footer')?.innerText || '');
+      /* Без \b: в JavaScript граница слова опирается на \w, который не знает
+         кириллицы, и «\bлучший\b» не совпадает никогда. Проверка молча
+         пропускала бы всё — этой ошибке в проекте уже счёт на разы. */
+      const MARKET = '(в России|на рынке|в Москве|среди [а-яё]+|из всех)';
+      const re = new RegExp('(?:^|[^а-яёa-z])(сам(?:ый|ая|ое|ые)|лучш(?:ий|ая|ее|ие)|'
+        + 'единственн(?:ый|ая|ое|ые)|лидер[а-яё]*|крупнейш[а-яё]*)(?![а-яёa-z])[^.!?]{0,40}?'
+        + MARKET, 'gi');
+      const sup = [];
+      let m;
+      while ((m = re.exec(text))) {
+        const frag = text.slice(Math.max(0, m.index - 60), m.index + 90);
+        if (/\?/.test(frag)) continue;
+        if (/(?:^|[^а-яё])не\s+(утвержда|заявля|обеща|говор)/i.test(frag)) continue;
+        sup.push(frag.replace(/\s+/g, ' ').trim());
+      }
+      /* Пометка обязана называть, что именно не подтверждено. Порог беру тот
+         же, что на прототипе — шесть знаков без пробелов: правило «меньше трёх
+         слов» я сначала придумал строже и оно объявило дефектом «порог
+         уточняется», где предмет назван прямо. */
+      const clean = (e) => (e.textContent || '').replace(/[\u26a0\ufe0f\s]/g, '');
+      const all = [...document.querySelectorAll('.prov')];
+      const thin = all
+        .filter((e) => clean(e).length < 6)
+        .map((e) => (e.textContent || '').trim().slice(0, 40));
+      /* И не должна стоять отдельным абзацем: тогда непонятно, к какому факту
+         она относится. Ячейки таблиц и подписи-заголовки — законные случаи. */
+      const alone = all.filter((e) => {
+        const par = e.parentElement;
+        if (!par || par.children.length !== 1) return false;
+        if ((par.textContent || '').trim() !== (e.textContent || '').trim()) return false;
+        if (/^(td|th)$/i.test(par.tagName)) return false;
+        return !par.previousElementSibling;
+      }).length;
+      return { sup, thin, alone };
+    });
+    r.sup.forEach((x) => supHits.push(`${u}: ${x}`));
+    r.thin.forEach((x) => provHits.push(`${u}: «${x}»`));
+    if (r.alone) provHits.push(`${u}: ${r.alone} пометок отдельным абзацем — непонятно, к какому факту`);
+  }
+  if (supHits.length) fail(`превосходство без критерия (ФЗ-135, ст. 14.2/14.3): ${supHits[0]}`);
+  if (provHits.length) fail(`пометки без предмета: ${[...new Set(provHits)].slice(0, 3).join('; ')}`);
+  if (!supHits.length && !provHits.length) {
+    console.log('текст сайта: превосходства без критерия нет, каждая пометка называет предмет');
+  }
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {
