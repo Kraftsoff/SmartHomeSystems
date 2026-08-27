@@ -72,3 +72,18 @@ export function byCluster() {
 
 /** Страница контактов рендерится не сырым HTML прототипа, а с живой формой. */
 export const contactsPage = pages['/contacts'];
+
+/* Карточка для пересылки. Next не наследует openGraph родителя, когда
+   страница задаёт свои title и description: картинка оставалась только на
+   главной, а на остальных ста тридцати пяти ссылка приходила голой строкой.
+   Собираем мету в одном месте, чтобы это не расходилось снова. */
+export function ogFor(title: string, description: string, url: string, type: 'website' | 'article' = 'website') {
+  return {
+    openGraph: {
+      type, locale: 'ru_RU', siteName: BRAND, title, description, url,
+      images: [{ url: `${SITE}/og.png`, width: 1200, height: 630,
+        alt: `${BRAND} — умный дом без облака, инженерный подрядчик с 2004 года` }],
+    },
+    twitter: { card: 'summary_large_image' as const, title, description, images: [`${SITE}/og.png`] },
+  };
+}

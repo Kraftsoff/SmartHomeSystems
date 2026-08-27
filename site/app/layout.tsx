@@ -10,7 +10,16 @@ import StickyCta from './components/StickyCta';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: { default: `${BRAND} — инженерия умного дома`, template: '%s' },
-  openGraph: { type: 'website', locale: 'ru_RU', siteName: BRAND },
+  /* Картинка для пересылки одна на весь сайт: сто тридцать семь картинок
+     весили бы больше, чем весь остальной сайт, а ссылка без картинки в
+     переписке выглядит недоделанной — а её пересылают дизайнеру и архитектору.
+     Рисуется tools/make-og.mjs теми же токенами, что и сайт. */
+  openGraph: {
+    type: 'website', locale: 'ru_RU', siteName: BRAND,
+    images: [{ url: '/og.png', width: 1200, height: 630,
+      alt: `${BRAND} — умный дом без облака, инженерный подрядчик с 2004 года` }],
+  },
+  twitter: { card: 'summary_large_image', images: ['/og.png'] },
 };
 
 /* Разметка организации отдаётся на каждой странице: она описывает компанию,

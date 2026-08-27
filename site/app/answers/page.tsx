@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { answers, byCluster, pageTitle, pageDescription, SITE } from '@/lib/content';
+import { answers, byCluster, pageTitle, pageDescription, ogFor, SITE } from '@/lib/content';
 import AnswerSearch from '../components/AnswerSearch';
 import Crumbs from '../components/Crumbs';
 import ClusterFilter from '../components/ClusterFilter';
@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: pageTitle(TITLE),
   description: pageDescription(LEDE),
   alternates: { canonical: `${SITE}/answers/` },
+  ...ogFor(pageTitle(TITLE), pageDescription(LEDE), `${SITE}/answers/`),
 };
 
 export default function AnswersIndex() {

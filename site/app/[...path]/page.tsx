@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, SITE, BRAND } from '@/lib/content';
+import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, ogFor, SITE, BRAND } from '@/lib/content';
 import { LINKS } from '@/lib/nav';
 import LeadForm from '../components/LeadForm';
 import CaseGrid from '../components/CaseGrid';
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: { params: Promise<{ path: str
       title: pageTitle(hub.title),
       description: pageDescription(hubDescription(hub)),
       alternates: { canonical: url },
-      openGraph: { title: hub.title, description: pageDescription(hubDescription(hub)), url },
+      ...ogFor(pageTitle(hub.title), pageDescription(hubDescription(hub)), url),
     };
   }
   const rec = all[key];
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: { params: Promise<{ path: str
     title: pageTitle(rec.title),
     description: pageDescription(rec.answer),
     alternates: { canonical: url },
-    openGraph: { title: rec.title, description: pageDescription(rec.answer), url },
+    ...ogFor(pageTitle(rec.title), pageDescription(rec.answer), url),
   };
 }
 

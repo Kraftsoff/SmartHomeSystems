@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import HousePlan from './components/HousePlan';
-import { answers, clusters, pageTitle, pageDescription, SITE } from '@/lib/content';
+import { answers, clusters, pageTitle, pageDescription, ogFor, SITE } from '@/lib/content';
 
 const TITLE = 'Умный дом без облака — инженерия под ключ';
 const LEDE = 'Логика управления живёт в доме, а не на сервере производителя: свет и климат работают без интернета. Тринадцать инженерных систем в одном проекте, собственное производство контроллеров с 2004 года.';
@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: pageTitle('Умный дом без облака'),
   description: pageDescription(LEDE),
   alternates: { canonical: `${SITE}/` },
+  ...ogFor(pageTitle('Умный дом без облака'), pageDescription(LEDE), `${SITE}/`),
 };
 
 export default function Home() {

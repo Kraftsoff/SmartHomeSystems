@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Crumbs from '../../components/Crumbs';
-import { answers, pageTitle, pageDescription, SITE, BRAND } from '@/lib/content';
+import { ogFor, answers, pageTitle, pageDescription, SITE, BRAND } from '@/lib/content';
 
 export function generateStaticParams() {
   return answers.map((a) => ({ slug: a.slug }));
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: pageTitle(a.question),
     description: pageDescription(a.answer),
     alternates: { canonical: url },
-    openGraph: { title: a.question, description: pageDescription(a.answer), url, type: 'article' },
+    ...ogFor(pageTitle(a.question), pageDescription(a.answer), url, 'article'),
   };
 }
 

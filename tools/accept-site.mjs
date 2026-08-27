@@ -251,6 +251,30 @@ for (const [heading, label] of [['Ответы по теме', 'разделах
 
 console.log(`хлебные крошки: на экране и в разметке совпадают (${files.filter((f) => /class="crumbs"/.test(readFileSync(f, 'utf8'))).length})`);
 
+/* Карточка для пересылки. Ссылку на инженерный проект пересылают дизайнеру
+   и архитектору, и без картинки она приходит голой строкой. Проверяем, что
+   мета указывает на файл, который действительно собран, и что заголовок с
+   описанием не пустые — иначе в переписке появится «example.invalid». */
+{
+  const miss = [], noImg = [];
+  for (const f of files) {
+    const url = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+    const src = readFileSync(f, 'utf8');
+    const img = (src.match(/property="og:image" content="([^"]*)"/) || [])[1];
+    const t = (src.match(/property="og:title" content="([^"]*)"/) || [])[1];
+    const d = (src.match(/property="og:description" content="([^"]*)"/) || [])[1];
+    if (!img) noImg.push(url);
+    else {
+      const local = img.replace(/^https?:\/\/[^/]+/, '');
+      if (!existsSync(join(OUT, local))) miss.push(`${url} → ${local}`);
+    }
+    if (!t || !d) miss.push(`${url}: пустой заголовок или описание карточки`);
+  }
+  if (noImg.length) fail(`страниц без картинки для пересылки: ${noImg.length} (${noImg.slice(0, 3).join(', ')})`);
+  if (miss.length) fail(`карточка для пересылки битая: ${miss.slice(0, 2).join('; ')} (всего ${miss.length})`);
+  if (!noImg.length && !miss.length) console.log('карточка для пересылки: есть на всех страницах, файл на месте');
+}
+
 /* Каждая внутренняя ссылка обязана вести в существующий файл. Мёртвые адреса
    из хэш-роутера пролежали в сборке, пока их не открыли глазами; проверка по
    одному шаблону ловит только известную породу, а эта — любую. */
