@@ -40,6 +40,14 @@ const LAUNCH = existsSync(EXEC_CANDIDATE) ? { executablePath: EXEC_CANDIDATE } :
 
 const problems = [];
 const fail = (m) => problems.push(m);
+/* Отчёт об успехе печатается, только если с прошлого отчёта нарушений не
+   прибавилось: строка успеха за циклом печаталась безусловно и рапортовала
+   одновременно с записью нарушения. Тот же дефект нашёлся в приёмке сайта. */
+let reported = 0;
+const ok = (m) => {
+  if (problems.length === reported) console.log(m);
+  reported = problems.length;
+};
 
 const browser = await chromium.launch(LAUNCH);
 const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
@@ -82,7 +90,7 @@ while (queue.length) {
   lonely.forEach((h) => fail(`страница ответа с одной входящей ссылкой: ${h}`));
   const counts = [...routes].filter((h) => h.startsWith('#/answers/')).map((h) => (inbound.get(h) || new Set()).size);
   if (counts.length) {
-    console.log(`перелинковка ответов: минимум входящих ${Math.min(...counts)}, максимум ${Math.max(...counts)}`);
+    ok(`перелинковка ответов: минимум входящих ${Math.min(...counts)}, максимум ${Math.max(...counts)}`);
   }
 }
 
@@ -160,14 +168,14 @@ for (const [name, map] of [['title', titles], ['description', descs], ['canonica
     const disallowed = new Set([...rb.matchAll(/^Disallow: (\S+)/gm)].map((m) => m[1]));
     const clash = gone.filter((g) => disallowed.has(g));
     clash.forEach((g) => fail(`${g} отдаёт 410, но закрыт в robots.txt — бот не увидит 410 и адрес останется в индексе`));
-    console.log(`robots против 410: путей на удаление ${gone.length}, ошибочно закрыто ${clash.length}`);
+    ok(`robots против 410: путей на удаление ${gone.length}, ошибочно закрыто ${clash.length}`);
   }
 }
 
-console.log(`МАРШРУТЫ ${routes.size} | битых ${broken} | пропусков заголовков ${skips} | не-один-H1 ${badH1} | без крошек ${noCrumbs} | случайных 404 ${soft404} | сырых тегов ${rawTags}`);
-console.log(`МЕТА уникальных: title ${titles.size} · description ${descs.size} · canonical ${canons.size} — из ${routes.size} маршрутов`);
+ok(`МАРШРУТЫ ${routes.size} | битых ${broken} | пропусков заголовков ${skips} | не-один-H1 ${badH1} | без крошек ${noCrumbs} | случайных 404 ${soft404} | сырых тегов ${rawTags}`);
+ok(`МЕТА уникальных: title ${titles.size} · description ${descs.size} · canonical ${canons.size} — из ${routes.size} маршрутов`);
 if (errs.length) fail(`ошибок консоли: ${errs.length} — ${errs[0]}`);
-console.log('ошибок консоли/страницы:', errs.length);
+ok('ошибок консоли/страницы:', errs.length);
 
 /* ---------- 3. Доступность по набору правил ---------- */
 const A11Y_ROUTES = ['#/', '#/pricing', '#/answers', '#/compare', '#/contacts', '#/solutions/flat'];
@@ -284,7 +292,7 @@ for (const mode of ['night', 'day']) {
     return out;
   });
   bad.forEach((x) => fail(`контраст (${mode}): ${x}`));
-  console.log(`контраст ${mode}: нарушений ${bad.length}`);
+  ok(`контраст ${mode}: нарушений ${bad.length}`);
 }
 
 /* ---------- 5. Горизонтальное переполнение ---------- */
@@ -332,7 +340,7 @@ await page.setViewportSize({ width: 1400, height: 1000 });
     if (r.scrolls) fail(`на 360px таблица прокручивается вбок, колонки не видны: ${h}`);
     if (r.cells && r.labelled < r.cells) fail(`${h}: ячеек без подписи колонки ${r.cells - r.labelled}`);
   }
-  console.log(`таблицы на 360px: маршрутов ${checked}, без боковой прокрутки, подписей ${labelled}/${cells}`);
+  ok(`таблицы на 360px: маршрутов ${checked}, без боковой прокрутки, подписей ${labelled}/${cells}`);
   await page.setViewportSize({ width: 1400, height: 1000 });
 }
 
@@ -357,7 +365,7 @@ await page.setViewportSize({ width: 1400, height: 1000 });
     if (r.pad < 4) fail(`ячейки таблицы без отступов: ${h}`);
     if (!r.line) fail(`строки таблицы без разделителя: ${h}`);
   }
-  console.log('оформление таблиц вне страниц ответов: отступы и линейки на месте');
+  ok('оформление таблиц вне страниц ответов: отступы и линейки на месте');
 }
 
 /* ---------- 6. Разметка: валидность и согласие с DOM ---------- *//* ---------- 6. Разметка: валидность и согласие с DOM ---------- */
@@ -421,7 +429,7 @@ if (ld.invalid.length) ld.invalid.forEach((x) => fail('разметка: ' + x))
       if (!art.dateModified) fail('в разметке Article нет dateModified');
       const dump = JSON.stringify(art) + JSON.stringify(org || {});
       if (/⚠️|заполнить|уточня/i.test(dump)) fail('в структурированных данных осталась заглушка');
-      console.log('структурированные данные: заглушек нет');
+      ok('структурированные данные: заглушек нет');
     }
     await page.goto(F);
     await page.waitForTimeout(200);
@@ -432,7 +440,7 @@ if (ld.invalid.length) ld.invalid.forEach((x) => fail('разметка: ' + x))
 if (ld.faq !== ld.cardsClean)
   fail(`разметка FAQPage (${ld.faq}) разошлась с карточками без пометок (${ld.cardsClean})`);
 ld.marked.slice(0, 3).forEach((n) => fail(`в разметке FAQPage осталась пометка: «${String(n).slice(0, 60)}»`));
-console.log('JSON-LD:', ld.types.join(' '),
+ok('JSON-LD:', ld.types.join(' '),
   `| FAQPage ${ld.faq} = карточек без пометок ${ld.cardsClean} из ${ld.cards}`);
 
 /* ---------- 7. Что видит краулер без JavaScript ---------- */
@@ -455,7 +463,7 @@ const plainText = rawSrc
 const inTpl = (rawSrc.match(/<template class="more">[\s\S]*?<\/template>/g) || []).join(' ')
   .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 if (plainText.length < 100000) fail(`в сыром HTML только ${plainText.length} знаков текста — краулеру нечего извлекать`);
-console.log(`без JavaScript: ответов в разметке ${noJsFaq}; в сыром HTML ${plainText.length} знаков, из них ${inTpl.length} в <template>`);
+ok(`без JavaScript: ответов в разметке ${noJsFaq}; в сыром HTML ${plainText.length} знаков, из них ${inTpl.length} в <template>`);
 await ctx.close();
 
 /* ---------- 7b. Исходный HTML: то, что браузер молча чинит ---------- */
@@ -472,7 +480,7 @@ await ctx.close();
     const close = (src.match(new RegExp(`</${tag}>`, 'g')) || []).length;
     if (open !== close) fail(`тег <${tag}>: открыт ${open} раз, закрыт ${close}`);
   }
-  console.log('исходный HTML: парные теги сходятся, ячейки таблиц согласованы');
+  ok('исходный HTML: парные теги сходятся, ячейки таблиц согласованы');
 }
 
 /* ---------- 7a. Масштаб 200% (WCAG 1.4.4) ---------- */
@@ -490,7 +498,7 @@ await ctx.close();
     if (over) fail(`при масштабе 200% появляется горизонтальная прокрутка: ${h}`);
   }
   await ctx.close();
-  console.log('масштаб 200%: горизонтальной прокрутки нет');
+  ok('масштаб 200%: горизонтальной прокрутки нет');
 }
 
 /* ---------- 7b. Размер целей нажатия (WCAG 2.5.8) ---------- */
@@ -585,7 +593,7 @@ await ctx.close();
     await c2.close();
   }
 
-  console.log(wide.length ? 'ширина блоков на телефоне: нарушения ниже' : 'ширина блоков на телефоне: всё вписывается');
+  ok(wide.length ? 'ширина блоков на телефоне: нарушения ниже' : 'ширина блоков на телефоне: всё вписывается');
 
   for (const h of ['#/', '#/answers', '#/contacts', '#/pricing']) {
     if (!routes.has(h)) continue;
@@ -615,7 +623,7 @@ await ctx.close();
     small.forEach((x) => fail(`цель нажатия меньше 24px вне исключения (${h}): ${x}`));
   }
   await ctx.close();
-  console.log('размер целей нажатия: вне исключения «в тексте» нарушений нет');
+  ok('размер целей нажатия: вне исключения «в тексте» нарушений нет');
 }
 
 /* ---------- 7c. Клавиатура: фокус виден на каждом шаге ---------- */
@@ -643,7 +651,7 @@ await ctx.close();
     }
     [...new Set(bad)].forEach((x) => fail(`нет видимого фокуса при обходе Tab на ${h}: ${x}`));
   }
-  console.log('клавиатура: фокус виден на каждом шаге обхода');
+  ok('клавиатура: фокус виден на каждом шаге обхода');
 }
 
 /* ---------- 7d. Уважение к настройке «уменьшить движение» ---------- */
@@ -683,7 +691,7 @@ await ctx.close();
     if (auto.before !== auto.after) {
       fail(`при reduced-motion модель дома сама меняет сценарии (${auto.before} → ${auto.after})`);
     }
-    console.log(`reduced-motion: переходы ${rm.dur}, контент виден`);
+    ok(`reduced-motion: переходы ${rm.dur}, контент виден`);
   }
   await ctx.close();
 }
@@ -721,7 +729,7 @@ await ctx.close();
   dups.slice(0, 5).forEach(([sent, hs]) => {
     fail(`одно предложение дословно на ${new Set(hs).size} страницах (${[...new Set(hs)].slice(0, 3).join(', ')}): «${sent.slice(0, 60)}…»`);
   });
-  console.log(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
+  ok(`дублирование текста: проверено маршрутов ${check.length}, повторов ${dups.length}`);
 }
 
 /* ---------- Выгрузка содержимого не устарела ---------- */
@@ -748,7 +756,7 @@ await ctx.close();
     missing.slice(0, 3).forEach((u) => fail(`выгрузка устарела: ответа ${u} в ней нет`));
     extra.slice(0, 3).forEach((u) => fail(`выгрузка устарела: ${u} есть в ней, но не на сайте`));
     changed.slice(0, 3).forEach((a) => fail(`выгрузка устарела: текст ${a.url} расходится с сайтом`));
-    console.log(`выгрузка содержимого: ответов ${ex.answers.length}, расхождений ${missing.length + extra.length + changed.length}`);
+    ok(`выгрузка содержимого: ответов ${ex.answers.length}, расхождений ${missing.length + extra.length + changed.length}`);
   }
 }
 
@@ -783,7 +791,7 @@ await ctx.close();
     }, REFS);
     for (const x of bad) { broken++; fail(`${h}: текст обещает «${x.m}», но ${x.sel} на странице нет`); }
   }
-  console.log(`ссылки текста на элементы страницы: проверено ${routes.size} маршрутов, несуществующих ${broken}`);
+  ok(`ссылки текста на элементы страницы: проверено ${routes.size} маршрутов, несуществующих ${broken}`);
 }
 
 /* ---------- Повторы между страницами ответов ---------- */
@@ -840,7 +848,7 @@ await ctx.close();
       return { всего: d.filter((e) => re.test(e.name.trim())).length, плохих: bad };
     });
     if (yn.плохих.length) fail(`вопрос «да/нет» без прямого ответа первым словом: ${yn.плохих[0]}`);
-    console.log(`прямые ответы на «да/нет»: ${yn.всего} вопросов, уходов ${yn.плохих.length}`);
+    ok(`прямые ответы на «да/нет»: ${yn.всего} вопросов, уходов ${yn.плохих.length}`);
     /* Число у кластера читатель видит рядом с его названием. Оно правится руками
        при добавлении ответа и разъезжается молча: список обещает восемь, внутри
        девять. Поиск подменяет это число на количество найденного и возвращает
@@ -865,10 +873,10 @@ await ctx.close();
     if (drift.length) {
       fail(`число у кластера расходится с составом: «${drift[0].имя}» обещает ${drift[0].заявлено}, внутри ${drift[0].карточек}`);
     }
-    console.log(`числа у кластеров: ${clusters.length} кластеров, расхождений ${drift.length}`);
+    ok(`числа у кластеров: ${clusters.length} кластеров, расхождений ${drift.length}`);
   }
 
-  console.log(`повторы между ответами: сравнено ${[...routes].filter((x) => x.startsWith('#/answers/')).length}, повторов ${repeats.length}`);
+  ok(`повторы между ответами: сравнено ${[...routes].filter((x) => x.startsWith('#/answers/')).length}, повторов ${repeats.length}`);
 }
 
 /* ---------- Близкие копии страниц ---------- */
@@ -919,7 +927,7 @@ await ctx.close();
   }
   near.slice(0, 5).forEach(([jac, a, c]) =>
     fail(`страницы совпадают на ${Math.round(jac * 100)}%: ${a} и ${c} — вес делится между копиями`));
-  console.log(`близкие копии: сравнено маршрутов ${keys.length}, максимум сходства ${Math.round(worst * 100)}% (${worstPair}), выше порога ${near.length}`);
+  ok(`близкие копии: сравнено маршрутов ${keys.length}, максимум сходства ${Math.round(worst * 100)}% (${worstPair}), выше порога ${near.length}`);
 }
 
 /* ---------- 7f. Карта сайта против реализованных маршрутов ---------- */
@@ -942,7 +950,7 @@ await ctx.close();
     const missingFromSite = [...inSitemap].filter((r) => !implemented.includes(r) && !PLANNED.has(r));
     missingFromSitemap.slice(0, 6).forEach((r) => fail(`маршрут есть, в sitemap.xml его нет: ${r}`));
     missingFromSite.slice(0, 6).forEach((r) => fail(`в sitemap.xml есть, маршрута нет: ${r}`));
-    console.log(`sitemap: строк ${inSitemap.size}, маршрутов ${implemented.length}, расхождений ${missingFromSitemap.length + missingFromSite.length}`);
+    ok(`sitemap: строк ${inSitemap.size}, маршрутов ${implemented.length}, расхождений ${missingFromSitemap.length + missingFromSite.length}`);
   }
 }
 
@@ -981,7 +989,7 @@ await ctx.close();
       if (rootDisallow && !rootAllow) fail('robots.txt: YandexBot закрыт — Алиса берёт кандидатов из обычной выдачи Яндекса');
       if (rootDisallow && rootAllow) fail('robots.txt: у YandexBot одновременно Allow: / и Disallow: / — краулеры разрешают такой конфликт по-разному');
     }
-    console.log(`robots.txt: групп ${groups.length}, служебных путей ${need.length}, групп с утечкой ${open}`);
+    ok(`robots.txt: групп ${groups.length}, служебных путей ${need.length}, групп с утечкой ${open}`);
   }
 }
 
@@ -1004,7 +1012,7 @@ await ctx.close();
     const all = [...new Set([...links, ...bare])];
     const broken = all.filter((l) => !known.has(l) && !FILES_OK.has(l));
     broken.forEach((l) => fail(`${name}: ссылка на несуществующий маршрут ${l}`));
-    console.log(`${name}: ссылок ${all.length}, вне карты сайта ${broken.length}`);
+    ok(`${name}: ссылок ${all.length}, вне карты сайта ${broken.length}`);
   }
 }
 
@@ -1022,7 +1030,7 @@ await ctx.close();
     const dests = [...new Set([...rd.matchAll(/destination: '([^']+)'/g)].map((m) => m[1]))];
     const broken = dests.filter((d) => !known2.has(d));
     broken.forEach((d) => fail(`редирект ведёт на несуществующую страницу: ${d}`));
-    console.log(`редиректы: уникальных целей ${dests.length}, вне карты сайта ${broken.length}`);
+    ok(`редиректы: уникальных целей ${dests.length}, вне карты сайта ${broken.length}`);
   }
 }
 
@@ -1122,7 +1130,7 @@ await ctx.close();
     if (clr && clr.своих !== 1) fail(`кнопок очистки поиска: ${clr.своих} вместо одной`);
     if (clr && clr.безПодписи) fail(`кнопка очистки поиска без подписи: ${clr.безПодписи}`);
     if (clr && !clr.подавлена) fail('браузерная кнопка очистки не подавлена — в поле их будет две');
-    console.log(`поиск: «протечка» → ${found}, обрывки внутри слов → 0, сброс → ${all}, кнопка очистки одна и подписана`);
+    ok(`поиск: «протечка» → ${found}, обрывки внутри слов → 0, сброс → ${all}, кнопка очистки одна и подписана`);
   }
 
   /* Калькулятор состава работ. Цену он называть не должен: методика не подтверждена. */
@@ -1182,7 +1190,7 @@ await ctx.close();
     });
     if (r.maxLen < 200) fail(`калькулятор ни в одном состоянии не выдаёт состав работ (максимум ${r.maxLen} знаков)`);
     if (r.badCount) fail(`калькулятор называет непомеченную цену в ${r.badCount} состояниях из ${r.tried}: ${r.bad[0]}`);
-    console.log(r.badCount || r.maxLen < 200
+    ok(r.badCount || r.maxLen < 200
       ? `калькулятор: перебрано ${r.tried} состояний, нарушения перечислены ниже`
       : `калькулятор: перебрано ${r.tried} состояний, состав выдан, непомеченных цен нет`);
   }
@@ -1249,7 +1257,7 @@ await ctx.close();
         return box.offsetParent !== null && cs.visibility !== 'hidden' && cs.opacity !== '0';
       });
       if (asksAgain) fail('после отказа баннер спрашивает снова — решение не восстановлено');
-      console.log('согласие на аналитику: без ответа не стартует, отказ сохраняется и переживает переход');
+      ok('согласие на аналитику: без ответа не стартует, отказ сохраняется и переживает переход');
     }
   }
 
@@ -1336,7 +1344,7 @@ await ctx.close();
           const back = await page.evaluate(() => document.activeElement.hasAttribute
             && document.activeElement.hasAttribute('data-form'));
           if (!back) fail('после закрытия формы фокус не вернулся на кнопку, которая её открыла');
-          console.log('форма: фокус заперт в окне, при закрытии возвращается на кнопку');
+          ok('форма: фокус заперт в окне, при закрытии возвращается на кнопку');
         }
       }
       /* WCAG 1.3.5: у полей с личными данными должно быть объявлено назначение —
@@ -1357,7 +1365,7 @@ await ctx.close();
   if (purpose && purpose.length) {
     fail(`у обязательных полей не объявлено назначение (WCAG 1.3.5): ${purpose.join(', ')}`);
   }
-  console.log('форма заявки: согласие обязательно, метка и политика на месте, Esc закрывает, назначение полей объявлено');
+  ok('форма заявки: согласие обязательно, метка и политика на месте, Esc закрывает, назначение полей объявлено');
     }
   }
 
@@ -1431,7 +1439,7 @@ await ctx.close();
           fail('текст обещает отключение отопления в сценарии «Жара за окном», а оно остаётся');
         }
       }
-      console.log('обещания о сценарии «Жара за окном» сверены с его поведением');
+      ok('обещания о сценарии «Жара за окном» сверены с его поведением');
     }
   }
   /* Активный сценарий отмечен заливкой кнопки. Для скринридера цвет — не состояние,
@@ -1510,11 +1518,11 @@ await ctx.close();
     if (fp.всего < 3) fail(`следы под курсором почти не появляются: лучшая полоса дала ${fp.всего} за 12 шагов`);
     if (fp.задержка < 0.15) fail(`след гаснет сразу (задержка ${fp.задержка}s): он виден только в середине перехода и читается как пятно`);
     if (fp.ширина < 7) fail(`след шириной ${fp.ширина}px — на плане его не различить`);
-    console.log(`следы под курсором: лучшая полоса ${fp.всего} за 12 шагов, ширина ${fp.ширина}px, держится ${fp.задержка}s`);
+    ok(`следы под курсором: лучшая полоса ${fp.всего} за 12 шагов, ширина ${fp.ширина}px, держится ${fp.задержка}s`);
     }
   }
 
-  console.log(`модель дома: сценариев ${house.scenes}, реагирует на переключение; состояние кнопок объявляемо (${scn.нажатых} из ${scn.всего})`);
+  ok(`модель дома: сценариев ${house.scenes}, реагирует на переключение; состояние кнопок объявляемо (${scn.нажатых} из ${scn.всего})`);
 }
 
 /* ---------- 9. Целостность разметки: то, что браузер молча чинит ----------
@@ -1589,7 +1597,7 @@ await ctx.close();
   const clean9 = !v.dupIds.length && !v.dangling.length && !v.broken.length && !v.tablesNoTh
     && !v.badListChild && !v.wrongLevel && !v.nestedP && !v.nestedA && v.lang === 'ru'
     && !v.svgБезИмени && !v.imgБезAlt;
-  console.log(clean9
+  ok(clean9
     ? `целостность разметки: ${v.blocks} развёрнутых блоков, id уникальны, ссылок в никуда нет`
     : `целостность разметки: проверено ${v.blocks} блоков, нарушения перечислены ниже`);
   await page9.close();
@@ -1636,7 +1644,7 @@ await ctx.close();
   if (!blocked.start) fail('при запрещённом хранилище тема не выставлена');
   const themeOk = light.start === 'day' && dark.start === 'night'
     && kept.afterReload === kept.afterClick && !blocked.errs.length && !!blocked.start;
-  console.log(themeOk
+  ok(themeOk
     ? `тема: система светлая → ${light.start}, тёмная → ${dark.start}; выбор переживает перезагрузку; при запрете хранилища ошибок нет`
     : `тема: проверено четыре случая, нарушения перечислены ниже`);
 }
@@ -1689,7 +1697,7 @@ await ctx.close();
   }
   if (t.имена.length > 1) fail(`раздел ответов назван по-разному: ${t.имена.join(' / ')}`);
   if (t.осталосьСтатьи) fail('на странице осталось слово «Статьи» — раздел должен называться одинаково везде');
-  console.log(`числа и имя раздела: ${t.cards} ответов везде, раздел «${t.имена[0] || '—'}», крошка «${t.крошка}»`);
+  ok(`числа и имя раздела: ${t.cards} ответов везде, раздел «${t.имена[0] || '—'}», крошка «${t.крошка}»`);
   await pg.close();
 }
 
@@ -1742,7 +1750,7 @@ await ctx.close();
   if (cs.всего && cs.безПометки) {
     fail(`карточек кейсов без пометки: ${cs.безПометки} из ${cs.всего} — придуманный объект читается как сданный`);
   }
-  console.log(pr.пустых || pr.слишкомКороткие.length || pr.отдельноСтоящих || cs.безПометки
+  ok(pr.пустых || pr.слишкомКороткие.length || pr.отдельноСтоящих || cs.безПометки
     ? `пометки о непроверенном: ${pr.всего}, нарушения перечислены ниже`
     : `пометки о непроверенном: ${pr.всего}, все с пояснением и при своём факте; кейсы-шаблоны помечены (${cs.всего})`);
   await pg.close();
@@ -1801,7 +1809,7 @@ await ctx.close();
     return { hits: [...new Set(hits)].slice(0, 6), count: hits.length };
   });
   if (sup.count) fail(`превосходство без критерия (ФЗ-135, ст. 14.2/14.3): ${sup.count} — ${sup.hits[0]}`);
-  console.log(sup.count
+  ok(sup.count
     ? 'превосходные формулировки: нарушения перечислены ниже'
     : 'превосходные формулировки: вне цитат не встречаются');
   await pg.close();
@@ -1834,7 +1842,7 @@ await ctx.close();
     if (injected) fail(`адрес страницы попадает в разметку: ${payload}`);
   }
   if (dialog) fail('адрес страницы выполняет код');
-  console.log(`безопасность: внешних запросов ${external.length}, разметка из адреса не исполняется, до согласия хранилище пусто`);
+  ok(`безопасность: внешних запросов ${external.length}, разметка из адреса не исполняется, до согласия хранилище пусто`);
   await ctx2.close();
 }
 
@@ -1842,7 +1850,7 @@ await browser.close();
 
 if (problems.length) {
   console.log(`\n❌ НАРУШЕНИЙ: ${problems.length}`);
-  problems.forEach((x) => console.log('  ·', x));
+  problems.forEach((x) => ok('  ·', x));
   process.exit(1);
 }
 console.log('\n✅ Нарушений нет.');
