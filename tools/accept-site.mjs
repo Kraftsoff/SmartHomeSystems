@@ -332,6 +332,81 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Контраст текста к фону, WCAG AA: 4.5:1 для обычного текста и 3:1 для
+   крупного. Проверка была на прототипе и не переехала на сайт — а стилей с
+   тех пор написано больше, чем было. Смотрим обе темы: цвета в них разные,
+   и пройденное в одной ничего не говорит о другой. */
+{
+  for (const [scheme, mode] of [['light', 'day'], ['dark', 'night']]) {
+    const c = await browser.newContext({ colorScheme: scheme });
+    const pg = await c.newPage();
+    const bad = [];
+    for (const u of ['/', '/answers/', '/pricing/', '/portfolio/', '/contacts/', '/about/', '/service/']) {
+      await pg.goto(`${ORIGIN}${u}`);
+      await pg.waitForFunction(() => document.documentElement.dataset.mode).catch(() => {});
+      await pg.waitForTimeout(200);
+      const found = await pg.evaluate(() => {
+        /* Цвет приходит в двух записях: rgb(0…255) и color(srgb 0…1).
+           Разбор «взять три числа» на второй давал доли единицы вместо
+           яркости — фон шапки читался почти чёрным, и проверка объявляла
+           логотипу контраст 1.07:1 там, где он около семнадцати. */
+        const parse = (v) => {
+          const nums = (v.match(/[\d.]+(?:e-?\d+)?/g) || []).map(Number);
+          if (!nums.length) return { c: [255, 255, 255], a: 1 };
+          const srgb = /^color\(/.test(v);
+          const c = nums.slice(0, 3).map((x) => (srgb ? x * 255 : x));
+          const a = /\/|rgba/.test(v) && nums.length > 3 ? nums[3] : 1;
+          return { c, a };
+        };
+        const rgb = (v) => parse(v).c;
+        const lum = ([r, g, b]) => {
+          const f = (x) => { const s = x / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+          return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+        };
+        /* Фон берём у ближайшего непрозрачного предка: у самого элемента он
+           почти всегда прозрачный, и сравнение с ним даёт бессмыслицу. */
+        const bgOf = (n) => {
+          /* Полупрозрачные слои складываем по порядку, а не берём первый
+             попавшийся: фон шапки задан с прозрачностью, и без наложения
+             на страницу под ним яркость получается не та. */
+          const layers = [];
+          for (let a = n; a; a = a.parentElement) {
+            const { c, a: alpha } = parse(getComputedStyle(a).backgroundColor);
+            if (alpha === 0) continue;
+            layers.push({ c, alpha });
+            if (alpha === 1) break;
+          }
+          let out = [255, 255, 255];
+          for (let i = layers.length - 1; i >= 0; i -= 1) {
+            const { c, alpha } = layers[i];
+            out = out.map((x, k) => c[k] * alpha + x * (1 - alpha));
+          }
+          return out;
+        };
+        const out = [];
+        for (const n of document.querySelectorAll('main *, header *, footer *')) {
+          const t = [...n.childNodes].some((x) => x.nodeType === 3 && x.textContent.trim());
+          if (!t || !n.offsetParent) continue;
+          const cs = getComputedStyle(n);
+          const size = parseFloat(cs.fontSize);
+          const bold = parseInt(cs.fontWeight, 10) >= 700;
+          const need = size >= 24 || (size >= 18.66 && bold) ? 3 : 4.5;
+          const [L1, L2] = [lum(rgb(cs.color)), lum(bgOf(n))].sort((a, b) => b - a);
+          const ratio = (L1 + 0.05) / (L2 + 0.05);
+          if (ratio < need) {
+            out.push(`${n.tagName.toLowerCase()}.${(n.className || '').toString().slice(0, 24)} ${ratio.toFixed(2)}:1 при ${need}`);
+          }
+        }
+        return [...new Set(out)];
+      });
+      for (const f of found) bad.push(`${u} ${f}`);
+    }
+    if (bad.length) fail(`контраст ниже AA (${mode}): ${[...new Set(bad)].slice(0, 4).join('; ')}`);
+    await c.close();
+  }
+  console.log('контраст: обе темы держат AA');
+}
+
 /* Область с горизонтальной прокруткой обязана быть достижима клавиатурой:
    без tabindex до правой половины широкой таблицы не добраться без мыши. */
 {
