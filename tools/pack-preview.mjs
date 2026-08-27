@@ -56,7 +56,9 @@ const dos = (d) => [((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSecond
 const [t, dte] = dos(new Date(2020, 0, 1, 0, 0, 0));
 
 for (const f of files) {
-  const name = relative(OUT, f).split('\\').join('/');
+  /* Кладём всё внутрь одной папки: без неё архив разворачивается россыпью
+     из ста семидесяти семи файлов, а на Netlify перетаскивают папку. */
+  const name = `${NAME}/${relative(OUT, f).split('\\').join('/')}`;
   const raw = readFileSync(f);
   const body = deflateRawSync(raw, { level: 9 });
   const crc = crc32(raw);
