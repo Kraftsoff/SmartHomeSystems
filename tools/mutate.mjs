@@ -10,6 +10,11 @@
  * что гейт сработал.
  *
  * Запуск: node tools/mutate.mjs [подстрока имени]
+ *   FAST=1 — пропустить мутации, требующие пересборки.
+ *
+ * Каждая мутация гоняет приёмку целиком, поэтому полный набор идёт минутами:
+ * по одному имени — секунды, всё сразу — около четверти часа. Вывод идёт по
+ * мере готовности, чтобы прогон можно было читать, а не ждать.
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -58,6 +63,49 @@ const MUTATIONS = [
     from: '</main>', to: `<p>${Array.from({ length: 40000 },
       (_, i) => (i * 2654435761 % 4294967296).toString(36)).join(' ')}</p></main>`,
     expect: 'тяжелее бюджета' },
+  { name: 'кейсы исчезли без скриптов', file: 'site/out/portfolio/index.html', rebuild: false,
+    all: true, from: 'class="card case"', to: 'class="card caseX"',
+    expect: 'нет ни одного объекта' },
+  { name: 'кейс без пометки о шаблоне', file: 'site/out/portfolio/index.html', rebuild: false,
+    all: true, from: 'class="prov"', to: 'class="provX"',
+    expect: 'пометка' },
+  { name: 'ответ без целевого действия', file: 'site/out/answers/chto-delat-esli-topyat-sosedi/index.html',
+    rebuild: false, from: 'class="next"', to: 'class="nextX"',
+    expect: 'без целевого действия' },
+  { name: 'адрес шоурума разошёлся со страницей', file: 'site/out/showroom/index.html', rebuild: false,
+    from: '"streetAddress":"Новоданиловская набережная, 6к1"',
+    to: '"streetAddress":"Ленинградское шоссе, 12"',
+    expect: 'адрес в разметке расходится' },
+  { name: 'заглушка телефона в разметке места', file: 'site/out/showroom/index.html', rebuild: false,
+    from: '"@type":"LocalBusiness"', to: '"telephone":"+7 000 000-00-00","@type":"LocalBusiness"',
+    expect: 'телефон или почта' },
+  { name: 'таблица недостижима клавиатурой', file: 'site/out/about/index.html', rebuild: false,
+    all: true, from: 'class="tbl-wrap" tabindex="0"', to: 'class="tbl-wrap" data-x="0"',
+    expect: 'клавиатурой недостижимы' },
+  { name: 'текущий раздел не объявлен', file: 'site/out/pricing/index.html', rebuild: false,
+    all: true, from: 'aria-current="page"', to: 'data-current="page"',
+    expect: 'не объявлен текущий раздел' },
+  { name: 'заголовок повторяется на странице', file: 'site/out/pricing/index.html', rebuild: false,
+    from: '<h2 class="cluster-h">Что двигает цену</h2>',
+    to: '<h2 class="cluster-h">Что двигает цену</h2><h2 class="cluster-h">Что двигает цену</h2>',
+    expect: 'заголовок повторяется' },
+  { name: 'страница выпала из карты сайта', file: 'site/out/sitemap.xml', rebuild: false,
+    all: true, from: '<loc>', to: '<locX>',
+    expect: 'нет в карте сайта' },
+  { name: 'пометка не попала в список к заполнению',
+    file: 'site/out/index.html', rebuild: false,
+    from: 'class="prov">⚠️', to: 'class="prov">⚠️ заполнить: расчётный счёт и банк — ',
+    expect: 'нет в списке к заполнению' },
+  { name: 'превосходство без критерия', file: 'site/out/index.html', rebuild: false,
+    from: '<h1', to: '<p>Лучшая система на рынке.</p><h1',
+    expect: 'превосходство без критерия' },
+  /* Через собранный HTML эту мутацию не подсадить: вставка попадает внутрь
+     #main, а React при гидратации приводит DOM к своему дереву и лишний узел
+     удаляет — до замера он не доживает. Всё, что проверяется с включёнными
+     скриптами, нужно ломать в исходниках. */
+  { name: 'страница уехала за край экрана', file: 'site/app/globals.css', rebuild: true,
+    from: '.shell{max-width:1140px', to: '.shell{min-width:1400px;max-width:1140px',
+    expect: 'шире экрана' },
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },
@@ -72,13 +120,30 @@ const run = (cmd, args, cwd = ROOT) => {
   } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; }
 };
 
+/* Восстановление при убийстве. Прогон длиннее лимита оболочки убивают
+   сигналом, и без этого файл остаётся изменённым: так в собранном выводе
+   на сутки задержался подсаженный дефект, а следующая мутация об него
+   споткнулась. */
+let restore = null;
+const undo = () => { if (restore) { writeFileSync(restore.path, restore.text, 'utf8'); restore = null; } };
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(sig, () => { undo(); process.exit(130); });
+}
+process.on('exit', undo);
+
 let proven = 0, blind = 0, broken = 0;
 for (const m of MUTATIONS) {
   if (only && !m.name.includes(only)) continue;
+  /* FAST=1 пропускает мутации, требующие пересборки: полный набор не
+     укладывается в один заход, а быстрые дают ответ за минуты. */
+  if (process.env.FAST && m.rebuild) continue;
   const path = join(ROOT, m.file);
   if (!existsSync(path)) { console.log(`⚠️  ${m.name}: нет файла ${m.file}`); broken += 1; continue; }
   const before = readFileSync(path, 'utf8');
-  const after = before.replace(m.from, m.to);
+  /* all: заменить все вхождения. Строковый replace меняет только первое, и
+     мутация «карточки исчезли» убирала одну из трёх — гейт справедливо
+     молчал, потому что две оставались на месте. */
+  const after = m.all ? before.split(m.from).join(m.to) : before.replace(m.from, m.to);
   /* Первым делом — что подмена вообще применилась. Без этой строки проверяется
      неизменённый файл, и любой гейт выглядит доказанным. */
   if (after === before) {
@@ -86,6 +151,7 @@ for (const m of MUTATIONS) {
     broken += 1;
     continue;
   }
+  restore = { path, text: before };
   writeFileSync(path, after, 'utf8');
   if (m.rebuild) {
     /* Сборка запускается В каталоге сайта. С «--prefix» npx меняет каталог
@@ -95,7 +161,7 @@ for (const m of MUTATIONS) {
     run('node', [join(ROOT, 'tools/prune-build.mjs')]);
   }
   const out = run('node', [join(ROOT, 'tools/accept-site.mjs')]);
-  writeFileSync(path, before, 'utf8');
+  undo();
   if (m.rebuild) {
     run('npx', ['next', 'build'], join(ROOT, 'site'));
     run('node', [join(ROOT, 'tools/prune-build.mjs')]);
