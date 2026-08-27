@@ -18,6 +18,16 @@ const src = readFileSync(resolve(MAP), 'utf8');
 const rules = [...src.matchAll(/source:\s*'([^']+)'\s*,\s*destination:\s*'([^']+)'/g)]
   .map((m) => ({ source: m[1], destination: m[2] }));
 
+/* Сайт собран со слэшем в конце адреса, поэтому и назначение редиректа должно
+   его иметь. Без слэша хост отправляет старый адрес на «/equipment/controllers»,
+   а тот вторым переходом — на «/equipment/controllers/»: цепочка из двух
+   вместо одного на каждом из 194 адресов. */
+for (const r of rules) {
+  if (!/\.[a-z0-9]+$/i.test(r.destination) && !r.destination.endsWith('/')) {
+    r.destination += '/';
+  }
+}
+
 const seen = new Set();
 const unique = rules.filter((r) => (seen.has(r.source) ? false : seen.add(r.source)));
 

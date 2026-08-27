@@ -133,6 +133,28 @@ for (const f of files) {
   }
 }
 
+/* Редиректы со старых адресов: каждое назначение обязано существовать и
+   вести туда одним переходом. Сайт собран со слэшем в конце, и назначение
+   без слэша даёт цепочку из двух редиректов на каждом старом адресе. */
+{
+  let conf = null;
+  try { conf = JSON.parse(readFileSync(resolve('site/vercel.json'), 'utf8')); } catch { /* нет файла */ }
+  if (!conf) fail('нет site/vercel.json с правилами для старых адресов');
+  else {
+    const rules = conf.redirects || [];
+    if (!rules.length) fail('в site/vercel.json нет ни одного правила');
+    const dead = rules.filter((r) => {
+      const d = r.destination.split(/[?#]/)[0];
+      return !existsSync(join(OUT, d, 'index.html')) && !existsSync(join(OUT, d));
+    });
+    const chained = rules.filter((r) => !/\.[a-z0-9]+$/i.test(r.destination)
+      && !r.destination.endsWith('/'));
+    if (dead.length) fail(`редирект ведёт на несуществующую страницу: ${dead[0].source} → ${dead[0].destination} (всего ${dead.length})`);
+    if (chained.length) fail(`редиректов с лишним переходом: ${chained.length} — назначение без слэша, сайт собран со слэшем`);
+    if (!dead.length && !chained.length) console.log(`редиректы: ${rules.length} правил, все ведут на существующие страницы одним переходом`);
+  }
+}
+
 /* Видимая цепочка и её разметка обязаны совпадать. Они делаются из одного
    списка, но проверка нужна встречная: при переезде с прототипа крошки
    остались на 136 страницах, а BreadcrumbList не переехал ни на одну —
