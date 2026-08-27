@@ -949,6 +949,63 @@ console.log('согласие и тема: аналитика ждёт отве�
   }
 }
 
+/* Обход всех страниц на признаки пустоты и наложений. Выборочный осмотр
+   глазами находил такие вещи случайно: два одинаковых заголовка подряд на
+   решениях и направлениях лежали там, пока я не открыл именно ту страницу.
+   Здесь проверяются все, и не разметка, а положение на экране. */
+{
+  const c = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  await pg.evaluate(() => { try { localStorage.setItem('mm-analytics-consent', 'no'); } catch { /* нет хранилища */ } });
+  const bad = [];
+  for (const f of files) {
+    const url = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+    await pg.goto(`${ORIGIN}${url}`, { waitUntil: 'domcontentloaded' });
+    const found = await pg.evaluate(() => {
+      const out = [];
+      const main = document.querySelector('#main');
+      if (!main) return ['нет главной области'];
+      /* Заголовок внутри карточки законно бывает последним — там он подпись,
+         а не обещание раздела. Первая версия правила этого не знала и
+         объявила дефектом 126 страниц из 137. */
+      const heads = [...main.querySelectorAll('h2,h3')]
+        .filter((h) => !h.closest('.card,.case,.next,.handover'));
+      for (const h of heads) {
+        let n = h.nextElementSibling;
+        while (n && n.offsetHeight === 0) n = n.nextElementSibling;
+        if (!n && !h.parentElement.nextElementSibling) {
+          out.push(`заголовок обещает раздел, за которым ничего нет: «${h.textContent.trim().slice(0, 40)}»`);
+        } else if (n && /^H[1-3]$/.test(n.tagName)) {
+          out.push(`заголовок сразу за заголовком: «${h.textContent.trim().slice(0, 30)}»`);
+        }
+      }
+      for (const n of main.querySelectorAll('section,div.grid,dl,table')) {
+        if (n.offsetParent !== null && n.getBoundingClientRect().height < 2 && (n.textContent || '').trim()) {
+          out.push(`блок нулевой высоты с текстом: ${n.className}`);
+        }
+      }
+      for (const n of main.querySelectorAll('p,h1,h2,h3,li,dd')) {
+        const par = n.parentElement;
+        if (!par || par === main) continue;
+        const a = n.getBoundingClientRect(), b = par.getBoundingClientRect();
+        if (a.height > 0 && b.height > 0 && a.bottom > b.bottom + 4
+          && getComputedStyle(par).overflow === 'visible') {
+          out.push(`текст выходит за свой блок: ${n.tagName.toLowerCase()}`);
+        }
+      }
+      for (const n of main.querySelectorAll('.card')) {
+        if (!(n.textContent || '').trim()) out.push('пустая карточка');
+      }
+      return [...new Set(out)];
+    });
+    for (const x of found) bad.push(`${url}: ${x}`);
+  }
+  if (bad.length) fail(`признаки пустоты и наложений: ${bad.length} — ${bad.slice(0, 2).join('; ')}`);
+  else console.log(`обход ${files.length} страниц: пустых обещаний и наложений нет`);
+  await c.close();
+}
+
 /* Печать. Страницу цен распечатывают и несут на встречу: на бумаге не должно
    быть меню, липкой кнопки и вопроса о согласии, а у ссылок должен быть виден
    адрес — на бумаге по ним не нажать. */
