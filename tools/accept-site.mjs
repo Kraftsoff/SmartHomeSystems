@@ -251,6 +251,47 @@ console.log('согласие и тема: аналитика ждёт отве�
   await c.close();
 }
 
+/* Ни один элемент управления не должен остаться с фоном браузера по умолчанию.
+   Кнопки сценариев на плане не имели ни одного своего правила, а поле поиска
+   получило только рамку: в светлой теме это случайно похоже на задуманное, в
+   тёмной они горят белым на чёрном.
+
+   Смотрим именно в тёмной теме и именно на два значения — buttonface и белый.
+   Судить «по светлому фону» нельзя: основная кнопка в тёмной теме светлая
+   намеренно, с тёмной надписью, и такая проверка объявляла бы её дефектом. */
+{
+  const c = await browser.newContext({ colorScheme: 'dark' });
+  const pg = await c.newPage();
+  const bad = [];
+  for (const u of ['/', '/answers/', '/portfolio/', '/pricing/', '/contacts/']) {
+    await pg.goto(`${ORIGIN}${u}`);
+    /* Ждём, пока тема проставлена: до этого страница отдаёт значения светлой
+       темы, и замер объявляет дефектом всё подряд. */
+    await pg.waitForFunction(() => document.documentElement.dataset.mode).catch(() => {});
+    await pg.waitForTimeout(250);
+    const found = await pg.evaluate(() => {
+      const DEFAULTS = new Set(['rgb(239, 239, 239)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)']);
+      return [...document.querySelectorAll('button, input, select, textarea')]
+        .filter((n) => n.offsetParent !== null)
+        /* Флажки и переключатели красит accent-color, а не фон: у родного
+           элемента background остаётся белым при любом оформлении. */
+        .filter((n) => !['checkbox', 'radio'].includes(n.type))
+        .filter((n) => {
+          const bg = getComputedStyle(n).backgroundColor;
+          /* Прозрачный фон допустим, только если элементу задана своя рамка
+             или цвет: иначе это значит, что до него стили не дошли вовсе. */
+          if (bg === 'rgba(0, 0, 0, 0)') return getComputedStyle(n).borderStyle === 'none';
+          return DEFAULTS.has(bg);
+        })
+        .map((n) => `${n.tagName.toLowerCase()}.${n.className || '(без класса)'}`.slice(0, 60));
+    });
+    for (const f of found) bad.push(`${u}: ${f}`);
+  }
+  if (bad.length) fail(`элементы управления с оформлением по умолчанию в тёмной теме: ${[...new Set(bad)].slice(0, 4).join('; ')}`);
+  else console.log('тёмная тема: элементы управления оформлены, а не оставлены браузеру');
+  await c.close();
+}
+
 /* Кейсы — страница доверия премиального подрядчика. Объекты вставлял скрипт,
    и в сборку попадал пустой контейнер: раздел открывался одним заголовком. */
 {

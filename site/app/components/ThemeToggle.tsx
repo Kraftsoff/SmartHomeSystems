@@ -35,7 +35,7 @@ export default function ThemeToggle() {
     <button type="button" role="switch" aria-checked={night}
       aria-label="Переключить сценарий День/Ночь"
       onClick={() => apply(!night, true)}
-      style={{ marginLeft: 'auto', padding: '6px 12px', borderRadius: 999, cursor: 'pointer' }}>
+      className="chip theme-toggle">
       {night ? '☾ Ночь' : '☀ День'}
     </button>
   );

@@ -51,23 +51,24 @@ export default function ScopeCalc() {
     <div id="calc" style={{ margin: '20px 0' }}>
       <div className="card">
         <h3>Что сейчас на объекте</h3>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '10px 0 18px' }}>
+        {/* Выбранная стадия объявляется через aria-pressed, а вид берётся из
+            общей плашки: своих правил у этих кнопок не было, и в тёмной теме
+            они оставались светло-серыми кнопками браузера. */}
+        <div className="filter">
           {STAGES.map(([k, label]) => (
-            <button key={k} type="button" onClick={() => setStage(k)}
-              aria-pressed={stage === k}
-              style={{ padding: '9px 14px', borderRadius: 10, cursor: 'pointer',
-                border: `1px solid ${stage === k ? 'var(--accent-ink)' : 'var(--line)'}` }}>
+            <button key={k} type="button" className="chip" onClick={() => setStage(k)}
+              aria-pressed={stage === k}>
               {label}
             </button>
           ))}
         </div>
 
         <h3>Какие системы нужны</h3>
-        <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', marginTop: 10 }}>
+        <div className="picks">
           {SYSTEMS.map(([k, label]) => (
-            <label key={k} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14.5 }}>
+            <label key={k} className="check">
               <input type="checkbox" checked={picked.includes(k)} onChange={() => toggle(k)} />
-              {label}
+              <span>{label}</span>
             </label>
           ))}
         </div>

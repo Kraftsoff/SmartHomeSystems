@@ -9,58 +9,70 @@ export default function LeadForm() {
   const [sent, setSent] = useState(false);
 
   return (
-    <form
-      id="leadForm"
-      onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-      style={{ display: 'grid', gap: 14, maxWidth: 620 }}
-    >
-      <label>
-        Как к вам обращаться
-        <input name="name" required autoComplete="name" placeholder="Имя"
-          style={{ width: '100%', padding: '10px 12px', marginTop: 6 }} />
-      </label>
-      <label>
-        Телефон
-        <input name="tel" type="tel" required autoComplete="tel" placeholder="+7"
-          style={{ width: '100%', padding: '10px 12px', marginTop: 6 }} />
-      </label>
-      <label>
-        Город или посёлок
-        <input name="city" autoComplete="address-level2" placeholder="Город / посёлок"
-          style={{ width: '100%', padding: '10px 12px', marginTop: 6 }} />
-      </label>
-      <label>
-        Площадь объекта, м²
-        <input name="area" inputMode="numeric" placeholder="например, 180"
-          style={{ width: '100%', padding: '10px 12px', marginTop: 6 }} />
-      </label>
-      <label>
-        Стадия объекта
-        <select name="stage" style={{ width: '100%', padding: '10px 12px', marginTop: 6 }}>
-          <option>Идёт проектирование</option>
-          <option>Черновые работы</option>
-          <option>Чистовая отделка</option>
-          <option>Ремонт закончен</option>
-        </select>
-      </label>
+    <div className="lead">
+      <form
+        id="leadForm"
+        onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+        className="lead-form"
+      >
+        {/* Короткие поля стоят парами: лентой в один столбец форма из шести
+            строк читается как анкета, и до кнопки нужно прокручивать. */}
+        <div className="pair">
+          <label>Как к вам обращаться
+            <input className="field" name="name" required autoComplete="name" placeholder="Имя" />
+          </label>
+          <label>Телефон
+            <input className="field" name="tel" type="tel" required autoComplete="tel" placeholder="+7" />
+          </label>
+        </div>
+        <div className="pair">
+          <label>Город или посёлок
+            <input className="field" name="city" autoComplete="address-level2" placeholder="Город / посёлок" />
+          </label>
+          <label>Площадь объекта, м²
+            <input className="field" name="area" inputMode="numeric" placeholder="например, 180" />
+          </label>
+        </div>
+        <label>Стадия объекта
+          <select className="field" name="stage">
+            <option>Идёт проектирование</option>
+            <option>Черновые работы</option>
+            <option>Чистовая отделка</option>
+            <option>Ремонт закончен</option>
+          </select>
+        </label>
 
-      <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <input type="checkbox" id="lead-consent" name="consent" required style={{ marginTop: 4 }} />
-        <span>
-          Даю согласие на обработку персональных данных, чтобы MiMiSmart ответил на обращение
-          и сделал расчёт по объекту. <a href="/privacy/">Политика обработки данных</a>
-        </span>
-      </label>
+        <label className="check">
+          <input type="checkbox" id="lead-consent" name="consent" required />
+          <span>
+            Даю согласие на обработку персональных данных, чтобы MiMiSmart ответил на обращение
+            и сделал расчёт по объекту. <a href="/privacy/">Политика обработки данных</a>
+          </span>
+        </label>
 
-      <button type="submit" style={{ padding: '12px 18px', borderRadius: 10, cursor: 'pointer' }}>
-        Отправить заявку
-      </button>
+        <div className="actions">
+          <button type="submit" className="btn btn-primary">Отправить заявку</button>
+        </div>
 
-      {sent && (
-        <p role="status" className="prov">
-          ⚠️ приёмник заявки не подключён: нужен выбор CRM и договор поручения на обработку
-        </p>
-      )}
-    </form>
+        {sent && (
+          <p role="status" className="prov">
+            ⚠️ приёмник заявки не подключён: нужен выбор CRM и договор поручения на обработку
+          </p>
+        )}
+      </form>
+
+      {/* Что будет после отправки. Незнание этого — причина, по которой форму
+          закрывают: человек не понимает, звонок ему сейчас упадёт или письмо,
+          и во что это его обяжет. Ни у одного игрока на рынке этого нет. */}
+      <aside className="lead-after">
+        <h3>Что дальше</h3>
+        <ol>
+          <li>Инженер смотрит площадь, стадию и состав систем и даёт вилку по объекту.</li>
+          <li>Разговор — по телефону или в переписке, как вам удобнее. Выезд не нужен.</li>
+          <li>Оценка ни к чему не обязывает: договора на этом шаге нет.</li>
+        </ol>
+        <p className="prov">⚠️ подтвердить: срок ответа на заявку в рабочие часы</p>
+      </aside>
+    </div>
   );
 }

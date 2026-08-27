@@ -50,7 +50,7 @@ export default function AnswerSearch({ items }: { items: Item[] }) {
       <label htmlFor="q" style={{ position: 'absolute', left: -9999 }}>Поиск по вопросам</label>
       <input id="q" type="search" value={q} onChange={(e) => setQ(e.target.value)}
         placeholder="Поиск по вопросам — например «протечка» или «KNX»"
-        style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1px solid var(--line)' }} />
+        className="field" />
       <p aria-live="polite" style={{ color: 'var(--muted)', fontSize: 13.5, marginTop: 8 }}>
         {query ? `${hits.length} из ${items.length} по запросу «${q.trim()}»` : ''}
       </p>
