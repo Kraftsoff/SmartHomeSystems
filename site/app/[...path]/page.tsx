@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, SITE } from '@/lib/content';
 import LeadForm from '../components/LeadForm';
 import CaseGrid from '../components/CaseGrid';
+import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
 
 /* Разделы и сравнения приходят из выгрузки одним словарём «путь → содержимое»,
@@ -84,8 +85,18 @@ const HUB_HEADING: Record<string, string> = {
 
 function ChildList({ items, heading }: { items: ReturnType<typeof childrenOf>; heading: string }) {
   if (!items.length) return null;
+  /* Перечень объявляется перечнем: без ItemList машина видит набор ссылок
+     и не знает, что это полный список раздела и сколько в нём страниц. */
+  const ld = {
+    '@context': 'https://schema.org', '@type': 'ItemList', name: heading,
+    numberOfItems: items.length,
+    itemListElement: items.map(({ key: k, rec }, i) => ({
+      '@type': 'ListItem', position: i + 1, name: rec.title, url: `${SITE}/${k}/`,
+    })),
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       <h2>{heading}</h2>
       <div className="grid g3">
         {items.map(({ key: k, rec }) => (
@@ -107,7 +118,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
   if (hub) {
     return (
       <div className="shell">
-        <p className="crumbs"><a href="/">Главная</a> / {hub.title}</p>
+        <Crumbs items={[{ name: 'Главная', href: '/' }, { name: hub.title }]} />
         <div dangerouslySetInnerHTML={{ __html: hub.html }} />
         {/* Форма живёт только на контактах: одна точка приёма заявок, а не
             кнопка на каждой странице, ведущая в разные места. */}
@@ -135,12 +146,19 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
   const rec = all[key];
   if (!rec) notFound();
 
-  const crumbTail = rec.crumb.replace(/^\/\s*/, '');
+  const parts = key.split('/');
+  const trail = parts.slice(0, -1).map((_, i) => {
+    const k = parts.slice(0, i + 1).join('/');
+    const rc = all[k] || pages[`/${k}`];
+    return { name: rc ? rc.title : k, href: `/${k}/` };
+  });
   const related = answers.filter((a) => a.expandedText.length > 0).slice(0, 3);
 
   return (
     <div className="shell">
-      <p className="crumbs"><a href="/">Главная</a> / {crumbTail}</p>
+      {/* Промежуточные ступени берём из самого адреса: раздел третьего
+          уровня без них выглядит для машины ребёнком главной. */}
+      <Crumbs items={[{ name: 'Главная', href: '/' }, ...trail, { name: rec.title }]} />
       <p className="eyebrow">{rec.eyebrow}</p>
       <h1>{rec.title}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />

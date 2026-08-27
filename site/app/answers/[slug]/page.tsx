@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import Crumbs from '../../components/Crumbs';
 import { answers, pageTitle, pageDescription, SITE, BRAND } from '@/lib/content';
 
 export function generateStaticParams() {
@@ -45,7 +46,8 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="shell">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      <p className="crumbs"><a href="/">Главная</a> / <a href="/answers/">Ответы</a> / {a.cluster}</p>
+      <Crumbs items={[{ name: 'Главная', href: '/' }, { name: 'Ответы', href: '/answers/' },
+        { name: a.cluster }, { name: a.question }]} />
       <p className="eyebrow">{a.kicker}</p>
       <h1>{a.question}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: a.answerHtml }} />

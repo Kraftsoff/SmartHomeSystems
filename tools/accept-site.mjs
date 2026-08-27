@@ -113,6 +113,28 @@ for (const f of files) {
   console.log(`перенесённые страницы: разметка сбалансирована, кнопок без действия нет (${Object.keys(content.pages).length})`);
 }
 
+/* Видимая цепочка и её разметка обязаны совпадать. Они делаются из одного
+   списка, но проверка нужна встречная: при переезде с прототипа крошки
+   остались на 136 страницах, а BreadcrumbList не переехал ни на одну —
+   и никто этого не заметил, потому что на экране всё было на месте. */
+for (const f of files) {
+  const url = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+  const src = readFileSync(f, 'utf8');
+  const visible = src.match(/class="crumbs"[^>]*>([\s\S]*?)<\/nav>/);
+  const marked = src.match(/"@type":"BreadcrumbList","itemListElement":\[([\s\S]*?)\]\}/);
+  if (!visible && !marked) continue;
+  if (visible && !marked) { fail(`${url}: цепочка на экране есть, в разметке нет`); continue; }
+  if (!visible && marked) { fail(`${url}: цепочка в разметке есть, на экране нет`); continue; }
+  const seen = visible[1].replace(/<[^>]+>/g, '\u0001').split('\u0001')
+    .map((x) => x.replace(/\s+/g, ' ').trim()).filter((x) => x && x !== '/');
+  const names = [...marked[1].matchAll(/"name":"((?:[^"\\]|\\.)*)"/g)]
+    .map((m) => JSON.parse(`"${m[1]}"`));
+  if (seen.join(' / ') !== names.join(' / ')) {
+    fail(`${url}: цепочка расходится — на экране «${seen.join(' / ')}», в разметке «${names.join(' / ')}»`);
+  }
+}
+console.log(`хлебные крошки: на экране и в разметке совпадают (${files.filter((f) => /class="crumbs"/.test(readFileSync(f, 'utf8'))).length})`);
+
 /* Каждая внутренняя ссылка обязана вести в существующий файл. Мёртвые адреса
    из хэш-роутера пролежали в сборке, пока их не открыли глазами; проверка по
    одному шаблону ловит только известную породу, а эта — любую. */

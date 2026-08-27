@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { answers, byCluster, pageTitle, pageDescription, SITE } from '@/lib/content';
 import AnswerSearch from '../components/AnswerSearch';
+import Crumbs from '../components/Crumbs';
 
 const TITLE = 'База инженерных ответов';
 const LEDE = `Семьдесят семь вопросов, которые задают до подписания договора: что входит, сколько стоит, что ломается и кто чинит. Каждый ответ начинается с прямого ответа.`;
@@ -28,7 +29,7 @@ export default function AnswersIndex() {
   return (
     <div className="shell">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />
-      <p className="crumbs"><a href="/">Главная</a> / Ответы</p>
+      <Crumbs items={[{ name: 'Главная', href: '/' }, { name: TITLE }]} />
       <p className="eyebrow">Ответы</p>
       <h1>{TITLE}</h1>
       <div className="lede"><p>{LEDE}</p></div>
