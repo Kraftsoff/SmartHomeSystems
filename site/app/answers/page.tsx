@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import NextSteps from '@/app/components/NextSteps';
 import { answers, byCluster, pageTitle, pageDescription, ogFor, SITE } from '@/lib/content';
 import AnswerSearch from '../components/AnswerSearch';
 import Crumbs from '../components/Crumbs';
@@ -41,12 +42,8 @@ export default function AnswersIndex() {
         slug: a.slug, question: a.question, answer: a.answer, expanded: a.expandedText,
         cluster: a.cluster, kicker: a.kicker,
       }))} />
-      {/* Отбор стоит после поиска: поиск отвечает на «мне нужно про
-          протечку», отбор — на «покажи всё про сервис». Разные вопросы. */}
-      <ClusterFilter clusters={[...map.entries()].map(([c, l]) => [c, l.length])} />
-
       {[...map.entries()].map(([cluster, list]) => (
-        <section key={cluster} data-cluster={cluster}>
+        <section key={cluster}>
           <h2>{cluster} <span className="kicker">{list.length}</span></h2>
           <div className="grid g3">
             {list.map((a) => (
@@ -60,18 +57,7 @@ export default function AnswersIndex() {
           </div>
         </section>
       ))}
-
-      {/* Указатель на семьдесят семь ответов — тоже точка входа из поиска,
-          и до сих пор он заканчивался последней карточкой. */}
-      <div className="next">
-        <h2>Не нашли своего вопроса</h2>
-        <p>Спросите напрямую: инженер отвечает по вашему объекту — площадь, стадия,
-          состав систем. Ответ и вилку по смете даём без выезда.</p>
-        <div className="actions">
-          <a className="btn btn-primary" href="/contacts/">Задать вопрос инженеру</a>
-          <a className="btn btn-ghost" href="/pricing/">Из чего складывается смета</a>
-        </div>
-      </div>
+      <NextSteps here={'/answers/'} />
     </div>
   );
 }

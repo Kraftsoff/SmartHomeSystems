@@ -156,7 +156,7 @@ function stripEmpty(html) {
   return out;
 }
 
-function forRealSite(seg) {
+function forRealSite(seg, ownUrl) {
   return stripEmpty(fixLinks(seg)
     .replace(/<p class="crumbs">[\s\S]*?<\/p>\s*/g, '')
     /* Вложенную оболочку снимаем классом, а не тегом. Регулярка по <div
@@ -192,7 +192,14 @@ function forRealSite(seg) {
     .replace(/<button([^>]*?)data-form([^>]*?)>([\s\S]*?)<\/button>/g, (_, a, b, text) => {
       const attrs = a + b;
       const goal = (attrs.match(/data-goal="([^"]+)"/) || [])[1];
-      const href = goal === 'showroom' ? '/showroom/' : goal === 'partner' ? '/partners/' : '/contacts/';
+      let href = goal === 'showroom' ? '/showroom/' : goal === 'partner' ? '/partners/' : '/contacts/';
+      /* Кнопка, ведущая на страницу, где человек уже стоит, — тупик под видом
+         действия: нажатие перезагружает то же место. Цель бралась только из
+         data-goal, без оглядки на страницу, и на контактах, партнёрах и в
+         шоуруме кнопки указывали сами на себя. На контактах уводим к форме,
+         которая тут же на странице; в остальных случаях — туда, где заявку
+         принимают. */
+      if (ownUrl && href === `${ownUrl}/`) href = ownUrl === '/contacts' ? '#leadForm' : '/contacts/';
       const cls = (attrs.match(/class="([^"]+)"/) || [1, 'btn btn-ghost'])[1];
       return `<a class="${cls}" href="${href}">${text}</a>`;
     })
@@ -235,7 +242,7 @@ for (const [id, url] of Object.entries(PAGE_URL)) {
     title: h1 ? text(h1[1]) : '',
     eyebrow: eyebrow ? text(eyebrow[1]) : '',
     lede: lede ? text(lede[1]) : '',
-    html: forRealSite(seg),
+    html: forRealSite(seg, url),
     textLength: text(seg).length,
   };
 }

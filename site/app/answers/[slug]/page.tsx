@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import NextSteps from '@/app/components/NextSteps';
 import { notFound } from 'next/navigation';
 import Crumbs from '../../components/Crumbs';
 import { ogFor, answers, pageTitle, pageDescription, SITE, BRAND } from '@/lib/content';
@@ -46,28 +47,14 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
   return (
     <div className="shell">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
-      {/* Цепочка кончается направлением, а не вопросом: вопрос стоит
-          заголовком сразу под ней, и повторять его — шум на строку. */}
-      <Crumbs items={[{ name: 'Главная', href: '/' }, { name: 'Ответы', href: '/answers/' },
-        { name: a.cluster }]} />
+      <Crumbs items={[{ name: 'Главная', href: '/' },
+        { name: 'Ответы', href: '/answers/' }, { name: a.cluster }]} />
       <p className="eyebrow">{a.kicker}</p>
       <h1>{a.question}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: a.answerHtml }} />
       {a.expandedHtml ? <div dangerouslySetInnerHTML={{ __html: a.expandedHtml }} /> : null}
 
-      {/* Ответ — точка входа: из поиска человек попадает сюда, а не на главную.
-          Без следующего шага семьдесят семь страниц заканчиваются ничем.
-          Действия ровно два, и оба ведут туда, где на вопрос отвечают
-          цифрой по объекту, а не ещё одним текстом. */}
-      <div className="next">
-        <h2>Что дальше</h2>
-        <p>Расчёт по вашему объекту считается по площади, стадии и составу систем —
-          вопрос закрывается сметой, а не следующей статьёй.</p>
-        <div className="actions">
-          <a className="btn btn-primary" href="/contacts/">Рассчитать проект</a>
-          <a className="btn btn-ghost" href="/pricing/">Из чего складывается смета</a>
-        </div>
-      </div>
+      <NextSteps here={`/answers/${a.slug}/`} />
 
       {related.length > 0 && (
         <>

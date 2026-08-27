@@ -143,6 +143,10 @@ const MUTATIONS = [
     from: "const onLeadPage = here === '/contacts/';", to: "const onLeadPage = false && here === '/contacts/';",
     expect: 'ведёт на ту же страницу' },
 
+  { name: 'действие ведёт на ту же страницу', file: 'site/app/components/NextSteps.tsx', rebuild: true,
+    from: "const scope = here !== '/pricing/';", to: 'const scope = true;',
+    expect: 'ведёт на ту же страницу' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },

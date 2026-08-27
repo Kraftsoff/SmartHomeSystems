@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, ogFor, SITE, BRAND } from '@/lib/content';
 import { LINKS } from '@/lib/nav';
 import LeadForm from '../components/LeadForm';
+import NextSteps from '../components/NextSteps';
 import CaseGrid from '../components/CaseGrid';
 import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
@@ -193,15 +194,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         {/* Страница заканчивается действием: раздел — это конец пути из
             поиска, и до сих пор он упирался в подвал. */}
         {key !== 'contacts' && key !== 'privacy' && (
-          <div className="next">
-            <h2>Что дальше</h2>
-            <p>Назовите площадь, стадию объекта и нужные системы — инженер даст вилку
-              по объекту без выезда. Оценка ни к чему не обязывает.</p>
-            <div className="actions">
-              <a className="btn btn-primary" href="/contacts/">Рассчитать проект</a>
-              <a className="btn btn-ghost" href="/pricing/">Из чего складывается смета</a>
-            </div>
-          </div>
+          <NextSteps here={`/${key}/`} />
 
         )}
         {key === 'contacts' && (
@@ -313,15 +306,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
 
       {/* Раздел — конец пути из поиска: человек прочитал про свою систему и
           до сих пор упирался в подвал. */}
-      <div className="next">
-        <h2>Что дальше</h2>
-        <p>Назовите площадь, стадию объекта и нужные системы — инженер даст вилку
-          по объекту без выезда. Оценка ни к чему не обязывает.</p>
-        <div className="actions">
-          <a className="btn btn-primary" href="/contacts/">Рассчитать проект</a>
-          <a className="btn btn-ghost" href="/pricing/">Из чего складывается смета</a>
-        </div>
-      </div>
+      <NextSteps here={`/${key}/`} />
     </div>
   );
 }
