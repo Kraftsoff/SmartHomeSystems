@@ -139,6 +139,10 @@ const MUTATIONS = [
     from: 'data-mask={PLAN_DAY}', to: 'data-mask="/plan/sensor-67dd010377.png"',
     expect: 'не совпадает с нарисованным планом' },
 
+  { name: 'липкая кнопка ведёт на ту же страницу', file: 'site/app/components/StickyCta.tsx', rebuild: true,
+    from: "const onLeadPage = here === '/contacts/';", to: "const onLeadPage = false && here === '/contacts/';",
+    expect: 'ведёт на ту же страницу' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },

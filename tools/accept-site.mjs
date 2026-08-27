@@ -827,6 +827,22 @@ ok('согласие и тема: аналитика ждёт ответа, от
       подвалНиже: f.bottom > r.top ? Math.round(f.bottom - r.top) : 0 };
   });
   if (!after.видно) fail('липкое действие не появляется после первого экрана');
+  /* И ведёт оно не на ту страницу, где человек уже стоит. На контактах кнопка
+     указывала на контакты: нажатие перезагружало то же место — тупик на
+     единственной странице, где до обращения один шаг, да ещё поверх формы. */
+  {
+    const c3 = await browser.newContext({ viewport: { width: 390, height: 844 },
+      isMobile: true, hasTouch: true });
+    const p3 = await c3.newPage();
+    for (const u of ['/', '/pricing/', '/contacts/', '/portfolio/']) {
+      await p3.goto(`${ORIGIN}${u}`);
+      await p3.evaluate(() => window.scrollTo(0, 1200));
+      await p3.waitForTimeout(200);
+      const to = await p3.evaluate(() => document.querySelector('.sticky-cta a')?.getAttribute('href'));
+      if (to === u) fail(`${u}: липкое действие ведёт на ту же страницу — нажатие ничего не меняет`);
+    }
+    await c3.close();
+  }
   if (after.высота < 44) fail(`липкое действие высотой ${after.высота} px — меньше пальца`);
   ok('липкое действие: ждёт ответа о согласии, появляется после первого экрана');
   await c.close();
