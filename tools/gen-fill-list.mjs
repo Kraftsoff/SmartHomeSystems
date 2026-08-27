@@ -40,6 +40,20 @@ walk(data.sections, 'разделы');
 walk(data.comparisons, 'сравнения');
 walk(data.answers, 'ответы');
 
+/* Оговорка раздела лежит отдельным полем, а не разметкой внутри текста:
+   обход по <span class="prov"> её не видит. Шесть пометок — про пожарные
+   датчики, лицензию МЧС, пороги CO₂, время АВР, линейки светильников и
+   складской запас — не попали бы ни в один разговор с клиентом. */
+for (const [where, dict] of [['разделы', data.sections], ['сравнения', data.comparisons]]) {
+  for (const [key, rec] of Object.entries(dict)) {
+    if (!rec.prov) continue;
+    const text = rec.prov.replace(/^⚠️\s*/, '').replace(/\s+/g, ' ').trim();
+    if (!text) continue;
+    if (!found.has(text)) found.set(text, new Set());
+    found.get(text).add(`${where}: /${key}/`);
+  }
+}
+
 /* Часть пометок написана прямо в компонентах сайта, а не в контенте: подвал,
    форма, калькулятор. Список, собранный только из выгрузки, их не видел —
    и они не попали бы ни в один разговор с клиентом. */

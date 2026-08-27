@@ -14,6 +14,7 @@ export type Comparison = Section & {
   rows: string[][]; myths: string[][]; whenA: string; whenB: string;
 };
 export type Section = {
+  prov?: string;
   url: string; crumb: string; eyebrow: string; title: string; label: string;
   answerHtml: string; answer: string;
   items: { html: string; text: string }[];

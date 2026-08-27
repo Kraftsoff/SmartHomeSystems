@@ -552,3 +552,7 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
 .legal-list{margin:0 0 12px;padding-left:18px}
 .legal-list li{margin:5px 0}
 .legal-note{color:var(--muted);font-size:12.5px}
+
+/* Оговорка раздела стоит сразу под прямым ответом: читатель должен встретить
+   её вместе с утверждением, а не найти внизу страницы. */
+.sec-prov{margin:0 0 18px}

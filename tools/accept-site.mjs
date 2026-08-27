@@ -1384,6 +1384,31 @@ ok('согласие и тема: аналитика ждёт ответа, от
   await c.close();
 }
 
+/* Встречная проверка к списку к заполнению: та идёт от сайта к списку и
+   молчит, если пометка исчезла с обеих сторон сразу. Шесть оговорок разделов
+   так и уехали — поле было в прототипе, выгрузка его не читала, и страницы
+   про пожарные датчики и лицензию МЧС вышли с утверждением и без оговорки.
+   Здесь наоборот: что помечено в контенте, обязано стоять на странице. */
+{
+  const src = JSON.parse(readFileSync(join(OUT, '..', 'lib', 'content.json'), 'utf8'));
+  const c = await browser.newContext({ javaScriptEnabled: false });
+  const pg = await c.newPage();
+  let checked = 0;
+  for (const dict of [src.sections, src.comparisons]) {
+    for (const [key, rec] of Object.entries(dict)) {
+      if (!rec.prov) continue;
+      const want = rec.prov.replace(/^⚠️\s*/, '').trim();
+      await pg.goto(`${ORIGIN}/${key}/`);
+      const has = await pg.evaluate((t) =>
+        [...document.querySelectorAll('.prov')].some((e) => e.textContent.includes(t)), want);
+      if (!has) fail(`/${key}/: оговорка раздела не выведена — «${want.slice(0, 50)}…»`);
+      checked += 1;
+    }
+  }
+  console.log(`оговорки разделов: выведены на всех ${checked} страницах, где заданы`);
+  await c.close();
+}
+
 /* Сравнение без таблицы сравнения — это не страница сравнения. Данные лежали
    в конфиге прототипа, выгрузка читала семь полей из десяти, и три страницы
    выходили с заголовком «vs KNX» и без единой строки. Проверка смотрит на

@@ -362,20 +362,42 @@ const out = {
   answers,
 };
 /* Ни одна пометка о непроверенном не имеет права потеряться по дороге.
-   Шесть таких пометок жили в поле, которого выгрузка не читала, и на сайт
-   уезжали утверждения о пожарной безопасности, лицензии МЧС, порогах CO₂
+   Шесть таких пометок жили в поле `prov`, которого выгрузка не читала, и на
+   сайт уезжали утверждения о пожарной безопасности, лицензии МЧС, порогах CO₂
    и времени переключения АВР — без оговорки, что данные не подтверждены.
-   Сравниваем прототип с выгрузкой по самим текстам, а не по счётчику. */
+
+   Сравниваем не весь файл, а только те места, откуда контент действительно
+   берётся: конфиги разделов и сравнений плюс секции страниц из PAGE_URL.
+   Главная прототипа и его собственные подписи в сравнение не идут — на сайте
+   главная написана заново, и её пометки там свои. */
 {
-  const inProto = new Set([...html.matchAll(/⚠️\s*([^'"<]{6,90})/g)].map((m) => m[1].trim()));
+  const zones = [];
+  for (const nm of ['SUB', 'CMP']) {
+    const at = html.indexOf(`var ${nm}=`);
+    if (at < 0) continue;
+    let d = 0, k = html.indexOf('{', at);
+    const from = k;
+    for (; k < html.length; k += 1) {
+      if (html[k] === '{') d += 1;
+      else if (html[k] === '}') { d -= 1; if (!d) break; }
+    }
+    zones.push(html.slice(from, k + 1));
+  }
+  for (const url of Object.values(PAGE_URL)) {
+    const rec = pages[url];
+    if (rec) zones.push(rec.html);
+  }
+  const inZones = new Set(
+    zones.flatMap((z) => [...z.matchAll(/⚠️\s*([^'"<]{6,90})/g)].map((m) => m[1].trim())),
+  );
   const inOut = JSON.stringify(out);
-  const lost = [...inProto].filter((t) => !inOut.includes(t));
+  const lost = [...inZones].filter((t) => !inOut.includes(t));
   if (lost.length) {
     console.error(`выгрузка потеряла пометки о непроверенном: ${lost.length}`);
-    lost.slice(0, 5).forEach((t) => console.error(`  · ${t}`));
+    lost.slice(0, 6).forEach((t) => console.error(`  · ${t}`));
     process.exit(1);
   }
-  console.log(`пометок в прототипе ${inProto.size}, все дошли до выгрузки`);
+  console.log(`пометок в источниках контента ${inZones.size}, все дошли до выгрузки`);
 }
 
 writeFileSync(resolve(OUT), JSON.stringify(deepFixLinks(out), null, 2) + '\n', 'utf8');
