@@ -584,7 +584,29 @@ ok('согласие и тема: аналитика ждёт ответа, от
     }
   }
 
-  ok('узкий экран: за край не выходит, шапка заголовок не накрывает, меню помещается');
+  /* Переход по якорю не должен прятать цель под липкой шапкой. Ссылка
+     «К содержанию» уводила туда, где первые 63 пикселя закрыты шапкой:
+     человек с клавиатуры прыгал к содержанию и не видел его начала. */
+  {
+    await pg.goto(`${ORIGIN}/answers/`);
+    await pg.waitForTimeout(200);
+    const hidden = await pg.evaluate(() => {
+      const head = document.querySelector('header.site');
+      const h = head ? head.getBoundingClientRect().height : 0;
+      const out = [];
+      for (const sel of ['#main', 'h1', 'h2']) {
+        const t = document.querySelector(sel);
+        if (!t) continue;
+        t.scrollIntoView();
+        const top = t.getBoundingClientRect().top;
+        if (top < h) out.push(`${sel} на ${Math.round(h - top)} px`);
+      }
+      return out;
+    });
+    if (hidden.length) fail(`переход по якорю прячет цель под шапкой: ${hidden.join(', ')}`);
+  }
+
+  ok('узкий экран: за край не выходит, шапка заголовок не накрывает, меню помещается, якорь не уходит под шапку');
   await c.close();
 }
 

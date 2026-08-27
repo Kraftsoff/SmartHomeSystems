@@ -465,3 +465,8 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
 .nav-call a{font-size:19px;font-weight:700;color:var(--ink);text-decoration:none;
   min-height:44px;display:inline-flex;align-items:center}
 .nav-call span{color:var(--muted);font-size:13px}
+
+/* Цель перехода не должна оказываться под липкой шапкой. Без этого ссылка
+   «К содержанию» уводила ровно туда, где первые 63 пикселя закрыты шапкой:
+   человек с клавиатуры прыгал к содержанию и не видел его начала. */
+:where(h1, h2, h3, #main, [id]) { scroll-margin-top: 74px }
