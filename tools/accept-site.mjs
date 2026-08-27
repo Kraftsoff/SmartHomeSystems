@@ -865,6 +865,28 @@ ok('согласие и тема: аналитика ждёт ответа, от
       const gap = Math.round(cell.getBoundingClientRect().left - w.getBoundingClientRect().left);
       return { сдвиг: gap, скрыто: over };
     });
+    /* На узком экране таблица обязана раскладываться в блоки, а не уезжать
+       за край: три-пять столбцов на 390 px нечитаемы, и двадцать восемь
+       сценариев так не прочесть. Проверяем на самой длинной таблице сайта. */
+    await pg2.goto(`${ORIGIN}/scenarios/`);
+    await pg2.waitForTimeout(300);
+    const stacked = await pg2.evaluate(() => {
+      const w = document.querySelector('.tbl-wrap');
+      if (!w) return null;
+      const t = w.querySelector('table');
+      const cell = w.querySelector('tbody td[data-col]');
+      return {
+        зарезом: Math.round(t.scrollWidth - w.clientWidth),
+        подписьВидна: cell ? getComputedStyle(cell, '::before').content !== 'none' : false,
+        блоками: cell ? getComputedStyle(cell).display === 'block' : false,
+      };
+    });
+    if (!stacked) fail('на странице сценариев нет таблицы');
+    else if (stacked.зарезом > 1) fail(`таблица сценариев уезжает за край на ${stacked.зарезом} px вместо блоков`);
+    else if (!stacked.блоками || !stacked.подписьВидна) {
+      fail('таблица на узком экране не разложена в блоки или ячейки без подписи столбца');
+    } else ok('таблицы на узком экране: блоками, каждая ячейка подписана');
+
     if (!stuck) fail('на кейсах нет таблицы с прокруткой');
     /* По модулю: без липкости ячейка уезжает ВЛЕВО, и сдвиг выходит
        отрицательным — проверка «больше двух» пропускала ровно тот дефект,

@@ -495,3 +495,27 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
   border-left:3px solid var(--accent-ink);border-radius:0 12px 12px 0;
   padding:12px 16px;margin:0 0 14px;font-size:14.5px;max-width:none}
 .lead-warn a{font-weight:600;white-space:nowrap}
+
+/* Таблица на узком экране раскладывается в блоки. Три-пять столбцов на 390 px
+   нечитаемы: подпись строки съедала треть ширины, описание переносилось в семь
+   строк, остальное уезжало за край — двадцать восемь сценариев так не прочесть.
+   Подписи столбцов приходят из шапки в data-col при выгрузке. */
+@media (max-width: 700px) {
+  .tbl-wrap{overflow-x:visible}
+  .tbl-wrap table{min-width:0;width:100%}
+  .tbl-wrap thead{position:absolute;left:-9999px}
+  .tbl-wrap tr{display:block;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .tbl-wrap tr:last-child{border-bottom:none}
+  .tbl-wrap th,.tbl-wrap td{display:block;border:none;padding:0;
+    position:static;background:none;text-align:left}
+  .tbl-wrap th[data-col],.tbl-wrap td[data-col]{margin-top:10px}
+  .tbl-wrap tr>*:first-child{margin-top:0}
+  .tbl-wrap [data-col]::before{content:attr(data-col);display:block;
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:2px}
+  /* Первая ячейка — подпись строки: её собственное имя столбца ничего не
+     добавляет, а имя строки и есть заголовок блока. */
+  .tbl-wrap tbody tr>*:first-child{font-size:16px;font-weight:600}
+  .tbl-wrap tbody tr>*:first-child::before{display:none}
+  .tbl-wrap th:first-child::after,.tbl-wrap td:first-child::after{display:none}
+}

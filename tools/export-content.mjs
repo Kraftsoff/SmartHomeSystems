@@ -130,6 +130,34 @@ function jsBlock(name) {
    никуда не ведёт — тридцать две ссылки вели в пустоту, — крошки удваиваются с
    теми, что рисует шаблон, а вложенная оболочка сдвигает всю страницу вправо.
    Приводим здесь, в выгрузке: контент входит в сайт единственной дверью. */
+/* Подписи столбцов переносим в сами ячейки. На экране 390 px таблица из
+   трёх-пяти столбцов нечитаема: подпись строки занимает треть ширины,
+   описание переносится в семь строк, остальное уезжает за край — двадцать
+   восемь сценариев так не прочесть. С этими подписями узкий экран
+   раскладывает строку в блок, где у каждого значения видно, что это.
+   Восемьдесят таблиц сайта приходят через выгрузку, поэтому и правка здесь. */
+function labelCells(html) {
+  return html.replace(/<table[\s\S]*?<\/table>/g, (table) => {
+    const head = table.match(/<thead>([\s\S]*?)<\/thead>/);
+    if (!head) return table;
+    const cols = [...head[1].matchAll(/<th[^>]*>([\s\S]*?)<\/th>/g)]
+      .map((m) => m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim());
+    if (!cols.length) return table;
+    const body = table.match(/<tbody>([\s\S]*?)<\/tbody>/);
+    if (!body) return table;
+    const marked = body[1].replace(/<tr>([\s\S]*?)<\/tr>/g, (row, inner) => {
+      let i = 0;
+      const cells = inner.replace(/<(th|td)([^>]*)>/g, (_, tag, attrs) => {
+        const label = cols[i] || '';
+        i += 1;
+        return label ? `<${tag}${attrs} data-col="${label.replace(/"/g, '&quot;')}">` : `<${tag}${attrs}>`;
+      });
+      return `<tr>${cells}</tr>`;
+    });
+    return table.replace(body[0], `<tbody>${marked}</tbody>`);
+  });
+}
+
 function fixLinks(s) {
   return s
     .replace(/href="#\/"/g, 'href="/"')
@@ -281,7 +309,9 @@ const comparisons = jsBlock('CMP');
    разделах и сравнениях. Проходим по всему дереву один раз: пропустить ветку
    значит оставить ссылку, которая на сайте никуда не ведёт. */
 function deepFixLinks(v) {
-  if (typeof v === 'string') return fixLinks(v);
+  /* Подписи столбцов ставим здесь же: таблицы живут не только в страницах,
+     но и в ответах с развёрнутой частью — восемьдесят штук по всему сайту. */
+  if (typeof v === 'string') return labelCells(fixLinks(v));
   if (Array.isArray(v)) return v.map(deepFixLinks);
   if (v && typeof v === 'object') {
     return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deepFixLinks(x)]));
