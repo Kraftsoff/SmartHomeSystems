@@ -41,17 +41,33 @@ const rowOf = (u) => {
   return [depth <= 1 ? 'monthly' : 'monthly', depth <= 1 ? '0.9' : '0.7'];
 };
 
-const head = readFileSync(join(ROOT, 'site-foundation/sitemap.xml'), 'utf8')
-  .match(/^<\?xml[\s\S]*?-->/)[0]
-  .replace(/\n\s*3\. \d+ страниц-рычагов/, '\n  3. Страницы-рычаги')
-  .replace(/^(<!--\n)/m, '$1  ФАЙЛ СОБИРАЕТСЯ tools/gen-sitemap.mjs ИЗ site/out. Руками не править.\n');
+/* Сборка — функция, потому что её нужно вызвать дважды: генератор, у которого
+   второй запуск даёт другой файл, ломает всякую сверку, которая на него
+   опирается. Ровно это и случилось: строка о происхождении добавлялась заново
+   при каждом запуске, локально их накопилось три, конвейер сделал четвёртую
+   и остановился на расхождении. */
+const MARK = '  ФАЙЛ СОБИРАЕТСЯ tools/gen-sitemap.mjs ИЗ site/out. Руками не править.\n';
+const SITEMAP = join(ROOT, 'site-foundation/sitemap.xml');
 
-const body = urls.map((u) => {
-  const [freq, pri] = rowOf(u);
-  return `  <url>\n    <loc>BASE_URL${u === '/' ? '/' : u.replace(/\/$/, '')}</loc>\n`
-    + `    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
-}).join('\n');
+function build() {
+  const head = readFileSync(SITEMAP, 'utf8')
+    .match(/^<\?xml[\s\S]*?-->/)[0]
+    .split('\n').filter((l) => !l.includes('ФАЙЛ СОБИРАЕТСЯ')).join('\n')
+    .replace(/\n\s*3\. \d+ страниц-рычагов/, '\n  3. Страницы-рычаги')
+    .replace(/^(<!--\n)/m, `$1${MARK}`);
+  const body = urls.map((u) => {
+    const [freq, pri] = rowOf(u);
+    return `  <url>\n    <loc>BASE_URL${u === '/' ? '/' : u.replace(/\/$/, '')}</loc>\n`
+      + `    <changefreq>${freq}</changefreq>\n    <priority>${pri}</priority>\n  </url>`;
+  }).join('\n');
+  return `${head}\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+}
 
-writeFileSync(join(ROOT, 'site-foundation/sitemap.xml'),
-  `${head}\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`, 'utf8');
+const first = build();
+writeFileSync(SITEMAP, first, 'utf8');
+const second = build();
+if (second !== first) {
+  console.error('сборка карты не идемпотентна: второй запуск дал другой файл');
+  process.exit(1);
+}
 console.log(`site-foundation/sitemap.xml: адресов ${urls.length}`);
