@@ -89,6 +89,34 @@ for (const f of files) {
   if (crumbs > 1) fail(`${url}: хлебных крошек ${crumbs} вместо одной цепочки`);
 }
 
+/* Каждая внутренняя ссылка обязана вести в существующий файл. Мёртвые адреса
+   из хэш-роутера пролежали в сборке, пока их не открыли глазами; проверка по
+   одному шаблону ловит только известную породу, а эта — любую. */
+{
+  const known = new Set(files.map((f) => `/${relative(OUT, f).replace(/index\.html$/, '')}`));
+  const assets = new Set();
+  (function walkAll(dir) {
+    for (const e of readdirSync(dir)) {
+      const p = join(dir, e);
+      if (statSync(p).isDirectory()) walkAll(p);
+      else assets.add(`/${relative(OUT, p)}`);
+    }
+  })(OUT);
+  const broken = new Map();
+  for (const f of files) {
+    const from = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+    for (const m of readFileSync(f, 'utf8').matchAll(/href="([^"]+)"/g)) {
+      const href = m[1];
+      if (!href.startsWith('/') || href.startsWith('//')) continue;
+      const path = href.split(/[?#]/)[0];
+      if (known.has(path) || assets.has(path) || assets.has(path.replace(/\/$/, ''))) continue;
+      if (!broken.has(path)) broken.set(path, from);
+    }
+  }
+  for (const [path, from] of broken) fail(`ссылка в никуда: ${path} (со страницы ${from})`);
+  if (!broken.size) console.log(`внутренние ссылки: все ведут в существующие страницы (адресов ${known.size})`);
+}
+
 for (const [k, v] of titles) if (v.length > 1) fail(`один title на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);
 for (const [k, v] of descs) if (v.length > 1) fail(`одно description на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);
 for (const [k, v] of canons) if (v.length > 1) fail(`один canonical на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);

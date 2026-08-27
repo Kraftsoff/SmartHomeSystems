@@ -223,3 +223,8 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
 .tag{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
   padding:3px 9px;font-size:12px;color:var(--muted)}
+
+/* Карточки маршрута читаются как вопрос к читателю, поэтому заголовок в них
+   крупнее обычного, а пояснение — второй строкой и тише. */
+.routes .card h3{font-size:16.5px;line-height:1.35}
+.routes .card p{font-size:13.5px}
