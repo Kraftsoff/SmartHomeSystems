@@ -69,6 +69,19 @@ function childrenOf(key: string) {
   return direct.map((k) => ({ key: k, rec: all[k] }));
 }
 
+/* Заголовок списка называет то, что в нём лежит: «разборы» на сравнениях и
+   «направления» на функциях — не одно и то же, и общая подпись читается как
+   служебная. */
+const HUB_HEADING: Record<string, string> = {
+  compare: 'Разборы',
+  functions: 'Направления инженерии',
+  equipment: 'Оборудование по группам',
+  solutions: 'Типы объектов',
+  partners: 'Кому и что мы предлагаем',
+  pricing: 'Ещё о цене',
+  portfolio: 'Разделы',
+};
+
 function ChildList({ items, heading }: { items: ReturnType<typeof childrenOf>; heading: string }) {
   if (!items.length) return null;
   return (
@@ -102,12 +115,13 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
             контейнер: раздел открывался одним заголовком. Теперь объекты
             приходят из того же файла контента, что и весь остальной текст. */}
         {key === 'portfolio' && <CaseGrid items={cases} />}
-        <ChildList items={childrenOf(key)} heading="Разделы направления" />
-        {key === 'pricing' && (
-          <>
-            <h2>Состав работ по вашей стадии</h2>
-            <ScopeCalc />
-          </>
+        {/* Заголовок и объяснение к калькулятору приезжают из контента:
+            там сказано, почему он не считает деньги. */}
+        {key === 'pricing' && <ScopeCalc />}
+        {/* Список вложенных разделов идёт последним: перед калькулятором он
+            дублировал карточкой то, что стоит следом. */}
+        {key !== 'contacts' && (
+          <ChildList items={childrenOf(key)} heading={HUB_HEADING[key] || 'Разделы направления'} />
         )}
         {key === 'contacts' && (
           <>

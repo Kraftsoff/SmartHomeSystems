@@ -23,7 +23,8 @@ a{color:var(--accent-ink)}
 header.site{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
   backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 header.site .shell{display:flex;align-items:center;gap:18px;min-height:62px}
-.brand{font-weight:700;font-size:19px;text-decoration:none;color:var(--ink)}
+.brand{font-weight:700;font-size:19px;text-decoration:none;color:var(--ink);
+  flex:none;white-space:nowrap}
 nav.main{display:flex;gap:2px;font-size:14.5px;margin-right:auto;flex-wrap:nowrap}
 nav.main a{text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:9px;
   white-space:nowrap;transition:color .15s,background .15s}
@@ -104,10 +105,15 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
   color:var(--ink);font-size:16px;min-height:44px}
 .nav-panel a:hover{background:var(--panel-2)}
 
-@media (max-width:1180px){ nav.main a.sec{display:none} }
+/* В строке — четыре основных раздела, остальные в раскрывающемся меню на
+   любой ширине. Двенадцать пунктов не помещались даже на 1440: логотип
+   ломался на две строки, а ссылки жались друг к другу. Меню видно всегда,
+   и человек не гадает, где найти то, чего в строке нет. */
+nav.main a.sec{display:none}
+.burger{display:inline-flex}
 @media (max-width:860px){
   nav.main{display:none}
-  .burger{display:inline-flex;margin-left:auto}
+  .burger{margin-left:auto}
   header.site .shell{gap:10px}
 }
 
@@ -245,8 +251,11 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 /* Переключатель темы — та же плашка, что и остальные переключаемые кнопки.
    Своих правил у него не было вовсе: в тёмной теме он оставался светло-серой
    кнопкой браузера на чёрной странице. */
-.theme-toggle{margin-left:auto;flex:none;white-space:nowrap}
-@media (max-width:860px){ .theme-toggle{margin-left:0} }
+/* Кнопка меню и переключатель темы держатся вместе у правого края: отступ
+   стоял на переключателе, и кнопка меню зависала посреди шапки. */
+.burger{margin-left:auto}
+.theme-toggle{flex:none;white-space:nowrap}
+
 
 /* ————— Форма заявки ————— */
 .lead{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;
@@ -286,3 +295,21 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .handover-say p{color:var(--muted);font-size:14.5px;margin:0 0 12px;max-width:none}
 .handover-say p:last-child{margin:16px 0 0}
 @media (max-width:860px){ .handover{grid-template-columns:1fr;gap:18px} }
+
+/* ————— Калькулятор состава ————— */
+.calc{margin:26px 0 8px}
+.calc-in{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.calc-fs{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);
+  padding:16px 18px 18px;margin:0 0 16px;min-width:0}
+.calc-fs legend{padding:0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted)}
+.calc-fs > label{display:block;font-size:14px;color:var(--muted);margin-top:12px}
+.calc-fs > label .field{margin-top:6px}
+.calc-fs .filter{margin:10px 0 4px}
+.calc-out h3{font-size:18px;margin:0 0 4px}
+.calc-out h4{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  margin:16px 0 6px}
+.calc-out ul{margin:0;padding-left:20px;font-size:14.5px}
+.calc-risk{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line);
+  border-radius:12px;padding:12px 14px;margin:14px 0 0;font-size:14.5px}
+@media (max-width:860px){ .calc-in{grid-template-columns:1fr} }

@@ -13,6 +13,7 @@ export default function CaseGrid({ items }: { items: Case[] }) {
 
   return (
     <>
+      <h2>Реализованные объекты</h2>
       <div className="filter" role="group" aria-label="Отбор объектов по системе">
         <button type="button" className="chip" aria-pressed={tag === null}
           onClick={() => setTag(null)}>Все ({items.length})</button>
