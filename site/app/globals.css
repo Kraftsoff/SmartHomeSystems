@@ -68,7 +68,11 @@ h3{font-size:18px;margin:0 0 6px}
   /* Без переноса длинная пометка вылезала за край карточки и обрезалась
      на середине слова. Клонирование оформления даёт ровный фон на каждой
      строке, а не одну растянутую плашку. */
-  box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  /* Оформление НЕ клонируется на каждую строку: с клонированием длинная
+     пометка разваливалась на стопку скруглённых плашек и читалась как
+     поломка. По умолчанию скругление и боковые поля достаются только концам,
+     а заливка идёт сплошняком — как след маркера через несколько строк. */
+  box-decoration-break:slice;-webkit-box-decoration-break:slice}
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;margin:14px 0}
 table{border-collapse:collapse;width:100%;min-width:520px}
 th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:14.5px}
