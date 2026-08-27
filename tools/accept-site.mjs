@@ -114,7 +114,23 @@ for (const f of files) {
     }
   }
   for (const [path, from] of broken) fail(`ссылка в никуда: ${path} (со страницы ${from})`);
-  if (!broken.size) console.log(`внутренние ссылки: все ведут в существующие страницы (адресов ${known.size})`);
+
+  /* Встречная проверка: на каждую страницу должна вести хотя бы одна ссылка.
+     Адрес без входящих ссылок существует только для того, кто его знает —
+     ни человек из меню, ни краулер по сайту до него не доберутся. */
+  const linked = new Set(['/']);
+  for (const f of files) {
+    for (const m of readFileSync(f, 'utf8').matchAll(/href="(\/[^"]*)"/g)) {
+      const path = m[1].split(/[?#]/)[0];
+      const self = `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+      if (path !== self) linked.add(path);
+    }
+  }
+  const orphans = [...known].filter((u) => !linked.has(u));
+  if (orphans.length) fail(`на эти страницы не ведёт ни одна ссылка: ${orphans.slice(0, 5).join(', ')}`);
+  if (!broken.size && !orphans.length) {
+    console.log(`внутренние ссылки: все ведут в существующие страницы и на каждую есть ссылка (адресов ${known.size})`);
+  }
 }
 
 for (const [k, v] of titles) if (v.length > 1) fail(`один title на ${v.length} адресов: ${v.slice(0, 3).join(', ')}`);

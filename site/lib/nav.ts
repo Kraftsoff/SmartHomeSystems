@@ -11,6 +11,8 @@ export const LINKS: Array<[href: string, label: string, primary: boolean]> = [
   ['/compare/', 'Сравнения', false],
   ['/equipment/', 'Оборудование', false],
   ['/service/', 'Сервис', false],
+  ['/showroom/', 'Шоурум', false],
+  ['/partners/', 'Партнёрам', false],
   ['/about/', 'О компании', false],
   ['/contacts/', 'Контакты', false],
 ];

@@ -276,3 +276,13 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .picks{display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin-top:10px}
 .picks .check{padding:9px 10px;border-radius:10px;cursor:pointer;min-height:44px;align-items:center}
 .picks .check:hover{background:var(--panel-2)}
+
+/* ————— Что остаётся у вас ————— */
+.handover{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:30px;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 28px;box-shadow:var(--shadow)}
+.handover-list{margin:0;padding-left:22px}
+.handover-list li{margin:10px 0;font-size:15px;max-width:none}
+.handover-say p{color:var(--muted);font-size:14.5px;margin:0 0 12px;max-width:none}
+.handover-say p:last-child{margin:16px 0 0}
+@media (max-width:860px){ .handover{grid-template-columns:1fr;gap:18px} }

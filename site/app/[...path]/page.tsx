@@ -55,6 +55,38 @@ export async function generateMetadata({ params }: { params: Promise<{ path: str
   };
 }
 
+/* Дети раздела. В прототипе вложенные страницы рисовал хэш-роутер, и в
+   перенесённом HTML их списков не оказалось: сорок две страницы из ста
+   тридцати семи не имели ни одной входящей ссылки. До них не доходил ни
+   человек из меню, ни краулер по сайту — треть материала существовала
+   только для того, кто знает адрес. */
+function childrenOf(key: string) {
+  const all = { ...sections, ...comparisons };
+  const prefix = key ? `${key}/` : '';
+  const direct = Object.keys(all)
+    .filter((k) => k.startsWith(prefix) && !k.slice(prefix.length).includes('/'))
+    .sort();
+  return direct.map((k) => ({ key: k, rec: all[k] }));
+}
+
+function ChildList({ items, heading }: { items: ReturnType<typeof childrenOf>; heading: string }) {
+  if (!items.length) return null;
+  return (
+    <>
+      <h2>{heading}</h2>
+      <div className="grid g3">
+        {items.map(({ key: k, rec }) => (
+          <article className="card" key={k}>
+            <span className="kicker">{rec.eyebrow}</span>
+            <h3><a className="stretch" href={`/${k}/`}>{rec.title}</a></h3>
+            {rec.answer ? <p className="clamp">{rec.answer}</p> : null}
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export default async function SectionPage({ params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
   const key = path.join('/');
@@ -70,6 +102,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
             контейнер: раздел открывался одним заголовком. Теперь объекты
             приходят из того же файла контента, что и весь остальной текст. */}
         {key === 'portfolio' && <CaseGrid items={cases} />}
+        <ChildList items={childrenOf(key)} heading="Разделы направления" />
         {key === 'pricing' && (
           <>
             <h2>Состав работ по вашей стадии</h2>
@@ -97,6 +130,8 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
       <p className="eyebrow">{rec.eyebrow}</p>
       <h1>{rec.title}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />
+
+      <ChildList items={childrenOf(key)} heading="Внутри направления" />
 
       {rec.items.length > 0 && (
         <>

@@ -12,10 +12,14 @@
  * шаг нужно убрать — иначе переходы начнут падать в полную перезагрузку молча.
  */
 import { readdirSync, statSync, rmSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const OUT = resolve(process.argv[2] || 'site/out');
-const APP = resolve('site/app');
+/* Пути считаем от самого файла, а не от текущего каталога: скрипт запускают и
+   из корня, и из site, и во втором случае он искал site/site/out. */
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const OUT = resolve(process.argv[2] || join(ROOT, 'site/out'));
+const APP = join(ROOT, 'site/app');
 
 /* Защита: если в исходниках появился next/link, удалять нельзя. */
 function usesLink(dir) {
