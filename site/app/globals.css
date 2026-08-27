@@ -520,3 +520,21 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
   .tbl-wrap th:first-child::after,.tbl-wrap td:first-child::after{display:none}
 }
 
+
+/* Без скриптов: элементы управления, которым нечему отвечать, не показываем,
+   а навигация возвращается строкой — иначе на телефоне единственным входом
+   оставалась карта в подвале, потому что кнопка меню мертва. */
+.nojs .burger, .nojs .theme-toggle, .nojs .filter, .nojs .sticky-cta{display:none}
+.nojs .calc-in{display:none}
+.nojs nav.main{display:flex;flex-wrap:wrap;gap:2px 4px}
+.nojs nav.main a.sec{display:inline-flex}
+.nojs header.site .shell{min-height:0;padding-top:10px;padding-bottom:10px;
+  align-items:flex-start;flex-wrap:wrap}
+.nojs .calc::after{content:"Состав работ по стадии считается на этой странице — включите скрипты или назовите стадию в заявке.";
+  display:block;color:var(--muted);font-size:14.5px;max-width:var(--measure)}
+/* Кнопки сценариев без скриптов остаются — они называют, что план умеет
+   показать, — но перестают выглядеть нажимаемыми: элемент, который выглядит
+   кнопкой и ею не является, обманывает. */
+.nojs .scen-btn{background:var(--panel-2);border-style:dashed;cursor:default;
+  font-weight:400;box-shadow:none}
+.nojs .scen-btn[aria-pressed="true"]{border-color:var(--line);font-weight:400;box-shadow:none}

@@ -51,8 +51,14 @@ const org = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
+    <html lang="ru" className="nojs">
       <body>
+        {/* Класс снимается до первой отрисовки, поэтому переключения на глазах
+            не происходит и макет не дёргается. Без скриптов класс остаётся, и
+            элементы управления, которым нечему отвечать, не показываются:
+            мёртвая кнопка хуже отсутствующей, а на телефоне кнопка меню была
+            единственным входом в навигацию. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.remove('nojs')" }} />
         <script type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(org) }} />
         <a className="skip" href="#main">К содержанию</a>

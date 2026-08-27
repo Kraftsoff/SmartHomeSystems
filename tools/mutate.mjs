@@ -163,6 +163,10 @@ const MUTATIONS = [
     from: '  .tbl-wrap table{min-width:0;width:100%}', to: '  .tbl-wrap table{min-width:520px}',
     expect: 'уезжает за край' },
 
+  { name: 'мёртвые кнопки без скриптов', file: 'site/app/globals.css', rebuild: true,
+    from: '.nojs .burger, .nojs .theme-toggle, .nojs .filter, .nojs .sticky-cta{display:none}', to: '',
+    expect: 'которая ничего не открывает' },
+
   { name: 'редирект в никуда', file: 'site/vercel.json', rebuild: false,
     from: '"destination": "/equipment/controllers/"', to: '"destination": "/net-takoy/"',
     expect: 'на несуществующую страницу' },
