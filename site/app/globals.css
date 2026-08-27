@@ -1,3 +1,9 @@
+/* Типографическая шкала: 12 · 13 · 14.5 · 16 · 18 · 21 · 27 · 42.
+   Замер по всем 137 страницам нашёл двадцать четыре разных размера — это не
+   шкала, а континуум: 15, 16.5, 17 и 17.5 стояли рядом и не различались на
+   глаз, зато мешали держать ритм. Пять дробных значений давало одно правило,
+   задававшее пометку в em: размер зависел от родителя.
+   Новые размеры берутся из этих восьми ступеней. */
 /* Токены взяты из прототипа: те же значения, что прошли проверку контраста
    WCAG AA в обеих темах. Менять их здесь — значит расходиться с замером. */
 :root{
@@ -23,31 +29,31 @@ a{color:var(--accent-ink)}
 header.site{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
   backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 header.site .shell{display:flex;align-items:center;gap:18px;min-height:62px}
-.brand{font-weight:700;font-size:19px;text-decoration:none;color:var(--ink);
+.brand{font-weight:700;font-size:18px;text-decoration:none;color:var(--ink);
   flex:none;white-space:nowrap}
 nav.main{display:flex;gap:2px;font-size:14.5px;margin-right:auto;flex-wrap:nowrap}
 nav.main a{text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:9px;
   white-space:nowrap;transition:color .15s,background .15s}
 nav.main a:hover{color:var(--ink);background:var(--panel-2)}
 nav.main a[aria-current="page"]{color:var(--ink);font-weight:600}
-.crumbs{color:var(--muted);font-size:13.5px;margin:26px 0 10px}
+.crumbs{color:var(--muted);font-size:13px;margin:26px 0 10px}
 .crumbs a{color:var(--muted)}
-.eyebrow{color:var(--muted);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
-h1{font-size:clamp(28px,4vw,42px);line-height:1.15;margin:8px 0 18px;letter-spacing:-.01em}
+.eyebrow{color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+h1{font-size:clamp(27px,4vw,42px);line-height:1.15;margin:8px 0 18px;letter-spacing:-.01em}
 h2{font-size:clamp(21px,2.4vw,27px);margin:34px 0 12px}
-h3{font-size:17.5px;margin:0 0 6px}
+h3{font-size:18px;margin:0 0 6px}
 .lede{background:var(--panel-2);border-left:3px solid var(--accent-ink);
   border-radius:0 12px 12px 0;padding:16px 18px;margin:0 0 22px}
 .grid{display:grid;gap:16px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
-.card p{color:var(--muted);font-size:14px;margin:0}
-.kicker{color:var(--muted);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+.card p{color:var(--muted);font-size:14.5px;margin:0}
+.kicker{color:var(--muted);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
 /* Пометка о непроверенном стоит внутри фразы, поэтому не должна её ломать:
    моноширинный шрифт в рамке рвал строку сильнее, чем весит сама оговорка.
    Цвет предупреждения, обычный шрифт, размер чуть меньше основного. */
-.prov{display:inline;border-radius:6px;padding:1px 6px;font-size:.92em;
+.prov{display:inline;border-radius:6px;padding:1px 6px;font-size:13px;
   background:var(--warn-bg);color:var(--warn-ink);
   box-shadow:inset 0 0 0 1px var(--warn-line);
   /* Без переноса длинная пометка вылезала за край карточки и обрезалась
@@ -62,7 +68,7 @@ tr:last-child td,tr:last-child th{border-bottom:none}
 ol,ul{padding-left:20px}
 li{margin:6px 0}
 footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px;
-  color:var(--muted);font-size:13.5px}
+  color:var(--muted);font-size:13px}
 .skip{position:absolute;left:-9999px;top:0}
 .skip:focus{left:8px;top:8px;background:var(--panel);padding:8px 12px;border-radius:8px;z-index:20}
 :focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
@@ -91,7 +97,7 @@ footer.site{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 40px
    строки и открывает их же списком. Второй копии нет — иначе краулер увидит
    каждую ссылку дважды, а клавиатура пройдёт по невидимой. */
 .burger{display:none;align-items:center;gap:9px;background:var(--panel);color:var(--ink);
-  border:1px solid var(--line);border-radius:11px;padding:9px 13px;font:inherit;font-size:14px;
+  border:1px solid var(--line);border-radius:11px;padding:9px 13px;font:inherit;font-size:14.5px;
   min-height:44px;cursor:pointer}
 .burger:hover{border-color:var(--accent-ink)}
 .burger-bars{display:inline-flex;flex-direction:column;gap:3.5px;width:16px}
@@ -149,7 +155,7 @@ nav.main a.sec{display:none}
   gap:40px;align-items:center;padding:34px 0 10px}
 .hero-say{min-width:0}
 .hero .eyebrow{margin:0}
-.hero-lede{font-size:clamp(17px,1.55vw,19.5px);line-height:1.55;color:var(--muted);
+.hero-lede{font-size:clamp(16px,1.55vw,18px);line-height:1.55;color:var(--muted);
   margin:0 0 4px;max-width:52ch}
 .hero-show{min-width:0}
 .show-h{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;
@@ -161,8 +167,8 @@ nav.main a.sec{display:none}
 .proof{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
   gap:16px 26px;margin:34px 0 8px;padding:22px 0 0;border-top:1px solid var(--line)}
 .proof div{margin:0}
-.proof dt{font-size:19px;font-weight:700;letter-spacing:-.01em}
-.proof dd{margin:3px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+.proof dt{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.proof dd{margin:3px 0 0;color:var(--muted);font-size:14.5px;line-height:1.45}
 
 /* ————— Подвал ————— */
 .foot-map{display:flex;flex-wrap:wrap;gap:6px 4px;margin:0 0 20px;
@@ -184,7 +190,7 @@ nav.main a.sec{display:none}
 .consent{position:fixed;left:16px;bottom:16px;z-index:30;width:min(420px,calc(100vw - 32px));
   background:var(--panel);border:1px solid var(--line);border-radius:16px;
   padding:18px;box-shadow:var(--shadow-lift)}
-.consent p{margin:0 0 14px;font-size:14px;line-height:1.5}
+.consent p{margin:0 0 14px;font-size:14.5px;line-height:1.5}
 .consent-act{display:flex;gap:10px;flex-wrap:wrap}
 .consent .btn{min-height:44px;padding:10px 16px;font-size:14.5px;flex:1 1 auto}
 
@@ -204,12 +210,13 @@ h2 .kicker{display:inline-block;vertical-align:middle;margin-left:8px;
    теряет начало следующей. Таблицы, карточки и ячейки не ограничиваем:
    там текст и так короткий, а колонки живут по своей сетке. */
 main p, main li, main h2, main h3 { max-width: var(--measure) }
-.card p, .card li, .card h3, td p, td li, th p, .proof dd, .next p { max-width: none }
+.card li, .card h3, td p, td li, th p, .proof dd, .next p { max-width: none }
+.card p { max-width: 62ch }
 
 /* ————— Блок следующего шага ————— */
 .next{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
   padding:22px 24px;margin:38px 0 8px;box-shadow:var(--shadow)}
-.next h2{margin:0 0 6px;font-size:20px}
+.next h2{margin:0 0 6px;font-size:21px}
 .next p{margin:0;color:var(--muted);max-width:58ch}
 .next .actions{margin:16px 0 0}
 
@@ -219,7 +226,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
    оставались кнопками браузера по умолчанию. В светлой теме это случайно
    похоже на нужное, в тёмной — белые плашки на чёрном фоне. */
 .chip,.scen-btn{background:var(--panel);color:var(--ink);border:1px solid var(--line);
-  border-radius:999px;padding:8px 15px;font:inherit;font-size:14px;min-height:40px;cursor:pointer;
+  border-radius:999px;padding:8px 15px;font:inherit;font-size:14.5px;min-height:40px;cursor:pointer;
   transition:border-color .15s,background .15s}
 .chip:hover,.scen-btn:hover{border-color:var(--accent-ink)}
 .chip[aria-pressed="true"],.scen-btn[aria-pressed="true"]{
@@ -231,8 +238,8 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
    первая фраза кейса — та, ради которой его читают, — идёт приглушённой
    наравне со служебными строками. Проверялось замером: цвет приходил
    не тот, что здесь написан. */
-.card p.case-pain{font-size:14px;color:var(--ink);margin:0}
-.case-dl{margin:6px 0 0;font-size:14px}
+.card p.case-pain{font-size:14.5px;color:var(--ink);margin:0}
+.case-dl{margin:6px 0 0;font-size:14.5px}
 .case-dl dt{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:10px}
 .case-dl dd{margin:2px 0 0}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
@@ -241,13 +248,13 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 
 /* Карточки маршрута читаются как вопрос к читателю, поэтому заголовок в них
    крупнее обычного, а пояснение — второй строкой и тише. */
-.routes .card h3{font-size:16.5px;line-height:1.35}
-.routes .card p{font-size:13.5px}
+.routes .card h3{font-size:16px;line-height:1.35}
+.routes .card p{font-size:13px}
 
 /* Поля ввода. Без своего фона поле остаётся белым и в тёмной теме — рамка от
    темы, подложка от браузера. */
 .field,input[type="text"],input[type="tel"],input[type="email"],input[type="search"],textarea,select{
-  width:100%;padding:12px 14px;border-radius:12px;font:inherit;font-size:15.5px;
+  width:100%;padding:12px 14px;border-radius:12px;font:inherit;font-size:16px;
   background:var(--panel);color:var(--ink);border:1px solid var(--line)}
 .field::placeholder,textarea::placeholder{color:var(--muted)}
 .field:focus-visible,textarea:focus-visible,select:focus-visible{border-color:var(--accent-ink)}
@@ -266,7 +273,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   align-items:start;margin:6px 0 8px}
 .lead-form{display:grid;gap:16px;background:var(--panel);border:1px solid var(--line);
   border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
-.lead-form label{display:block;font-size:14px;color:var(--muted)}
+.lead-form label{display:block;font-size:14.5px;color:var(--muted)}
 .lead-form .field{margin-top:6px}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .check{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--ink)}
@@ -275,7 +282,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
 .lead-form .btn{width:100%}
 .lead-after{background:var(--panel-2);border:1px solid var(--line);
   border-radius:var(--radius);padding:22px 24px}
-.lead-after h3{margin:0 0 10px;font-size:17px}
+.lead-after h3{margin:0 0 10px;font-size:18px}
 .lead-after ol{margin:0;padding-left:20px;font-size:14.5px;color:var(--muted)}
 .lead-after li{margin:9px 0}
 .lead-after .prov{margin-top:14px;display:inline-block}
@@ -295,7 +302,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
   padding:26px 28px;box-shadow:var(--shadow)}
 .handover-list{margin:0;padding-left:22px}
-.handover-list li{margin:10px 0;font-size:15px;max-width:none}
+.handover-list li{margin:10px 0;font-size:14.5px;max-width:none}
 .handover-say p{color:var(--muted);font-size:14.5px;margin:0 0 12px;max-width:none}
 .handover-say p:last-child{margin:16px 0 0}
 @media (max-width:860px){ .handover{grid-template-columns:1fr;gap:18px} }
@@ -307,7 +314,7 @@ main p, main li, main h2, main h3 { max-width: var(--measure) }
   padding:16px 18px 18px;margin:0 0 16px;min-width:0}
 .calc-fs legend{padding:0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted)}
-.calc-fs > label{display:block;font-size:14px;color:var(--muted);margin-top:12px}
+.calc-fs > label{display:block;font-size:14.5px;color:var(--muted);margin-top:12px}
 .calc-fs > label .field{margin-top:6px}
 .calc-fs .filter{margin:10px 0 4px}
 .calc-out h3{font-size:18px;margin:0 0 4px}
@@ -411,3 +418,9 @@ a[href^="tel:"], a[href^="mailto:"]{display:inline-block;padding:4px 2px;min-hei
 .shots img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3;
   border-radius:var(--radius);border:1px solid var(--line);display:block;
   background:var(--panel-2)}
+
+/* Ширина строки для блоков из перенесённого содержимого. Правило по «main p»
+   их не покрывало: прямой ответ и вывод лежат в div, а не в абзаце, и строка
+   на них уходила за 130 знаков — замер по всем 137 страницам нашёл семнадцать
+   таких мест. */
+main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(--measure) }
