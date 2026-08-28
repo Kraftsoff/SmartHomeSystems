@@ -8,7 +8,7 @@
  * нарушением — один раз в правилах редиректов, один раз в аудите голоса покупателя.
  * Здесь код возврата принадлежит проверке, а не последней команде конвейера.
  */
-import { readdirSync, statSync, existsSync } from 'node:fs';
+import { readdirSync, statSync, existsSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
@@ -30,9 +30,30 @@ const files = [];
    коммит в этот момент уносит подделку в историю. Так в ветку уехал ответ без
    пометки о недостающей цифре, и заметил это конвейер, а не я. */
 if (existsSync(resolve('.mutating'))) {
-  console.log('\n❌ Идёт стенд подсадки дефектов: файлы содержимого изменены нарочно.');
-  console.log('   Дождитесь его окончания — иначе подделка уедет в коммит.');
-  process.exit(1);
+  let живой = true;
+  try {
+    const { процесс } = JSON.parse(readFileSync(resolve('.mutating'), 'utf8'));
+    /* Сигнал 0 ничего не шлёт, только спрашивает, жив ли процесс. */
+    try { process.kill(процесс, 0); } catch { живой = false; }
+  } catch { живой = false; }
+
+  if (живой) {
+    console.log('\n❌ Идёт стенд подсадки дефектов: файлы содержимого изменены нарочно.');
+    console.log('   Дождитесь его окончания — иначе подделка уедет в коммит.');
+    process.exit(1);
+  }
+
+  /* Прогон убит: сигналами стенд не спасти, он стоит в синхронном вызове
+     приёмки. Возвращаем файл по копии, снятой до подмены, и идём дальше. */
+  try {
+    const { path: файл, text } = JSON.parse(readFileSync(resolve('.mutating-backup'), 'utf8'));
+    writeFileSync(файл, text, 'utf8');
+    console.log(`⚠️  Стенд был прерван. Вернул по копии: ${файл}`);
+  } catch {
+    console.log('⚠️  Стенд был прерван, копии нет. Пересоберите содержимое: node tools/export-content.mjs');
+  }
+  rmSync(resolve('.mutating'), { force: true });
+  rmSync(resolve('.mutating-backup'), { force: true });
 }
 
 let bad = 0;

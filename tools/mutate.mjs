@@ -34,12 +34,29 @@ const only = process.argv[2];
    в этот момент забирает подсаженный дефект в историю — так в ветку уехал
    ответ без пометки о недостающей цифре, и поймал это конвейер, а не я.
    Линтер отказывается работать, пока замок на месте. */
+let restore = null;
+const undo = () => { if (restore) { writeFileSync(restore.path, restore.text, 'utf8'); restore = null; } };
+
 const ЗАМОК = resolve('.mutating');
-writeFileSync(ЗАМОК, `стенд запущен ${new Date().toISOString()}\n`, 'utf8');
+/* В замке лежит номер процесса, рядом — копия подменяемого файла до подмены.
+   Сигналами эту конструкцию не спасти: стенд стоит в синхронном вызове
+   приёмки, и обработчик не получает управления до её конца — проверено,
+   SIGTERM не сработал. Поэтому замок чинит себя сам: линтер видит мёртвый
+   процесс и возвращает файл по копии. */
+const ЗАПАС = resolve('.mutating-backup');
+writeFileSync(ЗАМОК, JSON.stringify({ процесс: process.pid, запущен: new Date().toISOString() }), 'utf8');
 const снятьЗамок = () => { try { rmSync(ЗАМОК); } catch { /* уже снят */ } };
-process.on('exit', снятьЗамок);
+/* По сигналу сперва возвращаем подменённый файл, потом снимаем замок. Иначе
+   прерванный прогон оставляет подделку в дереве и открывает дверь коммиту —
+   защита без восстановления хуже её отсутствия, потому что выглядит защитой. */
+const прибраться = () => {
+  try { undo(); } catch { /* нечего возвращать */ }
+  try { rmSync(ЗАПАС); } catch { /* копии нет */ }
+  снятьЗамок();
+};
+process.on('exit', прибраться);
 for (const сигнал of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
-  process.on(сигнал, () => { снятьЗамок(); process.exit(130); });
+  process.on(сигнал, () => { прибраться(); process.exit(130); });
 }
 
 const MUTATIONS = [
@@ -219,8 +236,6 @@ const run = (cmd, args, cwd = ROOT) => {
    сигналом, и без этого файл остаётся изменённым: так в собранном выводе
    на сутки задержался подсаженный дефект, а следующая мутация об него
    споткнулась. */
-let restore = null;
-const undo = () => { if (restore) { writeFileSync(restore.path, restore.text, 'utf8'); restore = null; } };
 for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(sig, () => { undo(); process.exit(130); });
 }
@@ -247,6 +262,7 @@ for (const m of MUTATIONS) {
     continue;
   }
   restore = { path, text: before };
+  writeFileSync(ЗАПАС, JSON.stringify({ path, text: before }), 'utf8');
   writeFileSync(path, after, 'utf8');
   if (m.rebuild) {
     /* Сборка запускается В каталоге сайта. С «--prefix» npx меняет каталог
