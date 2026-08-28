@@ -1581,7 +1581,9 @@ ok('согласие и тема: аналитика ждёт ответа, от
     if (заявлено !== данные.answers.length) {
       fail(`llms.txt заявляет ${заявлено} ответов, на сайте ${данные.answers.length}`);
     }
-    for (const m of l.matchAll(/\]\((\/[^)]*)\)/g)) {
+    /* Ссылки в файле для машин абсолютные: его забирают отдельно от сайта.
+       Сравниваем по пути, отбросив имя хоста. */
+    for (const m of l.matchAll(/\]\((?:https?:\/\/[^/)]+)?(\/[^)]*)\)/g)) {
       const путь = m[1].replace(/\/$/, '');
       const естьСтраница = files.some((f) => `/${relative(OUT, f).replace(/index\.html$/, '').replace(/\/$/, '')}` === путь);
       if (!естьСтраница && !existsSync(join(OUT, путь.slice(1)))) {
@@ -1612,6 +1614,7 @@ ok('согласие и тема: аналитика ждёт ответа, от
     const r = existsSync(join(OUT, 'robots.txt')) ? readFileSync(join(OUT, 'robots.txt'), 'utf8') : '';
     const обязательные = ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot',
       'Google-Extended', 'YandexAdditional', 'Bingbot'];
+    if (!/\]\(https?:\/\//.test(l)) fail('ссылки в llms.txt относительные — файл читают отдельно от сайта');
     const нет = обязательные.filter((a) => !new RegExp(`User-Agent:\\s*${a}\\b`, 'i').test(r));
     if (нет.length) fail(`в robots.txt не названы обходчики ИИ: ${нет.join(', ')}`);
     ok(`файлы для машин на месте, llms.txt сходится с содержимым (${заявлено} ответов); обходчиков ИИ названо ${(r.match(/^User-Agent:/gim) || []).length}`);

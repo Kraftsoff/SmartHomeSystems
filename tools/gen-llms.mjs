@@ -21,8 +21,18 @@ const направлений = new Set(data.answers.map((a) => a.cluster)).size;
 const телефон = (readFileSync(join(ROOT, 'site/lib/nav.ts'), 'utf8')
   .match(/PHONE\s*=\s*'([^']+)'/) || [])[1];
 
+/* Адрес сайта — из того же места, что и у сборки: переменная окружения, иначе
+   заглушка. */
+const SITE = process.env.SITE_URL
+  || (readFileSync(join(ROOT, 'site/lib/content.ts'), 'utf8')
+    .match(/'(https:\/\/[^']+)'; \/\/ ⚠️/) || [])[1]
+  || 'https://example.invalid';
+
 function build() {
   let t = readFileSync(SRC, 'utf8');
+  /* Ссылки абсолютные: файл забирают отдельно от сайта, и относительный
+     «/answers» модели, читающей его вне контекста, разрешить не из чего. */
+  t = t.replace(/\]\((\/[^)]*)\)/g, (_, путь) => `](${SITE}${путь})`);
   t = t.replace(/\[\d+ ответов на вопросы покупателя\]/, `[${ответов} ответов на вопросы покупателя]`);
   t = t.replace(/По \d+ направлениям/g, `По ${направлений} направлениям`);
   /* Телефон в файле для машин — из того же места, что и на страницах. */
