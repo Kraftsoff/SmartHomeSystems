@@ -24,6 +24,13 @@ const OUT = join(ROOT, 'site/out');
 const ZIP = join(ROOT, `${NAME}.zip`);
 
 console.log(`сборка под ${SITE}`);
+/* Файлы для машин собираются до сборки: они пишутся в site/public, а сборка
+   копирует public в выдачу. Запуск после неё оставлял в архиве прежнюю копию
+   с чужим адресом. */
+execFileSync('node', ['tools/gen-llms.mjs'], {
+  cwd: ROOT, stdio: 'inherit', env: { ...process.env, SITE_URL: SITE },
+});
+
 execFileSync('npx', ['next', 'build'], {
   cwd: join(ROOT, 'site'), stdio: 'inherit', env: { ...process.env, SITE_URL: SITE },
 });
