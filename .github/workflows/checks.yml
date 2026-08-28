@@ -61,6 +61,11 @@ jobs:
           npm ci --no-audit --no-fund || npm install --no-audit --no-fund
           npx next build
 
+      # Файлы для машин кладутся рядом со сборкой: llms.txt писался прямо для
+      # обходчиков языковых моделей и в сборку не попадал вовсе.
+      - name: Файлы для машин
+        run: node tools/gen-llms.mjs
+
       - name: Приёмка собранного сайта
         run: node tools/accept-site.mjs
 

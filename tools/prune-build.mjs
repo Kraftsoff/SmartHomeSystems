@@ -40,7 +40,12 @@ let freed = 0, count = 0;
   for (const e of readdirSync(dir)) {
     const p = join(dir, e);
     if (statSync(p).isDirectory()) walk(p);
-    else if (e.endsWith('.txt') && e !== 'robots.txt') {
+    /* Удаляем не «все .txt, кроме перечисленных», а ровно те, что Next кладёт
+       для клиентской навигации: у них узнаваемые имена. Перечень исключений
+       уже дважды промахнулся — сначала унёс llms.txt, написанный прямо для
+       обходчиков языковых моделей, потом robots.txt, который делает маршрут,
+       а не каталог public. Точное правило промахнуться не может. */
+    else if (e === 'index.txt' || (e.startsWith('__next') && e.endsWith('.txt'))) {
       freed += statSync(p).size; count += 1; rmSync(p);
     }
   }
