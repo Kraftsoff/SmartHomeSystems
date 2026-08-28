@@ -9,3 +9,4 @@ site/.next
 site/out
 *.zip
 .mutating
+.mutating-backup
