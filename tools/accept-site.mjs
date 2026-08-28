@@ -1582,7 +1582,17 @@ ok('согласие и тема: аналитика ждёт ответа, от
       const лишние = числа.filter((n) => !сайт.includes(n.trim()));
       if (лишние.length) fail(`${имя} называет числа, которых нет на сайте: ${лишние.slice(0, 3).join(', ')}`);
     }
-    ok(`файлы для машин на месте, llms.txt сходится с содержимым (${заявлено} ответов)`);
+    /* Обходчики ИИ названы поимённо. Googlebot не даёт доступа Gemini — за
+       это отвечает отдельный Google-Extended; для Нейро так же отвечает
+       YandexAdditional, и на нашем рынке он весит больше прочих. Сайт
+       написан, чтобы его цитировали: молчание в robots для половины из них
+       означало отказ по умолчанию у тех, кто его так трактует. */
+    const r = existsSync(join(OUT, 'robots.txt')) ? readFileSync(join(OUT, 'robots.txt'), 'utf8') : '';
+    const обязательные = ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot',
+      'Google-Extended', 'YandexAdditional', 'Bingbot'];
+    const нет = обязательные.filter((a) => !new RegExp(`User-Agent:\\s*${a}\\b`, 'i').test(r));
+    if (нет.length) fail(`в robots.txt не названы обходчики ИИ: ${нет.join(', ')}`);
+    ok(`файлы для машин на месте, llms.txt сходится с содержимым (${заявлено} ответов); обходчиков ИИ названо ${(r.match(/^User-Agent:/gim) || []).length}`);
   }
 }
 

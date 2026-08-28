@@ -17,6 +17,26 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: 'OAI-SearchBot', ...common },
       { userAgent: 'ClaudeBot', ...common },
       { userAgent: 'PerplexityBot', ...common },
+      /* Дальше — те, кого не было, а решают они не меньше.
+         Google-Extended управляет тем, попадёт ли сайт в ответы Gemini:
+         Googlebot к этому отношения не имеет, это отдельное согласие.
+         YandexAdditional — то же самое для Нейро, и для рынка, где мы
+         работаем, он важнее прочих.
+         Bingbot кормит Copilot, Applebot-Extended — ответы Apple,
+         Amazonbot — Alexa, CCBot — общий обход, из которого учится
+         половина моделей. Каждый пущен намеренно: сайт написан, чтобы его
+         цитировали; закрыть любого из них — решение владельца, не моё. */
+      { userAgent: 'Google-Extended', ...common },
+      { userAgent: 'YandexAdditional', ...common },
+      { userAgent: 'Bingbot', ...common },
+      { userAgent: 'Applebot', ...common },
+      { userAgent: 'Applebot-Extended', ...common },
+      { userAgent: 'Amazonbot', ...common },
+      { userAgent: 'CCBot', ...common },
+      { userAgent: 'anthropic-ai', ...common },
+      { userAgent: 'Meta-ExternalAgent', ...common },
+      { userAgent: 'DuckAssistBot', ...common },
+      { userAgent: 'cohere-ai', ...common },
     ],
     sitemap: `${SITE}/sitemap.xml`,
   };
