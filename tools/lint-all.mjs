@@ -8,8 +8,8 @@
  * нарушением — один раз в правилах редиректов, один раз в аудите голоса покупателя.
  * Здесь код возврата принадлежит проверке, а не последней команде конвейера.
  */
-import { readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, statSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 /* Собранный сайт — не исходник: правки вносятся в шаблоны и выгрузку, а
@@ -25,6 +25,15 @@ const files = [];
     else if (e.endsWith('.md') || e.endsWith('.html')) files.push(p);
   }
 })('.');
+
+/* Пока стенд подсаживает дефекты, файлы содержимого изменены нарочно, и
+   коммит в этот момент уносит подделку в историю. Так в ветку уехал ответ без
+   пометки о недостающей цифре, и заметил это конвейер, а не я. */
+if (existsSync(resolve('.mutating'))) {
+  console.log('\n❌ Идёт стенд подсадки дефектов: файлы содержимого изменены нарочно.');
+  console.log('   Дождитесь его окончания — иначе подделка уедет в коммит.');
+  process.exit(1);
+}
 
 let bad = 0;
 for (const f of files) {

@@ -16,7 +16,7 @@
  * по одному имени — секунды, всё сразу — около четверти часа. Вывод идёт по
  * мере готовности, чтобы прогон можно было читать, а не ждать.
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,6 +30,18 @@ const only = process.argv[2];
    проверяла, тоже нет. Ниже 700 px таблицы разложены карточками, выше —
    помещаются целиком, и ширины, при которой они прокручиваются вбок, не
    существует. Проверка требовала условия, которого не бывает. */
+/* Замок на время работы. Стенд держит файлы содержимого изменёнными, и коммит
+   в этот момент забирает подсаженный дефект в историю — так в ветку уехал
+   ответ без пометки о недостающей цифре, и поймал это конвейер, а не я.
+   Линтер отказывается работать, пока замок на месте. */
+const ЗАМОК = resolve('.mutating');
+writeFileSync(ЗАМОК, `стенд запущен ${new Date().toISOString()}\n`, 'utf8');
+const снятьЗамок = () => { try { rmSync(ЗАМОК); } catch { /* уже снят */ } };
+process.on('exit', снятьЗамок);
+for (const сигнал of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(сигнал, () => { снятьЗамок(); process.exit(130); });
+}
+
 const MUTATIONS = [
   { name: 'вопрос «сколько» остался без числа',
     /* Ответ без числа и без названной недостающей цифры проигрывает молча:
