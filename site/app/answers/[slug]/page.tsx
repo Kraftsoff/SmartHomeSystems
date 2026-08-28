@@ -40,7 +40,8 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
     '@context': 'https://schema.org', '@type': 'Article',
     headline: a.question, description: pageDescription(a.answer),
     articleBody: `${a.answer} ${a.expandedText}`.trim(),
-    inLanguage: 'ru-RU', publisher: { '@type': 'Organization', name: BRAND, url: SITE },
+    /* Ссылка на организацию, а не вторая её копия: сущность одна на сайт. */
+    inLanguage: 'ru-RU', publisher: { '@id': `${SITE}/#organization` },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
   };
 

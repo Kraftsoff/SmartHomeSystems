@@ -144,6 +144,9 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         {key === 'showroom' && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context': 'https://schema.org', '@type': 'LocalBusiness',
+            /* Зал принадлежит той же компании: без связи это отдельное
+               заведение, случайно совпавшее названием. */
+            parentOrganization: { '@id': `${SITE}/#organization` },
             '@id': `${SITE}/showroom/#showroom`, name: `Шоурум ${BRAND}`,
             description: 'Действующая система умного дома: сцены света, шторы, климат и щит автоматизации можно включить руками до заказа проекта.',
             url: `${SITE}/showroom/`,
@@ -157,7 +160,6 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
               dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
               opens: '09:00', closes: '18:00',
             }],
-            parentOrganization: { '@type': 'Organization', name: BRAND, url: SITE },
           }) }} />
         )}
         {/* Снимки зала живут в слое представления, а не в прототипе: тот
