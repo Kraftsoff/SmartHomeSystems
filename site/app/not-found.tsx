@@ -32,7 +32,7 @@ export default function NotFound() {
         <article className="card">
           <span className="kicker">Ответы</span>
           <h3><a className="stretch" href="/answers/">{answers.length} инженерных ответов</a></h3>
-          <p>По {clusters.length} направлениям: что входит, сколько стоит, что ломается и кто чинит.</p>
+          <p>По {clusters.length} темам: что входит, сколько стоит, что ломается и кто чинит.</p>
         </article>
         <article className="card">
           <span className="kicker">Цена</span>
