@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import NextSteps from '@/app/components/NextSteps';
 import { notFound } from 'next/navigation';
 import Crumbs from '../../components/Crumbs';
+import { nearestAnswers } from '@/lib/related';
 import { ogFor, answers, pageTitle, pageDescription, SITE, BRAND } from '@/lib/content';
 
 export function generateStaticParams() {
@@ -30,7 +31,9 @@ export default async function AnswerPage({ params }: { params: Promise<{ slug: s
   const a = find(slug);
   if (!a) notFound();
 
-  const related = answers.filter((x) => x.cluster === a.cluster && x.slug !== a.slug).slice(0, 4);
+  /* Ближайшие по тексту, а не первые четыре своего кластера: в кластере из
+     двенадцати порядок массива к теме отношения не имеет. */
+  const related = nearestAnswers(`${a.question} ${a.answer}`, 4, a.slug);
   const url = `${SITE}/answers/${a.slug}/`;
 
   /* Article, не QAPage: QAPage — для страниц, куда ответы присылают пользователи.
