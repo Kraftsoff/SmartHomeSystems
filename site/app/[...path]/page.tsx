@@ -8,6 +8,7 @@ import CaseGrid from '../components/CaseGrid';
 import EstimateChart from '../components/EstimateChart';
 import WallSection from '../components/WallSection';
 import PanelBoard from '../components/PanelBoard';
+import ObjectTypes from '../components/ObjectTypes';
 import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
 
@@ -204,6 +205,14 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         )}
         {/* Щит показан рядами со слотами: «каждая линия подписана и заложен
             резерв» — обещание, пока пустые слоты не видны глазом. */}
+        {/* Пять типов объектов выбором, а не пятью строками таблицы: разницу
+            между ними человек ищет глазами, а не читает подряд. */}
+        {key === 'solutions' && (
+          <>
+            <h2>Выберите свой объект</h2>
+            <ObjectTypes />
+          </>
+        )}
         {key === 'equipment' && (
           <>
             <h2>Что внутри щита</h2>
