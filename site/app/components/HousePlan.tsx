@@ -183,7 +183,11 @@ export default function HousePlan() {
           if (!pickTarget(r)) { timer = window.setTimeout(tick, 300); return; }
           lastX = tx; lastY = ty; lastT = performance.now();
           pickTarget(r);
-          timer = window.setTimeout(tick, 420);
+          /* Первый шаг делаем сразу, а не через полсекунды после выбора точки:
+             до него на плане не происходит ничего, и на медленной машине это
+             читается как неподвижная картинка. В конвейере на телефоне за
+             отведённое время не появлялось ни одного следа. */
+          timer = window.setTimeout(tick, 60);
           return;
         }
         const d = Math.hypot(tx - lastX, ty - lastY);
