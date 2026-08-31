@@ -807,7 +807,16 @@ ok('согласие и тема: аналитика ждёт ответа, от
     await pg.waitForFunction(() => document.documentElement.dataset.mode).catch(() => {});
     await pg.waitForTimeout(250);
     const found = await pg.evaluate(() => {
-      const DEFAULTS = new Set(['rgb(239, 239, 239)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)']);
+      /* Эталон снимаем с живого элемента, а не перечисляем цвета: в тёмной
+         теме браузер красит кнопку по умолчанию своим цветом, которого в
+         списке не было, и голая кнопка проходила проверку насквозь.
+         Ставим невидимый образец рядом и сравниваем с ним. */
+      const образец = document.createElement('button');
+      образец.style.cssText = 'position:absolute;left:-9999px;top:0';
+      document.body.appendChild(образец);
+      const эталон = getComputedStyle(образец).backgroundColor;
+      образец.remove();
+      const DEFAULTS = new Set([эталон, 'rgb(239, 239, 239)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)']);
       return [...document.querySelectorAll('button, input, select, textarea')]
         .filter((n) => n.offsetParent !== null)
         /* Флажки и переключатели красит accent-color, а не фон: у родного
@@ -815,9 +824,15 @@ ok('согласие и тема: аналитика ждёт ответа, от
         .filter((n) => !['checkbox', 'radio'].includes(n.type))
         .filter((n) => {
           const bg = getComputedStyle(n).backgroundColor;
-          /* Прозрачный фон допустим, только если элементу задана своя рамка
-             или цвет: иначе это значит, что до него стили не дошли вовсе. */
-          if (bg === 'rgba(0, 0, 0, 0)') return getComputedStyle(n).borderStyle === 'none';
+          /* Прозрачный фон допустим, если до элемента дошли стили: рамка или
+             скругление. Одной рамки мало — текстовая кнопка со своим цветом,
+             отступами и скруглением намеренно без рамки, и проверка называла
+             её неоформленной. У кнопки, до которой стили не дошли, скругление
+             ровно ноль. */
+          if (bg === 'rgba(0, 0, 0, 0)') {
+            const st = getComputedStyle(n);
+            return st.borderStyle === 'none' && parseFloat(st.borderRadius) === 0;
+          }
           return DEFAULTS.has(bg);
         })
         .map((n) => `${n.tagName.toLowerCase()}.${n.className || '(без класса)'}`.slice(0, 60));

@@ -556,3 +556,39 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
 /* Оговорка раздела стоит сразу под прямым ответом: читатель должен встретить
    её вместе с утверждением, а не найти внизу страницы. */
 .sec-prov{margin:0 0 18px}
+
+/* ————— Диаграмма сметы ————— */
+/* Шесть цветов различают доли: положение в полосе читается только глазами,
+   а подпись под ней должна с долей связываться.
+   Светлый конец шкалы пришлось убрать: белый номер поверх давал 1.93:1 при
+   норме 4.5, и приёмка это назвала. В комментарии здесь до того стояло, что
+   контраст проверен, — он не был проверен, я это написал не считая.
+   Считано: минимум по шести цветам 5.30 днём и 4.57 ночью. */
+:root{
+  --st1:#12305c; --st2:#17427f; --st3:#1b52b8; --st4:#2f5f9c; --st5:#3d6aa8; --st6:#4a6f8f;
+}
+:root[data-mode="night"]{
+  --st1:#1d4a8a; --st2:#2359a8; --st3:#2a66c4; --st4:#3a6fae; --st5:#4577b4; --st6:#4f7a9c;
+}
+.est{margin:18px 0 8px}
+.est-bar{display:flex;gap:3px;height:76px;border-radius:14px;overflow:hidden}
+.est-seg{border:0;padding:0;cursor:pointer;position:relative;min-width:34px;
+  transition:filter .15s,transform .15s;display:flex;align-items:flex-end;justify-content:center}
+.est-seg:hover{filter:brightness(1.12)}
+.est-seg[aria-expanded="true"]{outline:2px solid var(--ink);outline-offset:-2px}
+.est-seg-n{color:#fff;font-size:12px;font-weight:600;padding:0 0 8px;letter-spacing:.04em}
+.est-legend{list-style:none;display:flex;flex-wrap:wrap;gap:4px 6px;margin:12px 0 0;padding:0}
+.est-leg{display:inline-flex;align-items:center;gap:7px;background:none;border:0;
+  padding:7px 10px;border-radius:9px;font:inherit;font-size:13.5px;color:var(--muted);cursor:pointer;
+  min-height:38px}
+.est-leg:hover{background:var(--panel-2);color:var(--ink)}
+.est-leg.on{color:var(--ink);font-weight:600;background:var(--panel-2)}
+.est-legend i{width:11px;height:11px;border-radius:3px;flex:none}
+.est-body{margin-top:14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.est-item-name{margin:0 0 6px;font-size:16px;font-weight:700;color:var(--ink)}
+.est-item p{margin:0;color:var(--muted);max-width:var(--measure)}
+@media (max-width:640px){
+  .est-bar{height:56px}
+  .est-seg-n{font-size:11px;padding-bottom:6px}
+}

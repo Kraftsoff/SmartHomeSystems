@@ -5,6 +5,7 @@ import { LINKS, PHONE_E164 } from '@/lib/nav';
 import LeadForm from '../components/LeadForm';
 import NextSteps from '../components/NextSteps';
 import CaseGrid from '../components/CaseGrid';
+import EstimateChart from '../components/EstimateChart';
 import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
 
@@ -131,7 +132,19 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
             он занимает строку целиком. */}
         <Crumbs items={[{ name: 'Главная', href: '/' },
           { name: LINKS.find(([href]) => href === `/${key}/`)?.[1] || hub.title }]} />
-        <div dangerouslySetInnerHTML={{ __html: hub.html }} />
+        {/* Содержимое разрезается по метке: на месте вырезанной сетки из
+            шести карточек встаёт диаграмма сметы. Разрез, а не вставка в
+            конец, — иначе диаграмма оказывается не там, где о ней речь. */}
+        {hub.html.includes('<!--ESTIMATE-CHART-->') ? (
+          <>
+            <div dangerouslySetInnerHTML={{ __html: hub.html.split('<!--ESTIMATE-CHART-->')[0] }} />
+            <h2>Из чего складывается смета</h2>
+            <EstimateChart />
+            <div dangerouslySetInnerHTML={{ __html: hub.html.split('<!--ESTIMATE-CHART-->')[1] }} />
+          </>
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: hub.html }} />
+        )}
         {/* Форма живёт только на контактах: одна точка приёма заявок, а не
             кнопка на каждой странице, ведущая в разные места. */}
         {/* Кейсы вставлял скрипт прототипа, и в выгрузку попадал пустой

@@ -205,8 +205,22 @@ function stripEmpty(html) {
   return out;
 }
 
+/* Сетка из шести карточек сметы уступает место диаграмме: шесть абзацев
+   подряд человек не читает, а доли видны сразу. Тексты не теряются — они
+   переезжают в сам компонент и остаются в разметке целиком, потому что их
+   извлекает машина. Здесь остаётся метка, по которой шаблон разрезает
+   страницу и вставляет диаграмму ровно туда, где были карточки. */
+function вырезатьКарточкиСметы(seg) {
+  const i = seg.indexOf('<h2 class="cluster-h">Из чего складывается смета</h2>');
+  if (i < 0) return seg;
+  const начало = seg.lastIndexOf('<section', i);
+  const конец = seg.indexOf('</section>', i);
+  if (начало < 0 || конец < 0) return seg;
+  return `${seg.slice(0, начало)}<!--ESTIMATE-CHART-->${seg.slice(конец + '</section>'.length)}`;
+}
+
 function forRealSite(seg, ownUrl) {
-  return stripEmpty(fixLinks(seg)
+  return вырезатьКарточкиСметы(stripEmpty(fixLinks(seg)
     .replace(/<p class="crumbs">[\s\S]*?<\/p>\s*/g, '')
     /* Вложенную оболочку снимаем классом, а не тегом. Регулярка по <div
        class="shell">…</div> закрывается на первом же </div> внутри — на
@@ -255,7 +269,7 @@ function forRealSite(seg, ownUrl) {
     /* Заголовок и абзац перед формой остаются: они объясняют, почему
        калькулятор не считает деньги. Уходит только сама форма. */
     .replace(/<div[^>]*id="calc"[\s\S]*?<div[^>]*id="cOut"[^>]*>\s*<\/div>\s*<\/div>\s*/g, ''))
-    .trim();
+    .trim());
 }
 
 const PAGE_URL = {
