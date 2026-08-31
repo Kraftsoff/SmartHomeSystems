@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { sections, comparisons, pages, answers, cases, pageTitle, pageDescription, ogFor, SITE, BRAND } from '@/lib/content';
+import { sections, comparisons, pages, answers, cases, scenarios, pageTitle, pageDescription, ogFor, SITE, BRAND } from '@/lib/content';
 import { LINKS, PHONE_E164 } from '@/lib/nav';
 import LeadForm from '../components/LeadForm';
 import NextSteps from '../components/NextSteps';
@@ -9,6 +9,7 @@ import EstimateChart from '../components/EstimateChart';
 import WallSection from '../components/WallSection';
 import PanelBoard from '../components/PanelBoard';
 import ObjectTypes from '../components/ObjectTypes';
+import ScenarioBoard from '../components/ScenarioBoard';
 import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
 
@@ -129,6 +130,7 @@ function ChildList({ items, heading }: { items: ReturnType<typeof childrenOf>; h
 const ЗАМЕНЫ: Array<[string, string, () => React.ReactElement]> = [
   ['ESTIMATE-CHART', 'Из чего складывается смета', () => <EstimateChart />],
   ['OBJECT-TYPES', 'Выберите свой объект', () => <ObjectTypes />],
+  ['SCENARIO-BOARD', 'Двадцать восемь сценариев', () => <ScenarioBoard scenarios={scenarios} />],
 ];
 
 function HubBody({ html }: { html: string }) {

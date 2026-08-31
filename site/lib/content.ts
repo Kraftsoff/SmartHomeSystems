@@ -36,6 +36,11 @@ export type Case = {
 };
 export const cases = data.cases as Case[];
 
+export type Scenario = {
+  номер: string; имя: string; что: string; чтоHtml: string; нужно: string; семьи: string[];
+};
+export const scenarios = data.scenarios as Scenario[];
+
 export type Page = {
   url: string; id: string; title: string; eyebrow: string; lede: string;
   html: string; textLength: number;
