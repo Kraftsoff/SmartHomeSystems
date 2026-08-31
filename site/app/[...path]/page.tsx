@@ -7,6 +7,7 @@ import NextSteps from '../components/NextSteps';
 import CaseGrid from '../components/CaseGrid';
 import EstimateChart from '../components/EstimateChart';
 import WallSection from '../components/WallSection';
+import PanelBoard from '../components/PanelBoard';
 import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
 
@@ -199,6 +200,14 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
                 </figure>
               ))}
             </div>
+          </>
+        )}
+        {/* Щит показан рядами со слотами: «каждая линия подписана и заложен
+            резерв» — обещание, пока пустые слоты не видны глазом. */}
+        {key === 'equipment' && (
+          <>
+            <h2>Что внутри щита</h2>
+            <PanelBoard />
           </>
         )}
         {key === 'portfolio' && <CaseGrid items={cases} />}
