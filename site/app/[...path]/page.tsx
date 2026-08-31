@@ -123,6 +123,29 @@ function ChildList({ items, heading }: { items: ReturnType<typeof childrenOf>; h
   );
 }
 
+/* Один разрез на все метки: список растёт по мере того, как таблицы уступают
+   место интерактивной подаче, и повторять ветвление на каждую — значит
+   однажды забыть одну. */
+const ЗАМЕНЫ: Array<[string, string, () => React.ReactElement]> = [
+  ['ESTIMATE-CHART', 'Из чего складывается смета', () => <EstimateChart />],
+  ['OBJECT-TYPES', 'Выберите свой объект', () => <ObjectTypes />],
+];
+
+function HubBody({ html }: { html: string }) {
+  const метка = ЗАМЕНЫ.find(([м]) => html.includes(`<!--${м}-->`));
+  if (!метка) return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  const [м, заголовок, Рисовать] = метка;
+  const [до, после] = html.split(`<!--${м}-->`);
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: до }} />
+      <h2>{заголовок}</h2>
+      {Рисовать()}
+      <div dangerouslySetInnerHTML={{ __html: после }} />
+    </>
+  );
+}
+
 export default async function SectionPage({ params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;
   const key = path.join('/');
@@ -138,16 +161,10 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         {/* Содержимое разрезается по метке: на месте вырезанной сетки из
             шести карточек встаёт диаграмма сметы. Разрез, а не вставка в
             конец, — иначе диаграмма оказывается не там, где о ней речь. */}
-        {hub.html.includes('<!--ESTIMATE-CHART-->') ? (
-          <>
-            <div dangerouslySetInnerHTML={{ __html: hub.html.split('<!--ESTIMATE-CHART-->')[0] }} />
-            <h2>Из чего складывается смета</h2>
-            <EstimateChart />
-            <div dangerouslySetInnerHTML={{ __html: hub.html.split('<!--ESTIMATE-CHART-->')[1] }} />
-          </>
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: hub.html }} />
-        )}
+        {/* Содержимое разрезается по меткам: на месте вырезанного раздела
+            встаёт его интерактивная замена. Разрез, а не вставка в конец, —
+            иначе на странице оказываются и таблица, и то, что её заменило. */}
+        <HubBody html={hub.html} />
         {/* Форма живёт только на контактах: одна точка приёма заявок, а не
             кнопка на каждой странице, ведущая в разные места. */}
         {/* Кейсы вставлял скрипт прототипа, и в выгрузку попадал пустой
@@ -205,14 +222,6 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         )}
         {/* Щит показан рядами со слотами: «каждая линия подписана и заложен
             резерв» — обещание, пока пустые слоты не видны глазом. */}
-        {/* Пять типов объектов выбором, а не пятью строками таблицы: разницу
-            между ними человек ищет глазами, а не читает подряд. */}
-        {key === 'solutions' && (
-          <>
-            <h2>Выберите свой объект</h2>
-            <ObjectTypes />
-          </>
-        )}
         {key === 'equipment' && (
           <>
             <h2>Что внутри щита</h2>
