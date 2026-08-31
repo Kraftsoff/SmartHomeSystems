@@ -49,4 +49,12 @@ let закрыто = 0;
 })(OUT);
 
 console.log(`готово для ${SITE}: страниц закрыто от индексации ${закрыто}`);
+/* Вернуть файл для машин к боевому адресу. Сборка витрины подставляет в него
+   свой, и файл оставался изменённым в рабочем дереве после каждого запуска —
+   мелочь, которая всплывала при каждом коммите. */
+execFileSync('node', [join(ROOT, 'tools/gen-llms.mjs')], {
+  cwd: ROOT, stdio: 'ignore',
+  env: Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'SITE_URL')),
+});
+
 console.log('дальше: содержимое site/out в ветку netlify, Netlify заберёт её сам');
