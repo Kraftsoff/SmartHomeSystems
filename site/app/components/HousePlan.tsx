@@ -123,29 +123,39 @@ export default function HousePlan() {
     };
 
     let live = true;
+    let вернуть = 0;
     const onMove = (e: PointerEvent) => {
-      /* Настоящее прикосновение отменяет автопрогулку навсегда: вести жителя
-         и одновременно водить его самим — значит драться за одну фигуру. */
+      /* Пока курсор на плане, ведёт он: вести жителя и одновременно водить
+         его самим — значит драться за одну фигуру. */
       live = false;
+      clearTimeout(вернуть);
       const r = stage.getBoundingClientRect();
       moveTo(e.clientX - r.left, e.clientY - r.top, performance.now());
     };
-    const onLeave = () => { lastX = null; };
+    const onLeave = () => {
+      lastX = null;
+      /* Курсор ушёл — через паузу житель возвращается сам. Раньше прогулка
+         отменялась навсегда, и одно случайное движение мыши превращало план
+         в неподвижную картинку до перезагрузки. */
+      clearTimeout(вернуть);
+      вернуть = window.setTimeout(() => { live = true; }, 1200);
+    };
     stage.addEventListener('pointermove', onMove);
     stage.addEventListener('pointerleave', onLeave);
 
-    /* Автопрогулка — для экранов, на которые нельзя навести. На телефоне
-       следы шли только за намеренной протяжкой пальцем, о которой нигде не
-       сказано: касание не давало ничего, и главный элемент страницы выглядел
-       тёмным прямоугольником. Показываем, что он делает, вместо объяснения.
+    /* Автопрогулка идёт везде, а не только там, где нельзя навести курсор.
+       Прежнее условие «только на касании» оставляло план на компьютере
+       мёртвым: ноль следов за тринадцать секунд, потому что он ждал, что
+       мышь окажется над ним, — а об этом нигде не сказано. Главный элемент
+       страницы выглядел тёмным прямоугольником и читался как недоделанный.
+       Показываем, что он делает, вместо объяснения.
        При запрете анимации не запускается: движение без спроса — не украшение. */
-    const touch = matchMedia('(hover: none)').matches;
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let timer = 0;
     let seen: IntersectionObserver | null = null;
     let offScroll: (() => void) | null = null;
 
-    if (touch && !calm) {
+    if (!calm) {
       let tx = 0, ty = 0, stuck = 0;
       const pickTarget = (r: DOMRect) => {
         for (let i = 0; i < 60; i += 1) {
@@ -213,6 +223,7 @@ export default function HousePlan() {
     return () => {
       live = false;
       clearTimeout(timer);
+      clearTimeout(вернуть);
       seen?.disconnect();
       offScroll?.();
       stage.removeEventListener('pointermove', onMove);
