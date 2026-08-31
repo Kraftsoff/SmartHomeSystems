@@ -21,8 +21,8 @@ const УЗЛЫ: Узел[] = [
     текст: 'Каждая линия подписана, оставлен резерв слотов. Место под щит закладывается до отделки: ниша, вентиляция, фронтальный доступ для обслуживания.' },
   { id: 'box', имя: 'Подрозетник под панель', цвет: 'var(--ink)',
     текст: 'Глубокий подрозетник и питание в точке выключателя. Если его не заложить, панель управления вешается поверх готовой стены — или не вешается вовсе.' },
-  { id: 'sensor', имя: 'Точка датчика', цвет: 'var(--ink)',
-    текст: 'Присутствие, протечка, температура. Кабель приходит в точку до штукатурки; беспроводной датчик в стяжке недоступен для замены батареи.' },
+  { id: 'sensor', имя: 'Датчик протечки в полу', цвет: 'var(--ink)',
+    текст: 'Корпус утапливается в плитку вровень с полом: наружу выходит кольцо диаметром с монету, которое светится, пока защита в работе. Кабель приходит в точку до стяжки — беспроводной датчик под плиткой недоступен для замены батареи.' },
 ];
 
 export default function WallSection() {
@@ -63,9 +63,9 @@ export default function WallSection() {
 
           {/* Слаботочная: красная гофра */}
           <g {...вкл('data')}>
-            <path d="M100 170 H240 V250 H560" fill="none" stroke="var(--conduit-red)"
+            <path d="M100 170 H240 V292 H560" fill="none" stroke="var(--conduit-red)"
               strokeWidth="14" strokeLinejoin="round" strokeLinecap="round" />
-            <path d="M100 170 H240 V250 H560" fill="none" stroke="var(--wall-bg)"
+            <path d="M100 170 H240 V292 H560" fill="none" stroke="var(--wall-bg)"
               strokeWidth="14" strokeLinejoin="round" strokeLinecap="round"
               strokeDasharray="3 7" opacity="0.55" />
           </g>
@@ -77,10 +77,14 @@ export default function WallSection() {
             <circle cx="473" cy="61" r="9" fill="none" stroke="var(--muted)" strokeWidth="2" />
           </g>
 
-          {/* Точка датчика */}
+          {/* Датчик протечки — в полу, вровень с поверхностью. Раньше он был
+              нарисован кружком на стене: так его рисуют все, и так он не
+              выглядит ни у кого из наших объектов. */}
           <g {...вкл('sensor')}>
-            <circle cx="560" cy="250" r="17" fill="var(--panel)" stroke="var(--ink)" strokeWidth="2" />
-            <circle cx="560" cy="250" r="6" fill="var(--conduit-red)" />
+            <line x1="500" y1="300" x2="620" y2="300" stroke="var(--ink)" strokeWidth="2" />
+            <path d="M549 300 h22 v-9 h-22 z" fill="var(--panel)" stroke="var(--ink)" strokeWidth="2" />
+            <circle cx="560" cy="300" r="5" fill="var(--conduit-red)" />
+            <circle cx="560" cy="300" r="9" fill="none" stroke="var(--conduit-red)" strokeWidth="1.5" opacity=".5" />
           </g>
         </svg>
       </div>
