@@ -6,6 +6,7 @@ import LeadForm from '../components/LeadForm';
 import NextSteps from '../components/NextSteps';
 import CaseGrid from '../components/CaseGrid';
 import EstimateChart from '../components/EstimateChart';
+import WallSection from '../components/WallSection';
 import Crumbs from '../components/Crumbs';
 import ScopeCalc from '../components/ScopeCalc';
 
@@ -286,6 +287,16 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
       <p className="eyebrow">{rec.eyebrow}</p>
       <h1>{rec.title}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />
+
+      {/* Разрез стены стоит там, где о трассах и речь. Схема, а не снимок:
+          фотографии открытых стен у нас нет, а выдавать рендер за объект
+          нельзя — здесь ничего и не выдаётся, здесь объясняется устройство. */}
+      {key === 'functions/electric' && (
+        <>
+          <h2>Что остаётся в стене после отделки</h2>
+          <WallSection />
+        </>
+      )}
 
       {/* Оговорка раздела. Шесть таких висели в конфиге прототипа и до сайта
           не доезжали: страницы про пожарные датчики, лицензию МЧС, пороги CO₂

@@ -127,10 +127,18 @@ export default function HousePlan() {
     const onMove = (e: PointerEvent) => {
       /* Пока курсор на плане, ведёт он: вести жителя и одновременно водить
          его самим — значит драться за одну фигуру. */
+      const перехват = live;
       live = false;
       clearTimeout(вернуть);
       const r = stage.getBoundingClientRect();
-      moveTo(e.clientX - r.left, e.clientY - r.top, performance.now());
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      /* При перехвате фигура подхватывается там, где курсор, а не идёт к нему
+         через полдома: путь от места прогулки до курсора почти всегда пересекает
+         стену, фигура упирается в неё и застревает — следы переставали
+         появляться вовсе. */
+      if (перехват) { lastX = x; lastY = y; lastT = performance.now(); return; }
+      moveTo(x, y, performance.now());
     };
     const onLeave = () => {
       lastX = null;
