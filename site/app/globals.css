@@ -29,8 +29,11 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+/* Запасной набор настоящий, а не для вида: пока файл шрифта едет, страницу
+   набирает системный, и метрики у него близкие — подмена не дёргает макет. */
 body{margin:0;background:var(--bg);color:var(--ink);
-  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  font:16px/1.6 var(--font-sans),-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  font-feature-settings:"cv05" 1}
 a{color:var(--accent-ink)}
 .shell{max-width:1140px;margin:0 auto;padding:0 20px}
 header.site{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);
@@ -169,8 +172,12 @@ nav.main a.sec{display:none}
 .card p a,.card ul a{position:relative;z-index:1}
 
 /* ————— Первый экран ————— */
-.hero{display:grid;grid-template-columns:minmax(0,46fr) minmax(0,54fr);
-  gap:40px;align-items:center;padding:34px 0 10px}
+/* Колонка текста была уже колонки плана. С системным шрифтом это сходилось,
+   с Inter — нет: он шире в тех же кеглях, заголовок уходил в три строки, а два
+   целевых действия переставали помещаться в ряд и вставали столбиком. Даём
+   тексту больше места и сокращаем разрыв. */
+.hero{display:grid;grid-template-columns:minmax(0,52fr) minmax(0,48fr);
+  gap:32px;align-items:center;padding:34px 0 10px}
 .hero-say{min-width:0}
 .hero .eyebrow{margin:0}
 .hero-lede{font-size:clamp(16px,1.55vw,18px);line-height:1.55;color:var(--muted);
@@ -205,12 +212,25 @@ nav.main a.sec{display:none}
    самым заметным объектом страницы. Карточка в углу спрашивает то же самое,
    не забирая экран: отказ здесь равноправен согласию — обе кнопки видны
    и одинаково доступны, разного веса им придаёт только порядок. */
-.consent{position:fixed;left:16px;bottom:16px;z-index:30;width:min(420px,calc(100vw - 32px));
+/* Карточка согласия занимала 420 px по ширине и висела над содержимым: на
+   главной она закрывала целевое действие, на разделах — первый кадр. Спрашивать
+   про cookie, загородив то, ради чего пришли, — плохая сделка. На широком экране
+   это полоса в одну строку внизу, на узком остаётся карточка: там строка в ряд
+   не помещается. */
+.consent{position:fixed;left:16px;right:16px;bottom:16px;z-index:30;
   background:var(--panel);border:1px solid var(--line);border-radius:14px;
-  padding:18px;box-shadow:var(--shadow-lift)}
-.consent p{margin:0 0 14px;font-size:14.5px;line-height:1.5}
+  padding:14px 18px;box-shadow:var(--shadow-lift);
+  display:flex;flex-direction:column;gap:12px}
+.consent p{margin:0;font-size:14.5px;line-height:1.5}
 .consent-act{display:flex;gap:8px;flex-wrap:wrap}
 .consent .btn{min-height:44px;padding:10px 16px;font-size:14.5px;flex:1 1 auto}
+@media (min-width:760px){
+  .consent{flex-direction:row;align-items:center;gap:20px;
+    max-width:1160px;margin:0 auto;padding:12px 20px}
+  .consent p{flex:1 1 auto;min-width:0}
+  .consent-act{flex:0 0 auto;flex-wrap:nowrap}
+  .consent .btn{flex:0 0 auto;white-space:nowrap}
+}
 
 /* Прямой ответ в карточке остаётся в разметке целиком — его читает машина, —
    но показывается четырьмя строками: полотно на двадцать строк в сетке из

@@ -1,11 +1,29 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import { BRAND, SITE } from '@/lib/content';
 import ThemeToggle from './components/ThemeToggle';
 import MainNav from './components/MainNav';
 import { LINKS, PHONE, PHONE_HREF, PHONE_E164 } from '@/lib/nav';
 import CookieBar from './components/CookieBar';
 import StickyCta from './components/StickyCta';
+
+/* Inter — фирменный шрифт MiMiSmart: он же стоит на действующем сайте, снят
+   из его скомпилированного CSS. Раньше здесь был системный набор, и сайт
+   выглядел документом, а не продуктом компании.
+   next/font забирает файлы на сборке и раздаёт со своего адреса: в браузере
+   наружу не уходит ни одного запроса, значит и передавать некуда — на сайте,
+   который считает трансграничную передачу, это существенно.
+   Берём переменное начертание, а не пять отдельных: пять весов дают семь
+   файлов на 218 КБ, переменное — по одному файлу на набор символов.
+   display: swap — текст виден сразу системным шрифтом и заменяется, когда
+   файл доедет. Отрисовка на медленном телефоне мерится с запасом в 10%,
+   и блокирующий шрифт этот запас съел бы целиком. */
+const inter = Inter({
+  subsets: ['cyrillic', 'latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -58,7 +76,7 @@ const org = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className="nojs">
-      <body>
+      <body className={inter.variable}>
         {/* Класс снимается до первой отрисовки, поэтому переключения на глазах
             не происходит и макет не дёргается. Без скриптов класс остаётся, и
             элементы управления, которым нечему отвечать, не показываются:
