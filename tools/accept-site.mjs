@@ -457,14 +457,14 @@ ok(`хлебные крошки: на экране и в разметке сов
 {
   const referenced = new Set();
   for (const f of files) {
-    for (const m of readFileSync(f, 'utf8').matchAll(/["'(]([^"'()\s]*\.(?:png|jpg|jpeg|webp|svg))/g)) {
+    for (const m of readFileSync(f, 'utf8').matchAll(/["'(,\s]([^"'()\s]*\.(?:png|jpg|jpeg|webp|svg))/g)) {
       referenced.add(m[1].replace(/^https?:\/\/[^/]+/, ''));
     }
   }
   for (const f of readdirSync(join(OUT, '_next/static'), { recursive: true })) {
     const p = join(OUT, '_next/static', String(f));
     if (!statSync(p).isFile() || !/\.(css|js)$/.test(String(f))) continue;
-    for (const m of readFileSync(p, 'utf8').matchAll(/["'(]([^"'()\s]*\.(?:png|jpg|jpeg|webp|svg))/g)) {
+    for (const m of readFileSync(p, 'utf8').matchAll(/["'(,\s]([^"'()\s]*\.(?:png|jpg|jpeg|webp|svg))/g)) {
       referenced.add(m[1]);
     }
   }
@@ -481,6 +481,85 @@ ok(`хлебные крошки: на экране и в разметке сов
     const kb = Math.round(dead.reduce((n, [, s]) => n + s, 0) / 1024);
     fail(`картинки, на которые никто не ссылается: ${dead.length} на ${kb} КБ — ${dead.slice(0, 3).map(([p]) => p).join(', ')}`);
   } else ok('лишних картинок в сборке нет');
+}
+
+/* Картинки на страницах. До появления реестра графики визуальный слой сайта
+   состоял из пяти снимков зала на одной странице: всё остальное рисовали
+   клиентские компоненты, и в готовом HTML их не было — ни для читателя до
+   гидратации, ни для машины, которая скрипты не исполняет. Условия ниже
+   держат то, что исправлено. */
+{
+  const реестр = JSON.parse(readFileSync(resolve('site/lib/assets.json'), 'utf8'));
+
+  /* Каждая картинка обязана нести описание и свои размеры. Без alt кадр не
+     существует для незрячего и для машины; без width/height он двигает макет,
+     а нулевой сдвиг — измеренное свойство сайта. */
+  const адрес = (f) => `/${relative(OUT, f).replace(/index\.html$/, '')}`;
+  const беды = [];
+  for (const f of files) {
+    const url = адрес(f);
+    const html = readFileSync(f, 'utf8');
+    for (const m of html.matchAll(/<img\b[^>]*>/g)) {
+      const тег = m[0];
+      const alt = /\salt="([^"]*)"/.exec(тег);
+      if (!alt || alt[1].trim().length < 12) беды.push(`${url}: кадр без внятного alt`);
+      if (!/\swidth="\d+"/.test(тег) || !/\sheight="\d+"/.test(тег)) беды.push(`${url}: кадр без размеров`);
+      if (!/\sdecoding="/.test(тег)) беды.push(`${url}: кадр без decoding`);
+      if (!/\sloading="/.test(тег) && !/fetchpriority="high"/i.test(тег)) беды.push(`${url}: кадр без loading`);
+    }
+  }
+  if (беды.length) fail(`картинки без обязательного: ${беды.length} — ${беды.slice(0, 3).join('; ')}`);
+  else ok('у каждой картинки есть описание, размеры и правила загрузки');
+
+  /* Реестр обещает кадр на странице — страница обязана его показывать.
+     Опечатка в адресе иначе тихо оставляет страницу без картинки. */
+  const пусто = [];
+  for (const a of реестр) {
+    for (const стр of a.pages) {
+      const f = files.find((x) => адрес(x) === `/${стр}/`);
+      if (!f) { пусто.push(`${стр}: такой страницы нет`); continue; }
+      if (!readFileSync(f, 'utf8').includes(a.src)) пусто.push(`${стр}: нет кадра ${a.id}`);
+    }
+  }
+  if (пусто.length) fail(`реестр графики разошёлся со страницами: ${пусто.join('; ')}`);
+  else ok(`кадры стоят там, где обещаны: ${реестр.length} кадров на ${new Set(реестр.flatMap((a) => a.pages)).size} страницах`);
+
+  /* Бюджет веса. Картинки — единственное, что способно уронить отрисовку на
+     медленном телефоне, и растут они незаметно. */
+  const каталог = join(OUT, 'brand');
+  if (!existsSync(каталог)) fail('каталога с графикой бренда нет в сборке');
+  else {
+    const вес = readdirSync(каталог).reduce((n, e) => n + statSync(join(каталог, e)).size, 0);
+    const кб = Math.round(вес / 1024);
+    if (кб > 400) fail(`графика бренда весит ${кб} КБ при потолке 400`);
+    else ok(`графика бренда: ${readdirSync(каталог).length} файлов, ${кб} КБ`);
+  }
+
+  /* Два бюджета вместо одного. Картинка, которую грузят сразу, отодвигает
+     отрисовку и попадает в LCP; отложенная не стоит ничего до прокрутки.
+     Один общий потолок либо не даёт поставить галерею, либо пропускает
+     тяжёлый ведущий кадр — поэтому их два. */
+  const сразу = [], всего = [];
+  for (const f of files) {
+    const html = readFileSync(f, 'utf8');
+    let ведущие = 0, сумма = 0;
+    for (const m of html.matchAll(/<img\b[^>]*>/g)) {
+      const тег = m[0];
+      const src = /\ssrc="(\/[^"]+)"/.exec(тег);
+      if (!src) continue;
+      const p = join(OUT, src[1].replace(/^\//, ''));
+      if (!existsSync(p)) continue;
+      const байт = statSync(p).size;
+      сумма += байт;
+      if (!/loading="lazy"/.test(тег)) ведущие += байт;
+    }
+    if (ведущие > 80 * 1024) сразу.push(`${адрес(f)} ${Math.round(ведущие / 1024)} КБ`);
+    if (сумма > 250 * 1024) всего.push(`${адрес(f)} ${Math.round(сумма / 1024)} КБ`);
+  }
+  if (сразу.length) fail(`картинки, грузящиеся сразу, тяжелее 80 КБ: ${сразу.join(', ')}`);
+  else ok('ни одна страница не грузит сразу больше 80 КБ картинок');
+  if (всего.length) fail(`страницы тяжелее 250 КБ картинок: ${всего.join(', ')}`);
+  else ok('ни одна страница не тянет больше 250 КБ картинок всего');
 }
 
 /* Страница ошибки. Next отдавал английское «404: This page could not be

@@ -11,6 +11,19 @@ import PanelBoard from '../components/PanelBoard';
 import ObjectTypes from '../components/ObjectTypes';
 import ScenarioBoard from '../components/ScenarioBoard';
 import Crumbs from '../components/Crumbs';
+import Кадры, { кадрыДля, разметкаКадров, type Кадр } from '../components/Shot';
+import ЗАЛ from '@/lib/showroom.json';
+
+/* Размеры снимков зала приходят из конвейера, описания живут здесь: первые
+   меняются при каждом пережатии, вторые — нет. Раньше и то и другое стояло
+   списком в разметке, и после пережатия размеры разошлись бы с файлами. */
+const ОПИСАНИЯ_ЗАЛА: Record<string, string> = {
+  'showroom-msk-1.webp': 'Зона переговоров шоурума: стол, за которым разбирают планировку, и зал за ним',
+  'showroom-msk-2.webp': 'Образцы выключателей и панелей на стенде шоурума',
+  'showroom-msk-3.webp': 'Зал шоурума: панель управления на телевизоре, стеллажи с образцами выключателей, переговорная зона',
+  'showroom-msk-4.webp': 'Настенная панель управления, термостат и клавиши выключателей в шоуруме',
+  'showroom-msk-5.webp': 'Переговорный стол шоурума, за которым разбирают планировку объекта',
+};
 import ScopeCalc from '../components/ScopeCalc';
 
 /* Разделы и сравнения приходят из выгрузки одним словарём «путь → содержимое»,
@@ -133,11 +146,28 @@ const ЗАМЕНЫ: Array<[string, string, () => React.ReactElement]> = [
   ['SCENARIO-BOARD', 'Двадцать восемь сценариев', () => <ScenarioBoard scenarios={scenarios} />],
 ];
 
-function HubBody({ html }: { html: string }) {
-  const метка = ЗАМЕНЫ.find(([м]) => html.includes(`<!--${м}-->`));
-  if (!метка) return <div dangerouslySetInnerHTML={{ __html: html }} />;
+/* Кадр на хабе встаёт сразу после прямого ответа, а не в конец страницы: внизу
+   он читается как украшение, под ответом — как показ того, о чём абзац.
+   Вставка идёт строкой в ту же разметку, а не вторым контейнером: разрезанный
+   HTML браузер достраивает по-своему, и гидратация падает. Если блок ответа не
+   найден, кадр уходит в конец — молча пропасть он не может. */
+function сКадром(html: string, кадры: Кадр[]): string {
+  const разметка = разметкаКадров(кадры, true);
+  if (!разметка) return html;
+  const якорь = html.indexOf('class="answer"');
+  if (якорь === -1) return html + разметка;
+  const конец = html.indexOf('</div>', якорь);
+  if (конец === -1) return html + разметка;
+  const рез = конец + '</div>'.length;
+  return html.slice(0, рез) + разметка + html.slice(рез);
+}
+
+function HubBody({ html, кадры }: { html: string; кадры: Кадр[] }) {
+  const целиком = сКадром(html, кадры);
+  const метка = ЗАМЕНЫ.find(([м]) => целиком.includes(`<!--${м}-->`));
+  if (!метка) return <div dangerouslySetInnerHTML={{ __html: целиком }} />;
   const [м, заголовок, Рисовать] = метка;
-  const [до, после] = html.split(`<!--${м}-->`);
+  const [до, после] = целиком.split(`<!--${м}-->`);
   return (
     <>
       <div dangerouslySetInnerHTML={{ __html: до }} />
@@ -166,7 +196,7 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
         {/* Содержимое разрезается по меткам: на месте вырезанного раздела
             встаёт его интерактивная замена. Разрез, а не вставка в конец, —
             иначе на странице оказываются и таблица, и то, что её заменило. */}
-        <HubBody html={hub.html} />
+        <HubBody html={hub.html} кадры={кадрыДля(key)} />
         {/* Форма живёт только на контактах: одна точка приёма заявок, а не
             кнопка на каждой странице, ведущая в разные места. */}
         {/* Кейсы вставлял скрипт прототипа, и в выгрузку попадал пустой
@@ -207,16 +237,10 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
               и переговорный стол, за которым разбирают планировку. Снимки наши,
               не каталожные: то, что на них видно, включается руками при вас.</p>
             <div className="grid g3 shots">
-              {[
-                ['showroom-msk-3.jpg', 'Зал шоурума: панель управления на телевизоре, стеллажи с образцами выключателей, переговорная зона', 815, 460],
-                ['showroom-msk-5.jpg', 'Переговорный стол шоурума, за которым разбирают планировку объекта', 1050, 1400],
-                ['showroom-msk-2.jpg', 'Образцы выключателей и панелей на стенде шоурума', 555, 467],
-                ['showroom-msk-4.jpg', 'Настенная панель управления, термостат и клавиши выключателей в шоуруме', 466, 463],
-                ['showroom-msk-1.jpg', 'Зона переговоров шоурума: стол, за которым разбирают планировку, и зал за ним', 571, 324],
-              ].map(([file, alt, w, h]) => (
-                <figure key={file as string}>
-                  <img src={`/showroom/${file}`} alt={alt as string} loading="lazy"
-                    width={w as number} height={h as number} />
+              {ЗАЛ.map((ф) => (
+                <figure key={ф.file}>
+                  <img src={`/showroom/${ф.file}`} alt={ОПИСАНИЯ_ЗАЛА[ф.file]}
+                    width={ф.w} height={ф.h} loading="lazy" decoding="async" />
                 </figure>
               ))}
             </div>
@@ -316,6 +340,11 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
       <p className="eyebrow">{rec.eyebrow}</p>
       <h1>{rec.title}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />
+
+      {/* Кадр идёт сразу за прямым ответом: сначала машина и читатель получают
+          ответ текстом, потом то же самое показывается. Обратный порядок
+          прятал бы ответ под картинку. */}
+      <Кадры items={кадрыДля(key)} первый />
 
       {/* Разрез стены стоит там, где о трассах и речь. Схема, а не снимок:
           фотографии открытых стен у нас нет, а выдавать рендер за объект
