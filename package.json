@@ -1,0 +1,29 @@
+{
+  "name": "mimismart-site-workspace",
+  "private": true,
+  "description": "Сайт MiMiSmart: прототип, сборка на Next.js, приёмка и ТЗ",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "setup": "npm install && npm --prefix site install && npx playwright install --with-deps chromium",
+    "doctor": "node tools/doctor.mjs",
+
+    "dev": "npm --prefix site run dev",
+    "content": "node tools/export-content.mjs",
+    "build": "npm run content && npm --prefix site run build && node tools/prune-build.mjs",
+
+    "check": "npm run check:lang && npm run check:proto && npm run check:site",
+    "check:lang": "node tools/lint-all.mjs",
+    "check:proto": "node tools/accept.mjs",
+    "check:site": "node tools/accept-site.mjs",
+    "check:gates": "node tools/mutate.mjs",
+    "check:gates:fast": "FAST=1 node tools/mutate.mjs",
+
+    "assets": "node tools/pack-assets.mjs",
+    "pack:pages": "node tools/pack-pages.mjs",
+    "pack:netlify": "node tools/pack-netlify.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0",
+    "sharp": "^0.34.5"
+  }
+}

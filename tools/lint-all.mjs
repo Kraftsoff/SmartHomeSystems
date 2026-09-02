@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+/**
+ * Прогоняет проверку языка по всем файлам проекта и возвращает ненулевой код,
+ * если хоть один не прошёл.
+ *
+ * Зачем отдельный скрипт: `node tools/lint-text.mjs файл | tail -1` возвращает код
+ * от `tail`, то есть ноль всегда. За сессию это дважды привело к коммиту с
+ * нарушением — один раз в правилах редиректов, один раз в аудите голоса покупателя.
+ * Здесь код возврата принадлежит проверке, а не последней команде конвейера.
+ */
+import { readdirSync, statSync, existsSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+
+/* Собранный сайт — не исходник: правки вносятся в шаблоны и выгрузку, а
+   артефакты пересобираются. Проверяя их, линтер дублирует каждое замечание
+   и ругается на цитаты вопросов, которые в исходнике стоят законно. */
+const SKIP = new Set(['node_modules', '.git', 'backups', 'site-snapshot', 'tools', '.next', 'out']);
+const files = [];
+(function walk(dir) {
+  for (const e of readdirSync(dir)) {
+    if (SKIP.has(e)) continue;
+    const p = join(dir, e);
+    if (statSync(p).isDirectory()) walk(p);
+    else if (e.endsWith('.md') || e.endsWith('.html')) files.push(p);
+  }
+})('.');
+
+/* Пока стенд подсаживает дефекты, файлы содержимого изменены нарочно, и
+   коммит в этот момент уносит подделку в историю. Так в ветку уехал ответ без
+   пометки о недостающей цифре, и заметил это конвейер, а не я. */
+if (existsSync(resolve('.mutating'))) {
+  let живой = true;
+  try {
+    const { процесс } = JSON.parse(readFileSync(resolve('.mutating'), 'utf8'));
+    /* Сигнал 0 ничего не шлёт, только спрашивает, жив ли процесс. */
+    try { process.kill(процесс, 0); } catch { живой = false; }
+  } catch { живой = false; }
+
+  if (живой) {
+    console.log('\n❌ Идёт стенд подсадки дефектов: файлы содержимого изменены нарочно.');
+    console.log('   Дождитесь его окончания — иначе подделка уедет в коммит.');
+    process.exit(1);
+  }
+
+  /* Прогон убит: сигналами стенд не спасти, он стоит в синхронном вызове
+     приёмки. Возвращаем файл по копии, снятой до подмены, и идём дальше. */
+  try {
+    const { path: файл, text } = JSON.parse(readFileSync(resolve('.mutating-backup'), 'utf8'));
+    writeFileSync(файл, text, 'utf8');
+    console.log(`⚠️  Стенд был прерван. Вернул по копии: ${файл}`);
+  } catch {
+    console.log('⚠️  Стенд был прерван, копии нет. Пересоберите содержимое: node tools/export-content.mjs');
+  }
+  rmSync(resolve('.mutating'), { force: true });
+  rmSync(resolve('.mutating-backup'), { force: true });
+}
+
+let bad = 0;
+for (const f of files) {
+  try {
+    execFileSync('node', ['tools/lint-text.mjs', f], { stdio: 'pipe' });
+  } catch (e) {
+    bad++;
+    console.log(`\n❌ ${f}`);
+    console.log(String(e.stdout || '').split('\n').filter((l) => l.startsWith('✗')).join('\n'));
+  }
+}
+console.log(`\nпроверено файлов: ${files.length}, с нарушениями: ${bad}`);
+
+/* Сверка чисел в документах идёт следом, а не отдельной командой. Конвейер
+   запускает обе в одном шаге, а я гонял только эту — и сорок один коммит
+   подряд уехал с красной проверкой, потому что локально «зелено» означало
+   половину шага. */
+let sync = 0;
+try {
+  console.log(execFileSync('node', ['tools/check-docs-sync.mjs'], { encoding: 'utf8' }).trim());
+} catch (e) {
+  sync = 1;
+  console.log(String(e.stdout || e.message).trim());
+}
+
+/* Один итоговый вердикт последней строкой. Раньше их было две — язык и
+   документы, — и, прочитав нижнюю, легко было решить, что всё цело, когда
+   упала верхняя. Я так и сделал дважды: коммит уехал с красной проверкой. */
+if (bad || sync) {
+  console.log(`\n❌ Не прошло: ${[bad && 'язык', sync && 'сверка документов'].filter(Boolean).join(' и ')}`);
+  process.exit(1);
+}
+console.log('\n✅ Язык и сверка документов — обе части чисты.');

@@ -1,0 +1,220 @@
+[
+  {
+    "id": "controllers-din",
+    "alt": "Два контроллера MiMiSmart на DIN-рейке: модуль CM10 SW5 и шлюз GW5X2 с портом Ethernet и шиной CAN",
+    "caption": "Контроллеры CM10 SW5 и GW5X2. Своё производство, шина CAN, питание 24 В.",
+    "pages": [
+      "equipment",
+      "equipment/controllers",
+      "functions/electric"
+    ],
+    "src": "/brand/controllers-din-390.webp",
+    "w": 390,
+    "h": 448,
+    "srcset": "/brand/controllers-din-390.webp 390w",
+    "max": "/brand/controllers-din-390.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "controller-cuarm5m",
+    "alt": "Чертёж модуля CUARM5M на DIN-рейку: питание 24 вольта, порт Ethernet, маркировка MiMiSmart",
+    "caption": "Модуль CUARM5M: 24 В, Ethernet, монтаж на DIN-рейку в щит.",
+    "pages": [
+      "equipment/controllers"
+    ],
+    "src": "/brand/controller-cuarm5m-640.webp",
+    "w": 640,
+    "h": 823,
+    "srcset": "/brand/controller-cuarm5m-640.webp 640w",
+    "max": "/brand/controller-cuarm5m-640.webp",
+    "bg": "#f8f8f8"
+  },
+  {
+    "id": "sensor-smoke",
+    "alt": "Круглый дымовой извещатель на потолке, вокруг него поднимается дым",
+    "caption": "Дымовой извещатель заводит пожарную тревогу в общую логику: свет, вентиляция, оповещение.",
+    "pages": [
+      "equipment/sensors/smoke",
+      "functions/security/fire"
+    ],
+    "src": "/brand/sensor-smoke-760.webp",
+    "w": 760,
+    "h": 554,
+    "srcset": "/brand/sensor-smoke-760.webp 760w",
+    "max": "/brand/sensor-smoke-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "sensor-door",
+    "alt": "Приоткрытая дверь с датчиком открытия в верхнем углу коробки",
+    "caption": "Датчик открытия ставится в коробку двери и работает и на охрану, и на сценарии.",
+    "pages": [
+      "equipment/sensors/opening",
+      "functions/security/alarm"
+    ],
+    "src": "/brand/sensor-door-760.webp",
+    "w": 760,
+    "h": 554,
+    "srcset": "/brand/sensor-door-760.webp 760w",
+    "max": "/brand/sensor-door-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "thermostat-panel",
+    "alt": "Настенная стеклянная панель термостата: круговая шкала, показание 26 градусов, кнопки охлаждения, питания и авторежима",
+    "caption": "Настенная панель климата: уставка, режим и текущая температура зоны.",
+    "pages": [
+      "functions/climate",
+      "functions/climate/heating"
+    ],
+    "src": "/brand/thermostat-panel-760.webp",
+    "w": 760,
+    "h": 554,
+    "srcset": "/brand/thermostat-panel-760.webp 760w",
+    "max": "/brand/thermostat-panel-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "thermostat-round",
+    "alt": "Круглый настенный терморегулятор со светящимся ободом и показанием 20 градусов",
+    "caption": "Круглый терморегулятор для зоны, где панель избыточна.",
+    "pages": [
+      "equipment/sensors/temperature"
+    ],
+    "src": "/brand/thermostat-round-760.webp",
+    "w": 760,
+    "h": 715,
+    "srcset": "/brand/thermostat-round-760.webp 760w",
+    "max": "/brand/thermostat-round-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "ac-control",
+    "alt": "Настенный кондиционер, к нему тянется линия управления от небольшого устройства",
+    "caption": "Сплит-система заводится в общую логику и перестаёт жить отдельным пультом.",
+    "pages": [
+      "functions/climate/ventilation"
+    ],
+    "src": "/brand/ac-control-760.webp",
+    "w": 760,
+    "h": 554,
+    "srcset": "/brand/ac-control-760.webp 760w",
+    "max": "/brand/ac-control-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "light-scene",
+    "alt": "Линейный рисунок: торшер даёт световое пятно на пол, рядом окно со шторой",
+    "caption": "Свет собирается сценарием: торшер, подсветка, штора — одним действием.",
+    "pages": [
+      "functions/lighting",
+      "functions/lighting/dimming"
+    ],
+    "src": "/brand/light-scene-760.webp",
+    "w": 760,
+    "h": 614,
+    "srcset": "/brand/light-scene-760.webp 760w",
+    "max": "/brand/light-scene-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "curtains",
+    "alt": "Окно с раздвинутыми шторами на карнизе с приводом",
+    "caption": "Привод карниза входит в сценарий вместе со светом и климатом.",
+    "pages": [
+      "functions/curtains"
+    ],
+    "src": "/brand/curtains-760.webp",
+    "w": 760,
+    "h": 380,
+    "srcset": "/brand/curtains-760.webp 760w, /brand/curtains-1520.webp 1520w",
+    "max": "/brand/curtains-1520.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "cinema",
+    "alt": "Медиазона: большой экран на тумбе, над ним линия скрытой подсветки",
+    "caption": "Кинозона: экран, звук и свет включаются одной командой.",
+    "pages": [
+      "functions/multimedia"
+    ],
+    "src": "/brand/cinema-760.webp",
+    "w": 760,
+    "h": 380,
+    "srcset": "/brand/cinema-760.webp 760w, /brand/cinema-1520.webp 1520w",
+    "max": "/brand/cinema-1520.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "voice",
+    "alt": "Надписи «Алиса, открой шторы» и «Siri, выключи свет» на светлом фоне",
+    "caption": "Голосовые помощники подключаются поверх системы, а не вместо неё.",
+    "pages": [
+      "functions/multimedia",
+      "scenarios"
+    ],
+    "src": "/brand/voice-760.webp",
+    "w": 760,
+    "h": 691,
+    "srcset": "/brand/voice-760.webp 760w",
+    "max": "/brand/voice-760.webp",
+    "bg": "#e6dde2"
+  },
+  {
+    "id": "app-phone",
+    "alt": "Приложение MiMiSmart на телефоне: вкладки комнат, показания температуры и влажности, плитки управления устройствами",
+    "caption": "Приложение показывает комнаты и показания, а не список устройств.",
+    "pages": [
+      "equipment/app",
+      "functions"
+    ],
+    "src": "/brand/app-phone-760.webp",
+    "w": 760,
+    "h": 691,
+    "srcset": "/brand/app-phone-760.webp 760w",
+    "max": "/brand/app-phone-760.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "house-iso",
+    "alt": "Изометрический разрез современного загородного дома с тёплой подсветкой внутри",
+    "caption": "Дом целиком: инженерия проектируется на объект, а не на комнату.",
+    "pages": [
+      "solutions/house"
+    ],
+    "src": "/brand/house-iso-331.webp",
+    "w": 331,
+    "h": 200,
+    "srcset": "/brand/house-iso-331.webp 331w",
+    "max": "/brand/house-iso-331.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "room-iso",
+    "alt": "Изометрический разрез гостиной с медиазоной, диваном и обеденной группой",
+    "caption": "Зона за зоной: у каждой свой сценарий света, климата и штор.",
+    "pages": [
+      "scenarios"
+    ],
+    "src": "/brand/room-iso-200.webp",
+    "w": 200,
+    "h": 200,
+    "srcset": "/brand/room-iso-200.webp 200w",
+    "max": "/brand/room-iso-200.webp",
+    "bg": "#0b0d10"
+  },
+  {
+    "id": "gate-car",
+    "alt": "Автомобиль вид сверху на тёмном фоне",
+    "caption": "Приезд — это один сценарий: ворота, свет дорожки, снятие с охраны.",
+    "pages": [
+      "functions/security/access"
+    ],
+    "src": "/brand/gate-car-284.webp",
+    "w": 284,
+    "h": 621,
+    "srcset": "/brand/gate-car-284.webp 284w",
+    "max": "/brand/gate-car-284.webp",
+    "bg": "#0b0d10"
+  }
+]

@@ -1,0 +1,410 @@
+<title>Раскадровка тура по вилле</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&family=PT+Sans:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ink:#0d131e;
+  --panel:#151d2b;
+  --panel2:#1a2433;
+  --rule:#28344a;
+  --rule-soft:#1f2a3c;
+  --text:#e9edf4;
+  --muted:#8ea0b8;
+  --dim:#63748c;
+  --amber:#f0a848;
+  --amber-deep:#c47f2a;
+  --glass:#6aa9cf;
+  --ok:#5fbf8f;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--text);
+  font-family:"PT Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:48px 28px 80px}
+
+/* ── шапка ───────────────────────────────── */
+.slate{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:28px;
+  border-bottom:1px solid var(--rule);padding-bottom:26px;
+}
+.slate-main{flex:1 1 460px;min-width:0}
+.eyebrow{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--amber);margin:0 0 12px;
+}
+h1{
+  font-family:"Oswald","Arial Narrow",sans-serif;
+  font-weight:400;font-size:clamp(34px,5vw,52px);line-height:1.02;
+  letter-spacing:.005em;margin:0;text-wrap:balance;color:var(--text);
+}
+.lede{color:var(--muted);max-width:60ch;margin:16px 0 0;font-size:16px}
+.specs{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 26px;
+  flex:0 0 auto;align-self:flex-end;
+}
+.spec{border-top:1px solid var(--rule);padding:10px 0 2px}
+.spec b{
+  display:block;font-family:"Oswald",sans-serif;font-weight:400;
+  font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--text);
+}
+.spec span{
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);
+}
+
+/* ── секции ──────────────────────────────── */
+section{margin-top:56px}
+h2{
+  font-family:"Oswald",sans-serif;font-weight:400;font-size:13px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  margin:0 0 6px;
+}
+.sub{color:var(--dim);margin:0 0 22px;max-width:70ch;font-size:14px}
+
+/* ── план ────────────────────────────────── */
+.map{
+  background:var(--panel);border:1px solid var(--rule);border-radius:2px;
+  padding:18px;overflow-x:auto;
+}
+.map svg{display:block;min-width:900px;width:100%;height:auto}
+.legend{
+  display:flex;flex-wrap:wrap;gap:22px;margin-top:16px;
+  font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);
+}
+.legend i{display:inline-block;width:22px;height:0;border-top:2px solid;margin-right:7px;vertical-align:middle}
+
+/* ── контактный лист ─────────────────────── */
+.sheet{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 22px;
+  list-style:none;padding:0;margin:0;
+}
+.shot{
+  background:var(--panel);border:1px solid var(--rule);border-radius:2px;
+  display:flex;flex-direction:column;transition:border-color .18s,transform .18s;
+}
+.shot:hover,.shot:focus-within{border-color:var(--amber-deep);transform:translateY(-2px)}
+.frame{position:relative;display:block;background:#0a0f17;border-bottom:1px solid var(--rule-soft)}
+.frame svg{display:block;width:100%;height:auto}
+.num{
+  position:absolute;top:0;left:0;
+  font-family:"Oswald",sans-serif;font-size:13px;font-weight:600;
+  color:var(--ink);background:var(--amber);
+  padding:2px 9px 1px;font-variant-numeric:tabular-nums;
+}
+.meta{
+  display:flex;justify-content:space-between;gap:10px;
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--amber);
+  padding:10px 14px 0;
+}
+.meta .lens{color:var(--dim)}
+.shot h3{
+  font-family:"PT Sans",sans-serif;font-weight:700;font-size:15px;line-height:1.35;
+  margin:8px 14px 0;color:var(--text);text-wrap:balance;
+}
+.shot p{margin:7px 14px 0;color:var(--muted);font-size:13.5px;line-height:1.5}
+.cap{
+  margin:12px 14px 0;padding:9px 11px;border-left:2px solid var(--amber-deep);
+  background:var(--panel2);color:var(--text);font-size:13px;font-style:italic;
+}
+.goes{
+  margin:auto 14px 12px;padding-top:11px;
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--dim);
+  word-break:break-all;
+}
+.goes b{color:var(--glass);font-weight:400}
+
+/* ── вопросы ─────────────────────────────── */
+.asks{list-style:none;padding:0;margin:0;display:grid;gap:1px;background:var(--rule-soft)}
+.asks li{background:var(--panel);padding:16px 18px;display:flex;gap:16px;align-items:flex-start}
+.asks .k{
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--amber);flex:0 0 116px;padding-top:3px;
+}
+.asks .v{flex:1;min-width:0}
+.asks .v b{display:block;font-weight:700;margin-bottom:3px}
+.asks .v span{color:var(--muted);font-size:14px}
+
+.note{
+  margin-top:44px;padding:16px 18px;border:1px dashed var(--rule);
+  color:var(--dim);font-size:13.5px;max-width:76ch;
+}
+.note b{color:var(--muted)}
+
+@media (max-width:980px){ .sheet{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){
+  .wrap{padding:32px 16px 60px}
+  .sheet{grid-template-columns:1fr}
+  .specs{grid-template-columns:repeat(2,1fr);width:100%}
+  .asks li{flex-direction:column;gap:6px}
+  .asks .k{flex:none}
+}
+@media (prefers-reduced-motion:reduce){ .shot{transition:none} .shot:hover{transform:none} }
+</style>
+
+<div class="wrap">
+
+<header class="slate">
+  <div class="slate-main">
+    <p class="eyebrow">MiMiSmart · первый экран · на согласование</p>
+    <h1>Раскадровка тура по вилле</h1>
+    <p class="lede">Человек крутит колесо — камера едет по дому и останавливается на том, что мы ставим. Ниже маршрут камеры на плане и двенадцать остановок: что в кадре, как движется камера, какая подпись и куда ведёт.</p>
+  </div>
+  <div class="specs">
+    <div class="spec"><b>12</b><span>остановок</span></div>
+    <div class="spec"><b>300 vh</b><span>длина прокрутки</span></div>
+    <div class="spec"><b>180–240</b><span>кадров серии</span></div>
+    <div class="spec"><b>1,8 МБ</b><span>потолок на телефоне</span></div>
+  </div>
+</header>
+
+<section>
+  <h2>Маршрут камеры</h2>
+  <p class="sub">Один непрерывный проход: от общего плана участка сквозь ворота в дом, по жилой части в спа, потом в техническое помещение и в стену. Камера нигде не прыгает — между остановками она едет.</p>
+  <div class="map">
+  <svg viewBox="0 0 1200 430" role="img" aria-label="План участка и дома с траекторией камеры и двенадцатью пронумерованными остановками">
+    <defs>
+      <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#f0a848"/>
+      </marker>
+      <marker id="arw2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#8ea0b8"/>
+      </marker>
+    </defs>
+    <rect width="1200" height="430" fill="#0f1725"/>
+    <rect x="16" y="16" width="1168" height="398" fill="none" stroke="#243349" stroke-dasharray="6 6"/>
+    <g fill="#1b2a3d">
+      <circle cx="90" cy="80" r="20"/><circle cx="150" cy="55" r="14"/><circle cx="70" cy="370" r="17"/>
+      <circle cx="180" cy="390" r="12"/><circle cx="320" cy="66" r="16"/><circle cx="262" cy="118" r="11"/>
+      <circle cx="330" cy="376" r="14"/>
+    </g>
+    <line x1="200" y1="16" x2="200" y2="255" stroke="#33445e" stroke-width="3"/>
+    <line x1="200" y1="345" x2="200" y2="414" stroke="#33445e" stroke-width="3"/>
+    <line x1="200" y1="256" x2="200" y2="344" stroke="#f0a848" stroke-width="5"/>
+    <text x="150" y="240" fill="#63748c" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="end">ворота</text>
+    <path d="M200 300 L430 300" stroke="#1c2942" stroke-width="26" stroke-linecap="square"/>
+    <rect x="430" y="60" width="720" height="300" fill="#16202f" stroke="#33445e" stroke-width="2"/>
+    <g stroke="#2b3a52" stroke-width="1.6" fill="none">
+      <path d="M700 60 L700 360"/><path d="M950 60 L950 360"/>
+      <path d="M430 170 L700 170"/><path d="M700 200 L950 200"/><path d="M950 210 L1150 210"/>
+    </g>
+    <line x1="700" y1="360" x2="1150" y2="360" stroke="#6aa9cf" stroke-width="4"/>
+    <text x="925" y="380" fill="#4b6b85" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">панорамное остекление</text>
+    <g fill="#55697f" font-family="JetBrains Mono, monospace" font-size="12">
+      <text x="444" y="84">щитовая</text>
+      <text x="444" y="194">холл</text>
+      <text x="714" y="84">кухня</text>
+      <text x="714" y="224">гостиная</text>
+      <text x="964" y="84">кинозал</text>
+      <text x="964" y="234">спа · хаммам</text>
+    </g>
+    <path d="M1060 270 L565 115" stroke="#8ea0b8" stroke-width="1.6" stroke-dasharray="2 6"
+          fill="none" opacity=".75" marker-end="url(#arw2)"/>
+    <text x="812" y="186" fill="#8ea0b8" font-family="JetBrains Mono, monospace" font-size="11"
+          text-anchor="middle" transform="rotate(-17 812 186)">склейка</text>
+    <path d="M70 250 C118 262 158 280 200 300 L420 300 C450 300 476 300 500 300
+             C528 300 556 284 570 262 L585 240 C602 214 628 186 668 166 L720 148
+             C740 140 754 138 760 140 C772 146 776 172 780 206 L790 270
+             C796 292 826 300 858 300 L880 300 C900 300 916 314 930 330"
+          fill="none" stroke="#f0a848" stroke-width="2.6" stroke-linecap="round"
+          stroke-dasharray="9 7" opacity=".95"/>
+    <path d="M930 330 C972 330 1008 288 1026 220 L1050 130"
+          fill="none" stroke="#f0a848" stroke-width="2.6" stroke-linecap="round"
+          stroke-dasharray="9 7" opacity=".95"/>
+    <path d="M1050 130 C1082 150 1090 200 1080 236 L1060 270"
+          fill="none" stroke="#f0a848" stroke-width="2.6" stroke-linecap="round"
+          stroke-dasharray="9 7" opacity=".95"/>
+    <path d="M565 115 C580 126 592 146 600 170"
+          fill="none" stroke="#f0a848" stroke-width="2.6" stroke-linecap="round"
+          stroke-dasharray="9 7" opacity=".95" marker-end="url(#arw)"/>
+    <g font-family="Oswald, sans-serif" font-size="15" font-weight="600" text-anchor="middle"><g id="m1"><circle cx="70" cy="250" r="14" fill="#f0a848"/><text x="70" y="256" fill="#0d131e">1</text></g><g id="m2"><circle cx="200" cy="300" r="14" fill="#f0a848"/><text x="200" y="306" fill="#0d131e">2</text></g><g id="m3"><circle cx="500" cy="300" r="14" fill="#f0a848"/><text x="500" y="306" fill="#0d131e">3</text></g><g id="m4"><circle cx="585" cy="240" r="14" fill="#f0a848"/><text x="585" y="246" fill="#0d131e">4</text></g><g id="m5"><circle cx="760" cy="140" r="14" fill="#f0a848"/><text x="760" y="146" fill="#0d131e">5</text></g><g id="m6"><circle cx="790" cy="270" r="14" fill="#f0a848"/><text x="790" y="276" fill="#0d131e">6</text></g><g id="m7"><circle cx="880" cy="300" r="14" fill="#f0a848"/><text x="880" y="306" fill="#0d131e">7</text></g><g id="m8"><circle cx="930" cy="330" r="14" fill="#f0a848"/><text x="930" y="336" fill="#0d131e">8</text></g><g id="m9"><circle cx="1050" cy="130" r="14" fill="#f0a848"/><text x="1050" y="136" fill="#0d131e">9</text></g><g id="m10"><circle cx="1060" cy="270" r="14" fill="#f0a848"/><text x="1060" y="276" fill="#0d131e">10</text></g><g id="m11"><circle cx="565" cy="115" r="14" fill="#f0a848"/><text x="565" y="121" fill="#0d131e">11</text></g><g id="m12"><circle cx="600" cy="170" r="14" fill="#f0a848"/><text x="600" y="176" fill="#0d131e">12</text></g></g>
+  </svg>
+  </div>
+  <p class="legend">
+    <span><i style="border-color:#f0a848"></i>траектория камеры</span>
+    <span><i style="border-color:#6aa9cf"></i>панорамное остекление</span>
+    <span><i style="border-color:#8ea0b8;border-top-style:dotted"></i>склейка без движения</span>
+    <span><i style="border-color:#33445e"></i>стены и забор</span>
+    <span>Наведите на кадр ниже — точка на плане подсветится</span>
+  </p>
+</section>
+
+<section>
+  <h2>Двенадцать кадров</h2>
+  <p class="sub">Схемы композиции и движения, не рендеры: по ним согласуется маршрут, рендеры делаются после. Подпись под каждым кадром — настоящий текст поверх сцены, его читает и поиск, и экранный диктор.</p>
+  <ol class="sheet" id="sheet">
+    <li class="shot" data-stop="1">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 1: Общий план виллы в сумерках"><defs><linearGradient id="sk1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl1" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="url(#sk1)"/><circle cx="120" cy="20" r="26" fill="#3a6a95" opacity=".25"/><rect y="58" width="160" height="32" fill="#0c141d"/><g fill="#0a1119"><path d="M8 58 L14 30 L20 58z"/><path d="M18 58 L24 38 L30 58z"/><path d="M140 58 L147 26 L154 58z"/><path d="M130 58 L136 40 L142 58z"/></g><rect x="38" y="32" width="54" height="26" fill="#080d15"/><rect x="88" y="40" width="34" height="18" fill="#0b111a"/><rect x="36" y="30" width="58" height="3" fill="#101822"/><g fill="#f0a848"><rect x="43" y="38" width="16" height="9"/><rect x="63" y="38" width="10" height="9"/><rect x="77" y="40" width="9" height="7" opacity=".8"/><rect x="94" y="45" width="22" height="8" opacity=".9"/></g><rect x="42" y="49" width="76" height="1.4" fill="#f5c479" opacity=".5"/><g fill="#f0a848"><circle cx="30" cy="70" r="1.6"/><circle cx="52" cy="74" r="1.6"/><circle cx="78" cy="78" r="1.6"/><circle cx="106" cy="82" r="1.6"/></g><g fill="#f0a848" opacity=".22"><rect x="29" y="71" width="2" height="9"/><rect x="51" y="75" width="2" height="9"/><rect x="77" y="79" width="2" height="8"/><rect x="105" y="83" width="2" height="6"/></g><rect x="42" y="59" width="76" height="10" fill="#f0a848" opacity=".07"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><rect x="14" y="10" width="132" height="70" stroke-dasharray="4 4" opacity=".5"/><rect x="46" y="27" width="68" height="36" stroke-dasharray="4 4"/><path d="M24 20 L40 30 M136 20 L120 30 M24 70 L40 60 M136 70 L120 60"/><path d="M36 27 L41 30 L36 33 M124 27 L119 30 L124 33"/></g></svg>
+        <span class="num">01</span>
+      </span>
+      <span class="meta"><span class="move">наезд</span><span class="lens">35 мм</span></span>
+      <h3>Общий план виллы в сумерках</h3>
+      <p>Дом снаружи, ландшафтная подсветка загорается сама, мокрая дорожка отражает свет.</p>
+      <p class="cap">Свет участка включается по датчику освещённости, а не по часам</p>
+      <p class="goes">ведёт в <b>/functions/lighting</b></p>
+    </li>
+    <li class="shot" data-stop="2">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 2: Ворота отъезжают, камера входит на участок"><defs><linearGradient id="sk2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl2" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="url(#sk2)"/><rect y="56" width="160" height="34" fill="#0c141d"/><rect x="0" y="18" width="58" height="38" fill="#0a1018"/><g stroke="#1b2534" stroke-width="1.5"><path d="M8 18 L8 56 M18 18 L18 56 M28 18 L28 56 M38 18 L38 56 M48 18 L48 56"/></g><rect x="84" y="18" width="52" height="38" fill="#0a1018"/><g stroke="#1b2534" stroke-width="1.5"><path d="M92 18 L92 56 M102 18 L102 56 M112 18 L112 56 M122 18 L122 56 M132 18 L132 56"/></g><g stroke="#f0a848" stroke-width="1" opacity=".55"><path d="M62 26 L78 26 M62 34 L82 34 M62 42 L76 42"/></g><path d="M58 90 L74 56 L96 56 L136 90z" fill="#f0a848" opacity=".1"/><g fill="#f0a848"><circle cx="70" cy="64" r="2"/><circle cx="88" cy="70" r="2"/><circle cx="110" cy="78" r="2"/></g><circle cx="128" cy="86" r="2" fill="#4a5f79"/><rect x="60" y="60" width="60" height="26" fill="#f0a848" opacity=".06"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><rect x="14" y="10" width="132" height="70" stroke-dasharray="3 5" opacity=".35"/><path d="M20 45 L134 45" stroke-dasharray="6 5"/><path d="M126 39 L136 45 L126 51"/></g></svg>
+        <span class="num">02</span>
+      </span>
+      <span class="meta"><span class="move">проезд сквозь ворота</span><span class="lens">35 мм</span></span>
+      <h3>Ворота отъезжают, камера входит на участок</h3>
+      <p>Створка уходит вбок, светильники дорожки зажигаются один за другим по ходу машины.</p>
+      <p class="cap">Ворота и свет дорожки — один сценарий приезда</p>
+      <p class="goes">ведёт в <b>/functions/security/access</b></p>
+    </li>
+    <li class="shot" data-stop="3">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 3: Холл, жильцы входят"><defs><linearGradient id="sk3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl3" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#141b26"/><rect y="62" width="160" height="28" fill="#0e141d"/><rect width="160" height="10" fill="#0d131c"/><rect x="104" y="20" width="56" height="42" fill="#101823"/><g fill="#1a2430"><rect x="112" y="54" width="46" height="8"/><rect x="118" y="46" width="40" height="8"/><rect x="124" y="38" width="34" height="8"/><rect x="130" y="30" width="28" height="8"/></g><ellipse cx="46" cy="62" rx="30" ry="7" fill="url(#gl3)"/><ellipse cx="96" cy="66" rx="26" ry="6" fill="url(#gl3)"/><g fill="#f0a848"><rect x="30" y="9" width="32" height="1.6"/><rect x="80" y="9" width="26" height="1.6"/></g><g fill="#f0a848" opacity=".12"><path d="M30 11 L62 11 L74 62 L18 62z"/></g><g fill="#070b11"><path d="M52 34 C58 34 60 40 60 46 L60 66 L44 66 L44 46 C44 40 46 34 52 34z"/><circle cx="52" cy="29" r="5"/><path d="M74 38 C79 38 81 43 81 48 L81 66 L67 66 L67 48 C67 43 69 38 74 38z"/><circle cx="74" cy="33" r="4.4"/></g><rect x="14" y="24" width="10" height="38" fill="#0c121b"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><path d="M34 74 C60 68 96 44 122 22" stroke-dasharray="5 4"/><path d="M114 22 L124 20 L122 30"/></g></svg>
+        <span class="num">03</span>
+      </span>
+      <span class="meta"><span class="move">наезд с подъёмом</span><span class="lens">35 мм</span></span>
+      <h3>Холл, жильцы входят</h3>
+      <p>Свет собирается слоями: сначала дежурный, потом рабочий. Лиц крупно не даём.</p>
+      <p class="cap">Сценарий «Я пришёл»: свет, климат, снятие с охраны</p>
+      <p class="goes">ведёт в <b>/scenarios</b></p>
+    </li>
+    <li class="shot" data-stop="4">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 4: Стеклянная панель выключателя"><defs><linearGradient id="sk4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl4" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#1a232f"/><rect x="0" y="0" width="46" height="90" fill="#151d28"/><circle cx="22" cy="28" r="20" fill="#f0a848" opacity=".06"/><rect x="54" y="14" width="50" height="62" rx="2" fill="#0b1017" stroke="#2c3a4e" stroke-width="1.2"/><g fill="#f0a848"><rect x="62" y="26" width="20" height="1.6"/><rect x="62" y="42" width="20" height="1.6"/><rect x="62" y="58" width="20" height="1.6"/></g><g fill="#2f3f55"><circle cx="92" cy="43" r="2.4"/><circle cx="92" cy="59" r="2.4"/></g><circle cx="92" cy="27" r="2.4" fill="#f0a848"/><path d="M160 90 L160 34 C142 36 128 44 118 54 C112 60 110 70 116 78 C122 86 138 90 152 90z" fill="#080c12"/><path d="M118 54 C124 50 130 48 136 47 L138 52 C132 53 126 55 121 58z" fill="#0e141c"/><rect x="46" y="6" width="66" height="78" fill="url(#gl4)" opacity=".45"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><rect x="14" y="10" width="132" height="70" stroke-dasharray="4 4" opacity=".5"/><rect x="46" y="27" width="68" height="36" stroke-dasharray="4 4"/><path d="M24 20 L40 30 M136 20 L120 30 M24 70 L40 60 M136 70 L120 60"/><path d="M36 27 L41 30 L36 33 M124 27 L119 30 L124 33"/></g></svg>
+        <span class="num">04</span>
+      </span>
+      <span class="meta"><span class="move">наезд на макро</span><span class="lens">50 мм</span></span>
+      <h3>Стеклянная панель выключателя</h3>
+      <p>Рука касается клавиши, фон уходит в расфокус. Надписей на панели нет.</p>
+      <p class="cap">Одна клавиша меняет весь свет в зоне</p>
+      <p class="goes">ведёт в <b>/functions/lighting/dimming</b></p>
+    </li>
+    <li class="shot" data-stop="5">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 5: Датчик присутствия и датчик протечки"><defs><linearGradient id="sk5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl5" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#151d28"/><rect width="160" height="16" fill="#101820"/><circle cx="40" cy="16" r="5" fill="#0b1119" stroke="#33445e"/><circle cx="40" cy="16" r="2" fill="#5fbf8f"/><g stroke="#5fbf8f" stroke-width=".9" fill="none" opacity=".4"><path d="M22 34 C22 24 56 24 58 34"/><path d="M14 44 C14 28 64 28 66 44"/></g><rect y="70" width="160" height="20" fill="#0f151d"/><rect y="68" width="160" height="2.6" fill="#1e2a38"/><rect x="96" y="16" width="52" height="54" fill="#121a24"/><rect x="96" y="14" width="52" height="4" fill="#1b2532"/><path d="M118 18 L118 46 C118 52 124 54 130 54" stroke="#3d4f66" stroke-width="3" fill="none"/><circle cx="130" cy="54" r="5" fill="#1e2a38" stroke="#f0a848" stroke-width="1.4"/><rect x="128" y="46" width="4" height="8" fill="#f0a848"/><ellipse cx="112" cy="69" rx="7" ry="1.8" fill="#2b3a4d"/><ellipse cx="112" cy="68.4" rx="5" ry="1.2" fill="#f0a848"/><path d="M104 78 L120 78" stroke="#f0a848" stroke-width=".8" stroke-dasharray="2 2" opacity=".6"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><path d="M146 16 L146 74"/><path d="M141 66 L146 76 L151 66"/><path d="M142 16 L150 16"/></g></svg>
+        <span class="num">05</span>
+      </span>
+      <span class="meta"><span class="move">наклон вниз</span><span class="lens">50 мм</span></span>
+      <h3>Датчик присутствия и датчик протечки</h3>
+      <p>Сверху потолочный датчик, дальше камера опускается под мойку: кран с приводом и датчик протечки, утопленный заподлицо в пол.</p>
+      <p class="cap">Протечка: кран закрывается за секунды, без человека</p>
+      <p class="goes">ведёт в <b>/functions/security/leaks</b></p>
+    </li>
+    <li class="shot" data-stop="6">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 6: Уборка: свет на максимум"><defs><linearGradient id="sk6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl6" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#1d2733"/><rect width="160" height="12" fill="#26313d"/><rect y="66" width="160" height="24" fill="#161e28"/><g fill="#f0a848" opacity=".9"><rect x="16" y="5" width="34" height="2"/><rect x="62" y="5" width="34" height="2"/><rect x="108" y="5" width="34" height="2"/></g><g fill="#f0a848" opacity=".13"><path d="M16 8 L50 8 L60 66 L6 66z"/><path d="M62 8 L96 8 L102 66 L56 66z"/><path d="M108 8 L142 8 L152 66 L100 66z"/></g><rect x="112" y="26" width="26" height="18" rx="1.5" fill="#0a1017" stroke="#3a4d66"/><rect x="115" y="29" width="20" height="12" fill="#f0a848" opacity=".75"/><g fill="#0b1119"><path d="M84 36 C90 36 92 42 92 48 L92 70 L76 70 L76 48 C76 42 78 36 84 36z"/><circle cx="84" cy="30" r="5.4"/><path d="M92 44 L108 34 L110 38 L94 48z"/></g><rect x="44" y="52" width="16" height="18" rx="2" fill="#0f1720"/><circle cx="48" cy="72" r="2.4" fill="#0a0f16"/><circle cx="56" cy="72" r="2.4" fill="#0a0f16"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><path d="M26 70 C50 50 110 50 134 70" stroke-dasharray="5 4"/><path d="M126 64 L136 71 L124 74"/></g></svg>
+        <span class="num">06</span>
+      </span>
+      <span class="meta"><span class="move">облёт</span><span class="lens">35 мм</span></span>
+      <h3>Уборка: свет на максимум</h3>
+      <p>Домработница у настенной панели, комната залита полным светом.</p>
+      <p class="cap">Режим «Уборка»: полный свет, ложных тревог по протечке нет</p>
+      <p class="goes">ведёт в <b>/scenarios</b></p>
+    </li>
+    <li class="shot" data-stop="7">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 7: Климат: конвектор, диффузоры, термостат"><defs><linearGradient id="sk7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl7" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#161e2a"/><rect width="160" height="14" fill="#111925"/><g fill="#2c3a4e"><rect x="24" y="10" width="34" height="2.4"/><rect x="70" y="10" width="34" height="2.4"/></g><g stroke="#6aa9cf" stroke-width=".9" fill="none" opacity=".5"><path d="M30 15 C30 26 24 30 22 40"/><path d="M46 15 C46 28 40 32 38 44"/><path d="M76 15 C76 26 82 30 84 40"/><path d="M96 15 C96 28 100 32 102 42"/></g><rect x="0" y="14" width="52" height="56" fill="#0e1a26"/><rect x="0" y="14" width="52" height="56" fill="#6aa9cf" opacity=".13"/><rect x="50" y="14" width="2.4" height="56" fill="#243349"/><rect y="70" width="160" height="20" fill="#101822"/><rect x="4" y="60" width="42" height="10" rx="1" fill="#0a1017"/><g stroke="#f0a848" stroke-width=".8" opacity=".55"><path d="M8 62 L8 68 M13 62 L13 68 M18 62 L18 68 M23 62 L23 68 M28 62 L28 68 M33 62 L33 68 M38 62 L38 68 M43 62 L43 68"/></g><g stroke="#f0a848" stroke-width=".9" fill="none" opacity=".45"><path d="M24 58 C24 48 30 44 32 34"/><path d="M14 58 C14 50 18 46 20 38"/></g><rect x="120" y="28" width="20" height="14" rx="1.5" fill="#0a1017" stroke="#3a4d66"/><rect x="123" y="31" width="14" height="8" fill="#f0a848" opacity=".8"/><g fill="#0b1119"><path d="M104 36 C110 36 112 42 112 48 L112 74 L96 74 L96 48 C96 42 98 36 104 36z"/><circle cx="104" cy="30" r="5.4"/><path d="M112 42 L124 36 L126 40 L114 46z"/></g><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><path d="M30 78 L130 78"/><path d="M122 73 L132 78 L122 83"/><path d="M30 74 L30 82"/></g></svg>
+        <span class="num">07</span>
+      </span>
+      <span class="meta"><span class="move">панорама вправо</span><span class="lens">35 мм</span></span>
+      <h3>Климат: конвектор, диффузоры, термостат</h3>
+      <p>От окна с конвектором в полу — вдоль щелевых диффузоров в потолке — к мужчине у термостата.</p>
+      <p class="cap">Климат по зонам: температура, влажность и CO₂ в одном контуре</p>
+      <p class="goes">ведёт в <b>/functions/climate</b></p>
+    </li>
+    <li class="shot" data-stop="8">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 8: Рулонные шторы идут вниз"><defs><linearGradient id="sk8" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl8" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="url(#sk8)"/><rect y="66" width="160" height="24" fill="#0d141d"/><g fill="#0a1119"><path d="M4 66 L10 44 L16 66z"/><path d="M140 66 L148 40 L156 66z"/></g><rect x="10" y="8" width="140" height="58" fill="#6aa9cf" opacity=".1"/><g fill="#243349"><rect x="8" y="6" width="144" height="4"/><rect x="8" y="64" width="144" height="4"/><rect x="56" y="8" width="3" height="56"/><rect x="102" y="8" width="3" height="56"/></g><rect x="10" y="10" width="140" height="26" fill="#101a26" opacity=".92"/><rect x="10" y="34" width="140" height="2.6" fill="#33445e"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".8"><path d="M40 42 L40 54"/><path d="M36 50 L40 56 L44 50"/><path d="M120 42 L120 54"/><path d="M116 50 L120 56 L124 50"/></g><rect x="10" y="60" width="140" height="6" fill="#f0a848" opacity=".08"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><path d="M18 14 L18 26 M18 14 L30 14 M142 14 L142 26 M142 14 L130 14"/><path d="M18 76 L18 64 M18 76 L30 76 M142 76 L142 64 M142 76 L130 76"/></g></svg>
+        <span class="num">08</span>
+      </span>
+      <span class="meta"><span class="move">статичный кадр</span><span class="lens">35 мм</span></span>
+      <h3>Рулонные шторы идут вниз</h3>
+      <p>Камера стоит, движется только полотно по панорамному остеклению.</p>
+      <p class="cap">Шторы работают в сценарии, а не отдельным пультом</p>
+      <p class="goes">ведёт в <b>/functions/curtains</b></p>
+    </li>
+    <li class="shot" data-stop="9">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 9: Кинозал, в коридоре — интерком"><defs><linearGradient id="sk9" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl9" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#0b1017"/><rect x="8" y="10" width="98" height="46" fill="#1d3a52"/><rect x="8" y="10" width="98" height="46" fill="#6aa9cf" opacity=".35"/><rect x="8" y="10" width="98" height="46" fill="url(#gl9)" opacity=".4"/><path d="M8 56 L106 56 L118 90 L0 90z" fill="#6aa9cf" opacity=".07"/><g fill="#070b11"><rect x="4" y="72" width="30" height="18" rx="4"/><rect x="42" y="74" width="30" height="16" rx="4"/><rect x="80" y="72" width="28" height="18" rx="4"/></g><rect x="116" y="0" width="4" height="90" fill="#151d28"/><rect x="120" y="0" width="40" height="90" fill="#131a24"/><rect x="130" y="26" width="20" height="26" rx="1.5" fill="#0a1017" stroke="#3a4d66"/><rect x="133" y="29" width="14" height="14" fill="#6aa9cf" opacity=".6"/><circle cx="140" cy="48" r="2" fill="#f0a848"/><ellipse cx="140" cy="80" rx="16" ry="4" fill="url(#gl9)"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><rect x="46" y="27" width="68" height="36" stroke-dasharray="4 4" opacity=".5"/><rect x="14" y="10" width="132" height="70" stroke-dasharray="4 4"/><path d="M40 30 L24 20 M120 30 L136 20 M40 60 L24 70 M120 60 L136 70"/><path d="M24 26 L24 20 L30 20 M136 26 L136 20 L130 20"/></g></svg>
+        <span class="num">09</span>
+      </span>
+      <span class="meta"><span class="move">отъезд</span><span class="lens">35 мм</span></span>
+      <h3>Кинозал, в коридоре — интерком</h3>
+      <p>Экран светится, камера отъезжает и открывает коридор с вызывной панелью.</p>
+      <p class="cap">Кино, мультирум и интерком — одна система, одна кнопка</p>
+      <p class="goes">ведёт в <b>/functions/multimedia</b></p>
+    </li>
+    <li class="shot" data-stop="10">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 10: Хаммам и зона отдыха"><defs><linearGradient id="sk10" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl10" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#131a22"/><path d="M40 90 L40 34 C40 20 56 12 74 12 C92 12 108 20 108 34 L108 90z" fill="#1a222c"/><path d="M46 90 L46 36 C46 24 58 18 74 18 C90 18 102 24 102 36 L102 90z" fill="#0f151d"/><rect x="46" y="62" width="56" height="7" fill="#22303f"/><rect x="46" y="60" width="56" height="2" fill="#f0a848" opacity=".5"/><ellipse cx="74" cy="30" rx="22" ry="9" fill="url(#gl10)"/><g fill="#c9d6e2" opacity=".1"><ellipse cx="60" cy="52" rx="26" ry="9"/><ellipse cx="92" cy="44" rx="30" ry="8"/><ellipse cx="74" cy="70" rx="34" ry="8"/></g><g fill="#c9d6e2" opacity=".07"><ellipse cx="40" cy="60" rx="24" ry="10"/><ellipse cx="118" cy="56" rx="26" ry="10"/></g><rect x="0" y="76" width="160" height="14" fill="#0c1219"/><rect x="0" y="75" width="160" height="1.6" fill="#f0a848" opacity=".2"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><rect x="14" y="10" width="132" height="70" stroke-dasharray="4 4" opacity=".5"/><rect x="46" y="27" width="68" height="36" stroke-dasharray="4 4"/><path d="M24 20 L40 30 M136 20 L120 30 M24 70 L40 60 M136 70 L120 60"/><path d="M36 27 L41 30 L36 33 M124 27 L119 30 L124 33"/></g></svg>
+        <span class="num">10</span>
+      </span>
+      <span class="meta"><span class="move">медленный наезд</span><span class="lens">50 мм</span></span>
+      <h3>Хаммам и зона отдыха</h3>
+      <p>Пар слоями, тёплый низкий свет, подсветка лавки.</p>
+      <p class="cap">Спа-зона: пар, свет и вентиляция связаны между собой</p>
+      <p class="goes">ведёт в <b>/functions/climate/ventilation</b></p>
+    </li>
+    <li class="shot" data-stop="11">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 11: Щит автоматизации и электрощит"><defs><linearGradient id="sk11" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl11" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#161e29"/><rect x="8" y="8" width="66" height="74" fill="#0d141d" stroke="#33445e"/><rect x="86" y="8" width="66" height="74" fill="#0d141d" stroke="#33445e"/><g fill="#22303f"><rect x="13" y="14" width="56" height="7"/><rect x="13" y="26" width="56" height="7"/><rect x="13" y="38" width="56" height="7"/><rect x="13" y="50" width="56" height="7"/><rect x="13" y="62" width="56" height="7"/><rect x="91" y="14" width="56" height="7"/><rect x="91" y="26" width="56" height="7"/><rect x="91" y="38" width="56" height="7"/><rect x="91" y="50" width="56" height="7"/></g><g fill="#41546c"><rect x="15.0" y="15" width="3" height="5"/><rect x="19.4" y="15" width="3" height="5"/><rect x="23.8" y="15" width="3" height="5"/><rect x="28.2" y="15" width="3" height="5"/><rect x="32.6" y="15" width="3" height="5"/><rect x="37.0" y="15" width="3" height="5"/><rect x="41.4" y="15" width="3" height="5"/><rect x="45.8" y="15" width="3" height="5"/><rect x="50.2" y="15" width="3" height="5"/><rect x="54.6" y="15" width="3" height="5"/><rect x="59.0" y="15" width="3" height="5"/><rect x="63.4" y="15" width="3" height="5"/><rect x="15.0" y="27" width="3" height="5"/><rect x="19.4" y="27" width="3" height="5"/><rect x="23.8" y="27" width="3" height="5"/><rect x="28.2" y="27" width="3" height="5"/><rect x="32.6" y="27" width="3" height="5"/><rect x="37.0" y="27" width="3" height="5"/><rect x="41.4" y="27" width="3" height="5"/><rect x="45.8" y="27" width="3" height="5"/><rect x="50.2" y="27" width="3" height="5"/><rect x="54.6" y="27" width="3" height="5"/><rect x="59.0" y="27" width="3" height="5"/><rect x="63.4" y="27" width="3" height="5"/><rect x="15.0" y="39" width="3" height="5"/><rect x="19.4" y="39" width="3" height="5"/><rect x="23.8" y="39" width="3" height="5"/><rect x="28.2" y="39" width="3" height="5"/><rect x="32.6" y="39" width="3" height="5"/><rect x="37.0" y="39" width="3" height="5"/><rect x="41.4" y="39" width="3" height="5"/><rect x="45.8" y="39" width="3" height="5"/><rect x="50.2" y="39" width="3" height="5"/><rect x="54.6" y="39" width="3" height="5"/><rect x="59.0" y="39" width="3" height="5"/><rect x="63.4" y="39" width="3" height="5"/><rect x="15.0" y="51" width="3" height="5"/><rect x="19.4" y="51" width="3" height="5"/><rect x="23.8" y="51" width="3" height="5"/><rect x="28.2" y="51" width="3" height="5"/><rect x="32.6" y="51" width="3" height="5"/><rect x="37.0" y="51" width="3" height="5"/><rect x="41.4" y="51" width="3" height="5"/><rect x="45.8" y="51" width="3" height="5"/><rect x="50.2" y="51" width="3" height="5"/><rect x="54.6" y="51" width="3" height="5"/><rect x="59.0" y="51" width="3" height="5"/><rect x="63.4" y="51" width="3" height="5"/><rect x="15.0" y="63" width="3" height="5"/><rect x="19.4" y="63" width="3" height="5"/><rect x="23.8" y="63" width="3" height="5"/><rect x="28.2" y="63" width="3" height="5"/><rect x="32.6" y="63" width="3" height="5"/><rect x="37.0" y="63" width="3" height="5"/><rect x="41.4" y="63" width="3" height="5"/><rect x="45.8" y="63" width="3" height="5"/><rect x="50.2" y="63" width="3" height="5"/><rect x="54.6" y="63" width="3" height="5"/><rect x="59.0" y="63" width="3" height="5"/><rect x="63.4" y="63" width="3" height="5"/><rect x="93.0" y="15" width="3" height="5"/><rect x="97.4" y="15" width="3" height="5"/><rect x="101.8" y="15" width="3" height="5"/><rect x="106.2" y="15" width="3" height="5"/><rect x="110.6" y="15" width="3" height="5"/><rect x="115.0" y="15" width="3" height="5"/><rect x="119.4" y="15" width="3" height="5"/><rect x="123.8" y="15" width="3" height="5"/><rect x="128.2" y="15" width="3" height="5"/><rect x="132.6" y="15" width="3" height="5"/><rect x="137.0" y="15" width="3" height="5"/><rect x="141.4" y="15" width="3" height="5"/><rect x="93.0" y="27" width="3" height="5"/><rect x="97.4" y="27" width="3" height="5"/><rect x="101.8" y="27" width="3" height="5"/><rect x="106.2" y="27" width="3" height="5"/><rect x="110.6" y="27" width="3" height="5"/><rect x="115.0" y="27" width="3" height="5"/><rect x="119.4" y="27" width="3" height="5"/><rect x="123.8" y="27" width="3" height="5"/><rect x="128.2" y="27" width="3" height="5"/><rect x="132.6" y="27" width="3" height="5"/><rect x="137.0" y="27" width="3" height="5"/><rect x="141.4" y="27" width="3" height="5"/><rect x="93.0" y="39" width="3" height="5"/><rect x="97.4" y="39" width="3" height="5"/><rect x="101.8" y="39" width="3" height="5"/><rect x="106.2" y="39" width="3" height="5"/><rect x="110.6" y="39" width="3" height="5"/><rect x="115.0" y="39" width="3" height="5"/><rect x="119.4" y="39" width="3" height="5"/><rect x="123.8" y="39" width="3" height="5"/><rect x="128.2" y="39" width="3" height="5"/><rect x="132.6" y="39" width="3" height="5"/><rect x="137.0" y="39" width="3" height="5"/><rect x="141.4" y="39" width="3" height="5"/><rect x="93.0" y="51" width="3" height="5"/><rect x="97.4" y="51" width="3" height="5"/><rect x="101.8" y="51" width="3" height="5"/><rect x="106.2" y="51" width="3" height="5"/><rect x="110.6" y="51" width="3" height="5"/><rect x="115.0" y="51" width="3" height="5"/><rect x="119.4" y="51" width="3" height="5"/><rect x="123.8" y="51" width="3" height="5"/><rect x="128.2" y="51" width="3" height="5"/><rect x="132.6" y="51" width="3" height="5"/><rect x="137.0" y="51" width="3" height="5"/><rect x="141.4" y="51" width="3" height="5"/></g><rect x="91" y="62" width="56" height="7" fill="#1a2531" stroke="#f0a848" stroke-width=".8" stroke-dasharray="3 2"/><g fill="#f0a848"><circle cx="20" cy="17.5" r="1.2"/><circle cx="20" cy="29.5" r="1.2"/><circle cx="20" cy="41.5" r="1.2"/></g><g fill="#5b6f88"><rect x="13" y="22.5" width="24" height="1.6"/><rect x="13" y="34.5" width="24" height="1.6"/><rect x="13" y="46.5" width="24" height="1.6"/><rect x="13" y="58.5" width="24" height="1.6"/><rect x="13" y="70.5" width="24" height="1.6"/><rect x="91" y="22.5" width="24" height="1.6"/><rect x="91" y="34.5" width="24" height="1.6"/><rect x="91" y="46.5" width="24" height="1.6"/><rect x="91" y="58.5" width="24" height="1.6"/></g><rect x="8" y="8" width="66" height="74" fill="url(#gl11)" opacity=".3"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><path d="M30 78 L130 78"/><path d="M122 73 L132 78 L122 83"/><path d="M30 74 L30 82"/></g></svg>
+        <span class="num">11</span>
+      </span>
+      <span class="meta"><span class="move">проводка вбок</span><span class="lens">35 мм</span></span>
+      <h3>Щит автоматизации и электрощит</h3>
+      <p>Двери открыты, ряды подписаны, нижний ряд справа пустой — это резерв.</p>
+      <p class="cap">Инженерный порядок: подписанные линии, резерв слотов</p>
+      <p class="goes">ведёт в <b>/equipment</b></p>
+    </li>
+    <li class="shot" data-stop="12">
+      <span class="frame">
+        <svg viewBox="0 0 160 90" role="img" aria-label="Кадр 12: Рентген стены"><defs><linearGradient id="sk12" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16273f"/><stop offset="1" stop-color="#2f5c8a"/></linearGradient><radialGradient id="gl12" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0a848" stop-opacity=".55"/><stop offset="1" stop-color="#f0a848" stop-opacity="0"/></radialGradient></defs><rect width="160" height="90" fill="#161e29"/><rect x="0" y="0" width="52" height="90" fill="#1e2733"/><rect x="52" y="0" width="10" height="90" fill="#1a2430" opacity=".6"/><rect x="62" y="0" width="98" height="90" fill="#0c121a"/><g stroke="#6aa9cf" stroke-width=".9" opacity=".28" fill="none"><path d="M62 8 L160 8"/><path d="M62 18 L160 18"/><path d="M62 28 L160 28"/><path d="M62 38 L160 38"/><path d="M62 48 L160 48"/><path d="M62 58 L160 58"/><path d="M62 68 L160 68"/><path d="M62 78 L160 78"/><path d="M62 88 L160 88"/></g><g stroke="#7b8fda" stroke-width="0"></g><g stroke="#6d8299" stroke-width="3.4" fill="none" opacity=".95"><path d="M70 90 L70 44 C70 38 76 34 84 34 L128 34"/><path d="M96 90 L96 58 C96 52 102 48 110 48 L150 48"/></g><g stroke="#c8453d" stroke-width="3.4" fill="none" opacity=".95"><path d="M82 90 L82 66 C82 60 88 56 96 56 L150 56"/><path d="M112 90 L112 74 C112 68 118 66 126 66 L150 66"/></g><g fill="#22303f" stroke="#3a4d66" stroke-width=".8"><rect x="66" y="16" width="10" height="10" rx="1"/><rect x="92" y="16" width="10" height="10" rx="1"/></g><rect x="48" y="0" width="8" height="90" fill="#f0a848" opacity=".12"/><g stroke="#f0a848" stroke-width="1.2" fill="none" opacity=".85"><path d="M6 3 L3 3 L3 6"/><path d="M154 3 L157 3 L157 6"/><path d="M6 87 L3 87 L3 84"/><path d="M154 87 L157 87 L157 84"/></g><g stroke="#f0a848" stroke-width="1.4" fill="none" opacity=".92" stroke-linecap="round"><rect x="14" y="10" width="132" height="70" stroke-dasharray="4 4" opacity=".5"/><rect x="46" y="27" width="68" height="36" stroke-dasharray="4 4"/><path d="M24 20 L40 30 M136 20 L120 30 M24 70 L40 60 M136 70 L120 60"/><path d="M36 27 L41 30 L36 33 M124 27 L119 30 L124 33"/></g></svg>
+        <span class="num">12</span>
+      </span>
+      <span class="meta"><span class="move">наезд в стену, переход в разрез</span><span class="lens">50 мм</span></span>
+      <h3>Рентген стены</h3>
+      <p>Отделка становится прозрачной: серая гофра — силовые линии, красная — слаботочные.</p>
+      <p class="cap">Силовые и слаботочные линии разведены до отделки</p>
+      <p class="goes">ведёт в <b>/answers/kogda-podklyuchat-umnyy-dom-pri-remonte</b></p>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <h2>Что согласовать до рендеров</h2>
+  <p class="sub">Пять решений, которые дальше менять дорого: каждая остановка рендерится в серию из 15–20 промежуточных кадров, переснять одну — значит переснять и оба стыка с соседними.</p>
+  <ul class="asks">
+    <li><span class="k">порядок</span><span class="v"><b>Маршрут идёт снаружи внутрь и заканчивается разрезом стены</b><span>Остановки 3–10 можно переставить. Двенадцатая обязана остаться последней: под ней страница продолжается обычным первым экраном, и разрез стены передаёт читателя в текст про этапы ремонта.</span></span></li>
+    <li><span class="k">кадр 06</span><span class="v"><b>Домработница у панели — единственная сцена про персонал</b><span>Если она лишняя, на это место просится «Уехали»: постановка на охрану, свет гаснет по зонам, климат уходит в дежурный режим. Скажите, какой вариант оставляем.</span></span></li>
+    <li><span class="k">люди</span><span class="v"><b>В кадре трое: жильцы в холле, домработница, мужчина у термостата</b><span>Лиц крупно нигде нет, одежда по погоде. Кадр про дом, не про людей. Можно убрать всех — тогда сцены 3, 6 и 7 перестраиваются на движение предметов.</span></span></li>
+    <li><span class="k">кадр 02</span><span class="v"><b>Машина въезжает в ворота</b><span>Номер не показываем, но марка будет узнаваемой. Ставим нейтральный тёмный кроссовер или убираем машину и оставляем только свет фар за кадром?</span></span></li>
+    <li><span class="k">кадр 10</span><span class="v"><b>Хаммам снимаем с паром</b><span>Пар даёт настроение и съедает детали отделки. Если важнее показать отделку и подсветку — снимаем сухую сцену.</span></span></li>
+  </ul>
+</section>
+
+<p class="note"><b>Как это работает у зрителя.</b> Маршрут занимает три экрана по высоте. Колесо и палец не перехватываются — страница едет как обычно, кадр выбирается по тому, сколько её прокручено. Серия из 180–240 кадров грузится после текста и только на широком экране; на телефоне с медленной сетью остаётся один постер и те же подписи. При настройке «меньше движения» серия не запрашивается ни одним запросом. Текста в разметке первого экрана становится не меньше, чем сейчас: тур лежит под ним, а не вместо него.</p>
+
+</div>
+
+<script>
+(function(){
+  var sheet=document.getElementById('sheet');
+  if(!sheet) return;
+  function mark(n,on){
+    var g=document.getElementById('m'+n);
+    if(!g) return;
+    var c=g.querySelector('circle');
+    c.setAttribute('r', on ? '20' : '14');
+    c.setAttribute('fill', on ? '#ffffff' : '#f0a848');
+  }
+  function near(e){ return e.target.closest ? e.target.closest('.shot') : null; }
+  sheet.addEventListener('mouseover', function(e){ var li=near(e); if(li) mark(li.dataset.stop,true); });
+  sheet.addEventListener('mouseout',  function(e){ var li=near(e); if(li) mark(li.dataset.stop,false); });
+  sheet.addEventListener('focusin',   function(e){ var li=near(e); if(li) mark(li.dataset.stop,true); });
+  sheet.addEventListener('focusout',  function(e){ var li=near(e); if(li) mark(li.dataset.stop,false); });
+})();
+</script>
