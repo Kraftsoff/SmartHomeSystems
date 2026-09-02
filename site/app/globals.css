@@ -18,12 +18,24 @@
   --shadow-lift:0 2px 6px rgba(11,13,16,.06),0 14px 40px rgba(11,13,16,.10);
   --measure:68ch; --warn-bg:#fff8e6; --warn-line:#e8d9a8; --warn-ink:#6b5310;
   --risk-line:#b04a2e; --risk-bg:#fdf5f2;
+  /* Те же роли, что в ночной теме: правила ниже обращаются к ним всегда,
+     и без значения здесь светлая тема осталась бы без оформления. */
+  --spark:#0092b8; --warm:#a86a12; --edge:inset 0 1px 0 rgba(255,255,255,.7);
 }
+/* Ночная тема — основная. Была плоским серым с фиолетовым уклоном в тексте
+   (#a5a3c2), то есть «инверсией светлой», а не собственным оформлением.
+   Здесь глубокий сине-чёрный грунт, приподнятые панели, тонкие светящиеся
+   границы и холодный синий как живой акцент — язык, на котором сняты все
+   продуктовые кадры бренда. Тёплый янтарь один, и только как свет из окна
+   в первом экране: смысл в контрасте тёплого и холодного, а не в двух
+   акцентах, спорящих друг с другом. */
 :root[data-mode="night"]{
-  --bg:#0a0c12; --panel:#141824; --panel-2:#10131c; --ink:#f4f4f4; --muted:#a5a3c2;
-  --line:#242a3a; --accent-ink:#8fc0ff; --glow:#478beb;
-  --on-accent:#08111f; --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.45);
-  --shadow-lift:0 2px 6px rgba(0,0,0,.55),0 14px 40px rgba(0,0,0,.55);
+  --bg:#080a0f; --panel:#111621; --panel-2:#0c1017; --ink:#eef1f6; --muted:#9aa6b8;
+  --line:#1e2635; --accent-ink:#7ab3ff; --glow:#478beb; --spark:#00d0ff; --warm:#f0a848;
+  --on-accent:#04121f;
+  --shadow:0 1px 2px rgba(0,0,0,.6),0 10px 30px rgba(0,0,0,.5);
+  --shadow-lift:0 2px 8px rgba(0,0,0,.6),0 18px 50px rgba(0,0,0,.6);
+  --edge:inset 0 1px 0 rgba(255,255,255,.055);
   --warn-bg:#241f0e; --warn-line:#4a3f1c; --warn-ink:#e8cf8a;
   --risk-line:#e08a6c; --risk-bg:#241612;
 }
@@ -737,3 +749,135 @@ main .answer, main .conclusion, main .lede p, main figcaption { max-width: var(-
   border-top:1px solid var(--line);
 }
 @media (max-width:640px){ .shotcard img{ max-height:260px; } }
+
+/* ══ Глубина ═══════════════════════════════════════════════════════════════
+   Сайт был плоским: белый фон, серые рамки, ничего не светится. У бренда
+   язык другой — предметы в темноте, свет из окна, тёплое против холодного.
+   Ниже то, что даёт эту глубину, и ничего сверх: каждый приём отвечает за
+   одно место, а не рассыпан по странице. */
+
+/* Свет в комнате. Два пятна: холодное сверху справа — «за окном сумерки»,
+   тёплое слева под первым экраном — «внутри горит». Прибиты к странице,
+   не к экрану: при прокрутке они уходят вместе с первым экраном, как
+   источник света, а не как наклейка на стекле. */
+body{position:relative;isolation:isolate}
+body::before{
+  content:"";position:absolute;inset:0 0 auto;height:min(120vh,1100px);z-index:-1;
+  background:
+    radial-gradient(60% 50% at 82% 8%, color-mix(in srgb,var(--glow) 16%,transparent), transparent 70%),
+    radial-gradient(45% 40% at 8% 42%, color-mix(in srgb,var(--warm) 9%,transparent), transparent 72%);
+  pointer-events:none;
+}
+
+/* Шапка: стекло на тёмном. Граница снизу — не линия, а край света. */
+header.site{
+  background:color-mix(in srgb,var(--bg) 72%,transparent);
+  backdrop-filter:blur(14px) saturate(1.3);
+  border-bottom:1px solid color-mix(in srgb,var(--line) 80%,transparent);
+}
+
+/* Первый экран. Заголовок крупнее: он и есть главное, что видно за первую
+   секунду, а был одного роста с заголовками разделов. */
+.hero h1{font-size:clamp(29px,4.1vw,46px);line-height:1.08;letter-spacing:-.022em}
+.hero-lede{font-size:clamp(16px,1.65vw,19px)}
+
+/* Свечение под планом: план — светящийся объект, и свет от него должен
+   попадать на страницу, иначе он выглядит вклеенным прямоугольником. */
+.hero-show{position:relative}
+.hero-show::before{
+  content:"";position:absolute;inset:-8% -6% -14%;z-index:0;border-radius:50%;
+  background:radial-gradient(closest-side, color-mix(in srgb,var(--glow) 22%,transparent), transparent);
+  filter:blur(46px);pointer-events:none;
+}
+.hero-show > *{position:relative;z-index:1}
+
+/* Панели: приподнятые, с бликом по верхнему краю. Плоская заливка с рамкой
+   на тёмном читается дырой, блик возвращает объём. */
+.card,.lede,.shotcard,.est-wrap,.panel-board,.obj-tabs,.scen-board{
+  box-shadow:var(--shadow),var(--edge);
+}
+.card{background:color-mix(in srgb,var(--panel) 88%,transparent)}
+.card:has(.stretch:hover),.card:has(.stretch:focus-visible){
+  border-color:color-mix(in srgb,var(--accent-ink) 55%,var(--line));
+  box-shadow:var(--shadow-lift),var(--edge),
+    0 0 0 1px color-mix(in srgb,var(--accent-ink) 22%,transparent);
+}
+
+/* Прямой ответ — самое важное на странице. Полоса слева светится, а не
+   просто окрашена. */
+.lede{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel) 92%,transparent),
+    color-mix(in srgb,var(--panel-2) 92%,transparent));
+  border-left-color:var(--glow);
+  box-shadow:var(--shadow),var(--edge),
+    -1px 0 12px -2px color-mix(in srgb,var(--glow) 45%,transparent);
+}
+
+/* Целевое действие: кнопка светится собственным светом. */
+.btn-primary{
+  box-shadow:var(--shadow),
+    0 0 0 1px color-mix(in srgb,var(--accent-ink) 45%,transparent),
+    0 8px 30px -8px color-mix(in srgb,var(--glow) 65%,transparent);
+}
+.btn-primary:hover{
+  box-shadow:var(--shadow-lift),
+    0 0 0 1px color-mix(in srgb,var(--accent-ink) 70%,transparent),
+    0 12px 40px -8px color-mix(in srgb,var(--glow) 85%,transparent);
+}
+.btn-ghost{background:color-mix(in srgb,var(--panel) 55%,transparent);box-shadow:var(--edge)}
+
+/* Полоса доказательств. Цифры — то, чем компания отличается, и стояли они
+   тем же кеглем, что подпись под ними. */
+.proof dt{font-size:clamp(19px,2vw,23px);letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums}
+.proof div{position:relative;padding-left:14px}
+.proof div::before{
+  content:"";position:absolute;left:0;top:4px;bottom:4px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,var(--glow),transparent);
+}
+
+/* Сценарии первого экрана: выбранный горит, остальные ждут. */
+.hero-show .chip[aria-pressed="true"],.hero-show .chip.on{
+  border-color:color-mix(in srgb,var(--accent-ink) 60%,var(--line));
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--accent-ink) 30%,transparent),
+    0 6px 22px -8px color-mix(in srgb,var(--glow) 70%,transparent);
+}
+
+/* Кадры бренда: тёмная плитка на тёмной странице должна отделяться краем,
+   а не сливаться. */
+.shotcard{border-color:color-mix(in srgb,var(--line) 90%,transparent)}
+.shotcard figcaption{background:color-mix(in srgb,var(--panel) 80%,transparent)}
+
+@media (prefers-reduced-motion:reduce){
+  .btn-primary,.card{transition:none}
+}
+
+/* Ряд кадров. Раскладка задаётся числом кадров, а не «поместится — не
+   поместится»: авторазмещение при четырёх кадрах ставило три в ряд и одну
+   сиротой во второй строке. Высота кадра в ряду фиксирована, подпись прижата
+   к низу — иначе карточки разной высоты рвут ряд по нижнему краю. */
+.shotcards-1{grid-template-columns:1fr}
+.shotcards-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.shotcards-3,.shotcards-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:980px){
+  .shotcards-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .shotcards-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.shotcards-3 .shotcard,.shotcards-4 .shotcard{height:100%}
+.shotcards-3 .shotcard img,.shotcards-4 .shotcard img{height:190px;max-height:190px}
+.shotcards-3 .shotcard figcaption,.shotcards-4 .shotcard figcaption{margin-top:auto;font-size:13.5px}
+
+/* Иконка датчика над заголовком: светящийся предмет, а не серый значок —
+   тот же язык, что у кадров бренда. */
+.sensor-ico{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:64px;height:64px;margin:2px 0 14px;border-radius:16px;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--panel) 94%,transparent),
+    color-mix(in srgb,var(--panel-2) 94%,transparent));
+  border:1px solid var(--line);color:var(--accent-ink);
+  box-shadow:var(--shadow),var(--edge),
+    0 10px 30px -12px color-mix(in srgb,var(--glow) 70%,transparent);
+}
+.sensor-ico svg{width:32px;height:32px;display:block}

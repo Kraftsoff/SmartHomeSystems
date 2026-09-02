@@ -22,6 +22,13 @@ export function кадрыДля(путь: string): Кадр[] {
   return ВСЕ.filter((a) => a.pages.includes(путь));
 }
 
+/* Выбор кадра по имени — для мест, где набор задаётся вручную, а не адресом
+   страницы. Возвращает undefined, если кадра в реестре нет: вызывающая
+   сторона отфильтрует, и в разметке не окажется ссылки в пустоту. */
+export function кадрПоИмени(id: string): Кадр | undefined {
+  return ВСЕ.find((a) => a.id === id);
+}
+
 const экран = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -41,7 +48,7 @@ export function разметкаКадров(items: Кадр[], первый = f
     return `<figure class="shotcard" style="background:${a.bg}">${img}`
       + `<figcaption>${экран(a.caption)}</figcaption></figure>`;
   }).join('');
-  return `<div class="${items.length > 1 ? 'shotcards shotcards-2' : 'shotcards'}">${кадры}</div>`;
+  return `<div class="shotcards shotcards-${Math.min(items.length, 4)}">${кадры}</div>`;
 }
 
 export default function Кадры({ items, первый = false }: { items: Кадр[]; первый?: boolean }) {

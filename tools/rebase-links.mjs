@@ -21,11 +21,17 @@ if (!BASE || !BASE.startsWith('/')) {
 const OUT = resolve('site/out');
 
 const files = [];
+/* Собранные скрипты и стили правятся отдельно и по-другому: там нельзя
+   переставлять любой адрес подряд — под правило попали бы маршруты и куски
+   регулярных выражений. Заменяем только те строки, которые дословно совпадают
+   с реально лежащим в сборке файлом. */
+const сборка = [];
 (function walk(d) {
   for (const e of readdirSync(d)) {
     const p = join(d, e);
     if (statSync(p).isDirectory()) walk(p);
     else if (e.endsWith('.html') || e.endsWith('.txt') || e.endsWith('.xml')) files.push(p);
+    else if (e.endsWith('.js') || e.endsWith('.css')) сборка.push(p);
   }
 })(OUT);
 
@@ -59,13 +65,45 @@ for (const f of files) {
   });
   if (n !== s) { writeFileSync(f, n, 'utf8'); задето += 1; }
 }
+/* Пути к файлам из public, зашитые в скрипты и стили. Картинка плана лежала
+   строкой в бандле и строкой в CSS: перестановка корня их не касалась, на
+   витрине она отдавала 404, и план выходил пустым чёрным прямоугольником —
+   ровно то, что увидел клиент. Правило по HTML этого поймать не могло. */
+const публичные = [];
+(function собрать(d, база) {
+  for (const e of readdirSync(d)) {
+    const p = join(d, e);
+    if (statSync(p).isDirectory()) { if (e !== '_next') собрать(p, `${база}${e}/`); continue; }
+    if (/\.(png|jpe?g|webp|avif|svg|gif|woff2?|mp4|webm|md|json)$/i.test(e)) публичные.push(`${база}${e}`);
+  }
+})(OUT, '/');
+
+let вБандле = 0;
+for (const f of сборка) {
+  const s = readFileSync(f, 'utf8');
+  let n = s;
+  for (const адрес of публичные) {
+    const экран = адрес.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    n = n.replace(new RegExp(`(["'(])${экран}(?=["')])`, 'g'), (_, q) => { вБандле += 1; return `${q}${BASE}${адрес}`; });
+  }
+  if (n !== s) writeFileSync(f, n, 'utf8');
+}
+
 console.log(`корень ссылок переставлен на ${BASE}: правок ${правок}, файлов ${задето}`);
+console.log(`адресов файлов внутри скриптов и стилей переставлено: ${вБандле}`);
 
 /* Проверка на месте. Каждый корневой адрес в собранных файлах обязан начинаться
    с нового корня; всё, что осталось корневым, на витрине ведёт в пустоту, и
    заметить это можно только открыв страницу глазами. Один такой адрес уже
    проехал — список в srcset. */
 const остались = new Set();
+for (const f of сборка) {
+  const s = readFileSync(f, 'utf8');
+  for (const адрес of публичные) {
+    const экран = адрес.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (new RegExp(`(["'(])${экран}(?=["')])`).test(s)) остались.add(`${адрес} (в сборке)`);
+  }
+}
 for (const f of files.filter((f) => f.endsWith('.html'))) {
   const s = readFileSync(f, 'utf8');
   for (const m of s.matchAll(/(?:href|src|action)="(\/[^"]*)"/g)) {

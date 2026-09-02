@@ -12,16 +12,15 @@ function saved(): 'day' | 'night' | null {
     return v === 'day' || v === 'night' ? v : null;
   } catch { return null; }
 }
-function systemPrefersDay() {
-  try { return window.matchMedia?.('(prefers-color-scheme: light)').matches ?? false; }
-  catch { return false; }
-}
 
 export default function ThemeToggle() {
   const [night, setNight] = useState(true);
 
   useEffect(() => {
-    const initial = saved() ?? (systemPrefersDay() ? 'day' : 'night');
+    /* Системная настройка больше не решает: у половины посетителей в системе
+       светлая тема, и они видели бы сайт в оформлении, под которое он не
+       нарисован. Собственный выбор человека при этом сильнее всего. */
+    const initial = saved() ?? 'night';
     apply(initial === 'night', false);
   }, []);
 

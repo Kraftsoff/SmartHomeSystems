@@ -12,6 +12,7 @@ import ObjectTypes from '../components/ObjectTypes';
 import ScenarioBoard from '../components/ScenarioBoard';
 import Crumbs from '../components/Crumbs';
 import Кадры, { кадрыДля, разметкаКадров, type Кадр } from '../components/Shot';
+import ИконкаДатчика from '../components/SensorIcon';
 import ЗАЛ from '@/lib/showroom.json';
 
 /* Размеры снимков зала приходят из конвейера, описания живут здесь: первые
@@ -337,6 +338,10 @@ export default async function SectionPage({ params }: { params: Promise<{ path: 
       {/* Промежуточные ступени берём из самого адреса: раздел третьего
           уровня без них выглядит для машины ребёнком главной. */}
       <Crumbs items={[{ name: 'Главная', href: '/' }, ...trail, { name: current }]} />
+      {/* Иконка датчика вместо пустоты: у семи страниц про датчики не было
+          ни одной картинки, а снимков этих железок у нас нет. Своя иконка
+          честнее и пустоты, и чужого стокового кадра. */}
+      <ИконкаДатчика путь={key} />
       <p className="eyebrow">{rec.eyebrow}</p>
       <h1>{rec.title}</h1>
       <div className="lede" dangerouslySetInnerHTML={{ __html: rec.answerHtml }} />

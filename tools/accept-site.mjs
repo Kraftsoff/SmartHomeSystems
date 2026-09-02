@@ -747,16 +747,59 @@ ok(form ? 'форма: согласие обязательно, метка и п
   if (await bar()) fail('после отказа баннер спрашивает снова — решение не восстановлено');
   await c.close();
 }
-for (const [scheme, expect] of [['light', 'day'], ['dark', 'night']]) {
+/* Тема. Правило поменялось решением клиента 1 сентября: тёмная стала основной
+   и системная настройка её больше не отменяет — вся графика бренда снята на
+   чёрном, и на белом фоне сайт выглядит пустым. Проверяем то, что из этого
+   следует, а не прежнюю политику:
+     1) при любой системной теме сайт открывается тёмным;
+     2) тёмная стоит уже в отданной разметке — иначе страница мигает белым
+        и перекрашивается после гидратации;
+     3) собственный выбор человека сильнее умолчания и переживает переход. */
+for (const scheme of ['light', 'dark']) {
   const c = await browser.newContext({ colorScheme: scheme });
   const pg = await c.newPage();
   await pg.goto(`${ORIGIN}/`);
   await pg.waitForTimeout(500);
   const got = await pg.evaluate(() => document.documentElement.getAttribute('data-mode'));
-  if (got !== expect) fail(`при системной теме ${scheme} сайт открывается в «${got}» вместо «${expect}»`);
+  if (got !== 'night') fail(`при системной теме ${scheme} сайт открывается в «${got}» вместо тёмной`);
   await c.close();
 }
-ok('согласие и тема: аналитика ждёт ответа, отказ сохраняется, системная настройка учитывается');
+{
+  /* Без скриптов вовсе: тема обязана прийти разметкой, а не выставиться
+     после гидратации. Так проверяется отсутствие белой вспышки. */
+  const c = await browser.newContext({ colorScheme: 'light', javaScriptEnabled: false });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  const got = await pg.evaluate(() => document.documentElement.getAttribute('data-mode'));
+  if (got !== 'night') fail(`без скриптов тема приходит как «${got}»: страница отдаётся светлой и перекрашивается на глазах`);
+  await c.close();
+}
+{
+  const c = await browser.newContext({ colorScheme: 'dark' });
+  const pg = await c.newPage();
+  await pg.goto(`${ORIGIN}/`);
+  await pg.waitForTimeout(400);
+  const кнопка = await pg.evaluate(() => {
+    const b = document.querySelector('button[role="switch"]');
+    if (!b) return false;
+    b.click();
+    return true;
+  });
+  if (!кнопка) fail('переключателя темы нет: тёмная стала умолчанием, и уйти с неё нечем');
+  else {
+    await pg.waitForTimeout(300);
+    if (await pg.evaluate(() => document.documentElement.getAttribute('data-mode')) !== 'day') {
+      fail('переключатель не уводит в светлую тему');
+    }
+    await pg.goto(`${ORIGIN}/pricing/`);
+    await pg.waitForTimeout(400);
+    if (await pg.evaluate(() => document.documentElement.getAttribute('data-mode')) !== 'day') {
+      fail('выбранная светлая тема не пережила переход на другую страницу');
+    }
+  }
+  await c.close();
+}
+ok('согласие и тема: аналитика ждёт ответа, отказ сохраняется; тёмная приходит разметкой, выбор человека её перебивает и держится');
 
 /* Ширина. Ничто не должно вылезать за край экрана: горизонтальная прокрутка
    на телефоне — это когда до половины строки не дотянуться. Проверяем на
