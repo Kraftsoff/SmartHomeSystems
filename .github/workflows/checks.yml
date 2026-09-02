@@ -42,10 +42,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Установка playwright и Chromium
+      # Ставится тем же способом, что у разработчика: версии инструментов
+      # заперты корневым package-lock. Раньше здесь стоял npm i playwright@latest
+      # — CI гонялся на версии, которой ни у кого локально не было.
+      - name: Установка инструментов и Chromium
         run: |
-          npm init -y > /dev/null
-          npm i --no-save playwright@latest
+          npm ci --no-audit --no-fund
           npx playwright install --with-deps chromium
       # Маршруты, мета, контраст, доступность, разметка, отзывчивость,
       # перелинковка и поведение — один прогон, ненулевой код при нарушении.
@@ -101,10 +103,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Установка playwright и Chromium
+      # Ставится тем же способом, что у разработчика: версии инструментов
+      # заперты корневым package-lock. Раньше здесь стоял npm i playwright@latest
+      # — CI гонялся на версии, которой ни у кого локально не было.
+      - name: Установка инструментов и Chromium
         run: |
-          npm init -y > /dev/null
-          npm i --no-save playwright@latest
+          npm ci --no-audit --no-fund
           npx playwright install --with-deps chromium
       - name: Сборка сайта
         working-directory: site

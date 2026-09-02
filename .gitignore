@@ -3,8 +3,11 @@
 # но наш собственный контекст-файл маркетинга — версионируем
 !.agents/product-marketing.md
 
-# Next.js
+# Зависимости
+/node_modules
 site/node_modules
+
+# Next.js
 site/.next
 site/out
 *.zip
