@@ -1,0 +1,15 @@
+# vendored AI-agent marketing skills (coreyhaines31/marketingskills via: npx skills add coreyhaines31/marketingskills)
+.agents/*
+# но наш собственный контекст-файл маркетинга — версионируем
+!.agents/product-marketing.md
+
+# Зависимости
+/node_modules
+site/node_modules
+
+# Next.js
+site/.next
+site/out
+*.zip
+.mutating
+.mutating-backup

@@ -1,0 +1,119 @@
+name: Проверки прототипа
+
+on:
+  pull_request:
+    paths:
+      - 'tz-site/prototype/**'
+      - 'tools/**'
+      - '**/*.md'
+      - '.github/workflows/checks.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Проверка проверок идёт по ночам: она гоняет приёмку по разу на каждый
+    # подсаженный дефект, и на каждом коммите это было бы дороже пользы.
+    - cron: '0 2 * * *'
+
+jobs:
+  language:
+    name: Стандарт языка
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Зависимостей нет: проверка языка работает на голом Node.
+      - name: Сайт и все документы проекта
+        run: |
+          node tools/lint-all.mjs
+
+      # Числа в документах устаревают молча: прототип растёт, а «73 рычага»
+      # остаётся. Один раз это уже привело к работе по устаревшей картине.
+      - name: Документы сходятся с прототипом
+        run: node tools/check-docs-sync.mjs
+
+  acceptance:
+    name: Приёмка прототипа
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Ставится тем же способом, что у разработчика: версии инструментов
+      # заперты корневым package-lock. Раньше здесь стоял npm i playwright@latest
+      # — CI гонялся на версии, которой ни у кого локально не было.
+      - name: Установка инструментов и Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      # Маршруты, мета, контраст, доступность, разметка, отзывчивость,
+      # перелинковка и поведение — один прогон, ненулевой код при нарушении.
+      - name: Прогон
+        run: node tools/accept.mjs
+
+      # Сайт проверяется по собранным файлам — тем, что уедут на хостинг.
+      # Прототип и сайт живут параллельно, пока перенос не закончен, поэтому
+      # приёмок две: у них разные предметы, а не разные версии одного.
+      # Строго до сборки: файлы кладутся в site/public, а сборка копирует
+      # public в выдачу. Запуск после неё оставлял в выдаче прежнюю копию —
+      # с заглушкой вместо адреса.
+      - name: Файлы для машин
+        run: node tools/gen-llms.mjs
+
+      - name: Сборка сайта
+        working-directory: site
+        run: |
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npx next build
+
+      - name: Приёмка собранного сайта
+        run: node tools/accept-site.mjs
+
+
+      # Полезная нагрузка для клиентской навигации: 7,1 МБ из 12,2, и при
+      # обычных ссылках её никто не запрашивает. Шаг сам отменяется, если
+      # в исходниках появится next/link.
+      - name: Убрать неиспользуемое из сборки
+        run: node tools/prune-build.mjs
+
+      # Карта сайта собирается из собранных страниц, а не ведётся руками:
+      # 139 адресов, и один забытый ответ — страница есть, в карте её нет.
+      - name: Карта сайта сходится с собранным
+        run: |
+          node tools/gen-sitemap.mjs
+          git diff --exit-code site-foundation/sitemap.xml \
+            || (echo "карта сайта разошлась с собранными страницами — пересоберите её" && exit 1)
+
+  mutation:
+    name: Гейты умеют падать
+    # Приёмка, которая ничего не ловит, зелёная так же, как приёмка, которой
+    # нечего ловить, — по выводу их не различить. Здесь в собранный сайт
+    # подсаживаются известные дефекты, и каждый обязан быть назван.
+    #
+    # Не на каждом коммите: прогон запускает приёмку по разу на мутацию, а она
+    # обходит все 137 страниц. По расписанию и по кнопке — там эта цена уместна.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Ставится тем же способом, что у разработчика: версии инструментов
+      # заперты корневым package-lock. Раньше здесь стоял npm i playwright@latest
+      # — CI гонялся на версии, которой ни у кого локально не было.
+      - name: Установка инструментов и Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Сборка сайта
+        working-directory: site
+        run: |
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npx next build
+      - name: Подсадка дефектов
+        run: FAST=1 node tools/mutate.mjs

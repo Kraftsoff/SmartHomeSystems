@@ -1,0 +1,937 @@
+<title>MiMiSmart — инженерные системы и умный дом</title>
+<style>
+  :root{
+    /* фирменная палитра MiMiSmart (из CSS реального сайта): #0a051a / #e27500 / #00d0ff */
+    --night:#0a051a; --night-2:#0d0a26; --panel:#131033; --panel-2:#0f0c29;
+    --line:#282354; --line-soft:#1c1840;
+    --ink:#f4f4f4; --muted:#a5a3c2; --faint:#6f6d92;
+    --glow:#e27500; --glow-2:#c76400; --signal:#00d0ff;
+    --good:#27ca40; --warn:#ffce5e; --crit:#ff7b7b;
+    --shell:#171338; --room:#0f0c2b; --room-line:#312a5e;;
+    --radius:24px; --radius-sm:12px; --maxw:1180px; /* rounded-3xl/xl реального сайта */
+    /* реальный сайт использует жирный гротеск Helvetica для заголовков, НЕ serif */
+    --serif:Helvetica,"Helvetica Neue",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root{--night:#f4f4f4;--night-2:#efefef;--panel:#ffffff;--panel-2:#f8f9fa;--line:#d9d9d9;--line-soft:#eaeaea;
+      --ink:#121212;--muted:#58595d;--faint:#95979e;--glow:#e27500;--glow-2:#c76400;--signal:#00576b;
+      --shell:#f0f4f6;--room:#f8f9fa;--room-line:#d9d9d9;}
+  }
+  :root[data-theme="dark"]{--night:#0a051a;--night-2:#0d0a26;--panel:#131033;--panel-2:#0f0c29;--line:#282354;
+    --line-soft:#1c1840;--ink:#f4f4f4;--muted:#a5a3c2;--faint:#6f6d92;--glow:#e27500;--glow-2:#c76400;
+    --signal:#00d0ff;--shell:#171338;--room:#0f0c2b;--room-line:#312a5e;}
+  :root[data-theme="light"]{--night:#f4f4f4;--night-2:#efefef;--panel:#ffffff;--panel-2:#f8f9fa;--line:#d9d9d9;
+    --line-soft:#eaeaea;--ink:#121212;--muted:#58595d;--faint:#95979e;--glow:#e27500;--glow-2:#c76400;
+    --signal:#00576b;--shell:#f0f4f6;--room:#f8f9fa;--room-line:#d9d9d9;}
+
+  *{box-sizing:border-box} body{margin:0}
+  .wrap{background:var(--night);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+  .shell{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.01em;text-wrap:balance;margin:0}
+  .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--faint)}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .amber{color:var(--glow)}
+  .prov{color:var(--warn);font-family:var(--mono);font-size:11px}
+
+  .draft{background:linear-gradient(90deg,var(--glow-2),var(--glow));color:#231402;font-family:var(--mono);font-size:12px;letter-spacing:.03em;text-align:center;padding:6px 12px}
+  header.nav{position:sticky;top:0;z-index:40;backdrop-filter:blur(10px);background:color-mix(in srgb,var(--night) 80%,transparent);border-bottom:1px solid var(--line-soft)}
+  .nav-in{display:flex;align-items:center;gap:18px;height:64px}
+  .brand{font-family:var(--serif);font-size:20px;font-weight:600;margin-right:auto;display:flex;align-items:center;gap:9px;cursor:pointer}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--glow);box-shadow:0 0 12px var(--glow)}
+  nav.links{display:flex;gap:16px;flex-wrap:wrap}
+  nav.links a{color:var(--muted);font-size:13.5px;padding:6px 2px;border-bottom:2px solid transparent}
+  nav.links a:hover{color:var(--ink)}
+  nav.links a.on{color:var(--ink);border-bottom-color:var(--glow)}
+  .btn{font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 18px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:transform .3s,box-shadow .3s;white-space:nowrap}
+  .btn-primary{background:linear-gradient(180deg,var(--glow),var(--glow-2));color:#241503;box-shadow:0 6px 22px color-mix(in srgb,var(--glow) 35%,transparent)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--glow)}
+  .btn-sm{padding:8px 14px;font-size:13px}
+  @media (max-width:960px){nav.links{display:none}}
+
+  section{padding:64px 0;border-bottom:1px solid var(--line-soft)}
+  .sec-head{max-width:62ch;margin-bottom:32px}
+  .sec-head h2{font-size:clamp(24px,3.2vw,38px);line-height:1.1}
+  .sec-head p{color:var(--muted);margin:12px 0 0;max-width:58ch}
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line-soft)}
+  .cursor-glow{position:absolute;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;pointer-events:none;background:radial-gradient(circle,color-mix(in srgb,var(--glow) 44%,transparent),transparent 62%);mix-blend-mode:screen;opacity:0;transition:opacity .4s;z-index:1;will-change:transform}
+  @media (prefers-color-scheme:light){.cursor-glow{mix-blend-mode:multiply}}
+  :root[data-theme="light"] .cursor-glow{mix-blend-mode:multiply}
+  :root[data-theme="dark"] .cursor-glow{mix-blend-mode:screen}
+  .hero.awake .cursor-glow{opacity:1}
+  .hero-in{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr 1.15fr;gap:36px;align-items:center;padding:48px 0 56px}
+  @media (max-width:940px){.hero-in{grid-template-columns:1fr;gap:16px;padding:28px 0 36px}}
+  .hero h1{font-size:clamp(30px,4.4vw,52px);line-height:1.05}
+  .lede{color:var(--muted);font-size:clamp(15px,1.5vw,18px);max-width:52ch;margin:18px 0 24px}
+  .qualify{display:inline-flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:13.5px;color:var(--muted);margin-top:22px}
+  .qualify b{color:var(--ink);font-weight:600}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .hint{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:13px;margin-top:18px}
+  .hint .pulse{width:8px;height:8px;border-radius:50%;background:var(--glow);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--glow) 60%,transparent)}70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+  /* house svg */
+  .house{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,.4))}
+  .room{cursor:pointer}
+  .room .rf{fill:var(--room);stroke:var(--room-line);stroke-width:1.5;transition:fill .3s}
+  .room .rw{fill:var(--glow);opacity:0;transition:opacity .3s}
+  .room .ri{stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .3s}
+  .room .rn{fill:var(--faint);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;transition:fill .3s}
+  .room:hover .rw,.room.on .rw{opacity:.2}
+  .room:hover .ri,.room.on .ri{stroke:var(--glow)}
+  .room:hover .rn,.room.on .rn{fill:var(--ink)}
+  .chip{opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+  .chip rect{fill:var(--night-2);stroke:var(--glow);stroke-width:1}
+  .chip text{fill:var(--glow);font-family:var(--mono);font-size:11.5px}
+  .room:hover .chip,.room.on .chip{opacity:1;transform:none}
+  .shellline{fill:var(--shell);stroke:var(--line);stroke-width:2}
+  /* чертёжные отметки (Концепция D): линии допуска и номенклатура поверх разреза объекта */
+  .dims{stroke:var(--glow);stroke-width:1;opacity:.65}
+  .dimtxt{fill:var(--glow);font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;opacity:.85}
+
+  /* прогулка по объекту: маршрут прочерчивается один раз, комнаты помечаются «посещено» по мере прохода */
+  .walkpath{fill:none;stroke:var(--glow);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:100;stroke-dashoffset:100;opacity:.75;
+    transition:stroke-dashoffset 3.2s cubic-bezier(.4,0,.2,1)}
+  .hero.walked .walkpath{stroke-dashoffset:0}
+  .walker{fill:var(--glow);opacity:0;filter:drop-shadow(0 0 7px var(--glow));transition:opacity .3s}
+  .hero.walked .walker{opacity:1}
+  .room.visited .ri{stroke:var(--signal)}
+  .room.visited .rn{fill:var(--ink)}
+
+  /* cards & grids */
+  .grid{display:grid;gap:14px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:920px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:border-color .3s,transform .3s}
+  .card:hover{border-color:var(--glow)}
+  .card h3{font-size:17.5px;margin:0 0 6px}
+  .card p{color:var(--muted);font-size:13.5px;margin:0}
+  .card.link{cursor:pointer} .card.link:hover{transform:translateY(-3px)}
+  .card .go{margin-top:12px;font-size:13px;color:var(--glow);font-weight:600}
+  .kicker{font-family:var(--mono);font-size:11px;color:var(--glow);letter-spacing:.08em;text-transform:uppercase}
+
+  .risk{display:flex;gap:12px;align-items:flex-start;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .risk .x{color:var(--crit);font-family:var(--mono);font-weight:700}
+  .risk p{margin:0;color:var(--muted);font-size:14px}
+  .conclusion{margin-top:22px;background:color-mix(in srgb,var(--glow) 10%,var(--panel-2));border:1px solid color-mix(in srgb,var(--glow) 40%,var(--line));border-radius:var(--radius);padding:22px;font-size:16.5px;font-family:var(--serif)}
+
+  .stages{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media (max-width:880px){.stages{grid-template-columns:repeat(2,1fr)}}
+  .stage{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel-2)}
+  .stage .n{font-family:var(--mono);font-size:11px;color:var(--good)}
+  .stage p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+  .stage.hot{border-color:var(--good)}
+  .stage.late{opacity:.55} .stage.late .n{color:var(--crit)}
+
+  .steps{counter-reset:st;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media (max-width:880px){.steps{grid-template-columns:repeat(2,1fr)}}
+  .step{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel-2)}
+  .step::before{counter-increment:st;content:counter(st,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--glow)}
+  .step p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+
+  .price-band{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:24px;padding:36px}
+  .price-band .big{font-family:var(--serif);font-size:clamp(22px,3vw,32px);max-width:34ch}
+  .price-band .cut{margin-top:14px;color:var(--muted);font-size:14.5px}
+  .price-band .cut b{color:var(--crit);font-weight:600}
+
+  .case{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .case h3{font-size:19px} .case .meta{font-family:var(--mono);font-size:12px;color:var(--faint);margin:4px 0 12px}
+  .case dl{margin:0;font-size:13.5px} .case dt{color:var(--faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-top:10px}
+  .case dd{margin:2px 0 0;color:var(--muted)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .tag{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .filter button{font-family:var(--mono);font-size:12px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+  .filter button.on{border-color:var(--glow);color:var(--glow)}
+
+  /* subpage template */
+  .sub-hero{padding:52px 0 40px;border-bottom:1px solid var(--line-soft)}
+  .sub-hero h1{font-size:clamp(28px,4vw,44px)}
+  .answer{margin-top:18px;max-width:64ch;background:color-mix(in srgb,var(--glow) 8%,var(--panel-2));border-left:3px solid var(--glow);border-radius:0 12px 12px 0;padding:16px 20px;font-size:16px}
+  .crumbs{font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-bottom:16px}
+  .crumbs a{color:var(--faint)} .crumbs a:hover{color:var(--glow)}
+  .list-col{columns:2;column-gap:28px;max-width:760px}
+  @media (max-width:640px){.list-col{columns:1}}
+  .list-col li{margin:0 0 8px;color:var(--muted);font-size:14.5px;break-inside:avoid}
+  .list-col li b{color:var(--ink);font-weight:600}
+
+  /* form */
+  .modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-start;justify-content:center;background:rgba(5,8,18,.72);overflow-y:auto;padding:36px 16px}
+  .modal.open{display:flex}
+  .form{background:var(--panel);border:1px solid var(--line);border-radius:20px;max-width:640px;width:100%;padding:30px}
+  .form h3{font-size:22px;margin-bottom:4px}
+  .form .sub{color:var(--muted);font-size:13.5px;margin:0 0 20px}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:560px){.frow{grid-template-columns:1fr}}
+  .fl{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+  .fl span{font-size:12px;color:var(--faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
+  .fl input,.fl select,.fl textarea{background:var(--night-2);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px 12px;font-size:14px;font-family:var(--sans)}
+  .fl input:focus,.fl select:focus{outline:2px solid var(--glow);outline-offset:1px}
+  .sysgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:4px 0 14px}
+  @media (max-width:560px){.sysgrid{grid-template-columns:repeat(2,1fr)}}
+  .sys{display:flex;gap:7px;align-items:center;font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:7px 9px;cursor:pointer}
+  .sys input{accent-color:var(--glow)}
+  .form .note{font-size:11.5px;color:var(--faint);margin-top:12px}
+  .xclose{float:right;background:none;border:none;color:var(--faint);font-size:22px;cursor:pointer}
+
+  footer{padding:44px 0 64px;color:var(--faint);font-size:13px}
+  .fgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:24px;margin-bottom:24px}
+  @media (max-width:820px){.fgrid{grid-template-columns:1fr 1fr}}
+  .fgrid h4{font-size:13px;color:var(--ink);margin:0 0 10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+  .fgrid a{display:block;color:var(--faint);font-size:13px;margin:6px 0}
+  .fgrid a:hover{color:var(--glow)}
+  .foot-note{margin-top:14px;color:var(--warn);font-family:var(--mono);font-size:11.5px}
+
+  .page{display:none} .page.on{display:block}
+  :focus-visible{outline:2px solid var(--glow);outline-offset:3px;border-radius:6px}
+
+  /* ---- design elevation (moorgen-grade) ---- */
+  .wrap{position:relative}
+  .wrap::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(120% 90% at 50% 0%,transparent 55%,rgba(0,0,0,.28) 100%)}
+  .wrap>*{position:relative;z-index:2}
+  section{padding:104px 0}
+  .sec-head{margin-bottom:44px}
+  .sec-head h2{font-size:clamp(28px,4vw,50px);font-weight:500}
+  .sec-head p{font-size:16px}
+  #p-home section{counter-increment:sec}
+  #p-home .sec-head .eyebrow::before,#p-home .price-band .eyebrow::before{
+    content:"0" counter(sec) "  ·  ";color:var(--glow);letter-spacing:.18em}
+  .hero-in{min-height:min(86vh,900px);padding:64px 0 84px}
+  .hero h1{font-size:clamp(32px,4.9vw,64px);font-weight:500;line-height:1.03}
+  .lede{font-size:clamp(16px,1.6vw,19px)}
+  .card{background:color-mix(in srgb,var(--panel) 72%,transparent);backdrop-filter:blur(6px)}
+  .card:hover{box-shadow:0 18px 44px rgba(0,0,0,.35),0 0 0 1px color-mix(in srgb,var(--glow) 45%,transparent) inset}
+  .btn{letter-spacing:.02em}
+  .scroll-cue{display:flex;align-items:center;gap:10px;margin-top:34px;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+  .scroll-cue .line{width:56px;height:1px;background:linear-gradient(90deg,var(--glow),transparent);animation:cue 2.2s ease-in-out infinite}
+  @keyframes cue{0%,100%{transform:scaleX(.4);opacity:.5}50%{transform:scaleX(1);opacity:1}}
+
+  /* production video block */
+  .prod{display:grid;grid-template-columns:1.2fr .8fr;gap:44px;align-items:center}
+  @media (max-width:880px){.prod{grid-template-columns:1fr}}
+  .prod h2{font-size:clamp(28px,4vw,50px);font-weight:500}
+  .prod .facts{margin:26px 0 0;display:grid;gap:14px}
+  .prod .fact{display:flex;gap:14px;align-items:baseline;border-top:1px solid var(--line-soft);padding-top:14px}
+  .prod .fact .k{font-family:var(--mono);font-size:11px;color:var(--glow);letter-spacing:.14em;text-transform:uppercase;min-width:130px}
+  .prod .fact p{margin:0;color:var(--muted);font-size:14.5px}
+  .short{position:relative;aspect-ratio:9/16;max-width:320px;margin:0 auto;border-radius:26px;overflow:hidden;
+    border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--night-2));box-shadow:0 40px 80px rgba(0,0,0,.5)}
+  .short svg{position:absolute;inset:0;width:100%;height:100%}
+  .short .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;
+    background:color-mix(in srgb,var(--glow) 92%,white);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 0 color-mix(in srgb,var(--glow) 55%,transparent);animation:pulse 2.6s infinite}
+  .short .play::after{content:"";border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #241503;margin-left:5px}
+  .short .cap{position:absolute;left:0;right:0;bottom:0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.66));color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+
+  /* ---- амбиентный свет (сдержанный, не игрушечный) + телеметрия ---- */
+  .aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(120px);opacity:.22}
+  .aurora .a1{width:560px;height:560px;left:-160px;top:-140px;background:var(--glow)}
+  .aurora .a2{width:480px;height:480px;right:-180px;top:25%;background:var(--signal)}
+  .chip.cyan rect{stroke:var(--signal)} .chip.cyan text{fill:var(--signal)}
+  .room.on .rw{opacity:.24}
+  .sec-head h2{background:linear-gradient(92deg,var(--ink) 60%,color-mix(in srgb,var(--ink) 55%,var(--glow)));-webkit-background-clip:text;background-clip:text}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+
+<div class="wrap">
+<div class="draft">Прототип v3 · инженерная точность + реальные материалы сайта · данные-заглушки помечены ⚠️</div>
+
+<header class="nav"><div class="shell nav-in">
+  <a class="brand" href="#/"><span class="dot"></span>MiMiSmart</a>
+  <nav class="links" id="topnav">
+    <a href="#/smart-home">Умный дом</a>
+    <a href="#/climate">Климат</a>
+    <a href="#/electric">Электрика и сети</a>
+    <a href="#/curtains-light">Шторы и свет</a>
+    <a href="#/multimedia">Мультимедиа</a>
+    <a href="#/security">Безопасность</a>
+    <a href="#/equipment">Оборудование</a>
+    <a href="#/cases">Кейсы</a>
+    <a href="#/news">Статьи</a>
+    <a href="#/partners">Партнёрам</a>
+    <a href="#/about">О компании</a>
+  </nav>
+  <button class="btn btn-primary btn-sm" data-form>Предварительный расчёт</button>
+</div></header>
+
+<!-- ===================== HOME ===================== -->
+<main class="page" id="p-home">
+  <div class="hero" id="hero">
+    <div class="aurora"><i class="a1"></i><i class="a2"></i></div>
+    <div class="cursor-glow" id="cglow"></div>
+    <div class="shell hero-in">
+      <div>
+        <p class="eyebrow">Единый инженерный подрядчик · с 2004 · своё производство</p>
+        <h1>Инженерные системы и <span class="amber">умный дом</span> для квартир и домов на стадии ремонта и строительства</h1>
+        <p class="lede">MiMiSmart проектирует, поставляет и настраивает системы управления, климата, вентиляции, отопления, увлажнения, штор, Wi-Fi, электрики, безопасности и мультимедиа — в единой логике объекта.</p>
+        <div class="cta-row">
+          <button class="btn btn-primary" data-form>Получить предварительный расчёт</button>
+          <button class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
+        </div>
+        <div class="qualify">Работаем с квартирами <b>от 80 м²</b>, домами <b>от 300 м²</b> и объектами <b>от 40 млн ₽</b>&nbsp;<span class="prov">⚠️</span></div>
+        <div class="hint"><span class="pulse"></span>Обход объекта: маршрут проходит по всем инженерным зонам</div>
+        <div class="scroll-cue"><span class="line"></span>листайте</div>
+      </div>
+      <div class="house-wrap">
+        <svg class="house" viewBox="0 0 820 640" role="img" aria-label="Инженерный разрез объекта с отметками систем и допусками">
+          <path class="shellline" d="M80 210 L410 66 L740 210 Z"/>
+          <rect class="shellline" x="110" y="206" width="600" height="384" rx="10"/>
+          <g class="dims">
+            <path d="M110 604 h600 M110 598 v12 M710 598 v12 M410 598 v12"/>
+          </g>
+          <text class="dimtxt" x="150" y="622">РАЗРЕЗ 1:50</text>
+          <text class="dimtxt" x="560" y="622">MIMISMART · ОБЪЕКТ №2026-014 ⚠️</text>
+          <!-- attic: ventilation -->
+          <g class="room" data-go="#/climate" tabindex="0" role="link" aria-label="Вентиляция и климат — чердачная зона">
+            <path class="rf" d="M175 200 L410 98 L645 200 Z"/><path class="rw" d="M175 200 L410 98 L645 200 Z"/>
+            <g class="ri" transform="translate(396,150)"><circle cx="10" cy="10" r="8"/><path d="M10 2 v4 M10 14 v4 M2 10 h4 M14 10 h4"/></g>
+            <text class="rn" x="352" y="192">ВЕНТКАМЕРА</text>
+            <g class="chip cyan" transform="translate(470,140)"><rect width="118" height="24" rx="12"/><text x="10" y="16" id="telV">Приток · 320 м³/ч</text></g>
+          </g>
+          <!-- living: light+curtains -->
+          <g class="room" data-go="#/curtains-light" tabindex="0" role="link" aria-label="Гостиная — свет и шторы">
+            <rect class="rf" x="128" y="222" width="188" height="172" rx="6"/><rect class="rw" x="128" y="222" width="188" height="172" rx="6"/>
+            <g class="ri" transform="translate(150,244)"><circle cx="10" cy="9" r="8"/><path d="M6 20 h8"/></g>
+            <text class="rn" x="150" y="378">ГОСТИНАЯ</text>
+            <g class="chip" transform="translate(186,232)"><rect width="118" height="24" rx="12"/><text x="10" y="16">DALI · сцена 40%</text></g>
+          </g>
+          <!-- bedroom: climate -->
+          <g class="room" data-go="#/climate" tabindex="0" role="link" aria-label="Спальня — микроклимат">
+            <rect class="rf" x="316" y="222" width="188" height="172" rx="6"/><rect class="rw" x="316" y="222" width="188" height="172" rx="6"/>
+            <g class="ri" transform="translate(338,244)"><path d="M10 2 v13"/><circle cx="10" cy="19" r="4"/></g>
+            <text class="rn" x="338" y="378">СПАЛЬНЯ</text>
+            <g class="chip cyan" transform="translate(392,232)"><rect width="112" height="24" rx="12"/><text x="10" y="16" id="telT">22.0° · 45% RH</text></g>
+          </g>
+          <!-- cinema -->
+          <g class="room" data-go="#/multimedia" tabindex="0" role="link" aria-label="Кинозал — мультимедиа">
+            <rect class="rf" x="504" y="222" width="188" height="172" rx="6"/><rect class="rw" x="504" y="222" width="188" height="172" rx="6"/>
+            <g class="ri" transform="translate(526,244)"><path d="M3 4 h14 v11 h-14 z M8 20 h4"/></g>
+            <text class="rn" x="526" y="378">КИНОЗАЛ</text>
+            <g class="chip" transform="translate(568,232)"><rect width="112" height="24" rx="12"/><text x="10" y="16">Сцена «Кино»</text></g>
+          </g>
+          <!-- hallway: security -->
+          <g class="room" data-go="#/security" tabindex="0" role="link" aria-label="Прихожая — безопасность">
+            <rect class="rf" x="128" y="398" width="188" height="168" rx="6"/><rect class="rw" x="128" y="398" width="188" height="168" rx="6"/>
+            <g class="ri" transform="translate(150,420)"><path d="M10 2 L18 6 v6 c0 5-4 8-8 10-4-2-8-5-8-10V6Z"/></g>
+            <text class="rn" x="150" y="550">ПРИХОЖАЯ</text>
+            <g class="chip" transform="translate(182,408)"><rect width="118" height="24" rx="12"/><text x="10" y="16">Охрана · камеры</text></g>
+          </g>
+          <!-- tech room: smart home brain -->
+          <g class="room" data-go="#/smart-home" tabindex="0" role="link" aria-label="Техпомещение — контроллеры умного дома">
+            <rect class="rf" x="316" y="398" width="188" height="168" rx="6"/><rect class="rw" x="316" y="398" width="188" height="168" rx="6"/>
+            <g class="ri" transform="translate(338,420)"><rect x="2" y="2" width="16" height="18" rx="2"/><path d="M6 7 h8 M6 11 h8 M6 15 h5"/></g>
+            <text class="rn" x="338" y="550">ЩИТ · КОНТРОЛЛЕРЫ</text>
+            <g class="chip" transform="translate(398,408)"><rect width="106" height="24" rx="12"/><text x="10" y="16">Локально · OK</text></g>
+          </g>
+          <!-- utility: power/DGU -->
+          <g class="room" data-go="#/electric" tabindex="0" role="link" aria-label="Электрощитовая — питание, ДГУ, заземление">
+            <rect class="rf" x="504" y="398" width="188" height="168" rx="6"/><rect class="rw" x="504" y="398" width="188" height="168" rx="6"/>
+            <g class="ri" transform="translate(530,420)"><path d="M10 2 L4 13 h6 l-2 9 L16 9 h-6 z"/></g>
+            <text class="rn" x="526" y="550">ЭЛЕКТРОЩИТОВАЯ</text>
+            <g class="chip" transform="translate(560,408)"><rect width="130" height="24" rx="12"/><text x="10" y="16">ДГУ · резерв готов</text></g>
+          </g>
+          <!-- инженерные отметки допуска (Концепция D) -->
+          <g class="dims">
+            <path d="M128 214 v-14 M316 214 v-14 M128 200 h188"/>
+            <path d="M504 214 v-14 M692 214 v-14 M504 200 h188"/>
+          </g>
+          <text class="dimtxt" x="150" y="196">3.60 м</text>
+          <text class="dimtxt" x="526" y="196">3.60 м</text>
+
+          <!-- маршрут обхода объекта: прогулка по комнатам при появлении hero в зоне видимости -->
+          <path id="walkpath" class="walkpath" pathLength="100"
+            d="M222 482 L222 308 L410 308 L598 308 L598 482 L410 482 L410 160"/>
+          <circle id="walker" class="walker" r="6">
+            <animateMotion id="walkMotion" dur="3.2s" begin="indefinite" fill="freeze">
+              <mpath href="#walkpath"/>
+            </animateMotion>
+          </circle>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Что мы делаем</p>
+      <h2>Двенадцать направлений. Одна логика управления объектом.</h2>
+      <p>За каждым направлением — состав работ, стадии подключения и требования к смежникам.</p></div>
+    <div class="grid g4" id="dirGrid"></div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Почему комплексно</p>
+      <h2>Пять подрядчиков без координатора превращают смету в черновик.</h2>
+      <p>Свет зависит от электрики, шторы — от потолков, климат — от вентиляции, Wi-Fi — от трасс. Когда каждую систему ведёт отдельная бригада, вы получаете вот это:</p></div>
+    <div class="grid g2">
+      <div class="risk reveal"><span class="x">✕</span><p>Кабели заложили не туда — штробление по чистовой отделке</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Потолки закрыли, а датчики и трассы не предусмотрели</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Кондиционеры не интегрируются с системой управления</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Электрокарнизы не согласованы с нишами потолков</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Вентиляция конфликтует с дизайн-проектом</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Wi-Fi нестабилен после ремонта — точки не заложены в проект</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Много подрядчиков — и ни одного ответственного за результат</p></div>
+      <div class="risk reveal"><span class="x">✕</span><p>Смета растёт на переделках, сроки сдвигаются</p></div>
+    </div>
+    <div class="conclusion reveal">MiMiSmart связывает инженерные системы в одну понятную архитектуру — <b>до того, как начнутся дорогие переделки.</b></div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Когда нас подключать</p>
+      <h2>Чем раньше — тем меньше рисков и точнее смета.</h2></div>
+    <div class="stages">
+      <div class="stage hot reveal"><span class="n">✓ ИДЕАЛЬНО</span><p>Есть архитектурный проект, готовится дизайн-проект</p></div>
+      <div class="stage hot reveal"><span class="n">✓ ИДЕАЛЬНО</span><p>Начинается проектирование электрики, обсуждается климат</p></div>
+      <div class="stage hot reveal"><span class="n">✓ ХОРОШО</span><p>Черновые работы не начаты или только начались</p></div>
+      <div class="stage hot reveal"><span class="n">✓ ЕЩЁ УСПЕВАЕМ</span><p>Кабели не проложены, потолки не закрыты</p></div>
+      <div class="stage late reveal"><span class="n">✕ ПОЗДНО</span><p>Чистовая отделка завершена — возможны только компромиссы</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Для кого</p><h2>Шесть ролей — шесть ценностей.</h2></div>
+    <div class="grid g3" id="whoGrid"></div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Как проходит работа</p>
+      <h2>Десять шагов — от консультации до поддержки.</h2>
+      <p>Работаем в связке с дизайнером, строителем, электриком, климатической компанией и другими участниками проекта.</p></div>
+    <div class="steps">
+      <div class="step reveal"><p>Первичная консультация</p></div>
+      <div class="step reveal"><p>Аудит проекта или планировки</p></div>
+      <div class="step reveal"><p>Предварительный состав систем</p></div>
+      <div class="step reveal"><p>Смета и техническое задание</p></div>
+      <div class="step reveal"><p>Проектирование</p></div>
+      <div class="step reveal"><p>Координация со смежниками</p></div>
+      <div class="step reveal"><p>Поставка оборудования</p></div>
+      <div class="step reveal"><p>Монтаж</p></div>
+      <div class="step reveal"><p>Пусконаладка и сценарии</p></div>
+      <div class="step reveal"><p>Сдача и поддержка</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Сценарии объекта</p>
+      <h2>Дом реагирует на присутствие. Как житель наверху — на ваш курсор.</h2>
+      <p>Сценарий закладывается в проект вместе с трассами и щитом. Приложение потом только дирижирует.</p></div>
+    <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Наступило утро</span><h3 style="margin-top:8px">Пробуждение</h3><p>За час прогреваются тёплые полы. Отопление переходит в дневной режим. Плавно открываются шторы — солнце вместо будильника, тихая музыка вместо сигнала.</p></div>
+      <div class="card reveal"><span class="kicker">Я ушёл / пришёл</span><h3 style="margin-top:8px">Никого дома</h3><p>Свет и розеточные группы отключаются, климат — в экономный режим, охрана и имитация присутствия — включены. Уведомление, если что-то осталось открытым.</p></div>
+      <div class="card reveal"><span class="kicker">Случилась протечка</span><h3 style="margin-top:8px">Авария</h3><p>Датчик фиксирует воду — краны перекрываются автоматически, приходит уведомление. Локальная логика отрабатывает даже без интернета.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Управление</p>
+      <h2>Три интерфейса одной системы.</h2>
+      <p>Простота здесь — следствие инженерной архитектуры. Колонка с лампочками так не умеет.</p></div>
+    <div class="grid g3">
+      <div class="card reveal"><span class="kicker">Приложение</span><h3 style="margin-top:8px">Весь объект в смартфоне</h3><p>Вся электрика и инженерия дома — в одном приложении. Десятки действий одним касанием, состояние систем — в реальном времени, из любой точки мира.</p></div>
+      <div class="card reveal"><span class="kicker">Выключатели</span><h3 style="margin-top:8px">Привычные, но сценарные</h3><p>Управляйте так, как привыкли. На одну кнопку — десятки действий: «Ушёл», «Кино», «Вечер». Премиальная фурнитура, совместимая с автоматикой.</p></div>
+      <div class="card reveal"><span class="kicker">Голос</span><h3 style="margin-top:8px">Голосовые ассистенты</h3><p>Интеграция с голосовыми ассистентами — как дополнительный интерфейс системы: свет, шторы, музыка, сцены. Команда исполняется локальной логикой объекта.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="prod">
+      <div class="reveal">
+        <p class="eyebrow">Производство</p>
+        <h2 style="margin-top:14px">Контроллеры для вашего объекта собирают здесь.</h2>
+        <p style="color:var(--muted);max-width:52ch;margin:18px 0 0">Своя линия сборки и тестирования в Москве. Каждый контроллер проходит прогон под нагрузкой до отгрузки на объект — вы видите производство своими глазами, в шоуруме этажом выше.</p>
+        <div class="facts">
+          <div class="fact"><span class="k">С 2004</span><p>разработка железа и ПО в одной команде</p></div>
+          <div class="fact"><span class="k">Прогон 100%</span><p>каждый модуль тестируется под нагрузкой до отгрузки <span class="prov">⚠️ формулировку подтвердить</span></p></div>
+          <div class="fact"><span class="k">Видео</span><p>ролик с линии — на этапе реализации сюда встраивается ваш YouTube-шорт с производства</p></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="short" role="img" aria-label="Плейсхолдер видео с производства: чертёж контроллера CUARM5M">
+          <svg viewBox="0 0 320 570" preserveAspectRatio="xMidYMid slice">
+            <rect width="320" height="570" fill="none"/>
+            <g opacity=".18" stroke="var(--line)" stroke-width="1">
+              <path d="M0 120 h320 M0 240 h320 M0 360 h320 M0 480 h320 M80 0 v570 M160 0 v570 M240 0 v570"/>
+            </g>
+            <!-- чертёж платы CUARM5M с отметками допуска -->
+            <g transform="translate(50,150)">
+              <rect width="220" height="150" rx="6" fill="var(--room)" stroke="var(--room-line)" stroke-width="1.6"/>
+              <g stroke="var(--glow)" stroke-width="1.2" fill="none" opacity=".85">
+                <path d="M20 30 h70 v36 h54 M20 74 h40 v44 h74 M148 30 v24 h54"/>
+              </g>
+              <g fill="var(--glow)"><circle cx="20" cy="30" r="3"/><circle cx="148" cy="30" r="3"/><circle cx="202" cy="54" r="3"/><circle cx="134" cy="118" r="3"/></g>
+              <rect x="148" y="82" width="48" height="32" rx="3" fill="var(--shell)" stroke="var(--line)"/>
+              <text x="155" y="102" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="var(--glow)">CUARM5M</text>
+              <!-- размерные линии -->
+              <g class="dims"><path d="M0 -8 h220 M0 -14 v12 M220 -14 v12"/></g>
+              <text class="dimtxt" x="86" y="-14">86 × 54 мм ⚠️</text>
+            </g>
+            <text x="24" y="452" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="var(--faint)" letter-spacing="2">MIMISMART · СБОРОЧНЫЙ ЧЕРТЁЖ</text>
+            <text x="24" y="470" font-family="ui-monospace,Menlo,monospace" font-size="11" fill="var(--faint)">МОСКВА · НОВОДАНИЛОВСКАЯ 6К1</text>
+          </svg>
+          <div class="play" role="button" tabindex="0" aria-label="Здесь будет видео с производства"></div>
+          <div class="cap">▶ youtube short · с линии сборки · встраивается на этапе 3 ⚠️</div>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Пять фактов о системе</p>
+      <h2>Обещания, которые проверяются на объекте, а не на словах.</h2></div>
+    <div class="grid g4">
+      <div class="card reveal"><span class="kicker">Гарантия</span><h3 style="margin-top:8px">Пожизненная <span class="prov">⚠️ условия подтвердить</span></h3><p>Самая высокая гарантия на рынке и круглосуточная поддержка на весь срок службы системы.</p></div>
+      <div class="card reveal"><span class="kicker">Датчики</span><h3 style="margin-top:8px">Произведение техники</h3><p>Одни из самых миниатюрных и технологичных датчиков автоматизации в своей категории <span class="prov">⚠️ сравнение подтвердить</span>.</p></div>
+      <div class="card reveal"><span class="kicker">Масштаб</span><h3 style="margin-top:8px">5000+ объектов <span class="prov">⚠️</span></h3><p>20 представительств по миру <span class="prov">⚠️</span> — опыт, который снижает риск на вашем объекте.</p></div>
+      <div class="card reveal"><span class="kicker">Архитектура</span><h3 style="margin-top:8px">Децентрализация</h3><p>Высокая надёжность при авариях: элементы системы работают автономно, без единой точки отказа.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="price-band reveal" style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <div style="max-width:56ch">
+        <p class="eyebrow" style="margin-bottom:10px">Шоурум в Москве</p>
+        <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Поуправляйте системой вживую — до того, как заказывать проект.</p>
+        <p class="cut">Вы сами включите сцены света, шторы и климат, увидите щит автоматизации и поймёте, почему обычная электрика устарела ещё 30 лет назад. Новоданиловская наб., 6к1 · 09:00–18:00.</p>
+      </div>
+      <button class="btn btn-primary" data-form data-goal="showroom">Записаться в шоурум</button>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="price-band reveal">
+      <p class="eyebrow" style="margin-bottom:12px">Стоимость</p>
+      <p class="big">Комплексные инженерные решения рассчитываются индивидуально. Для квартир и домов премиального уровня проекты обычно начинаются <span class="amber">от 2–3 млн ₽</span> <span class="prov">⚠️</span> — и зависят от площади, стадии объекта, состава систем и оборудования.</p>
+      <p class="cut"><b>Мы не работаем</b> с запросами на отдельные лампочки, розетки и бытовые гаджеты.</p>
+      <div class="cta-row" style="margin-top:22px"><button class="btn btn-primary" data-form>Получить предварительный расчёт по объекту</button></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Кейсы</p>
+      <h2>Кейсы: стадия, системы, участники, результат.</h2>
+      <p>Читаются как инженерные отчёты — потому что ими и являются. <a href="#/cases" style="color:var(--glow)">Все кейсы →</a></p></div>
+    <div class="grid g3" id="homeCases"></div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="sec-head reveal"><p class="eyebrow">Статьи</p>
+      <h2>Инженерные ответы, а не блог о лампочках.</h2>
+      <p>На текущем сайте здесь тестовые заглушки <span class="prov">⚠️</span> — заменяем на статьи-рычаги: вопрос клиента → прямой ответ → как реализуется → почему мы. <a href="#/news" style="color:var(--glow)">Все статьи →</a></p></div>
+    <div class="grid g3">
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Разбор по стадиям: проект → черновая → чистовая. С этого момента переделки становятся дорогими.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Из чего складывается смета и почему дешёвое решение — это риск на дистанции.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Проводной умный дом или облачные гаджеты?</h3><p>Локальная логика против зависимости от интернета — на реальных авариях объектов.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="shell">
+    <div class="price-band reveal" style="display:flex;gap:22px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <div style="max-width:56ch">
+        <p class="eyebrow" style="margin-bottom:10px">Партнёрам</p>
+        <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Дизайнерам, архитекторам, строителям и смежным подрядчикам</p>
+        <p class="cut">Есть клиент с квартирой от 80 м², домом от 300 м² или объектом от 40 млн ₽? Подключимся на стадии проекта, возьмём инженерную часть и выплатим партнёрское вознаграждение при успешной продаже. <span class="prov">⚠️ условия уточняются</span></p>
+      </div>
+      <div class="cta-row" style="flex-direction:column;align-items:stretch">
+        <a class="btn btn-primary" href="#/partners">Стать партнёром</a>
+        <button class="btn btn-ghost" data-form data-goal="partner">Передать клиента</button>
+      </div>
+    </div>
+  </div></section>
+</main>
+
+<!-- ===================== SUBPAGE TEMPLATE ===================== -->
+<main class="page" id="p-sub">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> <span id="s-crumb"></span></p>
+    <p class="eyebrow" id="s-eyebrow"></p>
+    <h1 id="s-title"></h1>
+    <div class="answer" id="s-answer"></div>
+  </div></div>
+  <section><div class="shell">
+    <div class="sec-head"><h2 id="s-h2">Состав направления</h2></div>
+    <ul class="list-col" id="s-items"></ul>
+  </div></section>
+  <section><div class="shell">
+    <div class="sec-head"><h2>Что будет, если делать это без общей координации</h2></div>
+    <div class="grid g2" id="s-risks"></div>
+  </div></section>
+  <section><div class="shell">
+    <div class="price-band">
+      <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Подключаемся на стадии проекта — проверим, что заложено, и покажем, что нужно добавить.</p>
+      <div class="cta-row" style="margin-top:18px">
+        <button class="btn btn-primary" data-form>Предварительный расчёт</button>
+        <button class="btn btn-ghost" data-form data-goal="audit">Аудит проекта</button>
+      </div>
+    </div>
+  </div></section>
+</main>
+
+<!-- ===================== EQUIPMENT ===================== -->
+<main class="page" id="p-equipment">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Оборудование</p>
+    <p class="eyebrow">Оборудование собственного производства</p>
+    <h1>Контроллеры, датчики и щиты, которые мы делаем сами</h1>
+    <div class="answer">Контроллеры — это мозг системы. Они принимают сигналы от датчиков и панелей, запускают сценарии и управляют светом, климатом, шторами и безопасностью. Работают локально — даже без интернета. Оборудование разрабатываем и производим сами с 2004 года.</div>
+  </div></div>
+  <section><div class="shell">
+    <div class="sec-head"><h2>Контроллеры и щит</h2></div>
+    <div class="grid g2">
+      <div class="card"><span class="kicker">Контроллер</span><h3>CUARM5M</h3><p>Модуль управления системой умного дома. Локальная логика сценариев, децентрализованная архитектура — нет единой точки отказа. Совместим с оборудованием и выключателями любых брендов.</p><div class="tags" style="margin-top:12px"><span class="tag">своё производство</span><span class="tag">локально</span><span class="tag">децентрализация</span></div></div>
+      <div class="card"><span class="kicker">Щит автоматизации</span><h3>Инженерный порядок</h3><p>Каждая линия подписана, заложен резерв слотов и места под расширение. Аккуратный кабель-менеджмент, группировка автоматов и съёмные клеммы упрощают обслуживание. Перед сдачей — тестирование под нагрузкой.</p><div class="tags" style="margin-top:12px"><span class="tag">резерв слотов</span><span class="tag">тест под нагрузкой</span></div></div>
+    </div>
+  </div></section>
+  <section><div class="shell">
+    <div class="sec-head"><h2>Датчики</h2><p style="color:var(--muted);margin-top:10px">Миниатюрные, собственной разработки. Каждый — часть общей логики объекта.</p></div>
+    <div class="grid g4">
+      <div class="card"><span class="kicker">Дым</span><h3>Тревога вовремя.</h3><p>Пожарная логика: сирена, свет на пути эвакуации, уведомление.</p></div>
+      <div class="card"><span class="kicker">Протечка</span><h3>Вода перекрыта.</h3><p>Краны закрываются автоматически за секунды — без участия человека.</p></div>
+      <div class="card"><span class="kicker">Движение</span><h3>Свет по присутствию.</h3><p>Свет и сцены — там, где вы. Экономия без потери комфорта.</p></div>
+      <div class="card"><span class="kicker">Температура</span><h3>Тепло по графику.</h3><p>Данные для климат-контура: отопление, полы, кондиционирование.</p></div>
+      <div class="card"><span class="kicker">Влажность</span><h3>Влажность в норме.</h3><p>RH-контроль по зонам — вместе с увлажнением и вентиляцией.</p></div>
+      <div class="card"><span class="kicker">Открытие</span><h3>Окна и двери.</h3><p>Охранная логика и климат: открыто окно — климат зоны на паузу.</p></div>
+      <div class="card"><span class="kicker">ИК</span><h3>Техника по ИК.</h3><p>Управление кондиционерами и AV-техникой в единой системе.</p></div>
+      <div class="card"><span class="kicker">Приложение</span><h3>Объект в смартфоне.</h3><p>Состояние всех систем и сценарии — в одном приложении.</p></div>
+    </div>
+  </div></section>
+  <section><div class="shell">
+    <div class="price-band">
+      <p class="big" style="font-size:clamp(19px,2.4vw,26px)">Своё железо и ПО — это контроль качества, совместимости и поддержки на годы вперёд.</p>
+      <div class="cta-row" style="margin-top:18px">
+        <button class="btn btn-primary" data-form>Предварительный расчёт</button>
+        <button class="btn btn-ghost" data-form data-goal="showroom">Посмотреть вживую в шоуруме</button>
+      </div>
+    </div>
+  </div></section>
+</main>
+
+<!-- ===================== CASES ===================== -->
+<main class="page" id="p-cases">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Кейсы</p>
+    <p class="eyebrow">Кейсы</p><h1>Инженерные истории объектов</h1>
+    <div class="answer">Каждый кейс — стадия подключения, состав систем, участники и решённые проблемы. Данные ниже — <b>шаблоны-заглушки ⚠️</b>: реальные объекты добавим из вашей базы.</div>
+  </div></div>
+  <section><div class="shell">
+    <div class="filter" id="caseFilter"></div>
+    <div class="grid g3" id="caseGrid"></div>
+  </div></section>
+</main>
+
+<!-- ===================== NEWS ===================== -->
+<main class="page" id="p-news">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Статьи</p>
+    <p class="eyebrow">Статьи</p><h1>База инженерных ответов</h1>
+    <div class="answer">На текущем сайте раздел заполнен тестовыми заглушками («Полезная статья», «Тестовое описание») <span class="prov">⚠️</span>. Заменяем на статьи-рычаги по стандарту: вопрос → прямой ответ → как реализуется → для кого → сколько и почему → почему мы.</div>
+  </div></div>
+  <section><div class="shell">
+    <div class="grid g3">
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Когда подключать умный дом при ремонте?</h3><p>Разбор по стадиям: проект → черновая → чистовая. С этого момента переделки становятся дорогими.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Сколько стоит инженерия для квартиры 150 м²?</h3><p>Из чего складывается смета и почему дешёвое решение — это риск на дистанции.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Проводной умный дом или облачные гаджеты?</h3><p>Локальная логика против зависимости от интернета — на реальных авариях объектов.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Умный дом для офиса: с чего начать?</h3><p>Чем коммерческий объект отличается от квартиры в проектировании систем.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">DALI-освещение: когда оправдано?</h3><p>Разница с обычным диммированием и на каких объектах DALI окупается.</p></div>
+      <div class="card reveal"><span class="kicker">⚠️ заглушка</span><h3 style="margin-top:8px">Что делать, если топят соседи?</h3><p>Как автоматическое перекрытие воды предотвращает ремонт у соседей снизу.</p></div>
+    </div>
+  </div></section>
+</main>
+
+<!-- ===================== PARTNERS ===================== -->
+<main class="page" id="p-partners">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Партнёрам</p>
+    <p class="eyebrow">Партнёрам</p><h1>Дизайнерам, архитекторам, строителям и смежникам</h1>
+    <div class="answer">Передайте нам клиента с квартирой от 80 м², домом от 300 м² или объектом от 40 млн ₽ — мы возьмём инженерную часть, сохраним ваши зоны ответственности и выплатим вознаграждение при успешной продаже. <span class="prov">⚠️ размер и условия — уточняются</span></div>
+  </div></div>
+  <section><div class="shell">
+    <div class="grid g2">
+      <div class="card"><span class="kicker">Дизайнеру / архитектору</span><h3>Инженерия не испортит дизайн</h3><p>Заранее заложим выключатели, датчики, карнизы, климат и свет; согласуем с потолками и нишами; снизим конфликты смежников на объекте.</p></div>
+      <div class="card"><span class="kicker">Строителю / прорабу</span><h3>Без переделок и простоев</h3><p>Кабели, щиты, трассы и оборудование — вовремя и согласованно. Подрядчик, который помогает стройке, а не мешает ей.</p></div>
+      <div class="card"><span class="kicker">Смежному подрядчику</span><h3>Понятные зоны ответственности</h3><p>Примем клиента на комплексную инженерную задачу — климат, электрику, слаботочку, AV — без споров за периметр работ.</p></div>
+      <div class="card"><span class="kicker">Как это работает</span><h3>Передача клиента за 3 шага</h3><p>Заявка → совместная встреча/аудит проекта → фиксация вознаграждения. Партнёрские материалы вышлем после регистрации.</p></div>
+    </div>
+    <div class="cta-row" style="margin-top:24px">
+      <button class="btn btn-primary" data-form data-goal="partner">Стать партнёром</button>
+      <button class="btn btn-ghost" data-form data-goal="partner">Передать клиента</button>
+      <button class="btn btn-ghost" data-form data-goal="partner">Получить материалы</button>
+    </div>
+  </div></section>
+</main>
+
+<!-- ===================== ABOUT ===================== -->
+<main class="page" id="p-about">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / О компании</p>
+    <p class="eyebrow">О компании</p><h1>Разработчик, производитель и инженерный подрядчик</h1>
+    <div class="answer">MiMiSmart с 2004 года разрабатывает и производит собственные контроллеры и ПО для автоматизации, проектирует и реализует инженерные системы премиальных квартир и домов. Проводная архитектура, локальная работа без облака, бессрочная гарантия <span class="prov">⚠️ условия уточнить</span>.</div>
+  </div></div>
+  <section><div class="shell">
+    <div class="grid g4">
+      <div class="card"><span class="kicker">Производство</span><h3>Своё железо и ПО</h3><p>Контроллеры и софт разрабатываем и выпускаем сами — контролируем качество, совместимость и поддержку на годы вперёд.</p></div>
+      <div class="card"><span class="kicker">Архитектура</span><h3>Проводная, децентрализованная</h3><p>Система работает локально, без зависимости от интернета и облачных сервисов. Нет единой точки отказа.</p></div>
+      <div class="card"><span class="kicker">Опыт</span><h3>5000+ объектов <span class="prov">⚠️</span></h3><p>Более 20 лет проектов: квартиры, дома, офисы. 20 представительств <span class="prov">⚠️</span>.</p></div>
+      <div class="card"><span class="kicker">Гарантия</span><h3>Бессрочная <span class="prov">⚠️</span></h3><p>Отвечаем за систему на всём жизненном цикле объекта: сервис, развитие, поддержка.</p></div>
+    </div>
+    <div class="conclusion" style="margin-top:22px">Шоурум в Москве: Новоданиловская наб., 6к1 — приходите поуправлять системой вживую. <button class="btn btn-ghost btn-sm" data-form data-goal="showroom" style="margin-left:10px">Записаться</button></div>
+  </div></section>
+</main>
+
+<!-- ===================== CONTACTS ===================== -->
+<main class="page" id="p-contacts">
+  <div class="sub-hero"><div class="shell">
+    <p class="crumbs"><a href="#/">Главная</a> / Контакты</p>
+    <p class="eyebrow">Контакты</p><h1>Обсудим ваш объект</h1>
+    <div class="answer">Телефон и почта на текущем сайте — заглушки <span class="prov">⚠️ заменить на реальные</span>. Шоурум: г. Москва, Новоданиловская наб., 6к1 · 09:00–18:00.</div>
+  </div></div>
+  <section><div class="shell">
+    <div class="cta-row">
+      <button class="btn btn-primary" data-form>Получить предварительный расчёт</button>
+      <button class="btn btn-ghost" data-form data-goal="audit">Передать проект на аудит</button>
+      <button class="btn btn-ghost" data-form data-goal="showroom">Записаться в шоурум</button>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="shell">
+  <div class="fgrid">
+    <div><h4>MiMiSmart</h4><p style="max-width:38ch;margin:0">Единый инженерный подрядчик для дорогих квартир и домов. Проектируем и реализуем инженерные системы в единой логике управления объектом.</p></div>
+    <div><h4>Направления</h4><a href="#/smart-home">Умный дом</a><a href="#/climate">Климат и вентиляция</a><a href="#/electric">Электрика и сети</a><a href="#/curtains-light">Шторы и свет</a><a href="#/multimedia">Мультимедиа</a><a href="#/security">Безопасность</a></div>
+    <div><h4>Компания</h4><a href="#/equipment">Оборудование</a><a href="#/cases">Кейсы</a><a href="#/news">Статьи</a><a href="#/partners">Партнёрам</a><a href="#/about">О компании</a><a href="#/contacts">Контакты</a></div>
+    <div><h4>Шоурум</h4><p style="margin:0">Москва, Новоданиловская наб., 6к1<br>09:00–18:00</p></div>
+  </div>
+  © 2026 MiMiSmart
+  <div class="foot-note">⚠️ Прототип. Пороги (80 м²/300 м²/40 млн), «от 2–3 млн ₽», цифры-пруфы, контакты и кейсы — заглушки до подтверждения (tz-site/99).</div>
+</div></footer>
+
+<!-- ===================== QUALIFY FORM ===================== -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Квалификационная заявка">
+  <form class="form" onsubmit="event.preventDefault();this.querySelector('.done').style.display='block'">
+    <button type="button" class="xclose" data-close aria-label="Закрыть">×</button>
+    <h3 id="formTitle">Предварительный расчёт по объекту</h3>
+    <p class="sub">Ответы помогут сразу подключить нужных инженеров. Данные уйдут в CRM с UTM-меткой источника.</p>
+    <div class="frow">
+      <label class="fl"><span>Имя</span><input required placeholder="Как к вам обращаться"></label>
+      <label class="fl"><span>Телефон</span><input required type="tel" placeholder="+7"></label>
+    </div>
+    <div class="frow">
+      <label class="fl"><span>Мессенджер</span><select><option>Telegram</option><option>WhatsApp</option><option>Звонок</option></select></label>
+      <label class="fl"><span>Тип объекта</span><select><option>Квартира</option><option>Дом</option><option>Другое</option></select></label>
+    </div>
+    <div class="frow">
+      <label class="fl"><span>Площадь, м²</span><input inputmode="numeric" placeholder="например, 180"></label>
+      <label class="fl"><span>Локация</span><input placeholder="Город / посёлок"></label>
+    </div>
+    <div class="frow">
+      <label class="fl"><span>Стадия объекта</span><select><option>Проектирование</option><option>Строительство</option><option>Черновой ремонт</option><option>Инженерные работы</option><option>Чистовая отделка</option></select></label>
+      <label class="fl"><span>Дизайн-проект</span><select><option>Есть</option><option>В работе</option><option>Нет</option></select></label>
+    </div>
+    <label class="fl"><span>Какие системы интересуют</span></label>
+    <div class="sysgrid">
+      <label class="sys"><input type="checkbox">Умный дом</label><label class="sys"><input type="checkbox">Климат</label>
+      <label class="sys"><input type="checkbox">Вентиляция</label><label class="sys"><input type="checkbox">Отопление</label>
+      <label class="sys"><input type="checkbox">Тёплые полы</label><label class="sys"><input type="checkbox">Увлажнение</label>
+      <label class="sys"><input type="checkbox">Шторы</label><label class="sys"><input type="checkbox">Wi-Fi / сети</label>
+      <label class="sys"><input type="checkbox">Электрика</label><label class="sys"><input type="checkbox">Акустика / кино</label>
+      <label class="sys"><input type="checkbox">Видеонаблюдение</label><label class="sys"><input type="checkbox">Другое</label>
+    </div>
+    <div class="frow">
+      <label class="fl"><span>Срок начала работ</span><select><option>Ближайший месяц</option><option>1–3 месяца</option><option>3–6 месяцев</option><option>Позже / изучаю</option></select></label>
+      <label class="fl"><span>Кто принимает решение</span><select><option>Я</option><option>Совместно с семьёй</option><option>Заказчик (я представитель)</option></select></label>
+    </div>
+    <label class="fl"><span>Планировка или проект</span><select><option>Могу прислать</option><option>Пока нет</option></select></label>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px">Отправить</button>
+    <p class="done" style="display:none;color:var(--good);font-size:14px;margin:12px 0 0">Заявка принята (прототип — отправка в CRM будет подключена на этапе 1).</p>
+    <p class="note">Нажимая «Отправить», вы соглашаетесь с политикой обработки персональных данных.</p>
+  </form>
+</div>
+
+<script>
+(function(){
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- data ---------- */
+  var DIRS=[
+    ['Умный дом и автоматизация','Свет, климат, шторы, протечки, сценарии — единая логика на своих контроллерах.','#/smart-home'],
+    ['Кондиционирование','Подбор, трассы, интеграция с управлением — до закрытия потолков.','#/climate'],
+    ['Вентиляция','Приток и вытяжка, согласованные с дизайном и климатом.','#/climate'],
+    ['Отопление и тёплые полы','Котельная, радиаторы, контуры полов — по графику и по присутствию.','#/climate'],
+    ['Увлажнение','Форсуночные и паровые системы, RH-контроль по зонам.','#/climate'],
+    ['Электрокарнизы и шторы','Карнизы и рулонные, ниши и питание — согласовано с потолками.','#/curtains-light'],
+    ['Wi-Fi и слаботочные сети','Радиопланирование, СКС, стабильная сеть после ремонта.','#/electric'],
+    ['Электрика','Щиты, линии, сценарные выключатели — по согласованию с проектом.','#/electric'],
+    ['Акустика и кинотеатры','Кинозалы и мультирум со сценарием «Кино» — свет, шторы, климат вместе.','#/multimedia'],
+    ['Электрофурнитура','Выключатели и розетки премиальных серий, совместимые с автоматикой.','#/curtains-light'],
+    ['Видеонаблюдение и безопасность','Камеры, домофония, контроль доступа, удалённый мониторинг.','#/security'],
+    ['ДГУ, молниезащита, заземление','Резервное питание и защита объекта по нормам.','#/security']
+  ];
+  var WHO=[
+    ['Для собственника','Не набор подрядчиков, а единая инженерная система объекта с понятной ответственностью.'],
+    ['Для дизайнера','Заранее заложим датчики, выключатели, карнизы, климат и свет — инженерия не испортит дизайн.'],
+    ['Для архитектора','Инженерный раздел, согласованный с архитектурой, без конфликтов на площадке.'],
+    ['Для строителя','Кабели, щиты и трассы — вовремя. Меньше переделок, предсказуемый график.'],
+    ['Для прораба','Один инженерный подрядчик вместо пяти смежников, которых надо сводить.'],
+    ['Для смежного подрядчика','Передайте клиента на комплекс — сохраним ваши зоны ответственности и заплатим вознаграждение.']
+  ];
+  var SUB={
+    'smart-home':{crumb:'/ Умный дом',eyebrow:'Умный дом и автоматизация',title:'Автоматизация в единой логике объекта',
+      answer:'Свет, климат, шторы, протечки и безопасность управляются одной системой на собственных контроллерах MiMiSmart. Проводная архитектура, работает локально — без интернета и облака. Сценарии, приложение, выключатели и датчики проектируются до начала электрики.',
+      items:['<b>Свет</b> — DALI, диммирование, сцены','<b>Климат</b> — единый контур с вентиляцией и отоплением','<b>Шторы</b> — карнизы в сценариях','<b>Протечки</b> — автоматическое перекрытие воды','<b>Сценарии</b> — «Утро», «Ушёл», «Кино», «Авария»','<b>Приложение</b> — весь объект в смартфоне','<b>Выключатели</b> — привычные, сценарные','<b>Датчики</b> — присутствие, климат, открытие','<b>Интеграции</b> — оборудование любых брендов'],
+      risks:['Контроллеры выбраны после электрики — трассы не совпадают','Датчики не заложены до закрытия потолков','«Умный дом» из облачных гаджетов отваливается без интернета','Сценарии невозможно расширить — система закрытая']},
+    'climate':{crumb:'/ Климат и вентиляция',eyebrow:'Климат · вентиляция · отопление · увлажнение',title:'Микроклимат как одна система, а не четыре подрядчика',
+      answer:'Кондиционирование, вентиляция, отопление, тёплые полы и увлажнение проектируются вместе и управляются одной логикой: температура, свежесть и влажность по зонам, по расписанию и по присутствию. Подключаемся до закрытия потолков и стяжки.',
+      items:['<b>Кондиционирование</b> — мульти/VRF, скрытая установка','<b>Вентиляция</b> — приток/вытяжка, рекуперация','<b>Отопление</b> — котельная, радиаторы, погодозависимость','<b>Тёплые полы</b> — контуры по зонам и графику','<b>Увлажнение</b> — RH-контроль по помещениям','<b>Управление</b> — единый контур в системе объекта'],
+      risks:['Кондиционеры не интегрируются с управлением — два пульта на стене','Вентиляция конфликтует с дизайном и потолками','Полы греют по таймеру, а не по присутствию — перерасход','Увлажнение добавили после отделки — пятна и переделки']},
+    'electric':{crumb:'/ Электрика и сети',eyebrow:'Электрика · щиты · Wi-Fi · слаботочные',title:'Электрика и сети, заложенные с первого раза',
+      answer:'Черновая и чистовая электрика по согласованию, щиты с резервом под расширение, радиопланирование Wi-Fi и СКС — до штукатурки. После ремонта сеть работает стабильно во всех комнатах, а щит остаётся обслуживаемым.',
+      items:['<b>Черновая электрика</b> — трассы, согласованные со всеми системами','<b>Щиты</b> — маркировка линий, резерв слотов','<b>Wi-Fi</b> — радиопланирование, точки в проекте','<b>СКС</b> — слаботочные сети объекта','<b>Домофония</b> — интеграция с системой','<b>Контроль доступа</b> — замки, ворота'],
+      risks:['Кабели «не туда» — штробление по чистовой','Щит без резерва — расширение невозможно','Wi-Fi поставили после ремонта — мёртвые зоны','Слаботочку вели разные бригады — никто не отвечает']},
+    'curtains-light':{crumb:'/ Шторы и свет',eyebrow:'Электрокарнизы · свет · электрофурнитура',title:'Свет и шторы, согласованные с дизайн-проектом',
+      answer:'Электрокарнизы, рулонные шторы, DALI-освещение, световые сценарии и премиальная фурнитура проектируются вместе с дизайнером: ниши, питание и управление закладываются до потолков — и не портят интерьер.',
+      items:['<b>Электрокарнизы</b> — ниши и питание в проекте','<b>Рулонные шторы</b> — скрытый монтаж','<b>DALI</b> — управляемый свет без мерцания','<b>Световые сценарии</b> — сцены по зонам и времени','<b>Выключатели</b> — премиальные серии, сценарные','<b>Согласование</b> — с дизайн-проектом и потолками'],
+      risks:['Карнизы не согласованы с нишами — видимые крепления','Питание штор забыли — кабель-канал по чистовой','Свет мерцает на диммерах — несовместимость','Фурнитура «из другой оперы» — дизайн рассыпается']},
+    'multimedia':{crumb:'/ Мультимедиа',eyebrow:'Акустика · мультирум · кинотеатры',title:'Кино и музыка как инженерная система',
+      answer:'Домашние кинотеатры и мультирум проектируются как часть инженерии объекта: акустика в конструктиве, трассы до отделки, сценарий «Кино» управляет светом, шторами и климатом одновременно.',
+      items:['<b>Кинозал</b> — акустический расчёт, изоляция','<b>Кино в гостиной</b> — скрытая акустика','<b>Мультирум</b> — музыка по зонам, AirPlay','<b>Сценарий «Кино»</b> — свет+шторы+климат+экран','<b>Интеграция</b> — в единую систему объекта'],
+      risks:['Акустику вспомнили после отделки — провода по плинтусам','Кинозал без вентиляции — духота через час','AV-подрядчик спорит с электриком за трассы','Оборудование не управляется из единой системы']},
+    'security':{crumb:'/ Безопасность',eyebrow:'Протечки · видеонаблюдение · ДГУ · молниезащита',title:'Инженерная безопасность объекта',
+      answer:'Защита от протечек с автоматическим перекрытием, видеонаблюдение, резервное питание (ДГУ), молниезащита и заземление — проектируются вместе с электрикой и управляются из единой системы с удалённым контролем.',
+      items:['<b>Протечки</b> — датчики + краны, авария за секунды','<b>Видеонаблюдение</b> — камеры, архив, доступ с телефона','<b>ДГУ</b> — резервное питание объекта','<b>Молниезащита</b> — по нормам, с проектом','<b>Заземление</b> — контур, измерения, протоколы','<b>Удалённый контроль</b> — состояние объекта 24/7'],
+      risks:['Протечка ночью — без автоматики это ремонт у соседей','Камеры «повесили потом» — провода по фасаду','ДГУ не согласован с щитом — переключение вручную','Заземление «как получилось» — риск для оборудования']}
+  };
+  var CASES=[
+    {t:'Квартира 250 м², Москва',tags:['квартира','умный дом','климат','шторы'],stage:'Подключение на стадии проектирования',
+     sys:'Умный дом, климат, вентиляция, увлажнение, тёплые полы, протечки, шторы, световые сценарии',
+     task:'Согласовать управление инженерными системами на стадии проектирования и избежать переделок в ремонте',
+     res:'Единая система управления, согласованная с дизайном, электрикой и климатом'},
+    {t:'Дом 480 м², Подмосковье ⚠️',tags:['дом','климат','безопасность','комплекс'],stage:'Подключение на этапе черновых работ',
+     sys:'Автоматизация, котельная и отопление, вентиляция, ДГУ, видеонаблюдение, Wi-Fi, молниезащита',
+     task:'Свести пять смежных подрядчиков в один график и единую логику управления',
+     res:'Объект сдан без переделок; резервное питание и удалённый контроль всех систем'},
+    {t:'Квартира 120 м², Москва ⚠️',tags:['квартира','свет','мультимедиа'],stage:'Подключение при готовом дизайн-проекте',
+     sys:'DALI-свет, электрокарнизы, мультирум, кино в гостиной, электрика по согласованию',
+     task:'Вписать инженерию в утверждённый дизайн-проект без визуальных компромиссов',
+     res:'Скрытый монтаж всех систем; сценарий «Кино» — свет, шторы и экран одной кнопкой'}
+  ];
+
+  /* ---------- render home grids ---------- */
+  function el(h){var d=document.createElement('div');d.innerHTML=h;return d.firstElementChild}
+  var dg=document.getElementById('dirGrid');
+  DIRS.forEach(function(d){dg.appendChild(el('<a class="card link reveal" href="'+d[2]+'"><h3>'+d[0]+'</h3><p>'+d[1]+'</p><div class="go">Подробнее →</div></a>'))});
+  var wg=document.getElementById('whoGrid');
+  WHO.forEach(function(w){wg.appendChild(el('<div class="card reveal"><span class="kicker">'+w[0]+'</span><p style="margin-top:8px;font-size:14.5px;color:var(--ink)">'+w[1]+'</p></div>'))});
+  function caseCard(c){return el('<div class="case reveal"><h3>'+c.t+'</h3><div class="meta">'+c.stage+'</div><dl><dt>Системы</dt><dd>'+c.sys+'</dd><dt>Задача</dt><dd>'+c.task+'</dd><dt>Результат</dt><dd>'+c.res+'</dd></dl><div class="tags">'+c.tags.map(function(t){return '<span class="tag">'+t+'</span>'}).join('')+'</div></div>')}
+  var hc=document.getElementById('homeCases'); CASES.forEach(function(c){hc.appendChild(caseCard(c))});
+
+  /* cases page + filters */
+  var FTAGS=['все','квартира','дом','климат','умный дом','шторы','свет','мультимедиа','безопасность','комплекс'];
+  var cf=document.getElementById('caseFilter'),cg=document.getElementById('caseGrid');
+  FTAGS.forEach(function(t,i){var b=document.createElement('button');b.textContent=t;if(!i)b.classList.add('on');
+    b.onclick=function(){cf.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');draw(t)};cf.appendChild(b)});
+  function draw(t){cg.innerHTML='';CASES.filter(function(c){return t==='все'||c.tags.indexOf(t)>-1}).forEach(function(c){var n=caseCard(c);n.classList.add('in');cg.appendChild(n)});
+    if(!cg.children.length)cg.innerHTML='<p style="color:var(--faint)">Кейсы этой категории добавим из вашей базы ⚠️</p>'}
+  draw('все');
+
+  /* ---------- router ---------- */
+  var pages={'':'p-home','equipment':'p-equipment','cases':'p-cases','news':'p-news','partners':'p-partners','about':'p-about','contacts':'p-contacts'};
+  function route(){
+    var h=location.hash.replace(/^#\//,'');
+    var sub=SUB[h];
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+    if(sub){
+      document.getElementById('s-crumb').textContent=' '+sub.crumb;
+      document.getElementById('s-eyebrow').textContent=sub.eyebrow;
+      document.getElementById('s-title').textContent=sub.title;
+      document.getElementById('s-answer').textContent=sub.answer;
+      var it=document.getElementById('s-items');it.innerHTML='';sub.items.forEach(function(x){var li=document.createElement('li');li.innerHTML=x;it.appendChild(li)});
+      var rk=document.getElementById('s-risks');rk.innerHTML='';sub.risks.forEach(function(x){rk.appendChild(el('<div class="risk"><span class="x">✕</span><p>'+x+'</p></div>'))});
+      document.getElementById('p-sub').classList.add('on');
+    } else {
+      document.getElementById(pages[h]||'p-home').classList.add('on');
+    }
+    document.querySelectorAll('#topnav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#/'+h)});
+    window.scrollTo(0,0); observeAll();
+  }
+  addEventListener('hashchange',route);
+
+  /* ---------- hero: сдержанный амбиентный свет за курсором (без персонажа) ---------- */
+  var hero=document.getElementById('hero'),glow=document.getElementById('cglow');
+  if(!reduce){
+    hero.addEventListener('pointermove',function(e){
+      var r=hero.getBoundingClientRect();hero.classList.add('awake');
+      glow.style.transform='translate('+(e.clientX-r.left)+'px,'+(e.clientY-r.top)+'px)';
+    });
+    hero.addEventListener('pointerleave',function(){hero.classList.remove('awake')});
+  }
+
+  /* ---------- обход объекта: разовая «прогулка» по маршруту при появлении hero ---------- */
+  (function(){
+    var rooms=[].slice.call(document.querySelectorAll('#hero .room'));
+    // порядок обхода совпадает с геометрией walkpath: прихожая → гостиная → спальня → кинозал → электрощитовая → щит → венткамера
+    var order=['security','curtains-light','climate','multimedia','electric','smart-home','climate'];
+    function roomByGoal(goal){return rooms.filter(function(r){return r.getAttribute('data-go')==='#/'+goal})}
+    function visit(goal){roomByGoal(goal).forEach(function(r){r.classList.add('visited')})}
+    var DUR=3200, SPLITS=[0,0.141,0.293,0.446,0.587,0.740,1.0];
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting||hero.classList.contains('walked'))return;
+        hero.classList.add('walked');
+        visit(order[0]);
+        if(reduce){ order.forEach(visit); return; }
+        var motion=document.getElementById('walkMotion');
+        if(motion&&motion.beginElement){ try{motion.beginElement();}catch(e){} }
+        for(var i=1;i<order.length;i++){
+          (function(idx){ setTimeout(function(){ visit(order[idx]); }, DUR*SPLITS[idx]); })(i);
+        }
+      });
+    },{threshold:.4});
+    io.observe(hero);
+  })();
+  document.querySelectorAll('.room').forEach(function(r){
+    function go(){location.hash=r.getAttribute('data-go').slice(1)}
+    r.addEventListener('click',go);
+    r.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+  });
+
+  /* показания на разрезе обновляются как реальная телеметрия объекта (данные — плейсхолдер) */
+  if(!reduce){
+    var t=22.0,v=320,step=0;
+    setInterval(function(){
+      step++;
+      t=Math.max(21.4,Math.min(22.6,t+(Math.random()-.5)*.2));
+      v=Math.round(Math.max(280,Math.min(360,v+(Math.random()-.5)*18)));
+      var telT=document.getElementById('telT'),telV=document.getElementById('telV');
+      if(telT)telT.textContent=t.toFixed(1)+'° · '+(44+step%3)+'% RH';
+      if(telV)telV.textContent='Приток · '+v+' м³/ч';
+    },2200);
+  }
+
+  /* ---------- reveal ---------- */
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}})},{threshold:.1});
+  function observeAll(){document.querySelectorAll('.page.on .reveal:not(.in)').forEach(function(x){io.observe(x)})}
+
+  /* ---------- form modal ---------- */
+  var modal=document.getElementById('modal'),ft=document.getElementById('formTitle');
+  var titles={audit:'Аудит проекта или планировки',partner:'Партнёрская заявка',showroom:'Запись в шоурум'};
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-form]');
+    if(b){ft.textContent=titles[b.getAttribute('data-goal')]||'Предварительный расчёт по объекту';modal.classList.add('open')}
+    if(e.target.closest('[data-close]')||e.target===modal)modal.classList.remove('open');
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')modal.classList.remove('open')});
+
+  route();
+})();
+</script>
+</div>

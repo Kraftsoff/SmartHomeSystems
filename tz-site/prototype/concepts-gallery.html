@@ -1,0 +1,200 @@
+<title>MiMiSmart — 4 новые концепции</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0}
+  .meta{background:#1a1a1a;color:#e8e8e8;font-family:ui-monospace,Menlo,monospace;font-size:12px;
+    padding:10px 20px;text-align:center;letter-spacing:.03em}
+  .jump{position:sticky;top:0;z-index:50;display:flex;background:#0c0c0c;border-bottom:1px solid #262626}
+  .jump a{flex:1;text-align:center;padding:13px 8px;color:#8a8a8a;font-family:ui-monospace,Menlo,monospace;
+    font-size:11.5px;text-decoration:none;letter-spacing:.06em;border-right:1px solid #262626;transition:color .2s,background .2s}
+  .jump a:last-child{border-right:none}
+  .jump a:hover{color:#fff;background:#171717}
+  .concept{scroll-margin-top:46px}
+  .tag{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .ph{border:1px dashed currentColor;opacity:.55;display:flex;align-items:center;justify-content:center;
+    font-family:ui-monospace,Menlo,monospace;font-size:11px;text-align:center;letter-spacing:.03em;padding:10px}
+
+  /* ============ D — ИНЖЕНЕРНЫЙ ЧЕРТЁЖ ============ */
+  #d{--ink:#14171c;--paper:#f7f6f2;--paper2:#efede6;--line:#c6cbd1;--redline:#c1440e;--blue:#2b3a4a;
+    background:var(--paper);color:var(--ink);font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+  #d .shell{max-width:1180px;margin:0 auto;padding:0 28px}
+  #d .mono{font-family:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace}
+  #d header{padding:64px 0 0}
+  #d .tag{color:var(--redline)}
+  #d h1{font-size:clamp(30px,4.2vw,52px);font-weight:600;line-height:1.08;margin:16px 0 0;letter-spacing:-.01em}
+  #d .lede{max-width:56ch;color:#4a5058;font-size:16px;margin:18px 0 0}
+  #d .draw{margin-top:48px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:40px 0;position:relative}
+  #d .dims{stroke:var(--redline);stroke-width:1;fill:none}
+  #d .dimtxt{fill:var(--redline);font-family:ui-monospace,monospace;font-size:11px}
+  #d .struct{stroke:var(--ink);stroke-width:1.4;fill:none}
+  #d .fill1{fill:var(--paper2);stroke:var(--line)}
+  #d .grid-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line);margin-top:0}
+  #d .cell{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:22px}
+  #d .cell:last-child{border-right:none}
+  #d .cell .n{color:var(--redline);font-family:ui-monospace,monospace;font-size:11px}
+  #d .cell h3{font-size:16px;margin:8px 0 6px;font-weight:600}
+  #d .cell p{font-size:13.5px;color:#5a6068;margin:0}
+  #d footer{padding:28px 0 56px;color:#8a9099;font-size:12px}
+
+  /* ============ E — РЕДАКЦИОННАЯ РЕЗИДЕНЦИЯ ============ */
+  #e{--bg:#0c0c0f;--bone:#f2ede4;--rule:#e2751a;background:var(--bg);color:var(--bone);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+  #e .serif{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif}
+  #e .shell{max-width:1180px;margin:0 auto;padding:0 28px}
+  #e nav{display:flex;justify-content:space-between;align-items:center;padding:30px 0;
+    border-bottom:1px solid rgba(242,237,228,.14)}
+  #e nav .brand{font-family:Georgia,serif;font-size:19px;letter-spacing:.03em}
+  #e nav .tag{color:rgba(242,237,228,.55)}
+  #e .hero-photo{margin-top:0;height:560px;background:linear-gradient(160deg,#1c1c22,#0c0c0f 70%);
+    position:relative;overflow:hidden;display:flex;align-items:flex-end}
+  #e .hero-photo .ph{position:absolute;inset:0;border:none;color:rgba(242,237,228,.3);font-size:12px}
+  #e .hero-photo .cap{position:relative;padding:44px;max-width:900px}
+  #e .hero-photo h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(32px,5.4vw,68px);line-height:1.04;margin:0}
+  #e .hero-photo .rule{width:64px;height:1px;background:var(--rule);margin-bottom:18px}
+  #e .quote{padding:64px 0;border-bottom:1px solid rgba(242,237,228,.14);display:grid;grid-template-columns:2fr 1fr;gap:40px}
+  #e .quote blockquote{font-family:Georgia,serif;font-size:clamp(20px,2.4vw,28px);line-height:1.4;margin:0;font-style:italic}
+  #e .quote cite{display:block;margin-top:18px;font-style:normal;font-size:13px;color:rgba(242,237,228,.6);font-family:-apple-system,sans-serif}
+  #e .quote .side{font-size:13px;color:rgba(242,237,228,.55);line-height:1.7;align-self:end}
+
+  /* ============ F — СПЕЦИФИКАЦИИ И ДАННЫЕ ============ */
+  #f{--bg:#0a051a;--panel:#12103a;--line:#2b2760;--cyan:#00d0ff;--orange:#e27500;--ink:#f4f4f4;--muted:#9b98c4;
+    background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+  #f .mono{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+  #f .shell{max-width:1180px;margin:0 auto;padding:0 28px}
+  #f header{padding:56px 0 0;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px}
+  #f .tag{color:var(--cyan)}
+  #f h1{font-size:clamp(26px,3.6vw,42px);font-weight:600;margin:14px 0 0;max-width:18ch;line-height:1.12}
+  #f .spec{margin-top:36px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  #f .spec-row{display:grid;grid-template-columns:1.4fr repeat(4,1fr);border-bottom:1px solid var(--line)}
+  #f .spec-row:last-child{border-bottom:none}
+  #f .spec-row>div{padding:14px 16px;font-size:13px;border-right:1px solid var(--line)}
+  #f .spec-row>div:last-child{border-right:none}
+  #f .spec-row.head{background:var(--panel);color:var(--muted);font-family:ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  #f .spec-row .v{color:var(--cyan);font-family:ui-monospace,monospace}
+  #f .cta{margin-top:26px;display:inline-block;background:var(--orange);color:#241503;padding:11px 20px;
+    border-radius:3px;font-weight:600;font-size:14px;text-decoration:none}
+  #f footer{padding:30px 0 56px;color:var(--muted);font-size:12px}
+
+  /* ============ G — ТИХАЯ РОСКОШЬ МАТЕРИАЛОВ ============ */
+  #g{--bg:#efe9e0;--ink:#2a2622;--bronze:#a8703a;--line:#ddd3c3;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+  #g .shell{max-width:1180px;margin:0 auto;padding:0 28px}
+  #g .disp{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-style:italic}
+  #g header{padding:70px 0 0;text-align:center}
+  #g .tag{color:var(--bronze);letter-spacing:.22em}
+  #g h1{font-size:clamp(30px,5vw,58px);margin:20px auto 0;max-width:16ch;line-height:1.12}
+  #g .lede{max-width:46ch;margin:20px auto 0;text-align:center;font-size:15px;color:#5a5348}
+  #g .catalog{margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+  #g .item{background:var(--bg);padding:0}
+  #g .item .swatch{aspect-ratio:4/5;color:var(--ink)}
+  #g .item .cap{padding:18px 20px 28px}
+  #g .item .k{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;color:var(--bronze);text-transform:uppercase}
+  #g .item h3{font-family:Georgia,serif;font-weight:400;font-size:19px;margin:8px 0 0}
+  #g footer{padding:40px 0 60px;text-align:center;color:#8a8072;font-size:12px}
+</style>
+
+<div class="meta">MiMiSmart · галерея из 4 новых концепций · «живой дом с курсором» отклонён и снят с рассмотрения</div>
+<nav class="jump">
+  <a href="#d">D · Инженерный чертёж</a>
+  <a href="#e">E · Редакционная резиденция</a>
+  <a href="#f">F · Спецификации и данные</a>
+  <a href="#g">G · Тихая роскошь материалов</a>
+</nav>
+
+<!-- ============ D ============ -->
+<section class="concept" id="d">
+  <div class="shell">
+    <header>
+      <p class="tag mono">Концепция D · референс — Arup / Buro Happold</p>
+      <h1>Чертёж, а не иллюстрация.</h1>
+      <p class="lede">Сайт говорит на языке инженерного чертежа: линии, отметки, допуски. Ни одного «мультяшного» дома — только реальные разрезы, схемы щитов и трассировки. Так подтверждают квалификацию, а не настроение.</p>
+    </header>
+
+    <div class="draw">
+      <svg viewBox="0 0 1120 300" width="100%" height="300" role="img" aria-label="Чертёж узла инженерных систем">
+        <g class="struct"><rect class="fill1" x="60" y="40" width="1000" height="200" rx="2"/></g>
+        <g class="struct"><path d="M60 140 h1000 M360 40 v200 M720 40 v200"/></g>
+        <g class="dims">
+          <path d="M60 24 h300 M60 18 v12 M360 18 v12"/><text class="dimtxt" x="180" y="16">3.40 м · КЛИМАТ</text>
+          <path d="M360 24 h360 M360 18 v12 M720 18 v12"/><text class="dimtxt" x="500" y="16">3.60 м · ЭЛЕКТРОЩИТОВАЯ</text>
+          <path d="M720 24 h340 M720 18 v12 M1060 18 v12"/><text class="dimtxt" x="850" y="16">3.40 м · АВТОМАТИЗАЦИЯ</text>
+          <path d="M1084 40 v200 M1078 40 h12 M1078 240 h12"/>
+          <text class="dimtxt" x="1092" y="145" transform="rotate(90 1092 145)">2.00 м</text>
+        </g>
+        <g class="struct" opacity=".8">
+          <circle cx="150" cy="100" r="10"/><path d="M150 90 v20 M140 100 h20"/>
+          <rect x="420" y="80" width="60" height="40"/><path d="M420 100 h60"/>
+          <path d="M800 60 l40 40 l-40 40 l-40 -40 z"/>
+        </g>
+        <text class="dimtxt" x="150" y="200">ДАТЧИК RH-04</text>
+        <text class="dimtxt" x="410" y="200">ЩИТ ЩА-1</text>
+        <text class="dimtxt" x="770" y="200">КОНТРОЛЛЕР CUARM5M</text>
+      </svg>
+    </div>
+
+    <div class="grid-row">
+      <div class="cell"><span class="n mono">01</span><h3>Узел, не картинка</h3><p>Каждая система показана как реальная схема — с отметками, допусками, номенклатурой оборудования.</p></div>
+      <div class="cell"><span class="n mono">02</span><h3>Палитра «бумага + редлайн»</h3><p>Бумажный фон, графитовый текст, инженерный оранжевый — как разметка на чертеже, а не декор.</p></div>
+      <div class="cell"><span class="n mono">03</span><h3>Без serif, без пафоса</h3><p>Гротеск и моноширинный шрифт для номеров — читается как техдокументация, а не буклет.</p></div>
+      <div class="cell"><span class="n mono">04</span><h3>Кому подходит</h3><p>Аудитории, которая ценит инженерную квалификацию выше визуального «вау»: архитекторы, прорабы, ГИПы.</p></div>
+    </div>
+    <footer class="mono">MIMISMART · РАЗДЕЛ ЧЕРТЕЖЕЙ · ЛИСТ 01/12</footer>
+  </div>
+</section>
+
+<!-- ============ E ============ -->
+<section class="concept" id="e">
+  <nav class="shell"><div class="brand">MiMiSmart</div><div class="tag mono">Концепция E · референс — Sminex / VOS'HOD</div></nav>
+  <div class="hero-photo">
+    <div class="ph">фото объекта на всю ширину — реальная резиденция, естественный свет, 4К</div>
+    <div class="cap shell">
+      <div class="rule"></div>
+      <h1>Инженерия, которую<br>не видно. Только чувствуют.</h1>
+    </div>
+  </div>
+  <div class="shell quote">
+    <div>
+      <blockquote>«Мы подключились на этапе проекта — ещё до того, как архитектор утвердил раскладку потолков. Это и есть разница между инсталляцией и инженерией объекта».
+        <cite>— главный инженер проекта, дом 480 м², Подмосковье</cite>
+      </blockquote>
+    </div>
+    <div class="side">Редакционная подача: объект — герой, компания — автор истории. Крупная фотография вместо иллюстраций, serif-заголовки вместо гротеска, цитаты инженеров вместо маркетинговых лозунгов.</div>
+  </div>
+</section>
+
+<!-- ============ F ============ -->
+<section class="concept" id="f">
+  <div class="shell">
+    <header>
+      <div>
+        <p class="tag mono">Концепция F · референс — Crestron / Lutron</p>
+        <h1>Доверие через данные, не через настроение.</h1>
+      </div>
+    </header>
+    <div class="spec">
+      <div class="spec-row head"><div>Система</div><div>Архитектура</div><div>Отклик</div><div>Резерв при аварии</div><div>Гарантия</div></div>
+      <div class="spec-row"><div>Умный дом (CUARM5M)</div><div class="v">проводная, локальная</div><div class="v">&lt; 50 мс</div><div class="v">работает без интернета</div><div class="v">пожизненная ⚠️</div></div>
+      <div class="spec-row"><div>Климат-контур</div><div class="v">единый, 5 подсистем</div><div class="v">по датчику RH/T</div><div class="v">ручной режим на щите</div><div class="v">5 лет ⚠️</div></div>
+      <div class="spec-row"><div>Электрощит</div><div class="v">резерв слотов 30%</div><div class="v">—</div><div class="v">ДГУ, автоввод резерва</div><div class="v">10 лет ⚠️</div></div>
+    </div>
+    <a class="cta" href="#">Получить полную спецификацию объекта →</a>
+    <footer class="mono">MIMISMART · SPEC SHEET · REV 2026.1 ⚠️ цифры — заглушки для демонстрации подачи</footer>
+  </div>
+</section>
+
+<!-- ============ G ============ -->
+<section class="concept" id="g">
+  <div class="shell">
+    <header>
+      <p class="tag mono">Концепция G · референс — Moorgen</p>
+      <h1 class="disp">Панель — такое же изделие, как часы.</h1>
+      <p class="lede">Каждый узел системы подан как предмет: материал, вес в руке, точность отклика. Ноль курсорных трюков — только тишина и качество исполнения.</p>
+    </header>
+    <div class="catalog">
+      <div class="item"><div class="swatch ph">латунная панель · макро</div><div class="cap"><div class="k">CUARM5M · панель</div><h3 class="disp">Тепло металла под пальцами</h3></div></div>
+      <div class="item"><div class="swatch ph">срез щита · крупный план</div><div class="cap"><div class="k">Щит автоматизации</div><h3 class="disp">Порядок, который не спешит</h3></div></div>
+      <div class="item"><div class="swatch ph">выключатель · в интерьере</div><div class="cap"><div class="k">Сценарный выключатель</div><h3 class="disp">Один жест — весь дом</h3></div></div>
+    </div>
+    <footer>MiMiSmart · каталог изделий · фото — плейсхолдеры до фотосъёмки</footer>
+  </div>
+</section>

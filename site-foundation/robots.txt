@@ -1,0 +1,92 @@
+# MiMiSmart — robots.txt
+#
+# Политика: ИИ-поисковые боты разрешены — цель проекта в цитируемости ИИ-ответов.
+# Training-only краулеры закрыты (решение бизнеса, можно пересмотреть).
+#
+# ВАЖНО о структуре файла: бот исполняет ТОЛЬКО ту группу, которая адресована ему.
+# Правила из «User-agent: *» при этом не наследуются, а заменяются целиком. Поэтому
+# служебные Disallow повторены в каждой группе — иначе персональное разрешение
+# открывает боту /admin, закрытый для всех остальных.
+#
+# Почему здесь НЕТ /favorites, /search, /settings, /vendors. Эти легаси-разделы решено
+# отдавать 410 Gone (redirects.md, раздел 10). Запрет обхода и удаление из индекса —
+# противоположные вещи: бот, которому путь запрещён, никогда его не запросит, значит
+# не увидит 410, и адрес останется в индексе записью без содержимого. Чтобы страница
+# исчезла из выдачи, её нужно РАЗРЕШИТЬ обходить и отдать по ней 410.
+# Закрывать обратно — только после того, как адреса выпадут из индекса.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# ─── ИИ-поиск: разрешено явно, служебное закрыто так же, как для всех ───
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# YandexBot — основной поисковый бот для нашего рынка. Закрывать нельзя ни в каком
+# виде: Алиса берёт кандидатов для ИИ-ответа из обычной выдачи Яндекса.
+User-agent: YandexBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# ─── Training-only: закрыто ───
+# Эти краулеры собирают данные для обучения моделей и в поисковой выдаче не участвуют,
+# то есть цитируемости не дают. ⚠️ решение бизнеса: список можно сократить или снять.
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+# ⚠️ заменить ДОМЕН при деплое — с чужим доменом строка бесполезна.
+Sitemap: https://ДОМЕН/sitemap.xml

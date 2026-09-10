@@ -1,0 +1,975 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/smart-home/razrabotka-sistem/modulnye-resheniya/index.html",
+      "destination": "/equipment/controllers/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/provodnye-sistemy/index.html",
+      "destination": "/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/prilozheniya/dlya-windows/index.html",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/multimedia/multirum/index.html",
+      "destination": "/functions/multimedia/multiroom/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/vorota/index.html",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/avtomatizatsiya-kvartir/oborudovanie-dlya-kvartir",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/avtomatizatsiya-kvartir/upravlenie-temperaturoy",
+      "destination": "/functions/climate/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/okhranno-pozharnaya-signalizatsiya",
+      "destination": "/functions/security/fire/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/avtomatizatsiya-kvartir/upravlenie-svetom",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/osveshhenie/distanczionnoe-upravlenie.html",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/besprovodnye-resheniya",
+      "destination": "/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/upravlenie-domom/golosovoe-upravlenie",
+      "destination": "/compare/ecosystems/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/udalyennoe-upravlenie",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/gotovye-resheniya/dopolnitelnye-optsii",
+      "destination": "/functions/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/osveshchenie/distantsionnoe-upravlenie",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/gotovye-resheniya/nedorogie-resheniya",
+      "destination": "/compare/diy/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya/kompleksnyie-resheniya/kottedzh",
+      "destination": "/solutions/house/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya/kompleksnyie-resheniya/kvartira",
+      "destination": "/solutions/flat/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/gotovye-resheniya/premialnyy-segment",
+      "destination": "/solutions/premium/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/modulnye-resheniya",
+      "destination": "/equipment/controllers/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/multimedia/upravlenie-audio-i-video",
+      "destination": "/functions/multimedia/audio/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/provodnye-sistemy",
+      "destination": "/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/upravlenie-domom/cherez-internet",
+      "destination": "/answers/chto-znachit-umnyy-dom-bez-oblaka-i/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya/kompleksnyie-resheniya/dacha",
+      "destination": "/solutions/house/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/prilozheniya/dliya-iphone.html",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/osveshchenie/upravlenie-golosom",
+      "destination": "/compare/ecosystems/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/gsm-resheniya",
+      "destination": "/compare/diy/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/elektrika/upravlenie-rozetkami",
+      "destination": "/functions/electric/sockets/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/mikroklimat/konditsionirovanie",
+      "destination": "/functions/climate/cooling/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/mikroklimat/ventilyacziya.html",
+      "destination": "/functions/climate/ventilation/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/multimedia/domashniy-kinoteatr",
+      "destination": "/functions/multimedia/cinema/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/upravlenie-domom/s-telefona",
+      "destination": "/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/gsm-sistemyi.html",
+      "destination": "/functions/security/alarm/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/elektrika/upravlenie-shtorami",
+      "destination": "/functions/curtains/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/videonablyudenie",
+      "destination": "/functions/security/cctv/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/osveshchenie/avtomatizatsiya",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/prilozheniya/dlya-android",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/prilozheniya/dlya-windows",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/kontrol-dostupa",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/elektrika/energosberezhenie",
+      "destination": "/answers/okupaetsya-li-umnyy-dom-na-energosberezhenii/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/razrabotka-sistem/komplekty",
+      "destination": "/compare/diy/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/prilozheniya/dlya-iphone",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/protechka-vody",
+      "destination": "/functions/security/leaks/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/signalizatsiya",
+      "destination": "/functions/security/alarm/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/mikroklimat/ventilyatsiya",
+      "destination": "/functions/climate/ventilation/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/elektrika/vodosnabzhenie",
+      "destination": "/functions/security/leaks/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/gsm-sistemy",
+      "destination": "/functions/security/alarm/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/osveshchenie/index.html",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/datchiki/temperatury",
+      "destination": "/equipment/sensors/temperature/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/mikroklimat/teplyy-pol",
+      "destination": "/functions/climate/floor/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/datchiki/dvizheniya",
+      "destination": "/equipment/sensors/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/datchiki/vlazhnosti",
+      "destination": "/equipment/sensors/humidity/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/mikroklimat/otoplenie",
+      "destination": "/functions/climate/heating/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/datchiki/protechki",
+      "destination": "/equipment/sensors/leak/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/domofon",
+      "destination": "/functions/security/intercom/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/multimedia/multirum",
+      "destination": "/functions/multimedia/multiroom/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost/vorota",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/elektrika/zhalyuzi",
+      "destination": "/functions/curtains/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/datchiki/dyma",
+      "destination": "/equipment/sensors/smoke/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/avtomatizirovannaya-sistema-upravleniya-zdaniem",
+      "destination": "/solutions/office/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnoe-elektricheskoe-otoplenie-v-chastnom-dome",
+      "destination": "/functions/climate/heating/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/vysokie-tekhnologii-v-klassicheskom-ispolnenii",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/bolshaya-kvartira-s-panoramnym-vidom-na-gorod",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/proizvoditeli-oborudovaniya-dlya-umnogo-doma",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/prostornaya-kvartira-dlya-semi-s-4-mya-detmi",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/sovety-po-vyboru-ustroystv-dlya-umnogo-doma",
+      "destination": "/answers/kak-vybrat-integratora-umnogo-doma/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyij-dom-%E2%80%93-plyusyi-i-minusyi.html",
+      "destination": "/compare/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/umnyy-dom-v-nebolshoy-i-akkuratnoy-kvartire",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/vpechatlyayushchiy-osobnyak-v-sosnovom-lesu",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/uyutnaya-kvartira-zhk-riverdale-apartments",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/2-kh-urovnevaya-kvartira-zhk-festivalnyy",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/dom-2-etazha-dlya-pary-v-stile-modern",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/signalizatsiya-dlya-zagorodnogo-doma",
+      "destination": "/functions/security/alarm/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/podklyuchenie-umnogo-vyklyuchatelya",
+      "destination": "/answers/ostanutsya-li-obychnye-vyklyuchateli-na-stene/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/upravlenie-umnym-domom-s-kompyutera",
+      "destination": "/answers/kak-rabotaet-prilozhenie-upravleniya-umnym-domom/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/ustanovka-kontrolya-dostupa-na-dver",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/prestizhnyy-dom-v-elitnom-poselke",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/sistemy-bezopasnosti-umnogo-doma",
+      "destination": "/functions/security/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/solnechnyie-batarei-v-umnom-dome",
+      "destination": "/answers/chto-prodolzhit-rabotat-v-dome-pri-otklyuchenii/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyij-dom-bezopasnost-i-oxrana",
+      "destination": "/functions/security/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/umnyy-dom-br-dlya-nayka-borzova",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/domashnij-kinoteatr-umnyij-dom",
+      "destination": "/functions/multimedia/cinema/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/detsentralizovannyy-umnyy-dom",
+      "destination": "/answers/chto-takoe-decentralizovannaya-arhitektura-umnogo-doma-i/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/sistema-umnyij-dom-dlya-dachi",
+      "destination": "/answers/stoit-li-stavit-umnyy-dom-na-dachu/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya/kompleksnyie-resheniya",
+      "destination": "/solutions/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/bolshoy-dom-dlya-bolshoy-semi",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/kak-sdelat-sistemu-umnyy-dom",
+      "destination": "/answers/iz-kakih-etapov-sostoit-proekt-umnogo-doma/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/upravlenie-svetom-s-telefona",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/avtomatizatsiya-umnogo-doma",
+      "destination": "/functions/automation/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/dlya-chego-nuzhen-umnyy-dom",
+      "destination": "/functions/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya/funktsii-umnogo-doma",
+      "destination": "/functions/automation/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/avtomatizatsiya-kvartir",
+      "destination": "/solutions/flat/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyy-dom-kak-eto-rabotaet",
+      "destination": "/functions/automation/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/avtomatizatsiya-kottedzha",
+      "destination": "/solutions/house/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/provodka-dlya-umnogo-doma",
+      "destination": "/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyij-dom-dlya-invalidov",
+      "destination": "/answers/smogut-li-gosti-deti-i-pozhilye-roditeli/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyy-dom-plyusy-i-minusy",
+      "destination": "/compare/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/komandy-dlya-umnogo-doma",
+      "destination": "/answers/kak-nastraivayutsya-scenarii-avtomatizacii-umnogo-doma/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/reyting-sistem-umnyy-dom",
+      "destination": "/compare/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnaya-kolonka-dlya-doma",
+      "destination": "/compare/ecosystems/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/vozmozhnosti-umnogo-doma",
+      "destination": "/functions/",
+      "permanent": true
+    },
+    {
+      "source": "/czenyi/proektirovanie-umnogo-doma",
+      "destination": "/answers/chto-vhodit-v-proektirovanie-umnogo-doma/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/komplektuyushie.html",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/kontrol-dostupa-na-dver",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/aktualnost-umnogo-doma",
+      "destination": "/functions/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyij-dom-dlya-ofisa",
+      "destination": "/solutions/office/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyij-dom-wi-fi.html",
+      "destination": "/answers/provodnoy-umnyy-dom-ili-besprovodnoy-chto-vybrat/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/komplektuyushchie",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi/v-poselke-park-avenue",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyy-dom-dlya-dachi",
+      "destination": "/answers/stoit-li-stavit-umnyy-dom-na-dachu/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/upravlenie-domom",
+      "destination": "/functions/automation/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnaya-dacha-moskva",
+      "destination": "/answers/stoit-li-stavit-umnyy-dom-na-dachu/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya/vozmozhnosti",
+      "destination": "/functions/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/gotovye-resheniya",
+      "destination": "/solutions/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/server-umnogo-doma",
+      "destination": "/equipment/controllers/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/skhemy-umnogo-doma",
+      "destination": "/functions/automation/",
+      "permanent": true
+    },
+    {
+      "source": "/upload/Proect_Umniy_Dom.pdf",
+      "destination": "/pricing/",
+      "permanent": true
+    },
+    {
+      "source": "/czenyi/montazh-umnogo-doma",
+      "destination": "/answers/skolko-vremeni-zanimaet-montazh-umnogo-doma/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/umnyy-dom-i-deti",
+      "destination": "/answers/smogut-li-gosti-deti-i-pozhilye-roditeli/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/prilozheniya",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/articles/mebel-umnyy-dom",
+      "destination": "/functions/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/kontrollery",
+      "destination": "/equipment/controllers/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/infared-sensor",
+      "destination": "/equipment/sensors/infrared/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/osveshchenie",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/bezopasnost",
+      "destination": "/functions/security/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/mikroklimat",
+      "destination": "/functions/climate/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie/datchiki",
+      "destination": "/equipment/sensors/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/multimedia",
+      "destination": "/functions/multimedia/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/temperature",
+      "destination": "/equipment/sensors/temperature/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi/nur-sultan",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/partneram/integrator",
+      "destination": "/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home/elektrika",
+      "destination": "/functions/electric/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi/tashkent",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/partneram/designer",
+      "destination": "/partners/designers/",
+      "permanent": true
+    },
+    {
+      "source": "/partneram/dileram",
+      "destination": "/answers/kak-stat-partnerom-dilerom-mimismart/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/opening",
+      "destination": "/equipment/sensors/opening/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi/moskva",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/moving",
+      "destination": "/equipment/sensors/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi/kazan",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi/sochi",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/smoke",
+      "destination": "/equipment/sensors/smoke/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi/baku",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/leak",
+      "destination": "/equipment/sensors/leak/",
+      "permanent": true
+    },
+    {
+      "source": "/czenyi/servis",
+      "destination": "/service/",
+      "permanent": true
+    },
+    {
+      "source": "/detector/wet",
+      "destination": "/equipment/sensors/humidity/",
+      "permanent": true
+    },
+    {
+      "source": "/controller/1",
+      "destination": "/equipment/controllers/",
+      "permanent": true
+    },
+    {
+      "source": "/protection-against-leaks",
+      "destination": "/functions/security/leaks/",
+      "permanent": true
+    },
+    {
+      "source": "/solutions-appartments",
+      "destination": "/solutions/flat/",
+      "permanent": true
+    },
+    {
+      "source": "/underfloor-heating",
+      "destination": "/functions/climate/floor/",
+      "permanent": true
+    },
+    {
+      "source": "/electric-curtains",
+      "destination": "/functions/curtains/",
+      "permanent": true
+    },
+    {
+      "source": "/solutions-office",
+      "destination": "/solutions/office/",
+      "permanent": true
+    },
+    {
+      "source": "/air-conditioning",
+      "destination": "/functions/climate/cooling/",
+      "permanent": true
+    },
+    {
+      "source": "/intercom-system",
+      "destination": "/functions/security/intercom/",
+      "permanent": true
+    },
+    {
+      "source": "/avtomatizacziya",
+      "destination": "/functions/automation/",
+      "permanent": true
+    },
+    {
+      "source": "/solutions-flat",
+      "destination": "/solutions/flat/",
+      "permanent": true
+    },
+    {
+      "source": "/solutions-home",
+      "destination": "/solutions/house/",
+      "permanent": true
+    },
+    {
+      "source": "/control-access",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/electric-lock",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/alarm-system",
+      "destination": "/functions/security/alarm/",
+      "permanent": true
+    },
+    {
+      "source": "/power-supply",
+      "destination": "/functions/electric/power-supply/",
+      "permanent": true
+    },
+    {
+      "source": "/oborudovanie",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/biodynamics",
+      "destination": "/functions/lighting/biodynamics/",
+      "permanent": true
+    },
+    {
+      "source": "/ventilation",
+      "destination": "/functions/climate/ventilation/",
+      "permanent": true
+    },
+    {
+      "source": "/cinema-home",
+      "destination": "/functions/multimedia/cinema/",
+      "permanent": true
+    },
+    {
+      "source": "/controller",
+      "destination": "/equipment/controllers/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/o-kompanii",
+      "destination": "/about/",
+      "permanent": true
+    },
+    {
+      "source": "/smart-home",
+      "destination": "/solutions/",
+      "permanent": true
+    },
+    {
+      "source": "/lightning",
+      "destination": "/functions/lighting/",
+      "permanent": true
+    },
+    {
+      "source": "/projector",
+      "destination": "/functions/multimedia/cinema/",
+      "permanent": true
+    },
+    {
+      "source": "/multiroom",
+      "destination": "/functions/multimedia/multiroom/",
+      "permanent": true
+    },
+    {
+      "source": "/kontaktyi",
+      "destination": "/contacts/",
+      "permanent": true
+    },
+    {
+      "source": "/partneram",
+      "destination": "/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/himidity",
+      "destination": "/functions/climate/humidity/",
+      "permanent": true
+    },
+    {
+      "source": "/curtains",
+      "destination": "/functions/curtains/",
+      "permanent": true
+    },
+    {
+      "source": "/security",
+      "destination": "/functions/security/",
+      "permanent": true
+    },
+    {
+      "source": "/detector",
+      "destination": "/equipment/sensors/",
+      "permanent": true
+    },
+    {
+      "source": "/products",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/articles",
+      "destination": "/answers/",
+      "permanent": true
+    },
+    {
+      "source": "/proektyi",
+      "destination": "/portfolio/",
+      "permanent": true
+    },
+    {
+      "source": "/dimming",
+      "destination": "/functions/lighting/dimming/",
+      "permanent": true
+    },
+    {
+      "source": "/climate",
+      "destination": "/functions/climate/",
+      "permanent": true
+    },
+    {
+      "source": "/heating",
+      "destination": "/functions/climate/heating/",
+      "permanent": true
+    },
+    {
+      "source": "/sockets",
+      "destination": "/functions/electric/sockets/",
+      "permanent": true
+    },
+    {
+      "source": "/catalog",
+      "destination": "/equipment/",
+      "permanent": true
+    },
+    {
+      "source": "/private",
+      "destination": "/privacy/",
+      "permanent": true
+    },
+    {
+      "source": "/cinema",
+      "destination": "/functions/multimedia/cinema/",
+      "permanent": true
+    },
+    {
+      "source": "/czenyi",
+      "destination": "/pricing/",
+      "permanent": true
+    },
+    {
+      "source": "/audio",
+      "destination": "/functions/multimedia/audio/",
+      "permanent": true
+    },
+    {
+      "source": "/gates",
+      "destination": "/functions/security/access/",
+      "permanent": true
+    },
+    {
+      "source": "/fire",
+      "destination": "/functions/security/fire/",
+      "permanent": true
+    },
+    {
+      "source": "/news",
+      "destination": "/answers/",
+      "permanent": true
+    },
+    {
+      "source": "/app",
+      "destination": "/equipment/app/",
+      "permanent": true
+    },
+    {
+      "source": "/tv",
+      "destination": "/functions/multimedia/tv/",
+      "permanent": true
+    }
+  ]
+}

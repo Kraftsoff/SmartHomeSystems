@@ -1,0 +1,377 @@
+<style>
+  :root{
+    /* dusk exterior + warm interior light */
+    --night:#0b1020; --night-2:#0e1426; --panel:#121b31; --panel-2:#0f1728;
+    --line:#25324c; --line-soft:#1b2740;
+    --ink:#eaf0fb; --muted:#98a6c2; --faint:#66748f;
+    --glow:#ffb765; --glow-2:#ff9a4d; --signal:#7bb0ff;
+    --good:#5fd6a0; --warn:#ffce5e; --crit:#ff7d84;
+    --shell:#16203a; --room:#101a30; --room-line:#2b3a5a; --dweller-head:#0b1020;
+    --radius:16px; --maxw:1180px;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --night:#efeadf; --night-2:#f4f0e7; --panel:#fffdf8; --panel-2:#faf6ee;
+      --line:#e2d9c7; --line-soft:#ece5d6;
+      --ink:#1c2333; --muted:#5f6579; --faint:#8b8f9d;
+      --glow:#e08a2b; --glow-2:#d97521; --signal:#2f6fd6;
+      --shell:#efe7d6; --room:#fbf7ee; --room-line:#e6dcc8; --dweller-head:#1c2333;
+    }
+  }
+  :root[data-theme="dark"]{
+    --night:#0b1020; --night-2:#0e1426; --panel:#121b31; --panel-2:#0f1728;
+    --line:#25324c; --line-soft:#1b2740; --ink:#eaf0fb; --muted:#98a6c2; --faint:#66748f;
+    --glow:#ffb765; --glow-2:#ff9a4d; --signal:#7bb0ff; --shell:#16203a; --room:#101a30; --room-line:#2b3a5a; --dweller-head:#0b1020;
+  }
+  :root[data-theme="light"]{
+    --night:#efeadf; --night-2:#f4f0e7; --panel:#fffdf8; --panel-2:#faf6ee;
+    --line:#e2d9c7; --line-soft:#ece5d6; --ink:#1c2333; --muted:#5f6579; --faint:#8b8f9d;
+    --glow:#e08a2b; --glow-2:#d97521; --signal:#2f6fd6; --shell:#efe7d6; --room:#fbf7ee; --room-line:#e6dcc8; --dweller-head:#1c2333;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0}
+  .wrap{background:var(--night);color:var(--ink);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .shell{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em;text-wrap:balance;margin:0}
+  .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--faint)}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---- top bar ---- */
+  .draft{background:linear-gradient(90deg,var(--glow-2),var(--glow));color:#231402;font-family:var(--mono);
+    font-size:12px;letter-spacing:.04em;text-align:center;padding:6px 12px}
+  header.nav{position:sticky;top:0;z-index:40;backdrop-filter:blur(10px);
+    background:color-mix(in srgb,var(--night) 78%,transparent);border-bottom:1px solid var(--line-soft)}
+  .nav-in{display:flex;align-items:center;gap:22px;height:64px}
+  .brand{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.01em;margin-right:auto;display:flex;align-items:center;gap:9px}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--glow);box-shadow:0 0 12px var(--glow)}
+  nav.links{display:flex;gap:20px}
+  nav.links a{color:var(--muted);font-size:14px}
+  nav.links a:hover{color:var(--ink)}
+  .btn{font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 18px;border-radius:999px;
+    border:1px solid transparent;cursor:pointer;transition:transform .15s ease, box-shadow .2s ease}
+  .btn-primary{background:linear-gradient(180deg,var(--glow),var(--glow-2));color:#241503;box-shadow:0 6px 22px color-mix(in srgb,var(--glow) 40%,transparent)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--glow)}
+  @media (max-width:820px){nav.links{display:none}}
+
+  /* ---- hero ---- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line-soft)}
+  .cursor-glow{position:absolute;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;pointer-events:none;
+    background:radial-gradient(circle,color-mix(in srgb,var(--glow) 46%,transparent),transparent 62%);
+    mix-blend-mode:screen;transition:opacity .4s ease;opacity:.0;z-index:1;will-change:transform}
+  @media (prefers-color-scheme:light){.cursor-glow{mix-blend-mode:multiply}}
+  :root[data-theme="light"] .cursor-glow{mix-blend-mode:multiply}
+  :root[data-theme="dark"] .cursor-glow{mix-blend-mode:screen}
+  .hero.awake .cursor-glow{opacity:1}
+  .hero-in{position:relative;z-index:2;display:grid;grid-template-columns:1.02fr 1.2fr;gap:36px;align-items:center;
+    padding:54px 0 64px}
+  @media (max-width:940px){.hero-in{grid-template-columns:1fr;gap:18px;padding:30px 0 40px}}
+  .hero h1{font-size:clamp(34px,5vw,60px);line-height:1.02}
+  .hero h1 .accent{color:var(--glow)}
+  .lede{color:var(--muted);font-size:clamp(16px,1.6vw,19px);max-width:44ch;margin:20px 0 28px}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .hint{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:13px;margin-top:22px}
+  .hint .pulse{width:8px;height:8px;border-radius:50%;background:var(--glow);box-shadow:0 0 0 0 var(--glow);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--glow) 60%,transparent)}70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+  /* ---- house ---- */
+  .house-stage{position:relative}
+  .house{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))}
+  .room{cursor:pointer}
+  .room .room-fill{fill:var(--room);stroke:var(--room-line);stroke-width:1.5;transition:fill .35s ease}
+  .room .room-wash{fill:var(--glow);opacity:0;transition:opacity .35s ease}
+  .room .ricon{stroke:var(--muted);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .35s ease}
+  .room .rname{fill:var(--faint);font-family:var(--mono);font-size:12px;letter-spacing:.04em;transition:fill .35s ease}
+  .room:hover .room-wash,.room.is-on .room-wash{opacity:.20}
+  .room:hover .ricon,.room.is-on .ricon{stroke:var(--glow)}
+  .room:hover .rname,.room.is-on .rname{fill:var(--ink)}
+  .room:hover .room-fill,.room.is-on .room-fill{fill:color-mix(in srgb,var(--room) 82%,var(--glow))}
+  .chip{opacity:0;transform:translateY(4px);transition:opacity .3s ease,transform .3s ease}
+  .chip rect{fill:var(--night-2);stroke:var(--glow);stroke-width:1}
+  .chip text{fill:var(--glow);font-family:var(--mono);font-size:12px}
+  .room:hover .chip,.room.is-on .chip{opacity:1;transform:translateY(0)}
+  .shell-outline{fill:var(--shell);stroke:var(--line);stroke-width:2}
+  .roof{fill:var(--shell);stroke:var(--line);stroke-width:2}
+  #dweller{transition:transform .5s cubic-bezier(.22,.61,.36,1)}
+  #dweller .body{fill:var(--glow)}
+  #dweller .head{fill:var(--dweller-head)}
+  #dweller .eye{fill:var(--glow)}
+  #dweller .glowring{fill:none;stroke:var(--glow);stroke-width:1.5;opacity:.5}
+
+  /* ---- sections ---- */
+  section{padding:72px 0;border-bottom:1px solid var(--line-soft)}
+  .sec-head{max-width:60ch;margin-bottom:34px}
+  .sec-head h2{font-size:clamp(26px,3.4vw,40px);line-height:1.08}
+  .sec-head p{color:var(--muted);margin:14px 0 0}
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  .fn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:900px){.fn-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.fn-grid{grid-template-columns:1fr}}
+  .fn{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px;position:relative;overflow:hidden;transition:border-color .25s ease,transform .25s ease}
+  .fn:hover{border-color:var(--glow);transform:translateY(-3px)}
+  .fn .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:14px;
+    background:color-mix(in srgb,var(--glow) 16%,transparent);border:1px solid color-mix(in srgb,var(--glow) 35%,transparent)}
+  .fn .ico svg{width:22px;height:22px;stroke:var(--glow);fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+  .fn h3{font-size:19px;margin-bottom:6px}
+  .fn p{color:var(--muted);font-size:14px;margin:0}
+  .fn .state{margin-top:14px;display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;color:var(--good)}
+  .fn .state .led{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good)}
+
+  .scen{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:820px){.scen{grid-template-columns:1fr}}
+  .scen .card{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .scen .k{font-family:var(--mono);font-size:12px;color:var(--glow);letter-spacing:.06em;text-transform:uppercase}
+  .scen h3{font-size:20px;margin:8px 0 10px}
+  .scen ul{margin:0;padding-left:18px;color:var(--muted);font-size:14px}
+  .scen li{margin:6px 0}
+
+  .proof{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media (max-width:820px){.proof{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .stat .n{font-family:var(--serif);font-size:38px;font-weight:600;line-height:1}
+  .stat .l{color:var(--muted);font-size:14px;margin-top:8px}
+  .stat .prov{color:var(--warn);font-size:11px;font-family:var(--mono);margin-top:6px}
+
+  .cta-band{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:24px;
+    padding:44px;display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .cta-band h2{font-size:clamp(24px,3vw,34px);max-width:22ch}
+  footer{padding:40px 0 60px;color:var(--faint);font-size:13px}
+  .foot-note{margin-top:12px;color:var(--warn);font-family:var(--mono);font-size:12px}
+
+  :focus-visible{outline:2px solid var(--glow);outline-offset:3px;border-radius:6px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="draft">Концепция A · «Живой дом» · интерактивный прототип MiMiSmart — данные-заглушки помечены ⚠️</div>
+
+  <header class="nav">
+    <div class="shell nav-in">
+      <a class="brand" href="#"><span class="dot"></span>MiMiSmart</a>
+      <nav class="links">
+        <a href="#functions">Функции</a>
+        <a href="#scenarios">Сценарии</a>
+        <a href="#why">Почему мы</a>
+        <a href="#price">Цены</a>
+      </nav>
+      <button class="btn btn-ghost">В шоурум</button>
+      <button class="btn btn-primary">Рассчитать</button>
+    </div>
+  </header>
+
+  <div class="hero" id="hero">
+    <div class="cursor-glow" id="cglow"></div>
+    <div class="shell hero-in">
+      <div>
+        <p class="eyebrow">Умный дом под ключ · производство · с 2004</p>
+        <h1>Дом, который <span class="accent">чувствует</span> хозяина.</h1>
+        <p class="lede">Свет, климат, шторы и безопасность реагируют на ваше присутствие. Наведите курсор на комнату — дом оживёт. Управление голосом, привычным выключателем или полностью автоматически.</p>
+        <div class="cta-row">
+          <button class="btn btn-primary">Рассчитать мой дом</button>
+          <button class="btn btn-ghost">Записаться в шоурум</button>
+        </div>
+        <div class="hint"><span class="pulse"></span>Наведите на комнаты — житель следит за курсором</div>
+      </div>
+
+      <div class="house-stage">
+        <svg class="house" viewBox="0 0 820 600" role="img" aria-label="Интерактивный разрез умного дома. Наведите на комнату, чтобы увидеть функцию.">
+          <!-- roof -->
+          <path class="roof" d="M80 200 L410 60 L740 200 Z"/>
+          <!-- shell -->
+          <rect class="shell-outline" x="110" y="196" width="600" height="384" rx="10"/>
+
+          <!-- ROOM: lighting (top-left) -->
+          <g class="room" data-fn="lighting" tabindex="0" role="button" aria-label="Гостиная — освещение">
+            <rect class="room-fill" x="128" y="212" width="188" height="176" rx="6"/>
+            <rect class="room-wash" x="128" y="212" width="188" height="176" rx="6"/>
+            <g class="ricon" transform="translate(150,236)"><circle cx="10" cy="9" r="8"/><path d="M6 20 h8 M7 23 h6"/></g>
+            <text class="rname" x="150" y="372">ГОСТИНАЯ</text>
+            <g class="chip" transform="translate(196,224)"><rect width="104" height="24" rx="12"/><text x="12" y="16">Свет · 40%</text></g>
+          </g>
+
+          <!-- ROOM: climate (top-mid) -->
+          <g class="room" data-fn="climate" tabindex="0" role="button" aria-label="Спальня — климат">
+            <rect class="room-fill" x="316" y="212" width="188" height="176" rx="6"/>
+            <rect class="room-wash" x="316" y="212" width="188" height="176" rx="6"/>
+            <g class="ricon" transform="translate(338,234)"><path d="M10 2 v14"/><circle cx="10" cy="19" r="4"/></g>
+            <text class="rname" x="338" y="372">СПАЛЬНЯ</text>
+            <g class="chip" transform="translate(400,224)"><rect width="88" height="24" rx="12"/><text x="12" y="16">22.0°</text></g>
+          </g>
+
+          <!-- ROOM: curtains (top-right) -->
+          <g class="room" data-fn="curtains" tabindex="0" role="button" aria-label="Детская — шторы">
+            <rect class="room-fill" x="504" y="212" width="188" height="176" rx="6"/>
+            <rect class="room-wash" x="504" y="212" width="188" height="176" rx="6"/>
+            <g class="ricon" transform="translate(526,234)"><path d="M2 2 h16 M5 2 v18 M10 2 v18 M15 2 v18"/></g>
+            <text class="rname" x="526" y="372">ДЕТСКАЯ</text>
+            <g class="chip" transform="translate(576,224)"><rect width="104" height="24" rx="12"/><text x="12" y="16">Открыты</text></g>
+          </g>
+
+          <!-- ROOM: security (bottom-left) -->
+          <g class="room" data-fn="security" tabindex="0" role="button" aria-label="Прихожая — безопасность">
+            <rect class="room-fill" x="128" y="392" width="188" height="172" rx="6"/>
+            <rect class="room-wash" x="128" y="392" width="188" height="172" rx="6"/>
+            <g class="ricon" transform="translate(150,414)"><path d="M10 2 L18 6 v6 c0 5 -4 8 -8 10 c-4 -2 -8 -5 -8 -10 V6 Z"/></g>
+            <text class="rname" x="150" y="548">ПРИХОЖАЯ</text>
+            <g class="chip" transform="translate(190,404)"><rect width="110" height="24" rx="12"/><text x="12" y="16">Охрана · вкл</text></g>
+          </g>
+
+          <!-- ROOM: multimedia (bottom-mid) -->
+          <g class="room" data-fn="multimedia" tabindex="0" role="button" aria-label="Кинозал — мультимедиа">
+            <rect class="room-fill" x="316" y="392" width="188" height="172" rx="6"/>
+            <rect class="room-wash" x="316" y="392" width="188" height="172" rx="6"/>
+            <g class="ricon" transform="translate(338,414)"><path d="M3 4 h14 v11 h-14 z M8 20 h4"/></g>
+            <text class="rname" x="338" y="548">КИНОЗАЛ</text>
+            <g class="chip" transform="translate(398,404)"><rect width="92" height="24" rx="12"/><text x="12" y="16">Аудио ♪</text></g>
+          </g>
+
+          <!-- ROOM: electric (bottom-right) -->
+          <g class="room" data-fn="electric" tabindex="0" role="button" aria-label="Щит — электрика">
+            <rect class="room-fill" x="504" y="392" width="188" height="172" rx="6"/>
+            <rect class="room-wash" x="504" y="392" width="188" height="172" rx="6"/>
+            <g class="ricon" transform="translate(530,414)"><path d="M10 2 L4 13 h6 l-2 9 L16 9 h-6 z"/></g>
+            <text class="rname" x="526" y="548">ЩИТ</text>
+            <g class="chip" transform="translate(578,404)"><rect width="104" height="24" rx="12"/><text x="12" y="16">Резерв OK</text></g>
+          </g>
+
+          <!-- dweller in living room -->
+          <g id="dweller" transform="translate(222,300)">
+            <circle class="glowring" cx="0" cy="10" r="26"/>
+            <path class="body" d="M-13 34 C-13 16 13 16 13 34 Z"/>
+            <circle class="head" cx="0" cy="-2" r="14"/>
+            <g id="eyes"><circle class="eye" cx="-5" cy="-2" r="2.4"/><circle class="eye" cx="5" cy="-2" r="2.4"/></g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <section id="functions">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Чем вы сможете управлять</p>
+        <h2>Одна система — весь дом. Работает локально, даже без интернета.</h2>
+        <p>Наведение на комнату выше подсвечивает функцию. Здесь — то же самое, блоками. Каждый блок раскрывается в отдельную страницу-ответ (рычаг) под запрос пользователя и ИИ-поиск.</p>
+      </div>
+      <div class="fn-grid" id="fnGrid">
+        <div class="fn reveal" data-fn="lighting"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="6"/><path d="M9 21h6M10 23h4"/></svg></div><h3>Освещение</h3><p>Любые светильники. Яркость, тёплый/холодный свет, сценарии, свет по присутствию.</p><span class="state"><span class="led"></span>40% · тёплый</span></div>
+        <div class="fn reveal" data-fn="climate"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><circle cx="12" cy="17" r="4"/></svg></div><h3>Климат</h3><p>Отопление, тёплый пол, кондиционирование, вентиляция, увлажнение — слаженно.</p><span class="state"><span class="led"></span>22.0° · норма</span></div>
+        <div class="fn reveal" data-fn="security"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-4 8-8 10-4-2-8-5-8-10V6z"/></svg></div><h3>Безопасность</h3><p>Протечки, охранная сигнализация, видеонаблюдение, имитация присутствия.</p><span class="state"><span class="led"></span>под охраной</span></div>
+        <div class="fn reveal" data-fn="curtains"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 3h16M7 3v18M12 3v18M17 3v18"/></svg></div><h3>Шторы</h3><p>Электрокарнизы и рулонные — одним касанием в приложении или по сценарию.</p><span class="state"><span class="led"></span>открыты</span></div>
+        <div class="fn reveal" data-fn="multimedia"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M9 21h6"/></svg></div><h3>Мультимедиа</h3><p>Кинозал под ключ, мультирум, AirPlay, следящая музыка, звуковые оповещения.</p><span class="state"><span class="led"></span>аудио: кухня</span></div>
+        <div class="fn reveal" data-fn="electric"><div class="ico"><svg viewBox="0 0 24 24"><path d="M13 2L5 14h6l-2 8 8-12h-6z"/></svg></div><h3>Электрика</h3><p>Современная электрика: розетки, сценарные выключатели, стабилизация, резерв, молниезащита.</p><span class="state"><span class="led"></span>резерв готов</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="scenarios">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Сценарии</p>
+        <h2>Дом реагирует на присутствие — как житель за курсором.</h2>
+        <p>Настраивается за 20 секунд с телефона. Справится даже ребёнок.</p>
+      </div>
+      <div class="scen">
+        <div class="card reveal"><div class="k">Наступило утро</div><h3>Пробуждение</h3><ul><li>За час прогреваются тёплые полы</li><li>Отопление — в дневной режим</li><li>Плавно раздвигаются шторы</li><li>Вместо будильника — тихая музыка</li></ul></div>
+        <div class="card reveal"><div class="k">Я ушёл</div><h3>Никого дома</h3><ul><li>Свет и техника выключаются</li><li>Климат — в экономрежим</li><li>Включается охрана и имитация присутствия</li><li>Уведомление, если что-то открыто</li></ul></div>
+        <div class="card reveal"><div class="k">Случилась протечка</div><h3>Авария</h3><ul><li>Датчик фиксирует воду мгновенно</li><li>Автоматически перекрывается вода</li><li>Пуш-уведомление на телефон</li><li>Сценарий безопасности активирован</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Почему мы</p>
+        <h2>Разработчик, производитель и интегратор — полный цикл.</h2>
+        <p>Мы делаем своё оборудование и ПО, а не перепродаём чужое. Отсюда — надёжность, совместимость и поддержка на годы.</p>
+      </div>
+      <div class="proof">
+        <div class="stat reveal"><div class="n mono">2004</div><div class="l">на рынке, свой R&amp;D и производство</div></div>
+        <div class="stat reveal"><div class="n mono">5000+</div><div class="l">реализованных объектов</div><div class="prov">⚠️ требует подтверждения</div></div>
+        <div class="stat reveal"><div class="n mono">20</div><div class="l">представительств</div><div class="prov">⚠️ требует подтверждения</div></div>
+        <div class="stat reveal"><div class="n">∞</div><div class="l">пожизненная гарантия</div><div class="prov">⚠️ уточнить условия</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="price">
+    <div class="shell">
+      <div class="cta-band reveal">
+        <h2>Рассчитайте умный дом под вашу площадь и задачи.</h2>
+        <div class="cta-row">
+          <button class="btn btn-primary">Рассчитать стоимость</button>
+          <button class="btn btn-ghost">Записаться в шоурум</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="shell">
+      MiMiSmart · г. Москва, Новоданиловская наб., 6к1 · умный дом под ключ
+      <div class="foot-note">⚠️ Прототип концепции. Контакты, цены и часть цифр — заглушки, требуют подтверждения (см. tz-site/99 — Открытые вопросы).</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hero = document.getElementById('hero');
+  var glow = document.getElementById('cglow');
+  var dweller = document.getElementById('dweller');
+  var eyes = document.getElementById('eyes');
+  var svg = hero.querySelector('.house');
+
+  // cursor-follow warm light + dweller gaze
+  if(!reduce){
+    hero.addEventListener('pointermove', function(e){
+      var r = hero.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      hero.classList.add('awake');
+      glow.style.transform = 'translate('+x+'px,'+y+'px)';
+      // gaze: map pointer to small eye offset + head tilt
+      var sr = svg.getBoundingClientRect();
+      var cx = sr.left + sr.width*0.27, cy = sr.top + sr.height*0.5;
+      var dx = e.clientX - cx, dy = e.clientY - cy;
+      var a = Math.atan2(dy, dx), d = Math.min(3, Math.hypot(dx,dy)/60);
+      eyes.setAttribute('transform','translate('+(Math.cos(a)*d)+','+(Math.sin(a)*d)+')');
+      dweller.style.transform = 'translate(222px,300px) rotate('+(Math.cos(a)*4)+'deg)';
+    });
+    hero.addEventListener('pointerleave', function(){ hero.classList.remove('awake'); eyes.setAttribute('transform','translate(0,0)'); });
+  }
+
+  // room <-> function link + click activation
+  var rooms = Array.prototype.slice.call(document.querySelectorAll('.room'));
+  function setActive(fn, on){
+    rooms.forEach(function(r){ if(r.getAttribute('data-fn')===fn) r.classList.toggle('is-on', on); });
+    var card = document.querySelector('.fn[data-fn="'+fn+'"]');
+    if(card){ card.style.borderColor = on ? 'var(--glow)' : ''; }
+  }
+  rooms.forEach(function(r){
+    var fn = r.getAttribute('data-fn');
+    r.addEventListener('mouseenter', function(){ var c=document.querySelector('.fn[data-fn="'+fn+'"]'); if(c) c.style.borderColor='var(--glow)'; });
+    r.addEventListener('mouseleave', function(){ if(!r.classList.contains('is-on')){var c=document.querySelector('.fn[data-fn="'+fn+'"]'); if(c) c.style.borderColor='';} });
+    function go(){ document.getElementById('functions').scrollIntoView({behavior: reduce?'auto':'smooth'}); r.classList.add('is-on'); setTimeout(function(){r.classList.remove('is-on'); setActive(fn,false);},1400); setActive(fn,true); }
+    r.addEventListener('click', go);
+    r.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); }});
+  });
+
+  // scroll reveal
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+})();
+</script>
