@@ -23,6 +23,35 @@ class Settings(BaseSettings):
     timeframe: str = "1h"
     quote_currency: str = "USDT"
 
+    # --- multi-book (three tabs) -------------------------------------------------
+    config_file: str = "config.yaml"  # optional: defines the books; defaults used if absent
+    alpaca_key: str = ""  # US stocks & ETFs (paper keys from app.alpaca.markets)
+    alpaca_secret: str = ""
+    alpaca_live: bool = False  # False = paper host
+    alpaca_feed: str = "iex"  # free data feed; "sip" needs a paid plan
+    tinvest_token: str = ""  # Т-Инвестиции (MOEX): акции, облигации, ETF
+    tinvest_account_id: str = ""
+    tinvest_sandbox: bool = True
+
+    # --- intel: news & events -> trade ideas ---------------------------------------
+    anthropic_api_key: str = ""  # leave empty to disable the analyst
+    intel_enabled: bool = True
+    intel_model: str = "claude-opus-5-5"
+    intel_interval_minutes: int = 15
+    intel_mode: Literal["off", "advise", "confirm", "auto"] = "confirm"
+    intel_min_confidence: float = 0.65  # below this a thesis is logged only
+    intel_auto_confidence: float = 0.85  # auto mode executes at or above this
+    intel_max_position_pct: float = 10.0  # per intel trade, % of the book's equity
+    intel_max_open: int = 3  # simultaneous intel positions across books
+    intel_default_hold_hours: int = 72
+    intel_sources: str = "gdelt,rss"  # gdelt, rss, newsapi, custom
+    intel_rss_feeds: str = ""  # comma separated URLs, empty = built-in list
+    intel_newsapi_key: str = ""
+    intel_custom_url: str = ""  # any JSON endpoint; see intel/sources.py
+    intel_custom_headers: str = ""  # JSON dict
+    intel_keywords: str = ""  # extra GDELT query terms, comma separated
+    intel_proposal_ttl_hours: int = 6
+
     # --- strategy -------------------------------------------------------------
     strategy: str = "ema_trend"
     strategy_params: str = ""  # JSON dict overriding strategy defaults

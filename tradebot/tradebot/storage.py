@@ -28,6 +28,16 @@ CREATE TABLE IF NOT EXISTS positions (
 CREATE TABLE IF NOT EXISTS kv (
     key TEXT PRIMARY KEY, value TEXT
 );
+CREATE TABLE IF NOT EXISTS intel_events (
+    id TEXT PRIMARY KEY, ts INTEGER, source TEXT, title TEXT, url TEXT, summary TEXT,
+    analyzed INTEGER DEFAULT 0, created_ts INTEGER
+);
+CREATE INDEX IF NOT EXISTS intel_events_analyzed ON intel_events (analyzed, ts);
+CREATE TABLE IF NOT EXISTS intel_proposals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, book TEXT, symbol TEXT, direction TEXT,
+    confidence REAL, horizon_hours INTEGER, rationale TEXT, invalidation TEXT, event_ids TEXT,
+    status TEXT, expires_ts INTEGER, executed_ts INTEGER, notional REAL, note TEXT
+);
 """
 
 
@@ -138,6 +148,86 @@ class Storage:
         with self._lock:
             row = self._conn.execute("SELECT value FROM kv WHERE key=?", (key,)).fetchone()
         return json.loads(row["value"]) if row else default
+
+    # --- intel: events --------------------------------------------------------
+    def add_events(self, events: list) -> int:
+        """Insert events, ignoring ones already seen. Returns the number of new rows."""
+        new = 0
+        with self._lock:
+            for e in events:
+                cur = self._conn.execute(
+                    "INSERT OR IGNORE INTO intel_events (id, ts, source, title, url, summary, analyzed, created_ts)"
+                    " VALUES (?,?,?,?,?,?,0,?)",
+                    (e.id, e.ts, e.source, e.title, e.url, e.summary, int(time.time() * 1000)),
+                )
+                new += cur.rowcount
+            self._conn.commit()
+        return new
+
+    def unanalyzed_events(self, limit: int = 60) -> list[dict]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM intel_events WHERE analyzed=0 ORDER BY ts DESC LIMIT ?", (limit,)
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def mark_analyzed(self, ids: list[str]) -> None:
+        if not ids:
+            return
+        with self._lock:
+            self._conn.executemany("UPDATE intel_events SET analyzed=1 WHERE id=?", [(i,) for i in ids])
+            self._conn.commit()
+
+    def intel_events(self, limit: int = 100) -> list[dict]:
+        with self._lock:
+            rows = self._conn.execute("SELECT * FROM intel_events ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()
+        return [dict(r) for r in rows]
+
+    # --- intel: proposals ---------------------------------------------------------
+    def add_proposal(self, p: dict) -> int:
+        with self._lock:
+            cur = self._conn.execute(
+                "INSERT INTO intel_proposals (ts, book, symbol, direction, confidence, horizon_hours, rationale,"
+                " invalidation, event_ids, status, expires_ts, executed_ts, notional, note)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (p["ts"], p["book"], p["symbol"], p["direction"], p["confidence"], p["horizon_hours"],
+                 p["rationale"], p.get("invalidation", ""), json.dumps(p.get("event_ids", [])), p["status"],
+                 p.get("expires_ts"), p.get("executed_ts"), p.get("notional"), p.get("note", "")),
+            )
+            self._conn.commit()
+            return int(cur.lastrowid)
+
+    def proposals(self, status: str | None = None, limit: int = 100) -> list[dict]:
+        with self._lock:
+            if status:
+                rows = self._conn.execute(
+                    "SELECT * FROM intel_proposals WHERE status=? ORDER BY id DESC LIMIT ?", (status, limit)
+                ).fetchall()
+            else:
+                rows = self._conn.execute("SELECT * FROM intel_proposals ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        out = []
+        for r in rows:
+            d = dict(r)
+            d["event_ids"] = json.loads(d.get("event_ids") or "[]")
+            out.append(d)
+        return out
+
+    def proposal(self, pid: int) -> dict | None:
+        with self._lock:
+            r = self._conn.execute("SELECT * FROM intel_proposals WHERE id=?", (pid,)).fetchone()
+        if not r:
+            return None
+        d = dict(r)
+        d["event_ids"] = json.loads(d.get("event_ids") or "[]")
+        return d
+
+    def update_proposal(self, pid: int, **fields) -> None:
+        if not fields:
+            return
+        cols = ", ".join(f"{k}=?" for k in fields)
+        with self._lock:
+            self._conn.execute(f"UPDATE intel_proposals SET {cols} WHERE id=?", (*fields.values(), pid))
+            self._conn.commit()
 
     def close(self) -> None:
         with self._lock:

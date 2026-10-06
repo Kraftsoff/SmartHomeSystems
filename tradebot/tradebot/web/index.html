@@ -8,10 +8,14 @@
   :root { --bg:#0f1115; --card:#171a21; --ink:#e8eaf0; --ink2:#9aa3b2; --line:#2a2f3a; --accent:#5b8def; --good:#2ea86b; --bad:#e0564f; --warn:#e3a53b; }
   @media (prefers-color-scheme: light) { :root { --bg:#f5f6f8; --card:#fff; --ink:#1a1d24; --ink2:#5c6473; --line:#e1e4ea; } }
   * { box-sizing:border-box; }
-  body { margin:0; font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); padding:12px; max-width:960px; margin-inline:auto; }
-  h1 { font-size:18px; margin:4px 0 12px; display:flex; align-items:center; gap:10px; }
+  body { margin:0; font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); padding:12px; max-width:1000px; margin-inline:auto; }
+  h1 { font-size:18px; margin:4px 0 10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--ink2); }
   .badge.live { border-color:var(--bad); color:var(--bad); }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; }
+  .tab { padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink2); cursor:pointer; white-space:nowrap; min-height:44px; font:inherit; }
+  .tab.active { color:var(--ink); border-color:var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+  .tab .sub { display:block; font-size:11px; }
   .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:12px; }
   .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
   .tile .k { font-size:12px; color:var(--ink2); }
@@ -22,8 +26,10 @@
   button { font:inherit; padding:10px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; min-height:44px; }
   button.danger { border-color:var(--bad); color:var(--bad); }
   button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.sm { padding:6px 10px; min-height:32px; font-size:13px; }
   table { width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
   th, td { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  td.wrap { white-space:normal; min-width:220px; }
   th { color:var(--ink2); font-weight:500; }
   .pos { color:var(--good); } .neg { color:var(--bad); }
   .status { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
@@ -34,53 +40,95 @@
   .tip { position:absolute; pointer-events:none; background:var(--card); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:12px; display:none; }
   .events div { font-size:12px; color:var(--ink2); padding:3px 0; border-bottom:1px solid var(--line); }
   .events .ERROR { color:var(--bad); } .events .WARN { color:var(--warn); } .events .TRADE { color:var(--ink); }
+  .muted { color:var(--ink2); font-size:13px; }
+  .disabled-note { padding:16px; color:var(--ink2); }
 </style>
 </head>
 <body>
-<h1>tradebot <span id="mode" class="badge">…</span> <span id="strat" class="badge"></span></h1>
-<div class="status" id="flags"></div>
-<div class="grid">
-  <div class="tile"><div class="k">Капитал</div><div class="v" id="equity">—</div></div>
-  <div class="tile"><div class="k">Сегодня</div><div class="v" id="daily">—</div></div>
-  <div class="tile"><div class="k">Просадка от пика</div><div class="v" id="dd">—</div></div>
-  <div class="tile"><div class="k">Сделок закрыто</div><div class="v" id="ntrades">—</div></div>
-</div>
-<div class="card" style="position:relative">
-  <h2>Кривая капитала</h2>
-  <svg id="chart" viewBox="0 0 800 180" preserveAspectRatio="none" aria-label="equity curve"></svg>
-  <div class="tip" id="tip"></div>
-</div>
-<div class="card">
-  <h2>Управление</h2>
-  <div class="row">
-    <button id="btnPause" onclick="act('pause')">⏸ Пауза</button>
-    <button id="btnResume" class="primary" onclick="act('resume')">▶ Продолжить</button>
-    <button class="danger" onclick="if(confirm('Закрыть все позиции и остановить торговлю?'))act('kill')">⛔ Kill switch</button>
-    <button onclick="act('reset-kill')">↺ Сброс kill</button>
-  </div>
-</div>
-<div class="card"><h2>Открытые позиции</h2><div class="scroll"><table id="positions"></table></div></div>
-<div class="card"><h2>Последние сделки</h2><div class="scroll"><table id="trades"></table></div></div>
-<div class="card"><h2>События</h2><div class="events" id="events"></div></div>
+<h1>tradebot <span id="total" class="badge"></span> <span id="hdr" class="badge"></span></h1>
+<div class="tabs" id="tabs"></div>
+<div id="view"></div>
 <script>
 const $ = id => document.getElementById(id);
 const fmt = (x, d=4) => x == null ? '—' : Number(x).toFixed(d);
 const pct = x => (x >= 0 ? '+' : '') + Number(x).toFixed(2) + '%';
-const ts = t => new Date(t).toLocaleString('ru-RU', {hour12:false});
+const ts = t => t ? new Date(t).toLocaleString('ru-RU', {hour12:false}) : '—';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let active = localStorage.getItem('tb_tab') || null, books = [];
 async function api(path, opts) {
   const r = await fetch(path, opts);
   if (r.status === 401) { document.body.innerHTML = '<p>Нужен token: откройте /?token=ВАШ_TOKEN</p>'; throw new Error('401'); }
   return r.json();
 }
-async function act(name) {
-  if (name === 'kill') {}  // confirmed above
-  await api('/api/' + name, {method:'POST'}); refresh();
+async function post(path) { await api(path, {method:'POST'}); refresh(); }
+function tabs() {
+  const items = books.map(b => ({id:b.name, title:b.title, sub: b.enabled ? ('equity ' + fmt(b.status.equity, 2)) : 'выключено'}));
+  items.push({id:'intel', title:'События и идеи', sub:'мир → сделки'});
+  if (!active || !items.find(i => i.id === active)) active = items[0].id;
+  $('tabs').innerHTML = items.map(i => `<button class="tab ${i.id===active?'active':''}" onclick="setTab('${i.id}')">${esc(i.title)}<span class="sub">${esc(i.sub)}</span></button>`).join('');
 }
-async function closeSym(sym) { if (confirm('Закрыть ' + sym + '?')) { await api('/api/close/' + encodeURIComponent(sym), {method:'POST'}); refresh(); } }
-let equityData = [];
-function drawChart() {
-  const svg = $('chart'); svg.innerHTML = '';
-  if (equityData.length < 2) return;
+function setTab(id) { active = id; localStorage.setItem('tb_tab', id); refresh(); }
+async function refresh() {
+  const ov = await api('/api/books'); books = ov.books; $('total').textContent = 'всего ' + fmt(ov.total_equity, 2);
+  tabs();
+  if (active === 'intel') return renderIntel();
+  const b = books.find(x => x.name === active);
+  if (!b.enabled) { $('view').innerHTML = `<div class="card disabled-note">Вкладка «${esc(b.title)}» выключена: ${esc(b.reason || 'нет ключей брокера')}. Брокер: ${esc(b.broker)}. См. README, раздел «Что нужно от вас».</div>`; return; }
+  const base = '/api/books/' + b.name;
+  const [st, trades, eq, events] = await Promise.all([api(base+'/status'), api(base+'/trades?limit=50'), api(base+'/equity?limit=1500'), api(base+'/events?limit=40')]);
+  const flags = [];
+  flags.push(st.running ? '<span class="pill ok">● работает</span>' : '<span class="pill bad">○ остановлен</span>');
+  if (!st.market_open) flags.push('<span class="pill">⏰ рынок закрыт</span>');
+  if (st.paused) flags.push('<span class="pill warn">⏸ пауза</span>');
+  if (st.killed) flags.push('<span class="pill bad">⛔ kill: ' + esc(st.kill_reason) + '</span>');
+  if (st.daily_halt) flags.push('<span class="pill warn">⚠ дневной лимит</span>');
+  if (st.last_error) flags.push('<span class="pill bad">⚠ ' + esc(st.last_error) + '</span>');
+  if (st.last_step_at) flags.push('<span class="pill">обновлено ' + ts(st.last_step_at) + '</span>');
+  $('hdr').textContent = st.mode + ' · ' + b.broker + ' · ' + st.strategy.name + ' · ' + st.timeframe;
+  $('hdr').className = 'badge ' + (st.mode === 'live' ? 'live' : '');
+  $('view').innerHTML = `
+    <div class="status">${flags.join('')}</div>
+    <div class="grid">
+      <div class="tile"><div class="k">Капитал</div><div class="v">${fmt(st.equity,2)}</div></div>
+      <div class="tile"><div class="k">Сегодня</div><div class="v ${st.daily_pnl_pct>=0?'pos':'neg'}">${pct(st.daily_pnl_pct)}</div></div>
+      <div class="tile"><div class="k">Просадка от пика</div><div class="v">-${fmt(st.drawdown_pct,2)}%</div></div>
+      <div class="tile"><div class="k">Сделок закрыто</div><div class="v">${trades.length}${trades.length>=50?'+':''}</div></div>
+    </div>
+    <div class="card" style="position:relative"><h2>Кривая капитала</h2><svg id="chart" viewBox="0 0 800 180" preserveAspectRatio="none" aria-label="equity curve"></svg><div class="tip" id="tip"></div></div>
+    <div class="card"><h2>Управление</h2><div class="row">
+      ${st.paused ? `<button class="primary" onclick="post('${base}/resume')">▶ Продолжить</button>` : `<button onclick="post('${base}/pause')">⏸ Пауза</button>`}
+      <button class="danger" onclick="if(confirm('Закрыть все позиции и остановить торговлю в этой вкладке?'))post('${base}/kill')">⛔ Kill switch</button>
+      <button onclick="post('${base}/reset-kill')">↺ Сброс kill</button>
+    </div><div class="muted" style="margin-top:8px">инструменты: ${esc(st.symbols.join(', '))}</div></div>
+    <div class="card"><h2>Открытые позиции</h2><div class="scroll"><table>${st.positions.length ? '<tr><th>Инструмент</th><th>Сторона</th><th>Кол-во</th><th>Вход</th><th>Сейчас</th><th>Стоп</th><th>P&L</th><th>Источник</th><th></th></tr>' +
+      st.positions.map(p => `<tr><td>${esc(p.symbol)}</td><td>${p.side}</td><td>${fmt(p.qty,6)}</td><td>${fmt(p.entry_price,4)}</td><td>${fmt(p.price,4)}</td><td>${fmt(p.stop,4)}</td><td class="${p.unrealized>=0?'pos':'neg'}">${fmt(p.unrealized,4)}</td><td>${esc(p.source)}</td><td><button class="sm" onclick="post('${base}/close/${encodeURIComponent(p.symbol)}')">закрыть</button></td></tr>`).join('')
+      : '<tr><td class="muted">нет открытых позиций</td></tr>'}</table></div></div>
+    <div class="card"><h2>Последние сделки</h2><div class="scroll"><table>${trades.length ? '<tr><th>Закрыта</th><th>Инструмент</th><th>Сторона</th><th>Вход</th><th>Выход</th><th>P&L</th><th>%</th><th>Причина</th></tr>' +
+      trades.map(t => `<tr><td>${ts(t.exit_ts)}</td><td>${esc(t.symbol)}</td><td>${t.side}</td><td>${fmt(t.entry_price,4)}</td><td>${fmt(t.exit_price,4)}</td><td class="${t.pnl>=0?'pos':'neg'}">${fmt(t.pnl,4)}</td><td class="${t.pnl>=0?'pos':'neg'}">${pct(t.return_pct)}</td><td class="wrap">${esc(t.exit_reason)}</td></tr>`).join('')
+      : '<tr><td class="muted">сделок пока нет</td></tr>'}</table></div></div>
+    <div class="card"><h2>События</h2><div class="events">${events.map(e => `<div class="${e.level}">${ts(e.ts)} · ${esc(e.message)}</div>`).join('')}</div></div>`;
+  drawChart(eq);
+}
+async function renderIntel() {
+  const [st, props, evs] = await Promise.all([api('/api/intel/status'), api('/api/intel/proposals?limit=60'), api('/api/intel/events?limit=60')]);
+  $('hdr').textContent = 'intel · ' + st.mode + (st.analyst ? ' · ' + st.analyst : ''); $('hdr').className = 'badge';
+  const pend = props.filter(p => p.status === 'pending');
+  const label = s => ({pending:'ждёт решения', executed:'исполнено', rejected:'отклонено', expired:'истекло', advice:'совет'}[s] || s);
+  $('view').innerHTML = `
+    <div class="status"><span class="pill">режим: ${esc(st.mode)}</span><span class="pill">источники: ${esc((st.sources||[]).join(', ')||'—')}</span><span class="pill">последний скан ${ts(st.last_run)}</span>${st.last_error?'<span class="pill bad">⚠ '+esc(st.last_error)+'</span>':''}</div>
+    <div class="card"><h2>Картина рынка (аналитик)</h2><div class="muted">${esc(st.last_summary || 'ещё не было анализа')}</div>
+      <div class="row" style="margin-top:8px"><button onclick="post('/api/intel/run')">🔄 Сканировать сейчас</button></div></div>
+    <div class="card"><h2>Идеи, ждущие вашего решения (${pend.length})</h2><div class="scroll"><table>${pend.length ? '<tr><th>#</th><th>Вкладка</th><th>Сделка</th><th>Увер.</th><th>Горизонт</th><th>Обоснование</th><th></th></tr>' +
+      pend.map(p => `<tr><td>${p.id}</td><td>${esc(p.book)}</td><td><b>${p.direction.toUpperCase()} ${esc(p.symbol)}</b></td><td>${fmt(p.confidence,2)}</td><td>${p.horizon_hours}ч</td><td class="wrap">${esc(p.rationale)}<br><span class="muted">Отмена идеи: ${esc(p.invalidation)}</span></td>
+        <td><button class="sm primary" onclick="post('/api/intel/proposals/${p.id}/approve')">✔ Исполнить</button> <button class="sm" onclick="post('/api/intel/proposals/${p.id}/reject')">✖</button></td></tr>`).join('')
+      : '<tr><td class="muted">нет идей, ждущих решения</td></tr>'}</table></div></div>
+    <div class="card"><h2>История идей</h2><div class="scroll"><table><tr><th>#</th><th>Когда</th><th>Вкладка</th><th>Сделка</th><th>Увер.</th><th>Статус</th><th>Обоснование</th></tr>
+      ${props.filter(p => p.status !== 'pending').map(p => `<tr><td>${p.id}</td><td>${ts(p.ts)}</td><td>${esc(p.book)}</td><td>${p.direction.toUpperCase()} ${esc(p.symbol)}</td><td>${fmt(p.confidence,2)}</td><td>${label(p.status)}</td><td class="wrap">${esc(p.rationale)}${p.note?' <span class="muted">('+esc(p.note)+')</span>':''}</td></tr>`).join('') || '<tr><td class="muted">пусто</td></tr>'}</table></div></div>
+    <div class="card"><h2>Последние события в мире</h2><div class="events">${evs.map(e => `<div>${ts(e.ts)} · <span class="muted">${esc(e.source)}</span> · ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener" style="color:var(--ink)">${esc(e.title)}</a>` : esc(e.title)}</div>`).join('') || '<div>нет событий — проверьте источники в .env</div>'}</div></div>`;
+}
+function drawChart(equityData) {
+  const svg = $('chart'); if (!svg) return; svg.innerHTML = '';
+  if (!equityData || equityData.length < 2) return;
   const W = 800, H = 180, L = 8, R = 8, T = 10, B = 18;
   const xs = equityData.map(e => e.ts), ys = equityData.map(e => e.equity);
   const x0 = xs[0], x1 = xs[xs.length-1], ymin = Math.min(...ys), ymax = Math.max(...ys);
@@ -88,20 +136,15 @@ function drawChart() {
   const sx = t => L + (t - x0) / ((x1 - x0) || 1) * (W - L - R);
   const sy = v => T + (1 - (v - (ymin - pad)) / ((ymax - ymin) + 2*pad)) * (H - T - B);
   const ns = 'http://www.w3.org/2000/svg';
-  const grid = document.createElementNS(ns, 'g');
   [0, 0.5, 1].forEach(f => {
     const v = ymin - pad + f * ((ymax - ymin) + 2*pad), y = sy(v);
-    const ln = document.createElementNS(ns, 'line'); ln.setAttribute('x1', L); ln.setAttribute('x2', W - R); ln.setAttribute('y1', y); ln.setAttribute('y2', y);
-    ln.setAttribute('stroke', 'var(--line)'); ln.setAttribute('stroke-width', '1'); grid.appendChild(ln);
-    const tx = document.createElementNS(ns, 'text'); tx.setAttribute('x', W - R); tx.setAttribute('y', y - 3); tx.setAttribute('text-anchor', 'end');
-    tx.setAttribute('fill', 'var(--ink2)'); tx.setAttribute('font-size', '10'); tx.textContent = v.toFixed(2); grid.appendChild(tx);
+    const ln = document.createElementNS(ns, 'line'); ln.setAttribute('x1', L); ln.setAttribute('x2', W - R); ln.setAttribute('y1', y); ln.setAttribute('y2', y); ln.setAttribute('stroke', 'var(--line)'); svg.appendChild(ln);
+    const tx = document.createElementNS(ns, 'text'); tx.setAttribute('x', W - R); tx.setAttribute('y', y - 3); tx.setAttribute('text-anchor', 'end'); tx.setAttribute('fill', 'var(--ink2)'); tx.setAttribute('font-size', '10'); tx.textContent = v.toFixed(2); svg.appendChild(tx);
   });
-  svg.appendChild(grid);
   const p = document.createElementNS(ns, 'path');
   p.setAttribute('d', equityData.map((e, i) => (i ? 'L' : 'M') + sx(e.ts).toFixed(1) + ' ' + sy(e.equity).toFixed(1)).join(' '));
-  p.setAttribute('fill', 'none'); p.setAttribute('stroke', 'var(--accent)'); p.setAttribute('stroke-width', '2'); p.setAttribute('vector-effect', 'non-scaling-stroke');
-  svg.appendChild(p);
-  const cross = document.createElementNS(ns, 'line'); cross.setAttribute('stroke', 'var(--ink2)'); cross.setAttribute('stroke-width', '1'); cross.setAttribute('y1', T); cross.setAttribute('y2', H - B); cross.style.display = 'none'; svg.appendChild(cross);
+  p.setAttribute('fill', 'none'); p.setAttribute('stroke', 'var(--accent)'); p.setAttribute('stroke-width', '2'); p.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(p);
+  const cross = document.createElementNS(ns, 'line'); cross.setAttribute('stroke', 'var(--ink2)'); cross.setAttribute('y1', T); cross.setAttribute('y2', H - B); cross.style.display = 'none'; svg.appendChild(cross);
   const dot = document.createElementNS(ns, 'circle'); dot.setAttribute('r', '4'); dot.setAttribute('fill', 'var(--accent)'); dot.setAttribute('stroke', 'var(--card)'); dot.setAttribute('stroke-width', '2'); dot.style.display = 'none'; svg.appendChild(dot);
   const tip = $('tip');
   const move = ev => {
@@ -116,32 +159,6 @@ function drawChart() {
   };
   const leave = () => { cross.style.display = 'none'; dot.style.display = 'none'; tip.style.display = 'none'; };
   svg.onmousemove = move; svg.ontouchmove = move; svg.onmouseleave = leave; svg.ontouchend = leave;
-}
-async function refresh() {
-  const [st, trades, eq, events] = await Promise.all([api('/api/status'), api('/api/trades?limit=50'), api('/api/equity?limit=1500'), api('/api/events?limit=40')]);
-  $('mode').textContent = st.mode; $('mode').className = 'badge ' + (st.mode === 'live' ? 'live' : '');
-  $('strat').textContent = st.strategy.name + ' · ' + st.timeframe + ' · ' + st.symbols.join(', ');
-  $('equity').textContent = fmt(st.equity, 2);
-  $('daily').textContent = pct(st.daily_pnl_pct); $('daily').className = 'v ' + (st.daily_pnl_pct >= 0 ? 'pos' : 'neg');
-  $('dd').textContent = '-' + Number(st.drawdown_pct).toFixed(2) + '%';
-  $('ntrades').textContent = trades.length + (trades.length >= 50 ? '+' : '');
-  const flags = [];
-  flags.push(st.running ? '<span class="pill ok">● работает</span>' : '<span class="pill bad">○ остановлен</span>');
-  if (st.paused) flags.push('<span class="pill warn">⏸ пауза</span>');
-  if (st.killed) flags.push('<span class="pill bad">⛔ kill: ' + st.kill_reason + '</span>');
-  if (st.daily_halt) flags.push('<span class="pill warn">⚠ дневной лимит</span>');
-  if (st.last_error) flags.push('<span class="pill bad">⚠ ' + st.last_error + '</span>');
-  if (st.last_step_at) flags.push('<span class="pill">обновлено ' + ts(st.last_step_at) + '</span>');
-  $('flags').innerHTML = flags.join('');
-  $('btnPause').style.display = st.paused ? 'none' : ''; $('btnResume').style.display = st.paused ? '' : 'none';
-  $('positions').innerHTML = st.positions.length ? '<tr><th>Пара</th><th>Сторона</th><th>Кол-во</th><th>Вход</th><th>Сейчас</th><th>Стоп</th><th>P&L</th><th></th></tr>' +
-    st.positions.map(p => `<tr><td>${p.symbol}</td><td>${p.side}</td><td>${fmt(p.qty,6)}</td><td>${fmt(p.entry_price,4)}</td><td>${fmt(p.price,4)}</td><td>${fmt(p.stop,4)}</td><td class="${p.unrealized>=0?'pos':'neg'}">${fmt(p.unrealized,4)}</td><td><button onclick="closeSym('${p.symbol}')">закрыть</button></td></tr>`).join('')
-    : '<tr><td style="color:var(--ink2)">нет открытых позиций</td></tr>';
-  $('trades').innerHTML = trades.length ? '<tr><th>Закрыта</th><th>Пара</th><th>Сторона</th><th>Вход</th><th>Выход</th><th>P&L</th><th>%</th><th>Причина</th></tr>' +
-    trades.map(t => `<tr><td>${ts(t.exit_ts)}</td><td>${t.symbol}</td><td>${t.side}</td><td>${fmt(t.entry_price,4)}</td><td>${fmt(t.exit_price,4)}</td><td class="${t.pnl>=0?'pos':'neg'}">${fmt(t.pnl,4)}</td><td class="${t.pnl>=0?'pos':'neg'}">${pct(t.return_pct)}</td><td>${t.exit_reason}</td></tr>`).join('')
-    : '<tr><td style="color:var(--ink2)">сделок пока нет</td></tr>';
-  $('events').innerHTML = events.map(e => `<div class="${e.level}">${ts(e.ts)} · ${e.message}</div>`).join('');
-  equityData = eq; drawChart();
 }
 refresh().catch(console.error); setInterval(() => refresh().catch(console.error), 15000);
 </script>

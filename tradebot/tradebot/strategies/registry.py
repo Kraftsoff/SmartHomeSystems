@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 from .base import Strategy
+from .donchian import DonchianBreakout
 from .ema_trend import EmaTrend
+from .ensemble import Ensemble
 from .mean_reversion import MeanReversion
+from .tsmom import TimeSeriesMomentum
 
 STRATEGIES: dict[str, type[Strategy]] = {
     EmaTrend.name: EmaTrend,
     MeanReversion.name: MeanReversion,
+    DonchianBreakout.name: DonchianBreakout,
+    TimeSeriesMomentum.name: TimeSeriesMomentum,
+    Ensemble.name: Ensemble,
 }
 
 

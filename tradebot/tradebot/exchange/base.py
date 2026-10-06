@@ -26,6 +26,10 @@ class DataFeed(ABC):
     def market_info(self, symbol: str) -> MarketInfo:
         return MarketInfo(symbol=symbol)
 
+    def is_market_open(self) -> bool:
+        """Crypto is always open; stock feeds override this with the exchange clock."""
+        return True
+
 
 class Broker(ABC):
     @abstractmethod

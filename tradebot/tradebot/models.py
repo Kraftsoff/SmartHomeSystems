@@ -36,6 +36,9 @@ class Signal:
     take_profit: float | None = None
     trail_distance: float | None = None
     reason: str = ""
+    max_hold_ms: int | None = None  # time stop: close after this many ms
+    source: str = "strategy"  # "strategy" | "intel" | "manual"
+    max_notional: float | None = None  # hard cap on position size in quote currency
 
     @classmethod
     def hold(cls, reason: str = "hold") -> "Signal":
@@ -55,6 +58,8 @@ class Position:
     extreme_price: float = 0.0  # best price seen since entry (for trailing)
     entry_fee: float = 0.0
     reason: str = ""
+    expires_ts: int | None = None  # time stop
+    source: str = "strategy"
 
     def unrealized(self, price: float) -> float:
         return (price - self.entry_price) * self.qty * self.side

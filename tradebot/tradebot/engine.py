@@ -65,8 +65,11 @@ class Engine:
         self.last_step_at: int = 0
         self.last_error: str = ""
         self.equity: float = 0.0
+        self.cash: float = 0.0
         self.lock = threading.RLock()
         self._stop_event = threading.Event()
+        self._external: list[tuple[str, Signal]] = []
+        self.market_open: bool = True
         if self.positions:
             log.info("recovered %d open position(s) from storage", len(self.positions))
 
@@ -103,6 +106,14 @@ class Engine:
     def stop(self) -> None:
         self._stop_event.set()
 
+    def submit_external(self, symbol: str, sig: Signal) -> None:
+        """Queue a signal from outside the strategy (intel module, manual). Acted on next step."""
+        with self.lock:
+            self._external.append((symbol, sig))
+            if symbol not in self.symbols:
+                self.symbols.append(symbol)
+        self._event("INFO", f"{symbol}: external signal queued ({sig.source}: {sig.reason})")
+
     def close_symbol(self, symbol: str, reason: str = "manual close") -> bool:
         with self.lock:
             if symbol not in self.positions:
@@ -129,10 +140,30 @@ class Engine:
     def step(self) -> None:
         with self.lock:
             now = self.feed.now_ms()
-            for sym in self.symbols:
+            try:
+                self.market_open = self.feed.is_market_open()
+            except Exception as exc:  # noqa: BLE001 - treat an unreachable exchange clock as closed
+                self.market_open = False
+                raise RuntimeError(f"market clock unavailable: {exc}") from exc
+            for sym in list(self.symbols):
                 self._step_symbol(sym, now)
+            self._process_external(now)
             self._snapshot(now)
             self.last_step_at = now
+
+    def _process_external(self, now: int) -> None:
+        if not self._external:
+            return
+        if not self.market_open:
+            return  # keep queued until the market opens
+        pending, self._external = self._external, []
+        for sym, sig in pending:
+            try:
+                price = self.feed.fetch_price(sym)
+                self.last_prices[sym] = price
+                self._act(sym, sig, price, now)
+            except Exception as exc:  # noqa: BLE001
+                self._event("ERROR", f"{sym}: external signal failed: {exc}")
 
     # ------------------------------------------------------------------- per-symbol
     def _step_symbol(self, symbol: str, now: int) -> None:
@@ -154,6 +185,12 @@ class Engine:
             if pos is not None:
                 self._manage_exits(symbol, pos, high=float(last["high"]), low=float(last["low"]), price=price)
                 pos = self.positions.get(symbol)
+            if not self.market_open:
+                return  # candle closed but we cannot trade now; re-evaluate when open
+            if pos is not None and pos.source != "strategy":
+                # intel / manual positions are managed by their own stop, target and time stop only
+                self.last_candle_ts[symbol] = last_ts
+                return
             sig = self.strategy.signal(closed, pos)
             self._act(symbol, sig, price, last_ts)
             self.last_candle_ts[symbol] = last_ts
@@ -178,6 +215,9 @@ class Engine:
                     pos.stop = new_stop
             self.storage.save_position(pos)
 
+        if pos.expires_ts is not None and self.feed.now_ms() >= pos.expires_ts:
+            self._close(symbol, price, "time stop")
+            return
         # worst case first: if both stop and target are inside the bar, assume the stop hit
         if pos.stop is not None:
             if (pos.side == LONG and low <= pos.stop) or (pos.side == SHORT and high >= pos.stop):
@@ -196,6 +236,7 @@ class Engine:
         if pos is not None or sig.direction == 0:
             return
         if sig.direction == SHORT and not self.allow_short:
+            self._event("INFO", f"{symbol}: short signal ignored (shorts disabled for this book)")
             return
         if self.paused:
             return
@@ -209,7 +250,10 @@ class Engine:
         if not size.ok:
             self._event("INFO", f"{symbol}: skip entry: {size.reason}", {"equity": equity, "price": price})
             return
-        qty = info.round_qty(size.qty)
+        qty = size.qty
+        if sig.max_notional and qty * price > sig.max_notional:
+            qty = sig.max_notional / price
+        qty = info.round_qty(qty)
         if info.min_qty and qty < info.min_qty:
             self._event("INFO", f"{symbol}: skip entry: qty {qty} < min {info.min_qty}")
             return
@@ -225,6 +269,7 @@ class Engine:
             symbol=symbol, side=sig.direction, qty=fill.qty, entry_price=fill.price, entry_ts=fill.ts,
             stop=sig.stop, take_profit=sig.take_profit, trail_distance=sig.trail_distance,
             extreme_price=fill.price, entry_fee=fill.fee, reason=sig.reason,
+            expires_ts=(fill.ts + sig.max_hold_ms) if sig.max_hold_ms else None, source=sig.source,
         )
         self.positions[symbol] = pos
         self.storage.save_position(pos)
@@ -264,7 +309,8 @@ class Engine:
 
     def _snapshot(self, now: int) -> None:
         self.equity = self._equity()
-        self.storage.add_equity(now, self.equity, self.broker.cash())
+        self.cash = self.broker.cash()
+        self.storage.add_equity(now, self.equity, self.cash)
         for ev in self.risk.update_equity(self.equity, now):
             self._event("ERROR" if ev.startswith("KILL") else "WARN", ev)
             self.notify(ev)
@@ -286,6 +332,7 @@ class Engine:
                     "symbol": sym, "side": pos.side_name(), "qty": pos.qty, "entry_price": pos.entry_price,
                     "price": price, "stop": pos.stop, "take_profit": pos.take_profit,
                     "unrealized": pos.unrealized(price), "entry_ts": pos.entry_ts, "reason": pos.reason,
+                    "expires_ts": pos.expires_ts, "source": pos.source,
                 })
             return {
                 "mode": self.mode,
@@ -294,8 +341,9 @@ class Engine:
                 "killed": self.risk.killed,
                 "kill_reason": self.risk.kill_reason,
                 "daily_halt": self.risk.daily_halt,
+                "market_open": self.market_open,
                 "equity": equity,
-                "cash": self.broker.cash() if self.running or self.mode != "live" else None,
+                "cash": self.cash,
                 "peak_equity": self.risk.peak_equity,
                 "drawdown_pct": self.risk.drawdown_pct(equity),
                 "daily_pnl_pct": self.risk.daily_pnl_pct(equity),

@@ -39,27 +39,41 @@ def _tf(tf: str) -> int:
 
 
 def cmd_run(args, s: Settings) -> None:
+    import logging
+
     import uvicorn
 
-    from .bootstrap import build_engine
+    from .intel.service import IntelService
     from .notify import TelegramNotifier
+    from .supervisor import Supervisor
     from .web.app import create_app
 
+    logging.basicConfig(level=getattr(logging, s.log_level.upper(), logging.INFO),
+                        format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     tg = TelegramNotifier(s.telegram_token, s.telegram_chat_id) if s.telegram_token and s.telegram_chat_id else None
-    engine = build_engine(s, notifier=tg.send if tg else None)
-    if tg:
-        tg.engine = engine
-        tg.start_polling()
-        tg.send(f"tradebot started in {s.mode} mode: {s.symbols} {s.timeframe} {s.strategy}")
-    if s.mode == "live" and not s.web_token:
+    sup = Supervisor(s, notifier=tg.send if tg else None)
+    intel = IntelService(s, sup.storage, sup, notifier=tg.send if tg else None) if s.intel_enabled and s.intel_mode != "off" else None
+    for name, why in sup.disabled.items():
+        print(f"book {name!r} disabled: {why}", file=sys.stderr)
+    if not sup.engines:
+        sys.exit("no book could start; check broker credentials in .env")
+    if not s.web_token:
         print("WARNING: TB_WEB_TOKEN is empty; the control panel is unprotected", file=sys.stderr)
-    t = threading.Thread(target=engine.run_forever, args=(s.poll_seconds,), name="engine", daemon=True)
-    t.start()
-    app = create_app(engine, token=s.web_token)
+    if tg:
+        tg.supervisor, tg.intel = sup, intel
+        tg.start_polling()
+        tg.send("tradebot started: " + ", ".join(f"{b.title} ({b.mode}, {b.strategy})" for b in sup.engines)
+                + (f"; intel mode={intel.mode}" if intel else ""))
+    sup.start(s.poll_seconds)
+    if intel:
+        intel.start()
+    app = create_app(token=s.web_token, supervisor=sup, intel=intel)
     try:
         uvicorn.run(app, host=s.web_host, port=s.web_port, log_level="warning")
     finally:
-        engine.stop()
+        sup.stop()
+        if intel:
+            intel.stop()
         if tg:
             tg.stop()
 
@@ -110,6 +124,33 @@ def cmd_download(args, s: Settings) -> None:
         print(f"{sym} -> {path}")
 
 
+def cmd_intel(args, s: Settings) -> None:
+    """Offline check of the intel pipeline: fetch sources, analyze, print theses (no trading)."""
+    from .books import load_books
+    from .intel.analyst import make_analyst
+    from .intel.sources import build_sources
+    from .intel.universe import describe_universe
+
+    books = [b for b in load_books(s.config_file, s) if b.enabled or args.all_books]
+    universe = describe_universe(books)
+    events = []
+    for src in build_sources(s):
+        got = src.safe_fetch()
+        print(f"{src.name}: {len(got)} events", file=sys.stderr)
+        events += got
+    events = [e.__dict__ for e in events][: args.limit]
+    for e in events[:15]:
+        print(f"  - [{e['source']}] {e['title'][:110]}")
+    analyst = make_analyst(s)
+    print(f"analyst: {type(analyst).__name__}, universe: {len(universe)} instruments", file=sys.stderr)
+    res = analyst.analyze(events, universe, {})
+    print("\nMARKET SUMMARY:", res.market_summary)
+    for t in res.theses:
+        print(json.dumps(t.model_dump(), ensure_ascii=False))
+    if not res.theses:
+        print("(no theses)")
+
+
 def cmd_status(args, s: Settings) -> None:
     from .storage import Storage
 
@@ -157,12 +198,16 @@ def main(argv: list[str] | None = None) -> None:
     dl.add_argument("--timeframe")
     dl.add_argument("--days", type=int, default=365)
 
+    it = sub.add_parser("intel", help="dry run of the news -> theses pipeline (no trading)")
+    it.add_argument("--limit", type=int, default=60)
+    it.add_argument("--all-books", action="store_true", help="include books without credentials in the universe")
+
     stt = sub.add_parser("status", help="print state from the database")
     stt.add_argument("-n", type=int, default=20)
 
     args = p.parse_args(argv)
     s = Settings()
-    {"run": cmd_run, "backtest": cmd_backtest, "optimize": cmd_optimize, "download": cmd_download, "status": cmd_status}[args.cmd](args, s)
+    {"run": cmd_run, "backtest": cmd_backtest, "optimize": cmd_optimize, "download": cmd_download, "status": cmd_status, "intel": cmd_intel}[args.cmd](args, s)
 
 
 if __name__ == "__main__":
