@@ -1,0 +1,51 @@
+# Скопируйте в config.yaml, чтобы переопределить три вкладки по умолчанию.
+# Если файла нет, бот использует: Акции (Alpaca), Ценные бумаги (Alpaca ETF), Крипто (ccxt).
+books:
+  - name: stocks
+    title: Акции
+    broker: alpaca            # alpaca | tinvest | ccxt
+    mode: paper               # paper = бумажный счёт брокера, live = реальный
+    symbols: [SPY, QQQ, AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA, XOM]
+    timeframe: 1d
+    strategy: ensemble        # ema_trend | donchian | tsmom | mean_reversion | ensemble
+    strategy_params: {}
+    quote_currency: USD
+    allow_short: false        # на Alpaca шорт требует маржинальный счёт >= 2000 $; иначе обратные ETF
+    min_notional: 1
+    risk: {risk_per_trade_pct: 1.0, max_open_positions: 3, max_daily_loss_pct: 3, max_drawdown_pct: 15}
+
+  - name: securities
+    title: Ценные бумаги
+    broker: alpaca
+    mode: paper
+    symbols: [TLT, IEF, GLD, SLV, USO, BNO, UNG, DBA, UUP, SH]
+    timeframe: 1d
+    strategy: tsmom
+    quote_currency: USD
+    min_notional: 1
+
+  # Вариант для российского рынка (MOEX через Т-Инвестиции):
+  # - name: moex
+  #   title: Акции MOEX
+  #   broker: tinvest
+  #   mode: paper             # paper = песочница Т-Инвестиций
+  #   symbols: [SBER, GAZP, LKOH, ROSN, NVTK, GMKN, PLZL, YDEX, "TQTF:SBGD", "TQTF:TMOS"]
+  #   timeframe: 1d
+  #   strategy: donchian
+  #   quote_currency: RUB
+  #   allow_short: false
+
+  - name: crypto
+    title: Криптовалюта
+    broker: ccxt
+    exchange: binance         # bybit | okx | kraken | ...
+    market_type: spot         # swap = фьючерсы (лонг + шорт)
+    mode: paper
+    symbols: [BTC/USDT, ETH/USDT]
+    timeframe: 1h
+    strategy: ema_trend
+    quote_currency: USDT
+    starting_cash: 50
+    fee_pct: 0.1
+    min_notional: 10
+    allow_short: false
