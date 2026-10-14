@@ -1,0 +1,13 @@
+{
+  "name": "shs-load-testing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Managed load-testing harness for SmartHomeSystems staging environments",
+  "scripts": {
+    "test:staging": "artillery run staging-load-test.yml",
+    "report": "artillery report"
+  },
+  "devDependencies": {
+    "artillery": "2.0.21"
+  }
+}
