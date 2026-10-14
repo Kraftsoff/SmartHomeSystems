@@ -1,0 +1,7 @@
+# Installed dependencies (recreated by run.sh / npm install)
+node_modules/
+package-lock.json
+
+# Load-test run output
+artillery/report-*.json
+artillery/report-*.json.html
