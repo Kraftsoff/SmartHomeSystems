@@ -1,0 +1,63 @@
+# Managed load test — Artillery
+#
+# SAFETY: This profile is intentionally conservative. It is meant to be run
+# ONLY against a staging/pre-prod environment you own and are authorised to
+# test. Never point it at production or at infrastructure you do not control.
+#
+# Target is taken from the TARGET_URL environment variable so the URL is never
+# hard-coded. Run via ../run.sh, which enforces the safety checks.
+#
+# Tune load with env vars (defaults in parentheses):
+#   WARMUP_RATE (1) -> RAMP_RATE (10) -> PEAK_RATE (30)
+#   Durations: WARMUP_SEC (30), RAMP_SEC (120), SUSTAIN_SEC (180), COOLDOWN_SEC (30)
+
+config:
+  target: "{{ $processEnvironment.TARGET_URL }}"
+  http:
+    timeout: 10          # fail a request after 10s rather than piling up
+    pool: 50             # cap concurrent sockets so we ramp, not flood
+  phases:
+    - name: warm-up
+      duration: "{{ $processEnvironment.WARMUP_SEC }}"
+      arrivalRate: "{{ $processEnvironment.WARMUP_RATE }}"
+      rampTo: "{{ $processEnvironment.RAMP_RATE }}"
+    - name: ramp
+      duration: "{{ $processEnvironment.RAMP_SEC }}"
+      arrivalRate: "{{ $processEnvironment.RAMP_RATE }}"
+      rampTo: "{{ $processEnvironment.PEAK_RATE }}"
+    - name: sustained-peak
+      duration: "{{ $processEnvironment.SUSTAIN_SEC }}"
+      arrivalRate: "{{ $processEnvironment.PEAK_RATE }}"
+    - name: cool-down
+      duration: "{{ $processEnvironment.COOLDOWN_SEC }}"
+      arrivalRate: "{{ $processEnvironment.PEAK_RATE }}"
+      rampTo: 1
+  # Abort the run automatically if the target is clearly struggling. This keeps
+  # a managed test from turning into an accidental denial-of-service.
+  ensure:
+    thresholds:
+      - http.response_time.p95: 1500
+      - http.response_time.p99: 3000
+    conditions:
+      - expression: "http.response_time.p99 < 5000"
+        strict: true
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+    ensure: {}
+
+scenarios:
+  - name: browse-public-pages
+    weight: 1
+    flow:
+      - get:
+          url: "/"
+          name: "GET /"
+      - think: 2
+      - get:
+          url: "/robots.txt"
+          name: "GET /robots.txt"
+          # A 404 here is fine; we only care about serving behaviour under load.
+          expect:
+            - statusCode: [200, 301, 302, 404]
+      - think: 1
